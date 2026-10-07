@@ -42,7 +42,7 @@ RUN pip install uvicorn[standard]
 
 # collectstatic needs *a* secret key to import settings, but the real one is
 # supplied at runtime by Railway variables and is never baked into the image.
-RUN DJANGO_SECRET_KEY=DJANGO_SECRET_KEY = E0FTEphNXcIF-3yP88pTk5v67JzFAl4zxE58PkU9AmF-3Nvhow5b1RFWDZOy-2J8-_XEdREUriZdOpAMMONgdg python manage.py collectstatic --noinput
+RUN DJANGO_SECRET_KEY=build-only-placeholder python manage.py collectstatic --noinput
 
 ARG PROJ_NAME="app"
 

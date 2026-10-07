@@ -8,7 +8,7 @@ One GitHub repo, three Railway services: **Postgres**, **backend**, **web**.
 - Settings → Networking → **Generate Domain**.
 - Variables:
   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`  (add a Postgres service first)
-  - `DJANGO_SECRET_KEY` = long random string
+  - DJANGO_SECRET_KEY = 
   - `JWT_SIGNING_KEY` = a different long random string
   - `CORS_ALLOWED_ORIGINS` = the web service URL, e.g. `https://web-production-xxxx.up.railway.app`
   - (optional) `CSRF_TRUSTED_ORIGINS` = same URL, for the Django admin

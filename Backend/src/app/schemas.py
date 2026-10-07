@@ -26,7 +26,7 @@ class RegisterIn(Schema):
 
 
 class LoginIn(Schema):
-    identifier: str  # email or theKapita ID — matches the form field as-is
+    identifier: str  
     password: str
 
 
