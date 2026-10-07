@@ -1,0 +1,5 @@
+{
+  "name": "thekapita",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}

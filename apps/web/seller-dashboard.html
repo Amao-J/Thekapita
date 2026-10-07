@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita Seller Center — Verified Merchant Portal</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profile.css">
+  <link rel="stylesheet" href="css/wallet.css">
+  <link rel="stylesheet" href="css/marketplace.css">
+  <link rel="stylesheet" href="css/seller.css">
+</head>
+<body class="seller-body">
+
+  <!-- Header -->
+  <header class="desktop-header profile-back-header">
+    <div class="header-back-action" onclick="window.location.href='marketplace.html'">
+      <div class="back-btn-circle">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </div>
+      <span style="font-weight: 700; font-size: 16px;"><span style="color: #00d084;">Seller Center</span></span>
+    </div>
+
+    <div class="wallet-header-tag">
+      <div class="seller-header-badge">
+        <span class="material-symbols-outlined icon">verified</span>
+        <span>HP Authorized Direct</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Seller Layout -->
+  <div class="seller-layout-wrapper">
+    
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="seller-sidebar">
+      <div class="seller-profile-summary">
+        <div class="seller-avatar">HP</div>
+        <div class="seller-details">
+          <h4>HP Authorized Direct</h4>
+          <span class="seller-location"><span class="material-symbols-outlined">location_on</span> Lagos, Nigeria</span>
+        </div>
+      </div>
+
+      <nav class="seller-nav-menu">
+        <button class="seller-nav-btn active" onclick="switchSellerView('overview', this)">
+          <span class="material-symbols-outlined icon">dashboard</span>
+          <span>Overview</span>
+        </button>
+
+        <button class="seller-nav-btn" onclick="switchSellerView('products', this)">
+          <span class="material-symbols-outlined icon">inventory_2</span>
+          <span>Products Catalog</span>
+        </button>
+
+        <button class="seller-nav-btn" onclick="switchSellerView('orders', this)">
+          <span class="material-symbols-outlined icon">local_shipping</span>
+          <span>Orders & Escrow</span>
+          <span class="nav-count-badge">3</span>
+        </button>
+
+        <button class="seller-nav-btn" onclick="switchSellerView('payouts', this)">
+          <span class="material-symbols-outlined icon">account_balance_wallet</span>
+          <span>Payouts & Wallet</span>
+        </button>
+
+        <button class="seller-nav-btn" onclick="switchSellerView('settings', this)">
+          <span class="material-symbols-outlined icon">store</span>
+          <span>Store Settings</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Mobile Icon Navigation Bar -->
+    <div class="seller-mobile-nav">
+      <button class="seller-mobile-icon-btn active" title="Overview" onclick="switchSellerView('overview', this)">
+        <span class="material-symbols-outlined">dashboard</span>
+      </button>
+
+      <button class="seller-mobile-icon-btn" title="Products" onclick="switchSellerView('products', this)">
+        <span class="material-symbols-outlined">inventory_2</span>
+      </button>
+
+      <button class="seller-mobile-icon-btn" title="Orders" onclick="switchSellerView('orders', this)">
+        <span class="material-symbols-outlined">local_shipping</span>
+        <span class="mobile-icon-badge">3</span>
+      </button>
+
+      <button class="seller-mobile-icon-btn" title="Payouts" onclick="switchSellerView('payouts', this)">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+      </button>
+
+      <button class="seller-mobile-icon-btn" title="Settings" onclick="switchSellerView('settings', this)">
+        <span class="material-symbols-outlined">store</span>
+      </button>
+    </div>
+
+    <!-- Content Workspace -->
+    <main class="seller-content-pane">
+
+      <!-- VIEW 1: OVERVIEW -->
+      <div id="sellerViewOverview" class="seller-view-pane active">
+        
+        <div class="seller-metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Total Net Revenue</span>
+              <span class="material-symbols-outlined metric-icon emerald">payments</span>
+            </div>
+            <div class="metric-value">₦4,850,000.00</div>
+            <div class="metric-sub-note text-emerald"><span class="material-symbols-outlined icon-inline">trending_up</span> +14.2% from last month</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Escrow Locked Funds</span>
+              <span class="material-symbols-outlined metric-icon amber">lock</span>
+            </div>
+            <div class="metric-value">₦450,000.00</div>
+            <div class="metric-sub-note">1 Order awaiting customer delivery confirmation</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Active Listings</span>
+              <span class="material-symbols-outlined metric-icon blue">inventory</span>
+            </div>
+            <div class="metric-value">18 Items</div>
+            <div class="metric-sub-note text-rose"><span class="material-symbols-outlined icon-inline">warning</span> 2 Low stock warnings</div>
+          </div>
+        </div>
+
+        <!-- Recent Customer Orders Table -->
+        <div class="seller-section-card">
+          <div class="section-card-header">
+            <div>
+              <h3 class="section-title">Recent Customer Orders</h3>
+              <p class="section-subtitle">Real-time status of orders and escrow settlements</p>
+            </div>
+            <button class="seller-btn seller-btn-outline" onclick="switchSellerView('orders')">View All Orders</button>
+          </div>
+
+          <div class="seller-table-responsive">
+            <table class="seller-data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Product Title</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Escrow Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="order-row-894201">
+                  <td><strong>#KPT-894201</strong></td>
+                  <td>HP EliteBook 840 G5</td>
+                  <td>Ahmed Idowu Ebuka</td>
+                  <td><strong>₦450,000.00</strong></td>
+                  <td><span class="status-pill status-transit" id="status-badge-894201"><span class="material-symbols-outlined icon-small">local_shipping</span> In Transit</span></td>
+                  <td><button class="seller-btn seller-btn-primary seller-btn-sm" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update</button></td>
+                </tr>
+                <tr id="order-row-742910">
+                  <td><strong>#KPT-742910</strong></td>
+                  <td>HP ZBook Studio G8</td>
+                  <td>Chidi Okafor</td>
+                  <td><strong>₦1,200,000.00</strong></td>
+                  <td><span class="status-pill status-cleared"><span class="material-symbols-outlined icon-small">verified</span> Escrow Released</span></td>
+                  <td><button class="seller-btn seller-btn-outline seller-btn-sm" onclick="openOrderDetailsModal('KPT-742910', 'HP ZBook Studio G8', 'Chidi Okafor', '₦1,200,000.00', 'Escrow Released', 'DHL Express', 'DHL-9920148')">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIEW 2: PRODUCTS CATALOG -->
+      <div id="sellerViewProducts" class="seller-view-pane" style="display: none;">
+        <div class="seller-section-card">
+          <div class="section-card-header">
+            <div>
+              <h2 class="cart-title">Products Inventory</h2>
+              <p class="cart-subtitle">Manage active marketplace listings, stock levels, and prices</p>
+            </div>
+            <button class="seller-btn seller-btn-primary" onclick="toggleAddProductModal(true)">
+              <span class="material-symbols-outlined">add</span> Add New Product
+            </button>
+          </div>
+
+          <div class="seller-table-responsive">
+            <table class="seller-data-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Unit Price</th>
+                  <th>Stock Available</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody">
+                <tr id="product-row-1">
+                  <td class="product-cell">
+                    <img id="p-img-1" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Laptop">
+                    <div>
+                      <strong class="product-title-text" id="p-title-1">HP EliteBook 840 G5</strong>
+                      <span class="product-sub-text" id="p-sub-1">16GB RAM • 512GB SSD</span>
+                    </div>
+                  </td>
+                  <td><span class="category-badge" id="p-cat-1">Computing</span></td>
+                  <td><strong id="p-price-1">₦450,000.00</strong></td>
+                  <td id="p-stock-1">14 Units</td>
+                  <td><span class="status-pill status-active">Active</span></td>
+                  <td style="text-align: right;">
+                    <div class="action-btn-group">
+                      <button class="icon-action-btn" title="Edit Product" onclick="openEditProductModal('1', 'HP EliteBook 840 G5', 'Computing', 450000, 14, '16GB RAM • 512GB SSD', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined">edit</span></button>
+                      <button class="icon-action-btn danger" title="Delete Listing" onclick="deleteProduct('1')"><span class="material-symbols-outlined">delete</span></button>
+                    </div>
+                  </td>
+                </tr>
+                <tr id="product-row-2">
+                  <td class="product-cell">
+                    <img id="p-img-2" src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Laptop">
+                    <div>
+                      <strong class="product-title-text" id="p-title-2">HP ZBook Studio G8</strong>
+                      <span class="product-sub-text" id="p-sub-2">32GB RAM • 1TB NVMe SSD</span>
+                    </div>
+                  </td>
+                  <td><span class="category-badge" id="p-cat-2">Computing</span></td>
+                  <td><strong id="p-price-2">₦1,200,000.00</strong></td>
+                  <td id="p-stock-2">3 Units</td>
+                  <td><span class="status-pill status-active">Active</span></td>
+                  <td style="text-align: right;">
+                    <div class="action-btn-group">
+                      <button class="icon-action-btn" title="Edit Product" onclick="openEditProductModal('2', 'HP ZBook Studio G8', 'Computing', 1200000, 3, '32GB RAM • 1TB NVMe SSD', 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined">edit</span></button>
+                      <button class="icon-action-btn danger" title="Delete Listing" onclick="deleteProduct('2')"><span class="material-symbols-outlined">delete</span></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: ORDERS & ESCROW -->
+      <div id="sellerViewOrders" class="seller-view-pane" style="display: none;">
+        <div class="seller-section-card">
+          <div class="section-card-header">
+            <div>
+              <h2 class="cart-title">Fulfillment & Escrow Orders</h2>
+              <p class="cart-subtitle">Dispatch pending orders to release locked escrow funds</p>
+            </div>
+          </div>
+          
+          <div class="seller-order-card" id="card-order-894201">
+            <div class="seller-order-header">
+              <div>
+                <span class="order-id">Order #KPT-894201</span>
+                <p class="order-sub-info">Customer: <strong>Ahmed Idowu Ebuka</strong> • Yaba, Lagos State</p>
+              </div>
+              <span class="status-pill status-transit" id="card-badge-894201"><span class="material-symbols-outlined icon-small">lock</span> Escrow Locked (₦450,000.00)</span>
+            </div>
+
+            <div class="seller-order-body">
+              <div class="order-item-detail-row">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Item">
+                <div>
+                  <strong>HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</strong>
+                  <p class="item-specs-text">Quantity: 1 • Courier: Standard Door Delivery</p>
+                </div>
+                <div class="item-price-tag">₦450,000.00</div>
+              </div>
+            </div>
+
+            <div class="seller-order-footer">
+              <span class="dispatch-note" id="dispatch-note-894201"><span class="material-symbols-outlined icon-inline text-emerald">local_shipping</span> Dispatched via Red Star Express (Ref: RSE-882910)</span><br>
+              <button class="seller-btn seller-btn-primary" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update Tracking Code</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: PAYOUTS & ESCROW WALLET -->
+      <div id="sellerViewPayouts" class="seller-view-pane" style="display: none;">
+        <div class="seller-metrics-grid">
+          <div class="metric-card highlight-card">
+            <div class="metric-top"><span class="metric-label">Cleared Balance (Available)</span></div>
+            <div class="metric-value text-emerald" id="payoutAvailableBalance">₦4,400,000.00</div>
+            <button class="seller-btn seller-btn-primary full-width" style="margin-top: 16px;" onclick="openWithdrawalModal()">
+              <span class="material-symbols-outlined">account_balance</span> Withdraw to Commercial Bank
+            </button>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top"><span class="metric-label">Escrow Locked (In Delivery)</span></div>
+            <div class="metric-value">₦450,000.00</div>
+            <p class="metric-sub-note">Funds release automatically 24h after verified delivery</p>
+          </div>
+        </div>
+
+        <div class="seller-section-card" style="margin-top: 24px;">
+          <h3 class="section-title">Linked Bank Account</h3>
+          <div class="bank-account-box">
+            <span class="material-symbols-outlined bank-icon">account_balance</span>
+            <div>
+              <strong id="displayBankName">Guaranty Trust Bank (GTBank)</strong>
+              <p>Account Number: <strong id="displayAccountNo">0123456789</strong> • Name: <span id="displayAccountName">HP Direct Nigeria LTD</span></p>
+            </div>
+            <button class="seller-btn seller-btn-outline seller-btn-sm" style="margin-left: auto;" onclick="openChangeBankModal()">Change Bank</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: STORE SETTINGS -->
+      <div id="sellerViewSettings" class="seller-view-pane" style="display: none;">
+        <div class="seller-section-card">
+          <h3 class="section-title">Merchant Profile & Dispatch Settings</h3>
+          <p class="section-subtitle">Configure complete store details visible to buyers across theKapita Marketplace</p>
+
+          <form onsubmit="saveStoreSettings(event)" class="seller-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Store Brand Name</label>
+                <input type="text" class="seller-input" id="settingStoreName" value="HP Authorized Direct" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">CAC / Business Registration No.</label>
+                <input type="text" class="seller-input" id="settingCacNo" value="RC-1492048" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Official Merchant Email</label>
+                <input type="email" class="seller-input" id="settingEmail" value="support@hpdirect.ng" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Merchant Phone Contact</label>
+                <input type="tel" class="seller-input" id="settingPhone" value="+234 803 123 4567" required>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">Primary Warehouse & Dispatch Origin</label>
+                <input type="text" class="seller-input" id="settingWarehouse" value="14 Commercial Avenue, Yaba, Lagos State" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Standard Shipping Fee (₦)</label>
+                <input type="number" class="seller-input" id="settingShipFee" value="2500" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Default Processing Time</label>
+                <select class="seller-input" id="settingProcTime">
+                  <option value="Same Day Dispatch" selected>Same Day Dispatch (Orders before 2PM)</option>
+                  <option value="24 Hours">24 Hours</option>
+                  <option value="48 Hours">48 Hours</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">Return & Refund Policy Notice</label>
+                <textarea class="seller-input" id="settingReturnPolicy" rows="3" required>100% money-back guarantee within 7 days of delivery if product is returned in original, unsealed condition with full accessories.</textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="form-label">Store Description & Bio</label>
+                <textarea class="seller-input" id="settingBio" rows="2" required>Official HP Direct Partner providing certified computing laptops, workstations, and original accessories with manufacturer warranty across Nigeria.</textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="seller-btn seller-btn-primary" style="margin-top: 20px;">
+              <span class="material-symbols-outlined">save</span> Save Store Profile
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: ADD PRODUCT -->
+  <div class="seller-modal-overlay" id="addProductModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3>Add New Product Listing</h3>
+        <button class="icon-action-btn" onclick="toggleAddProductModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form onsubmit="saveNewProduct(event)" class="seller-form">
+        <div class="form-group">
+          <label class="form-label">Product Title</label>
+          <input type="text" class="seller-input" id="newProdTitle" placeholder="e.g. HP Pavilion 15 Laptop" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Product Image URL / Photo Link</label>
+          <div class="image-input-wrapper">
+            <input type="url" class="seller-input" id="newProdImg" placeholder="https://images.unsplash.com/..." oninput="previewImageInput(this.value, 'newProdImgPreview')" required>
+            <img id="newProdImgPreview" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img input-preview-thumb" alt="Preview">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Category</label>
+          <select class="seller-input" id="newProdCategory" required>
+            <option value="Computing">Computing & Tech</option>
+            <option value="Apparel">Apparel & Fashion</option>
+            <option value="Home">Home & Living</option>
+            <option value="Beauty">Beauty & Care</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Unit Price (₦)</label>
+          <input type="number" class="seller-input" id="newProdPrice" placeholder="350000" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Stock Quantity</label>
+          <input type="number" class="seller-input" id="newProdStock" placeholder="10" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Specifications Summary</label>
+          <input type="text" class="seller-input" id="newProdSub" placeholder="e.g. 8GB RAM • 256GB SSD" required>
+        </div>
+
+        <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
+          <span class="material-symbols-outlined">publish</span> Publish Listing
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: EDIT PRODUCT -->
+  <div class="seller-modal-overlay" id="editProductModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3>Edit Product Listing</h3>
+        <button class="icon-action-btn" onclick="toggleEditProductModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form onsubmit="saveEditProduct(event)" class="seller-form">
+        <input type="hidden" id="editProdId">
+
+        <div class="form-group">
+          <label class="form-label">Product Title</label>
+          <input type="text" class="seller-input" id="editProdTitle" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Product Image URL / Photo Link</label>
+          <div class="image-input-wrapper">
+            <input type="url" class="seller-input" id="editProdImg" oninput="previewImageInput(this.value, 'editProdImgPreview')" required>
+            <img id="editProdImgPreview" src="" class="seller-thumb-img input-preview-thumb" alt="Preview">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Category</label>
+          <input type="text" class="seller-input" id="editProdCategory" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Unit Price (₦)</label>
+          <input type="number" class="seller-input" id="editProdPrice" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Stock Available</label>
+          <input type="number" class="seller-input" id="editProdStock" required>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Specifications Summary</label>
+          <input type="text" class="seller-input" id="editProdSub" required>
+        </div>
+
+        <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
+          <span class="material-symbols-outlined">save</span> Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: FULFILL & TRACKING UPDATE -->
+  <div class="seller-modal-overlay" id="fulfillModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3>Update Order Shipping Status</h3>
+        <button class="icon-action-btn" onclick="toggleFulfillModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form onsubmit="saveFulfillStatus(event)" class="seller-form">
+        <input type="hidden" id="fulfillOrderId">
+        <div class="form-group">
+          <label class="form-label">Order Ref</label>
+          <input type="text" class="seller-input" id="fulfillOrderDisplay" readonly>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Logistics Courier Partner</label>
+          <select class="seller-input" id="fulfillCourier" required>
+            <option value="Red Star Express">Red Star Express</option>
+            <option value="DHL Express">DHL Express</option>
+            <option value="GIG Logistics">GIG Logistics</option>
+            <option value="Kapita Direct Courier">Kapita Direct Courier</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Waybill / Tracking Reference Number</label>
+          <input type="text" class="seller-input" id="fulfillTrackingNo" placeholder="e.g. RSE-9912048" required>
+        </div>
+        <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
+          <span class="material-symbols-outlined">local_shipping</span> Confirm Dispatch & Notify Buyer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ORDER DETAILS -->
+  <div class="seller-modal-overlay" id="orderDetailsModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3 id="detModalTitle">Order Details</h3>
+        <button class="icon-action-btn" onclick="toggleOrderDetailsModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="seller-form" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+        <div><strong>Customer:</strong> <span id="detCustomer"></span></div>
+        <div><strong>Product:</strong> <span id="detProduct"></span></div>
+        <div><strong>Amount:</strong> <span id="detAmount" class="text-emerald" style="font-weight: 800;"></span></div>
+        <div><strong>Escrow Status:</strong> <span id="detEscrow"></span></div>
+        <div><strong>Courier:</strong> <span id="detCourier"></span></div>
+        <div><strong>Tracking No:</strong> <span id="detTracking"></span></div>
+      </div>
+      <button class="seller-btn seller-btn-outline full-width" style="margin-top: 20px;" onclick="toggleOrderDetailsModal(false)">Close</button>
+    </div>
+  </div>
+
+  <!-- MODAL 5: CHANGE BANK ACCOUNT -->
+  <div class="seller-modal-overlay" id="changeBankModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3>Link Payout Bank Account</h3>
+        <button class="icon-action-btn" onclick="toggleChangeBankModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form onsubmit="saveBankDetails(event)" class="seller-form">
+        <div class="form-group">
+          <label class="form-label">Commercial Bank</label>
+          <select class="seller-input" id="inputBankName" required>
+            <option value="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
+            <option value="Access Bank">Access Bank</option>
+            <option value="Zenith Bank">Zenith Bank</option>
+            <option value="First Bank of Nigeria">First Bank of Nigeria</option>
+            <option value="Kuda Microfinance Bank">Kuda Microfinance Bank</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">10-Digit NUBAN Account Number</label>
+          <input type="text" maxlength="10" class="seller-input" id="inputAccountNo" placeholder="0123456789" required>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Verified Account Name</label>
+          <input type="text" class="seller-input" id="inputAccountName" value="HP Direct Nigeria LTD" required>
+        </div>
+        <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
+          <span class="material-symbols-outlined">check_circle</span> Update Bank Account
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 6: WITHDRAWAL -->
+  <div class="seller-modal-overlay" id="withdrawalModal" style="display: none;">
+    <div class="seller-modal-box">
+      <div class="modal-header">
+        <h3>Withdraw Cleared Funds</h3>
+        <button class="icon-action-btn" onclick="toggleWithdrawalModal(false)"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form onsubmit="processWithdrawal(event)" class="seller-form">
+        <div class="form-group">
+          <label class="form-label">Available Cleared Balance</label>
+          <input type="text" class="seller-input" value="₦4,400,000.00" readonly>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Withdrawal Amount (₦)</label>
+          <input type="number" max="4400000" class="seller-input" id="withdrawAmount" placeholder="e.g. 500000" required>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label class="form-label">Transaction PIN</label>
+          <input type="password" maxlength="4" class="seller-input" placeholder="••••" required>
+        </div>
+        <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
+          <span class="material-symbols-outlined">send</span> Confirm Withdrawal
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="src/pages/seller.js"></script>
+</body>
+</html>

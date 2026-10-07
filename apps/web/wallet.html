@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita Pay — Universal Financial Engine</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profile.css">
+  <link rel="stylesheet" href="css/wallet.css">
+</head>
+<body class="wallet-body">
+
+  <header class="desktop-header profile-back-header">
+    <div class="header-back-action" onclick="window.location.href='index.html'">
+      <div class="back-btn-circle">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </div>
+    </div>
+    
+    <div class="wallet-header-tag">
+      <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon">check_circle</span></span>
+      <span class="id-badge">ID: <strong>KPT-883902</strong></span>
+    </div>
+  </header>
+
+  <main class="portal-container wallet-container">
+    
+    <div id="heroCardWrapper">
+      <section class="wallet-hero-card">
+        <div class="hero-top-row">
+          <div class="hero-brand">
+            <span class="material-symbols-outlined brand-icon">account_balance_wallet</span>
+            <h2>theKapita Pay</h2>
+          </div>
+          <div class="hero-security-pill">
+            <span class="pulse-dot"></span>
+            <span>Tier 3 Verified</span>
+          </div>
+        </div>
+
+        <div class="hero-balance-block">
+          <span class="balance-label">Available Balance</span>
+          <div class="balance-row">
+            <span class="hero-currency">₦</span>
+            <span class="hero-amount" id="mainWalletBalance">245,500.00</span>
+            <button class="eye-toggle wallet-eye" onclick="toggleWalletBalance()" aria-label="Toggle balance mask">
+              <span class="material-symbols-outlined" id="balanceEyeIcon">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="wallet-quick-actions">
+          <button class="quick-action-btn primary-action" onclick="openWalletModal('add')">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">add</span>
+            </div>
+            <span>Add Money</span>
+          </button>
+          <button class="quick-action-btn" onclick="openWalletModal('send')">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">north_east</span>
+            </div>
+            <span>Send</span>
+          </button>
+          <button class="quick-action-btn" onclick="openWalletModal('receive')">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">south_west</span>
+            </div>
+            <span>Receive</span>
+          </button>
+          <button class="quick-action-btn" onclick="openWalletModal('withdraw')">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">account_balance</span>
+            </div>
+            <span>Withdraw</span>
+          </button>
+          <button class="quick-action-btn" onclick="switchWalletTab('bills', document.querySelectorAll('.w-tab-btn')[2])">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">receipt_long</span>
+            </div>
+            <span>Pay Bills</span>
+          </button>
+          <button class="quick-action-btn" onclick="openWalletModal('scan')">
+            <div class="action-icon-circle">
+              <span class="material-symbols-outlined">qr_code_scanner</span>
+            </div>
+            <span>Scan & Pay</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <nav class="wallet-tabs">
+      <button class="w-tab-btn active" onclick="switchWalletTab('overview', this)">Overview</button>
+      <button class="w-tab-btn" onclick="switchWalletTab('cards', this)">Kapita Cards</button>
+      <button class="w-tab-btn" onclick="switchWalletTab('bills', this)">Bills & Utility</button>
+      <button class="w-tab-btn" onclick="switchWalletTab('recipients', this)">Recipients</button>
+      <button class="w-tab-btn" onclick="switchWalletTab('insights', this)">Analytics</button>
+      <button class="w-tab-btn" onclick="switchWalletTab('security', this)">Security & Limits</button>
+    </nav>
+
+    <div id="walletTabOverview" class="w-tab-pane active">
+      <div class="profile-grid-two">
+
+        <div class="grid-column gap-24">
+
+          <div class="kapita-card van-funding-card">
+            <div class="van-header">
+              <div class="van-title-box">
+                <span class="material-symbols-outlined van-icon">account_balance</span>
+                <div>
+                  <h4>Virtual Funding Account</h4>
+                  <p>Transfer to top up your Kapita wallet instantly</p>
+                </div>
+              </div>
+            </div>
+            <div class="van-details-grid">
+              <div class="van-item">
+                <span class="label">Bank Name</span>
+                <strong>Wema Bank / Kapita</strong>
+              </div>
+              <div class="van-item">
+                <span class="label">Account Number</span>
+                <div class="copy-num-row">
+                  <strong id="vanAccountNumber">9920188219</strong>
+                  <button class="copy-btn" onclick="navigator.clipboard.writeText('9920188219'); alert('Account copied!');">
+                    <span class="material-symbols-outlined">content_copy</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="kapita-card">
+            <div class="card-header">
+              <h3>Recent Transactions</h3>
+              <div class="filter-pills">
+                <span class="pill active" onclick="filterTx('all', this)">All</span>
+                <span class="pill" onclick="filterTx('in', this)">In</span>
+                <span class="pill" onclick="filterTx('out', this)">Out</span>
+              </div>
+            </div>
+
+            <div class="activity-timeline">
+              <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990812')">
+                <div class="act-icon-wrapper eats">
+                  <span class="material-symbols-outlined">restaurant</span>
+                </div>
+                <div class="act-details">
+                  <p class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Lunch</p>
+                  <span class="act-time">Today, 1:42 PM • Food Payment</span>
+                </div>
+                <div class="act-right">
+                  <span class="act-amount negative">-₦8,500</span>
+                  <span class="tx-status-pill success">Successful</span>
+                </div>
+              </div>
+
+              <div class="activity-row tx-item in" onclick="viewTxDetail('TX-990811')">
+                <div class="act-icon-wrapper pay">
+                  <span class="material-symbols-outlined">payments</span>
+                </div>
+                <div class="act-details">
+                  <p class="act-title"><strong>Salary Deposit:</strong> Tech Firm Ltd</p>
+                  <span class="act-time">Today, 9:15 AM • Bank Transfer</span>
+                </div>
+                <div class="act-right">
+                  <span class="act-amount positive">+₦850,000</span>
+                  <span class="tx-status-pill success">Successful</span>
+                </div>
+              </div>
+
+              <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990810')">
+                <div class="act-icon-wrapper ride">
+                  <span class="material-symbols-outlined">directions_car</span>
+                </div>
+                <div class="act-details">
+                  <p class="act-title"><strong>Transfer to:</strong> John Okafor (@john)</p>
+                  <span class="act-time">Yesterday • Peer Transfer</span>
+                </div>
+                <div class="act-right">
+                  <span class="act-amount negative">-₦20,000</span>
+                  <span class="tx-status-pill success">Successful</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="kapita-card">
+            <div class="card-header">
+              <h3>Payment Methods</h3>
+              <button class="text-btn" onclick="openWalletModal('addMethod')">+ Add New</button>
+            </div>
+            
+            <div class="payment-methods-list">
+              <div class="method-item default">
+                <div class="method-left">
+                  <div class="method-icon-box">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                  </div>
+                  <div class="method-details">
+                    <h4>theKapita Pay Wallet</h4>
+                    <p>Primary Ecosystem Wallet • ₦245,500.00</p>
+                  </div>
+                </div>
+                <span class="default-pill">Default</span>
+              </div>
+
+              <div class="method-item">
+                <div class="method-left">
+                  <div class="method-icon-box">
+                    <span class="material-symbols-outlined">account_balance</span>
+                  </div>
+                  <div class="method-details">
+                    <h4>GTBank Guarantee Trust</h4>
+                    <p>Account ending in •••• 4902</p>
+                  </div>
+                </div>
+                <button class="btn-sm text-btn">Options</button>
+              </div>
+
+              <div class="method-item">
+                <div class="method-left">
+                  <div class="method-icon-box">
+                    <span class="material-symbols-outlined">credit_card</span>
+                  </div>
+                  <div class="method-details">
+                    <h4>Visa Corporate Card</h4>
+                    <p>Card ending in •••• 8821</p>
+                  </div>
+                </div>
+                <button class="btn-sm text-btn">Options</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="grid-column gap-24">
+
+          <div class="kapita-card">
+            <div class="card-header">
+              <h3>Monthly Analytics</h3>
+              <span class="sec-indicator">Total: ₦185,400</span>
+            </div>
+
+            <div class="spending-breakdown">
+              <div class="spending-bar-wrapper">
+                <div class="spending-segment eats" style="width: 28%;" title="Eats: ₦52,000"></div>
+                <div class="spending-segment ride" style="width: 21%;" title="Ride: ₦38,500"></div>
+                <div class="spending-segment bills" style="width: 24%;" title="Bills: ₦45,000"></div>
+                <div class="spending-segment market" style="width: 17%;" title="Marketplace: ₦31,900"></div>
+                <div class="spending-segment other" style="width: 10%;" title="Other: ₦18,000"></div>
+              </div>
+
+              <div class="insight-legend">
+                <div class="legend-item"><span class="legend-dot eats"></span> Eats <strong>₦52,000</strong></div>
+                <div class="legend-item"><span class="legend-dot ride"></span> Ride <strong>₦38,500</strong></div>
+                <div class="legend-item"><span class="legend-dot bills"></span> Bills <strong>₦45,000</strong></div>
+                <div class="legend-item"><span class="legend-dot market"></span> Market <strong>₦31,900</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="kapita-card">
+            <div class="card-header">
+              <h3>Quick Utilities</h3>
+              <button class="text-btn" onclick="switchWalletTab('bills', document.querySelectorAll('.w-tab-btn')[2])">View All</button>
+            </div>
+
+            <div class="bills-category-grid">
+              <div class="bill-tile" onclick="openBillPay('Airtime & Data')">
+                <span class="material-symbols-outlined bill-icon">smartphone</span>
+                <h4>Airtime / Data</h4>
+                <p>MTN, Airtel</p>
+              </div>
+              <div class="bill-tile" onclick="openBillPay('Electricity')">
+                <span class="material-symbols-outlined bill-icon">bolt</span>
+                <h4>Electricity</h4>
+                <p>IKEDC, EKEDC</p>
+              </div>
+              <div class="bill-tile" onclick="openBillPay('Cable TV')">
+                <span class="material-symbols-outlined bill-icon">tv</span>
+                <h4>Cable TV</h4>
+                <p>DSTV, GOTV</p>
+              </div>
+              <div class="bill-tile" onclick="openBillPay('Internet')">
+                <span class="material-symbols-outlined bill-icon">wifi</span>
+                <h4>Internet</h4>
+                <p>Smile, Spectranet</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="kapita-card rewards-wallet-card">
+            <div class="card-header">
+              <div class="header-title">
+                <span class="material-symbols-outlined card-icon">stars</span>
+                <h3>theKapita Rewards</h3>
+              </div>
+              <span class="points-badge">2,450 Points</span>
+            </div>
+            <p class="rewards-subtitle">Earn 1% cashback on every Eats order, Ride booking, or Bill payment.</p>
+            
+            <div class="rewards-progress-bar">
+              <div class="progress-fill" style="width: 65%;"></div>
+            </div>
+            <div class="rewards-tier-row">
+              <span>550 pts to Platinum</span>
+            </div>
+
+            <button class="btn-secondary w-full" style="margin-top: 16px;">Redeem Marketplace Rewards</button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div id="walletTabCards" class="w-tab-pane">
+      <div class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;">
+        <div class="card-header justify-center">
+          <h3>theKapita Black Virtual Card</h3>
+        </div>
+        
+        <div class="kapita-virtual-card">
+          <div class="card-chip-row">
+            <span class="card-brand-logo">theKapita.</span>
+            <span class="material-symbols-outlined card-chip-icon">contactless</span>
+          </div>
+          <div class="card-number-display" id="cardNumberDisplay">
+            •••• •••• •••• 8821
+          </div>
+          <div class="card-bottom-meta">
+            <div>
+              <span class="card-meta-label">Card Holder</span>
+              <strong>Ahmed Ebuka</strong>
+            </div>
+            <div>
+              <span class="card-meta-label">Expires</span>
+              <strong>08/29</strong>
+            </div>
+            <div>
+              <span class="card-meta-label">CVV</span>
+              <strong id="cardCvvDisplay">•••</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-controls-row">
+          <button class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
+          <button class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
+          <button class="btn-primary">Manage Limits</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="walletTabBills" class="w-tab-pane">
+      <div class="kapita-card w-full">
+        <div class="card-header">
+          <div>
+            <h3>All Utility & Bill Payments</h3>
+            <p class="tab-subtitle">Pay directly from your available balance with 0 transaction fees.</p>
+          </div>
+        </div>
+
+        <div class="bills-full-grid">
+          <div class="bill-tile-item" onclick="openBillPay('Airtime & Data')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">smartphone</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Airtime & Data</h4>
+              <p>MTN, Airtel, Glo, 9mobile</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+
+          <div class="bill-tile-item" onclick="openBillPay('Electricity')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">bolt</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Electricity Tokens</h4>
+              <p>IKEDC, EKEDC, AEDC & others</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+
+          <div class="bill-tile-item" onclick="openBillPay('Cable TV')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">tv</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Cable TV Subscriptions</h4>
+              <p>DStv, GOtv, StarTimes</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+
+          <div class="bill-tile-item" onclick="openBillPay('Internet')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">wifi</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Internet Broadband</h4>
+              <p>Spectranet, Smile, Fibre</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+
+          <div class="bill-tile-item" onclick="openBillPay('Education')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">school</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Education & Exams</h4>
+              <p>WAEC, JAMB, Tuition Fees</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+
+          <div class="bill-tile-item" onclick="openBillPay('Health HMO')">
+            <div class="bill-tile-icon-box">
+              <span class="material-symbols-outlined">health_and_safety</span>
+            </div>
+            <div class="bill-tile-info">
+              <h4>Health & HMO Insurance</h4>
+              <p>Ecosystem Health Plans</p>
+            </div>
+            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="walletTabRecipients" class="w-tab-pane">
+      <div class="kapita-card w-full">
+        <div class="card-header">
+          <div>
+            <h3>Saved Recipients & Directory</h3>
+            <p class="tab-subtitle">Manage frequent payees for instant 0-fee Kapita tags or external bank transfers</p>
+          </div>
+          <button class="btn-primary" onclick="openWalletModal('send')">
+            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">person_add</span> Add New Recipient
+          </button>
+        </div>
+
+        <div class="recipients-toolbar">
+          <div class="search-input-wrapper recipient-search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input type="text" placeholder="Search by name, @username, or account number..." class="form-control">
+          </div>
+          <div class="filter-pills">
+            <span class="pill active">All (8)</span>
+            <span class="pill">Kapita Network</span>
+            <span class="pill">Bank Accounts</span>
+            <span class="pill">Favorites</span>
+          </div>
+        </div>
+
+        <div class="quick-send-rail-container">
+          <span class="rail-label">Frequent Transfers</span>
+          <div class="quick-send-rail">
+            <div class="rail-item" onclick="openWalletModal('send')">
+              <div class="rail-avatar add-new-rail">
+                <span class="material-symbols-outlined">add</span>
+              </div>
+              <span>New Payee</span>
+            </div>
+            <div class="rail-item" onclick="openWalletModal('send')">
+              <div class="rail-avatar">SO<span class="online-indicator"></span></div>
+              <span>Sarah</span>
+            </div>
+            <div class="rail-item" onclick="openWalletModal('send')">
+              <div class="rail-avatar">JO<span class="online-indicator"></span></div>
+              <span>John</span>
+            </div>
+            <div class="rail-item" onclick="openWalletModal('send')">
+              <div class="rail-avatar">EA</div>
+              <span>Ella</span>
+            </div>
+            <div class="rail-item" onclick="openWalletModal('send')">
+              <div class="rail-avatar">MC</div>
+              <span>Michael</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="recipients-grid">
+          <div class="recipient-card favorited">
+            <div class="rec-card-top">
+              <span class="network-badge internal">
+                <span class="material-symbols-outlined">bolt</span> Kapita ID
+              </span>
+              <button class="fav-star-btn active" title="Remove from Favorites">
+                <span class="material-symbols-outlined">star</span>
+              </button>
+            </div>
+            <div class="rec-avatar-lg">
+              SO
+              <span class="badge-dot kapita-dot"></span>
+            </div>
+            <h4>Sarah Okoro</h4>
+            <p class="handle">@sarah • Instant ₦0 Fee</p>
+            <span class="account-meta">KPT-881092 • Primary Tag</span>
+            <div class="rec-card-actions">
+              <button class="btn-primary" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Send Money
+              </button>
+            </div>
+          </div>
+
+          <div class="recipient-card">
+            <div class="rec-card-top">
+              <span class="network-badge bank">
+                <span class="material-symbols-outlined">account_balance</span> Bank Account
+              </span>
+              <button class="fav-star-btn" title="Add to Favorites">
+                <span class="material-symbols-outlined">star</span>
+              </button>
+            </div>
+            <div class="rec-avatar-lg bank-avatar">
+              JO
+            </div>
+            <h4>John Okafor</h4>
+            <p class="handle">GTBank Guarantee Trust</p>
+            <span class="account-meta">•••• 4902 • Verified Name</span>
+            <div class="rec-card-actions">
+              <button class="btn-secondary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Transfer
+              </button>
+            </div>
+          </div>
+
+          <div class="recipient-card">
+            <div class="rec-card-top">
+              <span class="network-badge internal">
+                <span class="material-symbols-outlined">bolt</span> Kapita ID
+              </span>
+              <button class="fav-star-btn active" title="Remove from Favorites">
+                <span class="material-symbols-outlined">star</span>
+              </button>
+            </div>
+            <div class="rec-avatar-lg">
+              EA
+              <span class="badge-dot kapita-dot"></span>
+            </div>
+            <h4>Ella Amra</h4>
+            <p class="handle">@amra • Instant ₦0 Fee</p>
+            <span class="account-meta">KPT-883912 • Primary Tag</span>
+            <div class="rec-card-actions">
+              <button class="btn-primary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Send Money
+              </button>
+            </div>
+          </div>
+
+          <div class="recipient-card">
+            <div class="rec-card-top">
+              <span class="network-badge bank">
+                <span class="material-symbols-outlined">account_balance</span> Bank Account
+              </span>
+              <button class="fav-star-btn" title="Add to Favorites">
+                <span class="material-symbols-outlined">star</span>
+              </button>
+            </div>
+            <div class="rec-avatar-lg bank-avatar">
+              MC
+            </div>
+            <h4>Michael Chen</h4>
+            <p class="handle">Access Bank PLC</p>
+            <span class="account-meta">•••• 8812 • Verified Name</span>
+            <div class="rec-card-actions">
+              <button class="btn-secondary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="walletTabInsights" class="w-tab-pane">
+      <div class="kapita-card w-full">
+        <div class="card-header">
+          <div>
+            <h3>Ecosystem Cashflow Analytics</h3>
+            <p class="tab-subtitle">Visualizing month-over-month cashflow across theKapita network</p>
+          </div>
+          <div class="analytics-timeframe-picker">
+            <button class="pill active">August 2026</button>
+            <button class="pill">Q3 2026</button>
+            <button class="pill">Yearly</button>
+          </div>
+        </div>
+
+        <div class="analytics-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="label">Total Inflow</span>
+              <span class="kpi-icon positive">
+                <span class="material-symbols-outlined">south_west</span>
+              </span>
+            </div>
+            <div class="kpi-value">₦475,000.00</div>
+            <span class="kpi-trend positive">
+              <span class="material-symbols-outlined">trending_up</span> +14.2% vs last month
+            </span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="label">Total Outflow</span>
+              <span class="kpi-icon negative">
+                <span class="material-symbols-outlined">north_east</span>
+              </span>
+            </div>
+            <div class="kpi-value">₦185,400.00</div>
+            <span class="kpi-trend negative">
+              <span class="material-symbols-outlined">trending_down</span> -3.5% vs last month
+            </span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="label">Net Savings Rate</span>
+              <span class="kpi-icon accent">
+                <span class="material-symbols-outlined">savings</span>
+              </span>
+            </div>
+            <div class="kpi-value">60.9%</div>
+            <span class="kpi-trend positive">
+              <span class="material-symbols-outlined">check_circle</span> Healthy Cashflow Ratio
+            </span>
+          </div>
+        </div>
+
+        <div class="analytics-chart-box">
+          <div class="chart-box-header">
+            <h4>6-Month Cashflow Overview</h4>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot inflow"></span> Inflow</span>
+              <span class="legend-item"><span class="legend-dot outflow"></span> Outflow</span>
+            </div>
+          </div>
+
+          <div class="bar-chart-container">
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 60%;" title="Inflow: ₦300,000"></div>
+                <div class="bar outflow" style="height: 40%;" title="Outflow: ₦140,000"></div>
+              </div>
+              <span class="bar-label">Mar</span>
+            </div>
+
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 75%;" title="Inflow: ₦380,000"></div>
+                <div class="bar outflow" style="height: 45%;" title="Outflow: ₦160,000"></div>
+              </div>
+              <span class="bar-label">Apr</span>
+            </div>
+
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 65%;" title="Inflow: ₦320,000"></div>
+                <div class="bar outflow" style="height: 35%;" title="Outflow: ₦120,000"></div>
+              </div>
+              <span class="bar-label">May</span>
+            </div>
+
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 85%;" title="Inflow: ₦420,000"></div>
+                <div class="bar outflow" style="height: 50%;" title="Outflow: ₦190,000"></div>
+              </div>
+              <span class="bar-label">Jun</span>
+            </div>
+
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 80%;" title="Inflow: ₦400,000"></div>
+                <div class="bar outflow" style="height: 55%;" title="Outflow: ₦210,000"></div>
+              </div>
+              <span class="bar-label">Jul</span>
+            </div>
+
+            <div class="bar-group active">
+              <div class="bar-wrapper">
+                <div class="bar inflow" style="height: 95%;" title="Inflow: ₦475,000"></div>
+                <div class="bar outflow" style="height: 48%;" title="Outflow: ₦185,400"></div>
+              </div>
+              <span class="bar-label">Aug</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-analytics-section">
+          <h4>Top Ecosystem Channels</h4>
+          <div class="channel-distribution-grid">
+            <div class="channel-card">
+              <div class="channel-info">
+                <div class="channel-icon eats">
+                  <span class="material-symbols-outlined">fastfood</span>
+                </div>
+                <div>
+                  <strong>theKapita Eats</strong>
+                  <p>28% of monthly spend</p>
+                </div>
+              </div>
+              <span class="channel-amount">₦52,000.00</span>
+            </div>
+
+            <div class="channel-card">
+              <div class="channel-info">
+                <div class="channel-icon bills">
+                  <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <div>
+                  <strong>Bills & Utility</strong>
+                  <p>24% of monthly spend</p>
+                </div>
+              </div>
+              <span class="channel-amount">₦45,000.00</span>
+            </div>
+
+            <div class="channel-card">
+              <div class="channel-info">
+                <div class="channel-icon ride">
+                  <span class="material-symbols-outlined">directions_car</span>
+                </div>
+                <div>
+                  <strong>theKapita Ride</strong>
+                  <p>21% of monthly spend</p>
+                </div>
+              </div>
+              <span class="channel-amount">₦38,500.00</span>
+            </div>
+
+            <div class="channel-card">
+              <div class="channel-info">
+                <div class="channel-icon market">
+                  <span class="material-symbols-outlined">shopping_bag</span>
+                </div>
+                <div>
+                  <strong>Marketplace</strong>
+                  <p>17% of monthly spend</p>
+                </div>
+              </div>
+              <span class="channel-amount">₦31,900.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-footer-action">
+          <button class="btn-secondary" onclick="alert('Exporting statement PDF...');">
+            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px;">download</span> Download Full Financial Statement (PDF)
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="walletTabSecurity" class="w-tab-pane">
+      <div class="kapita-card w-full">
+        <div class="card-header">
+          <div>
+            <h3>Security Controls & Limits</h3>
+            <p class="tab-subtitle">Manage your payment PIN, authorization options, and daily transaction thresholds.</p>
+          </div>
+          <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon">check_circle</span></span>
+        </div>
+
+        <div class="security-full-grid">
+          <div class="security-panel-box">
+            <div class="panel-box-title">
+              <span class="material-symbols-outlined panel-icon">speed</span>
+              <h4>Transaction Limits</h4>
+            </div>
+            <div class="settings-list">
+              <div class="detail-row">
+                <div class="row-label-group">
+                  <span>Daily Transfer Limit</span>
+                  <small>Maximum outbound transfers per 24h</small>
+                </div>
+                <strong>₦500,000.00</strong>
+              </div>
+
+              <div class="detail-row">
+                <div class="row-label-group">
+                  <span>Monthly Transfer Limit</span>
+                  <small>Cumulative transfer ceiling for current month</small>
+                </div>
+                <strong>₦5,000,000.00</strong>
+              </div>
+
+              <div class="detail-row">
+                <div class="row-label-group">
+                  <span>Available Balance Today</span>
+                  <small>Remaining transferable limit</small>
+                </div>
+                <strong style="color: #00d084;">₦350,000.00</strong>
+              </div>
+            </div>
+            <button class="btn-secondary w-full" style="margin-top: 16px;">Request Limit Increase</button>
+          </div>
+
+          <div class="security-panel-box">
+            <div class="panel-box-title">
+              <span class="material-symbols-outlined panel-icon">shield</span>
+              <h4>Authentication & Protection</h4>
+            </div>
+            <div class="settings-list">
+              <div class="setting-item">
+                <div class="setting-info-block">
+                  <strong>Biometric Payment Auth</strong>
+                  <p>Require FaceID or Fingerprint for transfers</p>
+                </div>
+                <input type="checkbox" checked class="toggle-switch">
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info-block">
+                  <strong>Security Transaction PIN</strong>
+                  <p>4-digit pin prompt required for transfers over ₦10,000</p>
+                </div>
+                <button class="btn-sm">Change PIN</button>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info-block">
+                  <strong>Two-Factor Login (2FA)</strong>
+                  <p>Send OTP verification code on untrusted device logins</p>
+                </div>
+                <input type="checkbox" checked class="toggle-switch">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="modal-overlay" id="walletActionModal" onclick="closeWalletModal(event)">
+    <div class="edit-modal-card wallet-modal-body" onclick="event.stopPropagation()">
+      <button class="close-modal-btn" onclick="closeWalletModal()">✕</button>
+      <div class="edit-modal-header text-center">
+        <h3 id="walletModalTitle">Wallet Action</h3>
+        <p id="walletModalSubtitle">Instant settlement via theKapita Pay</p>
+      </div>
+      <div id="walletModalContent" class="form-fields-container"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="txDetailModal" onclick="closeTxModal(event)">
+    <div class="edit-modal-card tx-detail-card" onclick="event.stopPropagation()">
+      <button class="close-modal-btn" onclick="closeTxModal()">✕</button>
+      <div class="tx-header-status text-center">
+        <div class="success-badge-circle">
+          <span class="material-symbols-outlined">check</span>
+        </div>
+        <h2 id="txDetailAmount">₦8,500.00</h2>
+        <span class="status-text-success">Payment Successful</span>
+      </div>
+      <div class="tx-meta-list">
+        <div class="detail-row"><span>Recipient:</span> <strong id="txDetailRecipient">theKapita Eats</strong></div>
+        <div class="detail-row"><span>Transaction Type:</span> <strong id="txDetailType">Food Payment</strong></div>
+        <div class="detail-row"><span>Date & Time:</span> <strong id="txDetailDate">27 Aug 2026, 1:42 PM</strong></div>
+        <div class="detail-row"><span>Reference ID:</span> <strong id="txDetailRef">KPT-88910293</strong></div>
+        <div class="detail-row"><span>Payment Method:</span> <strong>theKapita Pay Wallet</strong></div>
+      </div>
+      <div class="tx-modal-actions">
+        <button class="btn-secondary w-full" onclick="alert('Receipt downloaded (PDF)')">Download Receipt</button>
+        <button class="btn-secondary w-full" onclick="alert('Receipt link copied')">Share Receipt</button>
+        <button class="text-btn danger-text w-full" style="margin-top: 8px;">Report a Problem</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/pages/app.js"></script>
+  <script type="module" src="src/pages/wallet.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+django
+django-ninja
+django-cors-headers
+django-ninja-jwt
+pyjwt
+pydantic[email]
+gunicorn
+whitenoise
+psycopg[binary,pool]
+dj-database-url

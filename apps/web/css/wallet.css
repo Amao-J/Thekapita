@@ -1,0 +1,1565 @@
+/* ==========================================
+   THEKAPITA PAY WALLET STYLESHEET
+   ========================================== */
+
+.wallet-body {
+  background-color: var(--surface-gray, #f8f9fa);
+  min-height: 100vh;
+}
+
+.wallet-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.wallet-header-tag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.id-badge {
+  font-size: 13px;
+  background: var(--surface-gray, #f1f3f5);
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+/* 1. HERO BALANCE CARD */
+.wallet-hero-card {
+    width: 100%;
+  background: #121212;
+  color: #ffffff;
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  margin-bottom: 24px;
+}
+
+.hero-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-brand h2 {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 20px;
+  margin: 0;
+}
+
+.pay-logo-icon {
+  font-size: 22px;
+}
+
+.hero-security-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #00D084;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #00D084;
+  border-radius: 50%;
+}
+
+.hero-balance-block {
+  margin-bottom: 32px;
+}
+
+.balance-label {
+  font-size: 13px;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.hero-currency {
+  font-size: 28px;
+  font-weight: 700;
+  color: #00D084;
+}
+
+.hero-amount {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.wallet-eye {
+  color: #ffffff;
+  margin-left: 10px;
+}
+
+.tagline {
+  font-size: 13px;
+  color: #718096;
+}
+
+/* 2. QUICK ACTIONS GRID */
+.wallet-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.quick-action-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 14px 8px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.quick-action-btn.primary-action {
+  background: #00D084;
+  color: #121212;
+  border: none;
+  font-weight: 700;
+}
+
+.action-icon-circle {
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-action-btn.primary-action .action-icon-circle {
+  background: rgba(18, 18, 18, 0.15);
+}
+
+.quick-action-btn span {
+  font-size: 12px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+}
+
+/* NAVIGATION TABS */
+.wallet-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.w-tab-btn {
+  padding: 12px 18px;
+  border: none;
+  background: none;
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.w-tab-btn.active {
+  color: #121212;
+  border-bottom-color: #121212;
+}
+
+.w-tab-pane {
+  display: none;
+}
+
+.w-tab-pane.active {
+  display: block;
+}
+
+/* BILLS & REWARDS COMPONENTS */
+.bills-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.bill-tile {
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bill-tile:hover {
+  border-color: #121212;
+  transform: translateY(-2px);
+}
+
+.bill-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.bill-tile h4 {
+  font-size: 13px;
+  margin: 0;
+}
+
+.bill-tile p {
+  font-size: 11px;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.frequent-billers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.biller-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 14px;
+}
+
+.biller-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* SPENDING INSIGHTS BAR */
+.spending-bar-wrapper {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #edf2f7;
+  margin: 16px 0;
+}
+
+.spending-segment.eats { background: #FF6B6B; }
+.spending-segment.ride { background: #4D96FF; }
+.spending-segment.bills { background: #FFD93D; }
+.spending-segment.market { background: #6BCB77; }
+.spending-segment.other { background: #9B51E0; }
+
+.insight-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  font-size: 12px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.legend-dot.eats { background: #FF6B6B; }
+.legend-dot.ride { background: #4D96FF; }
+.legend-dot.bills { background: #FFD93D; }
+.legend-dot.market { background: #6BCB77; }
+
+/* TRANSACTIONS LIST */
+.tx-item {
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 14px;
+  transition: background 0.15s ease;
+}
+
+.tx-item:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.act-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.tx-status-pill {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.tx-status-pill.success {
+  background: rgba(0, 208, 132, 0.12);
+  color: #008f5a;
+}
+
+/* VIRTUAL CARD STYLING */
+.kapita-virtual-card {
+  background: linear-gradient(135deg, #121212 0%, #2a2a2a 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 380px;
+  margin: 20px auto;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+  text-align: left;
+}
+
+.card-chip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.card-brand-logo {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.card-number-display {
+  font-family: monospace;
+  font-size: 20px;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.card-bottom-meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-meta-label {
+  display: block;
+  font-size: 9px;
+  color: #a0aec0;
+  text-transform: uppercase;
+}
+
+/* RESPONSIVE DESIGN FOR MOBILE */
+@media (max-width: 768px) {
+  .wallet-quick-actions {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hero-amount {
+    font-size: 32px;
+  }
+
+  .wallet-hero-card {
+    padding: 20px;
+  }
+}
+
+
+.wallet-tabs {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    
+    /* Optional: hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.wallet-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.w-tab-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* ==========================================
+   SAVED RECIPIENTS FULL-WIDTH STYLES
+   ========================================== */
+
+#walletTabRecipients .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.recipients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.recipient-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  background: var(--white, #ffffff);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.recipient-card:hover {
+  border-color: var(--black, #121212);
+  transform: translateY(-2px);
+}
+
+.rec-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--black, #121212);
+  color: #00d084;
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.recipient-card h4 {
+  font-size: 15px;
+  margin: 0 0 4px 0;
+}
+
+.recipient-card p {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* Material Symbols Alignment Helpers */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.check-icon {
+  font-size: 14px;
+  color: #00d084;
+}
+
+.brand-icon {
+  font-size: 24px;
+  color: #00d084;
+}
+
+.legend-icon {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.method-icon {
+  font-size: 22px;
+  color: #121212;
+  margin-right: 12px;
+}
+
+.card-chip-icon {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.success-badge-circle .material-symbols-outlined {
+  font-size: 28px;
+  color: #00d084;
+}
+
+/* ==========================================
+   MATERIAL SYMBOLS FONT RENDERING FIX
+   ========================================== */
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Quick Action Circle Sizing */
+.action-icon-circle .material-symbols-outlined {
+  font-size: 20px;
+  color: inherit;
+}
+
+
+/* ==========================================
+   FULL-WIDTH SAVED RECIPIENTS SECTION
+   ========================================== */
+
+/* Ensure the tab pane and card stretch full width */
+#walletTabRecipients,
+#walletTabRecipients .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header layout: pushes title to left, button to right */
+#walletTabRecipients .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+#walletTabRecipients .card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Grid layout for recipient items */
+.recipients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.recipient-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  background: var(--white, #ffffff);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.recipient-card:hover {
+  border-color: var(--black, #121212);
+  transform: translateY(-2px);
+}
+
+.rec-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--black, #121212);
+  color: #00d084;
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.recipient-card h4 {
+  font-size: 15px;
+  margin: 0 0 4px 0;
+}
+
+.recipient-card p {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 16px 0;
+}
+
+/* ==========================================
+   FULL-WIDTH BILLS & SECURITY LAYOUT FIXES
+   ========================================== */
+
+/* Subtitles for tab headers */
+.tab-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 0 0;
+}
+
+/* ------------------------------------------
+   BILLS & UTILITY FULL-WIDTH LAYOUT
+   ------------------------------------------ */
+#walletTabBills,
+#walletTabBills .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bills-full-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.bill-tile-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  background: var(--white, #ffffff);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bill-tile-item:hover {
+  border-color: #121212;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.bill-tile-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--surface-gray, #f8f9fa);
+  color: #121212;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bill-tile-icon-box .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.bill-tile-info {
+  flex: 1;
+}
+
+.bill-tile-info h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #121212;
+}
+
+.bill-tile-info p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.tile-arrow {
+  color: #a0aec0;
+  font-size: 20px;
+}
+
+/* ------------------------------------------
+   SECURITY & LIMITS FULL-WIDTH LAYOUT
+   ------------------------------------------ */
+#walletTabSecurity,
+#walletTabSecurity .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.security-full-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.security-panel-box {
+  background: var(--surface-gray, #f8f9fa);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.panel-box-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.panel-box-title h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #121212;
+}
+
+.panel-icon {
+  font-size: 22px;
+  color: #00d084;
+}
+
+.row-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row-label-group small {
+  font-size: 11px;
+  color: #718096;
+}
+
+.setting-info-block {
+  flex: 1;
+  padding-right: 12px;
+}
+
+.setting-info-block strong {
+  display: block;
+  font-size: 14px;
+  color: #121212;
+}
+
+.setting-info-block p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Responsive collapse for tablet/mobile */
+@media (max-width: 860px) {
+  .security-full-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bills-full-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   VERTICAL BILL TILE LAYOUT (ICON ON TOP)
+   ========================================== */
+
+.bill-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.bill-tile:hover {
+  border-color: #121212;
+  transform: translateY(-2px);
+}
+
+.bill-tile .bill-icon {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #121212;
+}
+
+.bill-tile h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  color: #121212;
+}
+
+.bill-tile p {
+  font-size: 11px;
+  color: #718096;
+  margin: 2px 0 0 0;
+}
+
+/* ==========================================
+   PAYMENT METHODS LIST & HIERARCHY FIX
+   ========================================== */
+
+.payment-methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  background: var(--white, #ffffff);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.method-item:hover {
+  border-color: #121212;
+}
+
+/* Default state highlighting */
+.method-item.default {
+  background: rgba(0, 208, 132, 0.03);
+  border-color: rgba(0, 208, 132, 0.4);
+}
+
+.method-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Rounded container for icons */
+.method-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--surface-gray, #f8f9fa);
+  color: #121212;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.method-item.default .method-icon-box {
+  background: #121212;
+  color: #00d084;
+}
+
+.method-icon-box .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Typographic Hierarchy */
+.method-details h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #121212;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.method-details p {
+  font-size: 12px;
+  color: #666666;
+  margin: 2px 0 0 0;
+  line-height: 1.3;
+}
+
+/* Badge Alignment */
+.default-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(0, 208, 132, 0.15);
+  color: #008f5a;
+  white-space: nowrap;
+}
+
+.van-funding-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.van-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.van-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.van-icon {
+  font-size: 24px;
+  color: #00d084;
+}
+
+.van-title-box h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.van-title-box p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.van-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  background: var(--surface-gray, #f8f9fa);
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+.van-item .label {
+  display: block;
+  font-size: 11px;
+  color: #718096;
+}
+
+.copy-num-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #00d084;
+  padding: 0;
+  display: flex;
+}
+
+.copy-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ==========================================
+   ANALYTICS & INSIGHTS TAB STYLES
+   ========================================== */
+
+#walletTabInsights,
+#walletTabInsights .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.analytics-timeframe-picker {
+  display: flex;
+  gap: 6px;
+}
+
+/* 1. KPI CARDS */
+.analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.kpi-card {
+  background: var(--surface-gray, #f8f9fa);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpi-header .label {
+  font-size: 12px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.kpi-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon.positive { background: rgba(0, 208, 132, 0.15); color: #00a86b; }
+.kpi-icon.negative { background: rgba(255, 107, 107, 0.15); color: #e53e3e; }
+.kpi-icon.accent { background: rgba(18, 18, 18, 0.1); color: #121212; }
+
+.kpi-value {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: #121212;
+  margin: 10px 0 6px 0;
+}
+
+.kpi-trend {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-trend.positive { color: #008f5a; }
+.kpi-trend.negative { color: #e53e3e; }
+.kpi-trend .material-symbols-outlined { font-size: 14px; }
+
+/* 2. PURE CSS BAR CHART */
+.analytics-chart-box {
+  background: var(--surface-gray, #f8f9fa);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.chart-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-box-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #666;
+}
+
+.chart-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot.inflow { background: #00d084; width: 8px; height: 8px; border-radius: 50%; }
+.legend-dot.outflow { background: #121212; width: 8px; height: 8px; border-radius: 50%; }
+
+.bar-chart-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 160px;
+  padding-top: 20px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 100%;
+}
+
+.bar {
+  width: 12px;
+  border-radius: 6px 6px 0 0;
+  transition: opacity 0.2s ease;
+}
+
+.bar.inflow { background: #00d084; }
+.bar.outflow { background: #121212; }
+
+.bar-group:hover .bar {
+  opacity: 0.85;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: #718096;
+  font-weight: 600;
+}
+
+.bar-group.active .bar-label {
+  color: #121212;
+  font-weight: 800;
+}
+
+/* 3. CHANNEL DISTRIBUTION */
+.service-analytics-section {
+  margin-top: 24px;
+}
+
+.service-analytics-section h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.channel-distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.channel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.channel-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.channel-icon.eats { background: #FF6B6B; }
+.channel-icon.bills { background: #FFD93D; color: #121212; }
+.channel-icon.ride { background: #4D96FF; }
+.channel-icon.market { background: #6BCB77; }
+
+.channel-info strong {
+  display: block;
+  font-size: 13px;
+  color: #121212;
+}
+
+.channel-info p {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: #718096;
+}
+
+.channel-amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #121212;
+}
+
+.analytics-footer-action {
+  margin-top: 24px;
+  text-align: center;
+}
+
+/* RESPONSIVE LAYOUT */
+@media (max-width: 860px) {
+  .analytics-kpi-grid,
+  .channel-distribution-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   RECIPIENTS TAB ENHANCEMENTS
+   ========================================== */
+
+#walletTabRecipients,
+#walletTabRecipients .kapita-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Toolbar Controls */
+.recipients-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.recipient-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.recipient-search-box input {
+  padding-left: 40px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.recipient-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #718096;
+}
+
+/* Quick-Send Avatar Rail */
+.quick-send-rail-container {
+  background: var(--surface-gray, #f8f9fa);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.rail-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #718096;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.quick-send-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.quick-send-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.rail-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #121212;
+  color: #00d084;
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+.rail-item:hover .rail-avatar {
+  transform: scale(1.05);
+}
+
+.add-new-rail {
+  background: rgba(0, 208, 132, 0.15);
+  color: #008f5a;
+  border: 2px dashed #00d084;
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #00d084;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+.rail-item span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #121212;
+}
+
+/* Recipient Cards Grid */
+.recipients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.recipient-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recipient-card:hover {
+  border-color: #121212;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.recipient-card.favorited {
+  border-color: rgba(0, 208, 132, 0.4);
+  background: rgba(0, 208, 132, 0.01);
+}
+
+.rec-card-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.network-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.network-badge.internal {
+  background: rgba(0, 208, 132, 0.15);
+  color: #008f5a;
+}
+
+.network-badge.bank {
+  background: var(--surface-gray, #f1f3f5);
+  color: #4a5568;
+}
+
+.network-badge .material-symbols-outlined {
+  font-size: 12px;
+}
+
+.fav-star-btn {
+  background: none;
+  border: none;
+  color: #cbd5e0;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+.fav-star-btn.active {
+  color: #ffc107;
+}
+
+.rec-avatar-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #121212;
+  color: #00d084;
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.rec-avatar-lg.bank-avatar {
+  background: #2d3748;
+  color: #ffffff;
+}
+
+.badge-dot.kapita-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #00d084;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+.recipient-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: #121212;
+}
+
+.recipient-card .handle {
+  font-size: 12px;
+  color: #666666;
+  margin: 2px 0 0 0;
+}
+
+.recipient-card .account-meta {
+  font-size: 11px;
+  color: #a0aec0;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.rec-card-actions {
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 640px) {
+  .recipients-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ==========================================
+   RECIPIENT CARD BUTTON SIZE FIX
+   ========================================== */
+
+/* Ensure card action container centers compact buttons */
+.rec-card-actions {
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* Adjust button width to fit content naturally */
+.rec-card-actions .btn-primary,
+.rec-card-actions .btn-secondary,
+.rec-card-actions .btn-sm {
+  width: auto !important;
+  min-width: 130px;
+  max-width: 180px;
+  padding: 8px 16px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Maintain full-width touch area for mobile if preferred, or keep compact */
+@media (max-width: 480px) {
+  .rec-card-actions .btn-primary,
+  .rec-card-actions .btn-secondary {
+    min-width: 110px;
+    padding: 8px 12px;
+  }
+}
+
+/* ==========================================
+   CARD CONTROLS BUTTON SPACING & RESPONSIVENESS
+   ========================================== */
+
+.card-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px; /* Adds consistent spacing horizontally & vertically when wrapped */
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* On mobile screens, stack or expand buttons cleanly with proper breathing space */
+@media (max-width: 576px) {
+  .card-controls-row {
+    flex-direction: column;
+    gap: 10px; /* Vertical spacing between stacked buttons */
+  }
+
+  .card-controls-row .btn-primary,
+  .card-controls-row .btn-secondary {
+    width: 100%; /* Stacks neatly full-width on mobile */
+    max-width: 280px; /* Prevents them from being too wide */
+  }
+}

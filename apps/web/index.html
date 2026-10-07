@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita | one app, one wallet, one identity.</title>
+
+  <!-- SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
+
+  <!-- Google Fonts Import -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="desktop-header">
+    <div class="logo-container">
+      <h1 class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span>
+      </h1>
+    </div>
+
+    <!-- Right Header: Location + Notification Hub + Profile -->
+    <div class="header-right">
+      
+      <!-- Notification Bell Widget -->
+      <div class="notif-wrapper">
+        <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" onclick="toggleNotifMenu(event)">
+          <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-7c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v7z"/></svg>
+          <span class="notif-badge">3</span>
+        </button>
+
+        <!-- Dropdown Notification Panel -->
+        <div class="notif-menu" id="notifMenu">
+          <div class="notif-header">
+            <span>Activity & Alerts</span>
+            <span class="mark-read">Mark all as read</span>
+          </div>
+          <div class="notif-list">
+            <div class="notif-item unread">
+              <div class="notif-icon-circle eats-icon">🍔</div>
+              <div class="notif-content">
+                <p class="notif-title"><strong>theKapita Eats</strong></p>
+                <p class="notif-body">Your order from Bukka Hut is on the way!</p>
+                <span class="notif-time">2 mins ago</span>
+              </div>
+            </div>
+            
+            <!-- Link to wallet.html on Pay Notification -->
+            <div class="notif-item unread" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
+              <div class="notif-icon-circle pay-icon">💳</div>
+              <div class="notif-content">
+                <p class="notif-title"><strong>theKapita Pay</strong></p>
+                <p class="notif-body">Transfer of ₦15,000 to Sarah was successful.</p>
+                <span class="notif-time">1 hour ago</span>
+              </div>
+            </div>
+
+            <div class="notif-item">
+              <div class="notif-icon-circle brain-icon">🤖</div>
+              <div class="notif-content">
+                <p class="notif-title"><strong>theKapita Brain AI</strong></p>
+                <p class="notif-body">Your requested legal summary is ready.</p>
+                <span class="notif-time">Yesterday</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Launcher Button (9-Dot Grid) -->
+      <div class="launcher-wrapper">
+        <div class="app-launcher-menu" id="launcherMenu">
+          <div class="menu-header">
+            <span>theKapita Apps</span>
+          </div>
+          <div class="launcher-grid">
+            <!-- Link to wallet.html on Launcher Pay Item -->
+            <div class="launcher-item" onclick="window.location.href='wallet.html'" style="cursor: pointer;"><div class="launcher-icon">💳</div><span>Pay</span></div>
+            <div class="launcher-item" onclick="openApp('Ride')"><div class="launcher-icon">🚗</div><span>Ride</span></div>
+            <div class="launcher-item" onclick="openApp('Eats')"><div class="launcher-icon">🍔</div><span>Eats</span></div>
+            <!-- Link to marketplace.html on Launcher Market Item -->
+            <div class="launcher-item" onclick="window.location.href='marketplace.html'" style="cursor: pointer;"><div class="launcher-icon">🛍️</div><span>Market</span></div>
+            <div class="launcher-item" onclick="openApp('Haven')"><div class="launcher-icon">🏠</div><span>Haven</span></div>
+            <div class="launcher-item" onclick="openApp('Care')"><div class="launcher-icon">🩺</div><span>Care</span></div>
+            <div class="launcher-item" onclick="openApp('Counsel')"><div class="launcher-icon">⚖️</div><span>Counsel</span></div>
+            <div class="launcher-item" onclick="openApp('Talent')"><div class="launcher-icon">💼</div><span>Talent</span></div>
+            <div class="launcher-item" onclick="openApp('Brain')"><div class="launcher-icon">🤖</div><span>Brain AI</span></div>
+            <div class="launcher-item" onclick="openApp('Stays')"><div class="launcher-icon">🏨</div><span>Stays</span></div>
+            <div class="launcher-item" onclick="openApp('Handy')"><div class="launcher-icon">🔧</div><span>Handy</span></div>
+            <div class="launcher-item" onclick="openApp('More')"><div class="launcher-icon dark-bg">+12</div><span>All Apps</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Avatar Shortcut -->
+      <div class="profile-avatar photo-avatar" title="Account Settings">
+        <a href="profile.html" aria-label="Account settings">
+          <svg class="avatar-img avatar-placeholder" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 21a8 8 0 0 1 16 0z"></path>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Portal Container -->
+  <main class="portal-container">
+    
+    <!-- Hero Brand Statement & Search -->
+    <section class="search-hero">
+      <div class="hero-brand">
+        <p class="hero-subtitle"><span>Good Morning,</span> What do you need today?</p>
+      </div>
+      
+      <div class="sleek-search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" placeholder="Search rides, pay bills, order food, or ask AI..." id="globalSearch">
+        <button class="ai-trigger-btn">Ask AI</button>
+      </div>
+
+      <!-- Quick Action Pills -->
+      <div class="quick-pills" id="quickPillsContainer">
+        <div class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" data-icon="💳" onclick="window.location.href='wallet.html'" style="cursor: pointer;">💳 Kapita Pay</div>
+        <div class="pill" draggable="true" data-id="Ride" data-title="Ride" data-desc="Transportation" data-icon="🚗">🚗 Book Ride</div>
+        <div class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔">🍔 Order Chow</div>
+        <div class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">🛍️ Marketplace</div>
+      </div>
+    </section>
+
+    <!-- Sleek Ecosystem App Grid Container -->
+    <section class="ecosystem-section">
+      <div class="grid-title">
+        <h3>Services & Ecosystem</h3>
+        <span class="count-tag">20+ Apps</span>
+      </div>
+
+      <div class="desktop-app-grid" id="mainGridContainer">
+        <div class="app-card" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" data-icon="🏠">
+          <div class="icon-circle">🏠</div>
+          <div class="app-info">
+            <h4>Haven</h4>
+            <p>Real Estate</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Care" data-title="Care" data-desc="Healthcare" data-icon="🩺">
+          <div class="icon-circle">🩺</div>
+          <div class="app-info">
+            <h4>Care</h4>
+            <p>Healthcare</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Counsel" data-title="Counsel" data-desc="Legal Directory" data-icon="⚖️">
+          <div class="icon-circle">⚖️</div>
+          <div class="app-info">
+            <h4>Counsel</h4>
+            <p>Legal Directory</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Talent" data-title="Talent" data-desc="Jobs & Hiring" data-icon="💼">
+          <div class="icon-circle">💼</div>
+          <div class="app-info">
+            <h4>Talent</h4>
+            <p>Jobs & Hiring</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Brain" data-title="Brain AI" data-desc="AI Assistant" data-icon="🤖">
+          <div class="icon-circle">🤖</div>
+          <div class="app-info">
+            <h4>Brain AI</h4>
+            <p>AI Assistant</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Stays" data-title="Stays" data-desc="Hospitality" data-icon="🏨">
+          <div class="icon-circle">🏨</div>
+          <div class="app-info">
+            <h4>Stays</h4>
+            <p>Hospitality</p>
+          </div>
+        </div>
+
+        <div class="app-card" draggable="true" data-id="Handy" data-title="Handy" data-desc="Skilled Artisans" data-icon="🔧">
+          <div class="icon-circle">🔧</div>
+          <div class="app-info">
+            <h4>Handy</h4>
+            <p>Skilled Artisans</p>
+          </div>
+        </div>
+
+        <!-- Fixed non-draggable view all card -->
+        <div class="app-card view-all" onclick="openApp('More')">
+          <div class="icon-circle dark-circle">+12</div>
+          <div class="app-info">
+            <h4>All Apps</h4>
+            <p>View More</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="src/pages/app.js"></script>
+</body>
+</html>

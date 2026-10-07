@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/web/Dockerfile"
+watchPatterns = ["apps/web/**", "packages/shared/**", "package.json", "package-lock.json"]
+
+[deploy]
+healthcheckPath = "/"
+restartPolicyType = "ON_FAILURE"
