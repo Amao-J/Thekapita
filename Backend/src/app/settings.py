@@ -85,6 +85,11 @@ CORS_ALLOWED_ORIGINS += [
      "http://localhost",
      "https://localhost",
  ]
+CORS_ALLOWED_ORIGINS += [
+    origin.strip()
+    for origin in os.environ.get("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 CORS_ALLOW_CREDENTIALS = False  # bearer-token auth, not cookies — keep this False
 CORS_ALLOW_HEADERS = [
