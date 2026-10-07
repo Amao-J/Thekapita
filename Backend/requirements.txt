@@ -7,3 +7,4 @@ pydantic[email]
 gunicorn
 whitenoise
 psycopg[binary,pool]
+dj-database-url
