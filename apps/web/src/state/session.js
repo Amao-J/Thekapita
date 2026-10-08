@@ -80,6 +80,16 @@ export async function hydrateProfile() {
   return user;
 }
 
+export async function updateProfile(profile) {
+  const user = await authorizedRequest(ENDPOINTS.profile.me, {
+    method: 'PATCH',
+    body: profile,
+  });
+  state = { ...state, user };
+  persist();
+  return user;
+}
+
 export function logout() {
   state = emptyState();
   persist();

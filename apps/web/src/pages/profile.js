@@ -2,7 +2,7 @@
    PROFILE CONTROLLER & TAB SWITCHING
    ========================================== */
 import { refreshBalance, getBalanceDisplay } from '../state/ledger.js';
-import { isAuthenticated, getCurrentUser, hydrateProfile } from '../state/session.js';
+import { isAuthenticated, hydrateProfile, updateProfile } from '../state/session.js';
 
 if (!isAuthenticated()) {
   window.location.href = 'auth.html';
@@ -22,11 +22,13 @@ async function hydrateBalance() {
 
 async function hydrateIdentity() {
   try {
-    const user = getCurrentUser() ?? (await hydrateProfile());
+    const user = await hydrateProfile();
     const nameEl = document.querySelector('[data-profile-field="fullName"]');
     if (nameEl && user?.full_name) nameEl.textContent = user.full_name;
     const idEl = document.querySelector('[data-profile-field="kapitaId"]');
     if (idEl && user?.kapita_id) idEl.textContent = user.kapita_id;
+    const bioEl = document.querySelector('.bio-text');
+    if (bioEl) bioEl.textContent = user?.bio || '';
   } catch (err) {
     console.error('Could not load profile:', err);
   }
@@ -104,7 +106,7 @@ let currentEditSection = '';
 // breaks out of the attribute and injects markup. Build the field with real
 // DOM APIs instead, so the value always lands in the `value` property, not
 // in parsed HTML.
-function buildEditField(container, { id, label, type = 'text', value = '' }) {
+function buildEditField(container, { id, label, type = 'text', value = '', required = true }) {
   const group = document.createElement('div');
   group.className = 'form-group';
   const labelEl = document.createElement('label');
@@ -115,7 +117,7 @@ function buildEditField(container, { id, label, type = 'text', value = '' }) {
   input.id = id;
   input.value = value;
   input.className = 'form-control';
-  input.required = true;
+  input.required = required;
   group.append(labelEl, input);
   container.appendChild(group);
 }
@@ -136,7 +138,7 @@ function openEditModal(section) {
 
     container.innerHTML = '';
     buildEditField(container, { id: 'input1', label: 'Full Name', value: currentName });
-    buildEditField(container, { id: 'input2', label: 'Bio / Tagline', value: currentBio });
+    buildEditField(container, { id: 'input2', label: 'Bio / Tagline', value: currentBio, required: false });
   }
   
   // 2. EATS PROFILE
@@ -199,7 +201,7 @@ function closeEditModal(event) {
   if (modal) modal.classList.remove('active');
 }
 
-function saveProfileChanges(event) {
+async function saveProfileChanges(event) {
   event.preventDefault();
 
   const val1 = document.getElementById('input1')?.value;
@@ -207,8 +209,19 @@ function saveProfileChanges(event) {
   const val3 = document.getElementById('input3')?.value;
 
   if (currentEditSection === 'main') {
-    if (val1) document.querySelector('.name-line h2').textContent = val1;
-    if (val2) document.querySelector('.bio-text').textContent = val2;
+    const submitButton = event.currentTarget.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const user = await updateProfile({ full_name: val1.trim(), bio: val2.trim() });
+      document.querySelector('[data-profile-field="fullName"]').textContent = user.full_name;
+      document.querySelector('.bio-text').textContent = user.bio;
+      closeEditModal();
+    } catch (err) {
+      alert(err.message || 'Could not save your profile. Please try again.');
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+    return;
   }
   else if (currentEditSection === 'eats') {
     const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(1) .detail-row strong');
