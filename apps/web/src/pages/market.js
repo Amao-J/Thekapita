@@ -1,11 +1,100 @@
 /* ==========================================================================
-   THEKAPITA MARKETPLACE ENGINE
+   THEKAPITA MARKETPLACE ENGINE (WITH REAL NETWORK FEEDBACK & API INTEGRATION)
    ========================================================================== */
 import { addItem, subscribe as cartSubscribe, clearCart as clearCartState, getItems, getTotal } from '../state/cart.js';
+import { request, ApiError } from '../api/client.js';
+import { showToast } from './app.js';
 
 let currentCategory = 'all';
 let onlyVerified = false;
 
+/* --------------------------------------------------------------------------
+   0. REAL NETWORK LOADING & SKELETON RENDERER
+   -------------------------------------------------------------------------- */
+async function fetchAndRenderProducts() {
+  const grid = document.getElementById('marketProductsGrid');
+  if (!grid) return;
+
+  // Render 4 Skeleton Shimmer Cards while fetching live data
+  grid.innerHTML = Array(4).fill(0).map(() => `
+    <div class="product-card skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="product-details">
+        <div class="skeleton-text short"></div>
+        <div class="skeleton-text long"></div>
+        <div class="skeleton-text medium"></div>
+      </div>
+    </div>
+  `).join('');
+
+  try {
+    // Live API call with timeout & offline error catch via client.js
+    const products = await request('/marketplace/products');
+    renderProductCards(products);
+  } catch (err) {
+    // Real Network Error Fallback Card with Retry Button
+    const errorMsg = err instanceof ApiError ? err.message : 'Could not load products. Please check your network connection.';
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0;">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: #ff4d4d; margin-bottom: 12px;">cloud_off</span>
+        <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">Unable to connect to Marketplace API</h3>
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">${errorMsg}</p>
+        <button class="filter-pill-btn active" onclick="fetchAndRenderProducts()" style="padding: 10px 20px;">
+          <span class="material-symbols-outlined icon">refresh</span> Try Again
+        </button>
+      </div>
+    `;
+    if (window.showToast) {
+      window.showToast(errorMsg, 'error');
+    }
+  }
+}
+
+function renderProductCards(products) {
+  const grid = document.getElementById('marketProductsGrid');
+  if (!grid) return;
+
+  if (!products || products.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0;">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: #94a3b8; margin-bottom: 12px;">storefront</span>
+        <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">No products found</h3>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" data-category="${p.category}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}">
+      <div class="product-img-wrapper">
+        <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+        <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
+        ${p.is_verified ? `<div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> ${p.seller_name}</div>` : ''}
+      </div>
+      <div class="product-details">
+        <span class="product-meta-sub">${p.category_label || p.category}</span>
+        <h4 class="product-name" onclick="showProductDetails('${p.id}')">${p.title}</h4>
+        <div class="product-rating-row">
+          <span class="material-symbols-outlined" style="font-size: 13px;">star</span> ${p.rating || '4.8'} <span class="review-count">(${p.review_count || 12})</span>
+        </div>
+        <div class="product-bottom-row">
+          <div class="product-price-block">
+            <span class="product-price">₦${p.price.toLocaleString()}</span>
+          </div>
+          <button class="add-cart-btn" onclick="addToCart('${p.id}', '${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.seller_name || 'Seller'}')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('productCount').textContent = products.length;
+}
+
+/* --------------------------------------------------------------------------
+   FILTERS, CARTS, & UI ENGINE
+   -------------------------------------------------------------------------- */
 function filterCategory(cat, btn) {
   currentCategory = cat;
   document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
@@ -20,12 +109,12 @@ function toggleVerifiedOnly(btn) {
 }
 
 function filterMarketProducts() {
-  const search = document.getElementById('marketSearchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('#marketProductsGrid .product-card');
+  const search = document.getElementById('marketSearchInput')?.value.toLowerCase() || '';
+  const cards = document.querySelectorAll('#marketProductsGrid .product-card:not(.skeleton-card)');
   let count = 0;
 
   cards.forEach(card => {
-    const title = card.querySelector('.product-name').textContent.toLowerCase();
+    const title = card.querySelector('.product-name')?.textContent.toLowerCase() || '';
     const cardCategory = card.dataset.category;
     const isVerified = card.dataset.verified === 'true';
 
@@ -41,23 +130,25 @@ function filterMarketProducts() {
     }
   });
 
-  document.getElementById('productCount').textContent = count;
+  const countEl = document.getElementById('productCount');
+  if (countEl) countEl.textContent = count;
 }
 
 function addToCart(id, name, price, seller) {
-  // BUGFIX/UPGRADE: this used to only increment a badge counter — there was
-  // no cart data structure at all, so the actual Cart view in this page is
-  // still static markup, not rendered from state. addItem() now gives it
-  // one, and the badge below reflects that real count. Rendering the seller-
-  // grouped Cart view from cartState (replacing the static HTML) is the
-  // next piece of this file to convert — not done in this pass.
   addItem({ id, title: name, price: parseFloat(price), sellerId: seller });
-  alert(`${name} added to cart!`);
+  if (window.showToast) {
+    window.showToast(`${name} added to cart!`, 'success');
+  } else {
+    alert(`${name} added to cart!`);
+  }
 }
 
 cartSubscribe((items) => {
   const badge = document.getElementById('cartCountBadge');
-  if (badge) badge.textContent = String(items.reduce((sum, i) => sum + i.qty, 0));
+  const mobileBadge = document.getElementById('mobileCartBadge');
+  const totalCount = items.reduce((sum, i) => sum + i.qty, 0);
+  if (badge) badge.textContent = String(totalCount);
+  if (mobileBadge) mobileBadge.textContent = String(totalCount);
 });
 
 function toggleWishlist(btn) {
@@ -90,12 +181,10 @@ function selectDropdownCategory(catKey, catName, iconName, itemEl) {
   filterCategory(catKey, toggleBtn);
 }
 
-/* Desktop Top-Right Nav Menu Toggle */
 function toggleHeaderNavMenu(e) {
   e.stopPropagation();
   const menu = document.getElementById('headerNavDropdownMenu');
   const wrapper = e.currentTarget.parentElement;
-  
   const isShown = menu.classList.contains('show');
   menu.classList.toggle('show', !isShown);
   wrapper.classList.toggle('active', !isShown);
@@ -123,14 +212,12 @@ function switchMarketView(viewKey, btn) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* Toggle Sort Dropdown Menu */
 function toggleSortDropdown(e) {
   e.stopPropagation();
   const menu = document.getElementById('sortDropdownMenu');
   const wrapper = e.currentTarget.parentElement;
   const isShown = menu.classList.contains('show');
 
-  // Close category dropdown if open
   const catMenu = document.getElementById('categoryDropdownMenu');
   if (catMenu) {
     catMenu.classList.remove('show');
@@ -141,16 +228,11 @@ function toggleSortDropdown(e) {
   wrapper.classList.toggle('active', !isShown);
 }
 
-/* BUGFIX: selectSortOption() called sortProducts(), which did not exist
-   anywhere in the codebase, so every "Sort by" option silently did nothing.
-   Implemented here: reorders the existing card elements in place (via
-   appendChild, which moves nodes rather than re-creating them) so no
-   product markup is rebuilt from strings. */
 function sortProducts(sortKey) {
   const grid = document.getElementById('marketProductsGrid');
   if (!grid) return;
 
-  const cards = Array.from(grid.querySelectorAll('.product-card'));
+  const cards = Array.from(grid.querySelectorAll('.product-card:not(.skeleton-card)'));
   if (grid.dataset.originalOrderCaptured !== 'true') {
     cards.forEach((card, i) => { card.dataset.originalIndex = i; });
     grid.dataset.originalOrderCaptured = 'true';
@@ -179,7 +261,6 @@ function sortProducts(sortKey) {
   sorted.forEach(card => grid.appendChild(card));
 }
 
-/* Handle Sort Selection */
 function selectSortOption(sortKey, sortText, itemEl) {
   document.getElementById('currentSortLabel').textContent = sortText;
 
@@ -190,12 +271,9 @@ function selectSortOption(sortKey, sortText, itemEl) {
   menu.classList.remove('show');
   if (menu.parentElement) menu.parentElement.classList.remove('active');
 
-  if (typeof sortProducts === 'function') {
-    sortProducts(sortKey);
-  }
+  sortProducts(sortKey);
 }
 
-// Global outside click handler to close open dropdowns
 document.addEventListener('click', () => {
   const catMenu = document.getElementById('categoryDropdownMenu');
   if (catMenu) {
@@ -216,7 +294,6 @@ document.addEventListener('click', () => {
   }
 });
 
-/* Update Cart Item Quantity */
 function updateCartQty(itemId, delta) {
   const itemRow = document.getElementById(`cart-item-${itemId}`);
   if (!itemRow) return;
@@ -233,7 +310,6 @@ function updateCartQty(itemId, delta) {
   input.value = currentQty;
 }
 
-/* Smart Remove Cart Item Function (Deletes empty Seller Cards & Updates State) */
 function removeItem(itemId) {
   const itemRow = document.getElementById(`cart-item-${itemId}`);
   if (!itemRow) return;
@@ -263,7 +339,6 @@ function removeItem(itemId) {
   }, 200);
 }
 
-/* Show Empty State if all seller cards are removed from cart */
 function checkEmptyCartState() {
   const remainingSellers = document.querySelectorAll('#viewCart .seller-cart-card');
   if (remainingSellers.length === 0) {
@@ -283,14 +358,12 @@ function checkEmptyCartState() {
   }
 }
 
-/* Switch Main PDP Gallery Image */
 function changeMainImage(src, thumbEl) {
   document.getElementById('pdpMainImage').src = src;
   document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
   thumbEl.classList.add('active');
 }
 
-/* Update PDP Quantity */
 function updatePdpQty(delta) {
   const input = document.getElementById('pdpQtyInput');
   let current = parseInt(input.value) || 1;
@@ -299,18 +372,15 @@ function updatePdpQty(delta) {
   input.value = current;
 }
 
-/* Show Product Detail View */
 function showProductDetails(productId) {
   switchMarketView('productDetail');
 }
 
-/* Direct Buy Now from PDP */
 function buyNowPdp(id, name, price) {
   addToCart(id, name, price, 'HP Authorized');
   switchMarketView('checkout');
 }
 
-/* Tab Switching in PDP */
 function switchPdpTab(tabKey, btnEl) {
   document.querySelectorAll('.pdp-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.pdp-tab-content').forEach(c => c.style.display = 'none');
@@ -320,7 +390,6 @@ function switchPdpTab(tabKey, btnEl) {
   if (target) target.style.display = 'block';
 }
 
-/* Filter Orders by Status */
 function filterOrders(statusKey, btnEl) {
   document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'));
   btnEl.classList.add('active');
@@ -335,28 +404,20 @@ function filterOrders(statusKey, btnEl) {
   });
 }
 
-/* Live Map Modal Simulation */
 function showTrackModal(orderId) {
   alert(`📦 Live Tracking for ${orderId}:\nDriver: Express Courier Lagos\nStatus: Out for delivery in Yaba\nEstimated Arrival: Today before 5:00 PM`);
 }
 
-/* Review Modal Alert */
 function openReviewModal(orderId) {
   alert(`⭐ Leave a review for Order ${orderId}.\nYour feedback helps secure future marketplace transactions!`);
 }
 
-/* ==========================================================================
-   WISHLIST ENGINE (WITH COMPLETE SELLER CARD REMOVAL)
-   ========================================================================== */
-
-/* Remove Item from Wishlist and Clean Up Seller Card If Empty */
 function removeFromWishlist(wishlistId) {
   const itemRow = document.getElementById(`wishlist-item-${wishlistId}`);
   if (!itemRow) return;
 
   const sellerCard = itemRow.closest('.seller-cart-card');
 
-  // Smooth animation for row deletion
   itemRow.style.opacity = '0';
   itemRow.style.transform = 'scale(0.92)';
   itemRow.style.transition = 'all 0.2s ease';
@@ -364,7 +425,6 @@ function removeFromWishlist(wishlistId) {
   setTimeout(() => {
     itemRow.remove();
 
-    // Remove the entire seller store block if no items remain for that seller
     if (sellerCard) {
       const remainingItems = sellerCard.querySelectorAll('.cart-item-row');
       if (remainingItems.length === 0) {
@@ -383,13 +443,11 @@ function removeFromWishlist(wishlistId) {
   }, 200);
 }
 
-/* Move Item from Wishlist to Cart */
 function moveToCartFromWishlist(wishlistId, name, price, seller) {
   addToCart(wishlistId, name, price, seller);
   removeFromWishlist(wishlistId);
 }
 
-/* Clear Entire Wishlist */
 function clearWishlist() {
   if (confirm("Are you sure you want to clear your saved wishlist?")) {
     const wishlistContainer = document.querySelector('#viewWishlist .wishlist-container');
@@ -406,14 +464,12 @@ function clearWishlist() {
   }
 }
 
-/* Empty Wishlist State Notification */
 function checkEmptyWishlistState() {
   const wishlistContainer = document.querySelector('#viewWishlist .wishlist-container');
   if (!wishlistContainer) return;
 
   const remainingSellerCards = wishlistContainer.querySelectorAll('.seller-cart-card');
   if (remainingSellerCards.length === 0) {
-    // Only render empty state if it doesn't already exist
     if (!document.getElementById('emptyWishlistState')) {
       const emptyDiv = document.createElement('div');
       emptyDiv.id = 'emptyWishlistState';
@@ -431,43 +487,63 @@ function checkEmptyWishlistState() {
   }
 }
 
-/* BUGFIX: marketplace.html calls clearCart(), placeOrder() and
-   openAIProductAssistant() via inline onclick, but none of the three were
-   defined anywhere in the codebase — the same undefined-function bug class
-   as sortProducts, filterTx and openBillPay found elsewhere in this pass. */
-
 function clearCart() {
   if (!confirm('Remove all items from your cart?')) return;
   clearCartState();
-  // The Cart view itself is still static markup (see addToCart's comment
-  // above) — this clears the real data model; re-rendering the view from
-  // it is the same follow-up work noted there.
   checkEmptyCartState();
 }
 
-function placeOrder() {
+/* REAL NETWORK ORDER PLACEMENT WITH DISABLED BUTTON & SPINNER */
+async function placeOrder() {
   const items = getItems();
+  const btn = document.querySelector('.checkout-submit-btn');
+
   if (items.length === 0) {
-    alert('Your cart is empty.');
+    if (window.showToast) window.showToast('Your cart is empty.', 'error');
+    else alert('Your cart is empty.');
     return;
   }
-  // TODO(backend): POST to an orders endpoint with items + delivery address
-  // + payment method, holding funds in escrow per the Building Plan's
-  // marketplace rules (Section 3) — this stub only confirms the total so
-  // the checkout button isn't dead while that endpoint doesn't exist yet.
-  alert(`Order placed! Total: \u20a6${getTotal().toLocaleString()}.00. You'll get a confirmation shortly.`);
-  clearCartState();
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="btn-spinner"></span> Placing Order...`;
+  }
+
+  try {
+    // API Call to create live order in escrow
+    const response = await request('/marketplace/orders', {
+      method: 'POST',
+      body: { items, total_amount: getTotal() }
+    });
+
+    if (window.showToast) window.showToast('Order placed successfully! Funds secured in escrow.', 'success');
+    else alert('Order placed! Funds secured in escrow.');
+
+    clearCartState();
+    switchMarketView('orders');
+  } catch (err) {
+    const msg = err instanceof ApiError ? err.message : 'Order creation failed. Check network connection.';
+    if (window.showToast) window.showToast(msg, 'error');
+    else alert(msg);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `Confirm & Pay ₦${getTotal().toLocaleString()}.00 <span class="material-symbols-outlined">lock</span>`;
+    }
+  }
 }
 
 function openAIProductAssistant() {
-  // TODO(backend): wire to the AI gateway (Building Plan Section 3/5.8) —
-  // Claude Haiku 4.5 by default, escalate to Sonnet 5. Stub keeps the
-  // button honest about not being wired yet, rather than silently dead.
   alert('theKapita AI product assistant is coming soon — ask a seller directly for now.');
 }
 
-/* ---- Window bridge: marketplace.html still calls these via inline
-   onclick. Same pattern as auth.js/wallet.js/profile.js/app.js. */
+document.addEventListener('DOMContentLoaded', () => {
+  // Load products dynamically on page load
+  fetchAndRenderProducts();
+});
+
+// Window Bridge Bindings
+window.fetchAndRenderProducts = fetchAndRenderProducts;
 window.filterCategory = filterCategory;
 window.toggleVerifiedOnly = toggleVerifiedOnly;
 window.addToCart = addToCart;

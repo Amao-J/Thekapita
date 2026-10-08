@@ -2,6 +2,12 @@
    AUTHENTICATION PORTAL STYLES
    ========================================== */
 
+/* Focus Ring Customization */
+:focus-visible {
+  outline: 2px solid #00d084;
+  outline-offset: 2px;
+}
+
 .auth-body {
   background-color: var(--surface-gray, #f8f9fa);
   min-height: 100vh;
@@ -20,14 +26,30 @@
 }
 
 .auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.logo-link {
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 8px;
+}
+
+.auth-header .brand-title {
+  margin: 0;
   text-align: center;
 }
 
 .auth-subtitle {
   font-size: 13px;
-  color: #666;
+  color: #475569;
   margin-top: 6px;
-  font-weight: 500;
+  font-weight: 600;
+  text-align: center;
 }
 
 .auth-card {
@@ -35,13 +57,13 @@
   border-radius: 28px;
   padding: 32px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--border-color, #e5e7eb);
+  border: 1px solid var(--border-color, #cbd5e1);
 }
 
 /* Tabs */
 .auth-tabs {
   display: flex;
-  background: var(--surface-gray, #f1f3f5);
+  background: var(--surface-gray, #f1f5f9);
   padding: 4px;
   border-radius: 16px;
   margin-bottom: 24px;
@@ -55,7 +77,7 @@
   font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
   font-weight: 700;
   font-size: 14px;
-  color: #666;
+  color: #475569;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -67,15 +89,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Form Visibility */
+/* Form Visibility & Errors */
 .auth-error {
-  background: #fef2f2;
+  background: #fff5f5;
   color: #dc2626;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 12px 14px;
   font-size: 13px;
-  margin-bottom: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: left;
 }
 
 .auth-form {
@@ -94,101 +118,20 @@
   align-items: center;
 }
 
-.forgot-link, .inline-link {
+.forgot-link, 
+.inline-link {
   font-size: 12px;
-  color: var(--black, #121212);
+  color: #0f172a;
   text-decoration: underline;
-  font-weight: 600;
-}
-
-/* Inputs & Eye Toggle */
-.password-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-input-wrapper .form-control {
-  padding-right: 44px;
-}
-
-.eye-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.6;
-}
-
-.form-options {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  color: #555;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.btn-auth {
-  margin-top: 8px;
-  padding: 14px;
-  font-size: 15px;
-}
-
-/* Social Buttons */
-.auth-divider {
-  text-align: center;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  line-height: 0.1em;
-  margin: 24px 0 20px;
-}
-
-.auth-divider span {
-  background: #fff;
-  padding: 0 12px;
-  font-size: 11px;
   font-weight: 700;
-  color: #888;
-  letter-spacing: 0.5px;
 }
 
-.social-auth-grid {
-  display: flex;
-  gap: 12px;
+.forgot-link:hover,
+.inline-link:hover {
+  color: #008f5a;
 }
 
-.social-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 14px;
-  background: #fff;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.social-btn:hover {
-  background: var(--surface-gray, #f8f9fa);
-}
-
-/* ==========================================
-   INPUT & FORM CONTROL STYLES
-   ========================================== */
-
+/* Inputs & Form Groups */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -206,7 +149,7 @@
 .form-control {
   width: 100%;
   padding: 12px 16px;
-  border: 1.5px solid var(--border-color, #e5e7eb);
+  border: 1.5px solid var(--border-color, #cbd5e1);
   border-radius: 14px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 14px;
@@ -218,15 +161,14 @@
 }
 
 .form-control::placeholder {
-  color: #a0aec0;
+  color: #64748b;
 }
 
 .form-control:focus {
   border-color: var(--black, #121212);
-  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.05);
+  box-shadow: 0 0 0 3px rgba(18, 18, 18, 0.08);
 }
 
-/* Ensure password wrapper spans full width */
 .password-input-wrapper {
   position: relative;
   width: 100%;
@@ -244,30 +186,46 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  padding: 0;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
+  color: #475569;
+  transition: color 0.15s ease;
+  border-radius: 6px;
 }
 
 .eye-btn:hover {
-  opacity: 1;
+  color: var(--black, #121212);
 }
 
-/* ==========================================
-   AUTHENTICATION SUBMIT BUTTON STYLES
-   ========================================== */
+.form-options {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #334155;
+}
 
-/* Utility helper for full width layout */
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  accent-color: #00d084;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Auth Submit Button (WCAG Compliant High Contrast) */
 .w-full {
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Primary Auth Button */
 .btn-primary.btn-auth {
   display: flex;
   align-items: center;
@@ -275,7 +233,7 @@
   width: 100%;
   padding: 14px 20px;
   margin-top: 10px;
-  background-color: #00d084;
+  background-color: var(--black, #121212);
   color: var(--white, #ffffff);
   border: none;
   border-radius: 16px;
@@ -287,11 +245,10 @@
   transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Hover and Active State Interactions */
 .btn-primary.btn-auth:hover {
-  background-color: #242424;
+  background-color: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary.btn-auth:active {
@@ -301,55 +258,72 @@
 
 .btn-primary.btn-auth:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px #00d084; /* Electric Emerald focus accent */
+  box-shadow: 0 0 0 3px #00d084;
 }
 
-/* ==========================================
-   CENTERED AUTH HEADER STYLES
-   ========================================== */
-
-.auth-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Social Buttons & Divider */
+.auth-divider {
   text-align: center;
-  width: 100%;
+  border-bottom: 1px solid var(--border-color, #cbd5e1);
+  line-height: 0.1em;
+  margin: 24px 0 20px;
 }
 
-.auth-header .logo-container {
+.auth-divider span {
+  background: #ffffff;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.5px;
+}
+
+.social-auth-grid {
   display: flex;
+  gap: 12px;
+}
+
+.social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-}
-
-.auth-header .brand-title {
-  margin: 0;
-  text-align: center;
-}
-
-.auth-subtitle {
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 14px;
+  background: #ffffff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-weight: 600;
   font-size: 13px;
-  color: #666;
-  margin-top: 6px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.eye-btn {
-  position: absolute;
-  right: 14px;
-  background: none;
-  border: none;
+  color: #0f172a;
   cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.eye-btn:hover {
-  color: var(--black, #121212);
+.social-btn:hover {
+  background: var(--surface-gray, #f8f9fa);
+  border-color: var(--black, #121212);
+}
+
+/* Button Loading Spinner */
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

@@ -1,6 +1,45 @@
 /* ==========================================================================
-   THEKAPITA SELLER CENTER STYLESHEET
+   THEKAPITA SELLER CENTER STYLESHEET (ACCESSIBLE MASTER EDITION)
    ========================================================================== */
+
+/* Accessibility Utility Overrides */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 12px;
+  background: #0f172a;
+  color: #00d084;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  z-index: 100000;
+  transition: top 0.2s ease;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+  outline: 2px solid #00d084;
+}
+
+/* Global Focus Outline (WCAG 2.4.7) */
+:focus-visible {
+  outline: 2px solid #00d084 !important;
+  outline-offset: 2px !important;
+}
 
 .seller-body {
   background: #f8fafc;
@@ -12,7 +51,7 @@
   align-items: center;
   gap: 6px;
   background: #ecfdf5;
-  color: #059669;
+  color: #008f5a;
   font-size: 12px;
   font-weight: 700;
   padding: 6px 12px;
@@ -34,7 +73,7 @@
 /* Sidebar Navigation (Desktop) */
 .seller-sidebar {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 20px;
   padding: 20px;
   height: fit-content;
@@ -66,7 +105,7 @@
   flex-shrink: 0;
 }
 
-.seller-details h4 {
+.seller-name-heading {
   font-size: 13px;
   font-weight: 800;
   color: #0f172a;
@@ -75,7 +114,7 @@
 
 .seller-location {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -99,7 +138,7 @@
   border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
-  color: #64748b;
+  color: #334155;
   cursor: pointer;
   width: 100%;
   text-align: left;
@@ -120,7 +159,7 @@
 
 .nav-count-badge {
   margin-left: auto;
-  background: #ef4444;
+  background: #b91c1c;
   color: #ffffff;
   font-size: 10px;
   font-weight: 800;
@@ -134,7 +173,7 @@
   justify-content: space-around;
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 16px;
   padding: 8px;
   margin-bottom: 20px;
@@ -151,7 +190,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #334155;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -166,8 +205,7 @@
 }
 
 .seller-mobile-icon-btn.active {
-  /*background: #0f172a;*/
-  color: #00d084;
+  color: #008f5a;
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
 }
 
@@ -175,7 +213,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: #ef4444;
+  background: #b91c1c;
   color: #ffffff;
   font-size: 9px;
   font-weight: 800;
@@ -211,7 +249,7 @@
 
 .metric-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -232,16 +270,16 @@
 .metric-label {
   font-size: 12px;
   font-weight: 700;
-  color: #64748b;
+  color: #334155;
 }
 
 .metric-icon {
   font-size: 20px;
 }
 
-.metric-icon.emerald { color: #059669; }
-.metric-icon.amber { color: #d97706; }
-.metric-icon.blue { color: #2563eb; }
+.metric-icon.emerald { color: #008f5a; }
+.metric-icon.amber { color: #b45309; }
+.metric-icon.blue { color: #1d4ed8; }
 
 .metric-value {
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -252,7 +290,7 @@
 
 .metric-sub-note {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
   margin-top: 6px;
 }
 
@@ -264,7 +302,7 @@
 /* Section Cards & Headings */
 .seller-section-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -291,7 +329,7 @@
 
 .section-subtitle {
   font-size: 12px;
-  color: #64748b;
+  color: #334155;
   margin: 0;
 }
 
@@ -311,13 +349,25 @@
   white-space: nowrap;
 }
 
+.seller-data-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .seller-data-table th {
   text-align: left;
   padding: 12px 14px;
   background: #f8fafc;
-  color: #64748b;
+  color: #0f172a;
   font-weight: 700;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
 }
 
 .seller-data-table td {
@@ -350,12 +400,12 @@
 
 .product-sub-text {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
 }
 
 .category-badge {
   background: #f1f5f9;
-  color: #475569;
+  color: #0f172a;
   font-size: 10px;
   font-weight: 700;
   padding: 3px 8px;
@@ -376,9 +426,9 @@
 
 .icon-small { font-size: 13px; }
 
-.status-transit { background: #eff6ff; color: #2563eb; }
-.status-cleared { background: #ecfdf5; color: #059669; }
-.status-active { background: #f0fdf4; color: #16a34a; }
+.status-transit { background: #eff6ff; color: #1d4ed8; }
+.status-cleared { background: #ecfdf5; color: #008f5a; }
+.status-active { background: #f0fdf4; color: #15803d; }
 
 /* Standard Button System */
 .seller-btn {
@@ -415,12 +465,12 @@
 
 .seller-btn-outline:hover {
   border-color: #00d084;
-  color: #059669;
+  color: #008f5a;
 }
 
 .seller-btn-secondary {
   background: #f1f5f9;
-  color: #64748b;
+  color: #334155;
   cursor: default;
 }
 
@@ -443,7 +493,7 @@
 .icon-action-btn {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
-  color: #64748b;
+  color: #334155;
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -460,15 +510,15 @@
 }
 
 .icon-action-btn.danger:hover {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #b91c1c;
+  color: #b91c1c;
   background: #fef2f2;
 }
 
 /* Order Cards in Orders Tab */
 .seller-order-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 16px;
   overflow: hidden;
   margin-top: 16px;
@@ -487,7 +537,7 @@
 
 .order-sub-info {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
   margin: 2px 0 0 0;
 }
 
@@ -503,7 +553,7 @@
 
 .item-specs-text {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
   margin: 2px 0 0 0;
 }
 
@@ -527,7 +577,7 @@
 .dispatch-note {
   font-size: 11px;
   font-weight: 700;
-  color: #059669;
+  color: #008f5a;
 }
 
 /* Bank Box */
@@ -536,7 +586,7 @@
   align-items: center;
   gap: 14px;
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
   padding: 16px;
   margin-top: 12px;
@@ -544,12 +594,12 @@
 
 .bank-icon {
   font-size: 28px;
-  color: #059669;
+  color: #008f5a;
 }
 
 .bank-account-box p {
   font-size: 11px;
-  color: #64748b;
+  color: #334155;
   margin: 2px 0 0 0;
 }
 
@@ -577,7 +627,7 @@
 .form-label {
   font-size: 12px;
   font-weight: 700;
-  color: #475569;
+  color: #0f172a;
 }
 
 .seller-input {
@@ -673,27 +723,7 @@
   .form-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 868px) {
-  .seller-layout-wrapper {
-    grid-template-columns: 1fr;
-    padding: 0 16px;
-  }
-
-  .seller-sidebar {
-    display: none;
-  }
-
-  .seller-mobile-nav {
-    display: flex;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* 1. Mobile Vertical Alignment for Orders & Escrow Card Body */
   .order-item-detail-row {
     flex-direction: column;
     align-items: flex-start;
@@ -704,7 +734,6 @@
     margin-left: 0;
   }
 
-  /* 2. Mobile Vertical Alignment for Order Card Footer */
   .seller-order-footer {
     flex-direction: column;
     align-items: flex-start;
@@ -715,7 +744,6 @@
     width: 100%;
   }
 
-  /* 3. Mobile Vertical Alignment for Linked Bank Account Box */
   .bank-account-box {
     flex-direction: column;
     align-items: flex-start;

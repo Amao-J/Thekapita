@@ -1,4 +1,48 @@
 /* ==========================================================================
+   ACCESSIBILITY EXTENSION OVERRIDES (WCAG 2.1 AA)
+   ========================================================================== */
+
+/* Screen Reader Only Utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Skip to Main Content Link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 12px;
+  background: #0f172a;
+  color: #00d084;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  z-index: 100000;
+  transition: top 0.2s ease;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+  outline: 2px solid #00d084;
+}
+
+/* Global High-Visibility Focus Rings */
+:focus-visible {
+  outline: 2px solid #00d084 !important;
+  outline-offset: 2px !important;
+}
+
+/* ==========================================================================
    THEKAPITA MARKETPLACE EXTENSION STYLESHEET (COMPLETE MASTER CSS)
    ========================================================================== */
 
@@ -2377,4 +2421,42 @@ html body .wallet-container {
     grid-row: 2;
     justify-self: end;
   }
+}
+
+/* Product Skeleton Shimmer Loading States */
+.skeleton-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.skeleton-img {
+  width: 100%;
+  height: 180px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-text {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-text.short { width: 40%; }
+.skeleton-text.medium { width: 70%; }
+.skeleton-text.long { width: 90%; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }

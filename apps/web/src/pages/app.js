@@ -205,3 +205,71 @@ document.addEventListener('click', function(event) {
 window.openApp = openApp;
 window.toggleAppMenu = toggleAppMenu;
 window.toggleNotifMenu = toggleNotifMenu;
+
+/* ===================================================
+   GLOBAL NETWORK & TOAST FEEDBACK ENGINE
+   =================================================== */
+
+export function showToast(message, type = 'error', duration = 4000) {
+  let toastContainer = document.getElementById('globalToastContainer');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'globalToastContainer';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 48px);
+    `;
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  const bg = type === 'error' ? '#121212' : type === 'success' ? '#00d084' : '#2b6cb0';
+  const border = type === 'error' ? '#ff4d4d' : 'transparent';
+  const color = type === 'success' ? '#121212' : '#ffffff';
+
+  toast.style.cssText = `
+    background: ${bg};
+    color: ${color};
+    border-left: 4px solid ${border};
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.2s ease-out;
+  `;
+
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; margin-left:12px;" onclick="this.parentElement.remove()">✕</button>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Online / Offline Global Event Listeners
+window.addEventListener('offline', () => {
+  showToast('You are currently offline. Please check your internet connection.', 'error', 6000);
+});
+
+window.addEventListener('online', () => {
+  showToast('Connection restored! You are back online.', 'success', 3000);
+});
+
+window.showToast = showToast;
