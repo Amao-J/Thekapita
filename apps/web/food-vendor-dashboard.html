@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita Merchant - Vendor Dashboard</title>
+  
+  <!-- Fonts: Bricolage Grotesque & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" type="text/css" href="css/food-vendor.css">
+</head>
+<body>
+
+  <!-- ARIA Live Announcements -->
+  <div id="srAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Sidebar / Bottom Navigation -->
+  <aside class="merchant-sidebar" aria-label="Merchant Navigation Sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="merchant-tag">Merchant</span>
+      </div>
+      <div class="store-profile">
+        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80" alt="Iya Basira Store logo" class="store-avatar" id="sidebarStoreAvatar">
+        <div class="store-info">
+          <h4 id="sidebarStoreName">Iya Basira Local Buka</h4>
+          <p>ID: KPT-MER-884</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <button type="button" class="nav-item active" onclick="switchTab('dashboard', this)">
+        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+        <span>Overview</span>
+      </button>
+      <button type="button" class="nav-item" onclick="switchTab('orders', this)">
+        <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+        <span>Orders</span>
+        <span class="nav-badge" aria-label="2 pending orders">2</span>
+      </button>
+      <button type="button" class="nav-item" onclick="switchTab('menu', this)">
+        <span class="material-symbols-outlined" aria-hidden="true">restaurant_menu</span>
+        <span>Menu List</span>
+      </button>
+      <button type="button" class="nav-item" onclick="switchTab('wallet', this)">
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
+        <span>Escrow Wallet</span>
+      </button>
+      <button type="button" class="nav-item" onclick="switchTab('store', this)">
+        <span class="material-symbols-outlined" aria-hidden="true">store</span>
+        <span>Store Details</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace" id="main-vendor-content" tabindex="-1">
+    
+    <header class="top-toolbar">
+      <h2 class="page-title" id="pageTitleDisplay">Dashboard Overview</h2>
+      <div class="store-status-toggle">
+        <span id="statusText" style="color: var(--emerald-dark);">Accepting Orders</span>
+        <label class="switch" for="storeStatusCheckbox">
+          <input type="checkbox" id="storeStatusCheckbox" checked onchange="toggleStoreStatus(this)">
+          <span class="slider round" aria-hidden="true"></span>
+          <span class="sr-only">Toggle online store status</span>
+        </label>
+      </div>
+    </header>
+
+    <!-- VIEW 1: DASHBOARD OVERVIEW -->
+    <section id="view-dashboard" class="view-section active" aria-labelledby="pageTitleDisplay">
+      <button type="button" class="ai-notification-pill" onclick="openModal('addItemModal')">
+        <span class="ai-pill-icon"><span class="material-symbols-outlined" aria-hidden="true">center_focus_strong</span></span>
+        <span class="ai-pill-text"><strong>Kapita AI:</strong> Digitize new dishes instantly with our menu form.</span>
+        <span class="ai-pill-action">Add Dish <span class="material-symbols-outlined" style="font-size:12px;" aria-hidden="true">arrow_forward</span></span>
+      </button>
+
+      <div class="metrics-grid">
+        <div class="metric-card highlight">
+          <div class="metric-title">Today's Escrow Sales</div>
+          <div class="metric-value">₦145,500</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Active Orders</div>
+          <div class="metric-value">4</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Completed Today</div>
+          <div class="metric-value">32</div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">Recent Activity</h3>
+      <div class="menu-item-row" style="cursor: pointer;" onclick="switchTab('orders', document.querySelectorAll('.nav-item')[1])" role="button" tabindex="0">
+        <div class="menu-item-left">
+          <div style="background: #fef3c7; color: #92400e; padding: 10px; border-radius: 10px;">
+            <span class="material-symbols-outlined" aria-hidden="true">notifications_active</span>
+          </div>
+          <div class="menu-item-info">
+            <h4>New Order Received! (#TK-9921)</h4>
+            <p style="color: var(--text-muted); font-weight: 500;">₦8,400 • Abula Combo x2</p>
+          </div>
+        </div>
+        <button type="button" class="btn-action btn-accept">View</button>
+      </div>
+    </section>
+
+    <!-- VIEW 2: ORDER MANAGEMENT -->
+    <section id="view-orders" class="view-section" aria-label="Order Management Kanban">
+      <div class="orders-kanban" id="ordersKanbanContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: MENU LISTINGS -->
+    <section id="view-menu" class="view-section" aria-label="Menu List Management">
+      <div class="menu-header-actions">
+        <div class="sleek-search-bar">
+          <label for="menuSearchInput" class="sr-only">Search menu items</label>
+          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">search</span>
+          <input type="text" id="menuSearchInput" placeholder="Search menu items..." onkeyup="filterMenuList()">
+        </div>
+        <button type="button" class="btn-action btn-accept" onclick="openModal('addItemModal')">
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">add</span> Add Item
+        </button>
+      </div>
+
+      <div id="vendor-menu-list">
+        <!-- Vendor items rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: ESCROW WALLET -->
+    <section id="view-wallet" class="view-section" aria-label="Escrow Wallet Information">
+      <div class="metric-card highlight" style="margin-bottom: 24px;">
+        <div class="metric-title" style="color: var(--emerald);">Cleared Escrow Balance</div>
+        <div class="metric-value">₦342,850.00</div>
+        <button type="button" class="btn-action btn-accept" style="margin-top: 16px;" onclick="openModal('withdrawModal')">Withdraw to Bank</button>
+      </div>
+
+      <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">Recent Escrow Payouts</h3>
+      <div class="menu-item-row">
+        <div class="menu-item-left">
+          <div style="background: #e0f2fe; color: #0369a1; padding: 10px; border-radius: 10px;">
+            <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+          </div>
+          <div class="menu-item-info">
+            <h4>Withdrawal to GTBank</h4>
+            <p style="color: var(--text-muted); font-weight: 500; font-size: 11px;">Oct 7, 2026</p>
+          </div>
+        </div>
+        <div style="font-weight: 800;">-₦150,000</div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: STORE DETAILS -->
+    <section id="view-store" class="view-section" aria-label="Store Details and Settings">
+      <div class="metric-card" style="margin-bottom: 24px; background: var(--white);">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span class="material-symbols-outlined" style="color: var(--emerald-dark);" aria-hidden="true">storefront</span> Store Profile &amp; Settings
+        </h3>
+
+        <form id="storeDetailsForm" onsubmit="handleStoreUpdate(event)">
+          <div class="form-group">
+            <label for="storeNameInput">Business / Restaurant Name</label>
+            <input type="text" id="storeNameInput" class="form-control" value="Iya Basira Local Buka" required>
+          </div>
+
+          <div class="form-group">
+            <label id="storeCategoryLabel">Establishment Category</label>
+            <div class="header-nav-dropdown-wrapper">
+              <button type="button" class="form-control custom-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="storeCategoryLabel storeCategoryText" onclick="toggleCustomDropdown('storeCategoryDropdown', event)">
+                <span id="storeCategoryText">Authentic Local Buka</span>
+                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+              </button>
+              <div id="storeCategoryDropdown" class="header-nav-dropdown-menu" role="listbox">
+                <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('storeCategoryDropdown', 'storeCategoryText', 'storeCategoryHidden', 'Authentic Local Buka')">Authentic Local Buka</button>
+                <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('storeCategoryDropdown', 'storeCategoryText', 'storeCategoryHidden', 'Fine Dining Restaurant')">Fine Dining Restaurant</button>
+                <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('storeCategoryDropdown', 'storeCategoryText', 'storeCategoryHidden', 'Grills & Suya Spot')">Grills &amp; Suya Spot</button>
+                <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('storeCategoryDropdown', 'storeCategoryText', 'storeCategoryHidden', 'Bakery & Pastries')">Bakery &amp; Pastries</button>
+              </div>
+              <input type="hidden" id="storeCategoryHidden" value="Authentic Local Buka">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="storeAddressInput">Kitchen / Store Address</label>
+            <input type="text" id="storeAddressInput" class="form-control" value="14 Herbert Macaulay Way, Yaba, Lagos" required>
+          </div>
+
+          <div class="form-group">
+            <label for="storePhoneInput">WhatsApp / Support Phone</label>
+            <input type="tel" id="storePhoneInput" class="form-control" value="08031234567" required>
+          </div>
+
+          <div class="form-group">
+            <label for="storeHoursInput">Operating Hours</label>
+            <input type="text" id="storeHoursInput" class="form-control" value="Mon - Sat: 8:00 AM - 10:00 PM" required>
+          </div>
+
+          <div class="form-group">
+            <label for="storeAvatarInput">Store Logo / Image URL</label>
+            <input type="url" id="storeAvatarInput" class="form-control" value="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80" required>
+          </div>
+
+          <button type="submit" id="storeSaveBtn" class="btn-action btn-accept" style="padding: 12px 24px; font-size: 13px;">Save Store Details</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Add Menu Item Form -->
+  <div class="wallet-modal-overlay" id="addItemModal" role="dialog" aria-modal="true" aria-labelledby="addItemModalTitle">
+    <div class="wallet-modal-card">
+      <div class="modal-header">
+        <h3 id="addItemModalTitle">Add New Menu Dish</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('addItemModal')" aria-label="Close modal"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+      </div>
+
+      <form id="addItemForm" onsubmit="handleAddNewDish(event)">
+        <div class="form-group">
+          <label for="newDishName">Dish Title</label>
+          <input type="text" id="newDishName" class="form-control" placeholder="e.g. Gizdodo Special" required>
+        </div>
+
+        <div class="form-group">
+          <label for="newDishPrice">Price (₦)</label>
+          <input type="number" id="newDishPrice" class="form-control" placeholder="3500" min="100" required>
+        </div>
+
+        <div class="form-group">
+          <label id="dishCategoryLabel">Category</label>
+          <div class="header-nav-dropdown-wrapper">
+            <button type="button" class="form-control custom-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="dishCategoryLabel dishCategoryText" onclick="toggleCustomDropdown('dishCategoryDropdown', event)">
+              <span id="dishCategoryText">Swallows &amp; Soups</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+            </button>
+            <div id="dishCategoryDropdown" class="header-nav-dropdown-menu" role="listbox">
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('dishCategoryDropdown', 'dishCategoryText', 'dishCategoryHidden', 'Swallows & Soups')">Swallows &amp; Soups</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('dishCategoryDropdown', 'dishCategoryText', 'dishCategoryHidden', 'Rice & Entrees')">Rice &amp; Entrees</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('dishCategoryDropdown', 'dishCategoryText', 'dishCategoryHidden', 'Grills & Proteins')">Grills &amp; Proteins</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('dishCategoryDropdown', 'dishCategoryText', 'dishCategoryHidden', 'Drinks & Extras')">Drinks &amp; Extras</button>
+            </div>
+            <input type="hidden" id="dishCategoryHidden" value="Swallows & Soups">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newDishImg">Dish Image URL</label>
+          <input type="url" id="newDishImg" class="form-control" value="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=150&q=80" required>
+        </div>
+
+        <button type="submit" id="addDishSubmitBtn" class="btn-action btn-accept" style="width: 100%; padding: 14px; font-size: 14px; margin-top: 4px;">Publish Dish to Menu</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Bank Withdrawal Form -->
+  <div class="wallet-modal-overlay" id="withdrawModal" role="dialog" aria-modal="true" aria-labelledby="withdrawModalTitle">
+    <div class="wallet-modal-card">
+      <div class="modal-header">
+        <h3 id="withdrawModalTitle">Withdraw to Bank Account</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('withdrawModal')" aria-label="Close withdrawal modal"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+      </div>
+
+      <form id="withdrawForm" onsubmit="handleWithdrawal(event)">
+        <div class="form-group">
+          <label id="bankLabel">Select Bank</label>
+          <div class="header-nav-dropdown-wrapper">
+            <button type="button" class="form-control custom-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="bankLabel bankText" onclick="toggleCustomDropdown('bankDropdown', event)">
+              <span id="bankText">Choose bank...</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+            </button>
+            <div id="bankDropdown" class="header-nav-dropdown-menu" role="listbox">
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('bankDropdown', 'bankText', 'bankHidden', 'Guaranty Trust Bank (GTBank)')">Guaranty Trust Bank (GTBank)</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('bankDropdown', 'bankText', 'bankHidden', 'Zenith Bank')">Zenith Bank</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('bankDropdown', 'bankText', 'bankHidden', 'United Bank for Africa (UBA)')">United Bank for Africa (UBA)</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('bankDropdown', 'bankText', 'bankHidden', 'First Bank of Nigeria')">First Bank of Nigeria</button>
+              <button type="button" class="header-dropdown-item" role="option" onclick="selectDropdownOption('bankDropdown', 'bankText', 'bankHidden', 'Access Bank')">Access Bank</button>
+            </div>
+            <input type="hidden" id="bankHidden" value="" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="withdrawAccountNumber">Account Number</label>
+          <input type="text" id="withdrawAccountNumber" class="form-control" maxlength="10" placeholder="0123456789" required>
+        </div>
+
+        <div class="form-group">
+          <label for="withdrawAmount">Amount to Withdraw (₦)</label>
+          <input type="number" id="withdrawAmount" class="form-control" value="342850" max="342850" min="1000" required>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Available Balance: ₦342,850.00</p>
+        </div>
+
+        <button type="submit" id="withdrawSubmitBtn" class="btn-action btn-accept" style="width: 100%; padding: 14px; font-size: 14px;">Authorize Payout</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="src/pages/food-vendor.js"></script>
+</body>
+</html>

@@ -45,7 +45,8 @@
             <button class="mark-read text-btn-link" type="button">Mark all as read</button>
           </div>
           <div class="notif-list">
-            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Eats: Your order from Bukka Hut is on the way! 2 minutes ago">
+            <!-- Linked Eats Notification to food.html -->
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Eats: Your order from Bukka Hut is on the way! 2 minutes ago" onclick="window.location.href='food.html'" style="cursor: pointer;">
               <div class="notif-icon-circle eats-icon" aria-hidden="true">🍔</div>
               <div class="notif-content">
                 <p class="notif-title"><strong>theKapita Eats</strong></p>
@@ -55,7 +56,7 @@
             </div>
             
             <!-- Link to wallet.html on Pay Notification -->
-            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Pay: Transfer of 15,000 Naira to Sarah was successful. 1 hour ago" onclick="window.location.href='wallet.html'">
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Pay: Transfer of 15,000 Naira to Sarah was successful. 1 hour ago" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
               <div class="notif-icon-circle pay-icon" aria-hidden="true">💳</div>
               <div class="notif-content">
                 <p class="notif-title"><strong>theKapita Pay</strong></p>
@@ -64,12 +65,13 @@
               </div>
             </div>
 
-            <div class="notif-item" tabindex="0" role="button" aria-label="theKapita Brain AI: Your requested legal summary is ready. Yesterday">
-              <div class="notif-icon-circle brain-icon" aria-hidden="true">🤖</div>
+            <!-- Bills Notification linked to bills.html -->
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Bills: Electricity token generated for Ikeja Electric Meter. 3 hours ago" onclick="window.location.href='bills.html'" style="cursor: pointer;">
+              <div class="notif-icon-circle pay-icon" aria-hidden="true">⚡</div>
               <div class="notif-content">
-                <p class="notif-title"><strong>theKapita Brain AI</strong></p>
-                <p class="notif-body">Your requested legal summary is ready.</p>
-                <span class="notif-time">Yesterday</span>
+                <p class="notif-title"><strong>theKapita Bills</strong></p>
+                <p class="notif-body">Electricity token generated for Ikeja Electric Meter.</p>
+                <span class="notif-time">3 hours ago</span>
               </div>
             </div>
           </div>
@@ -87,10 +89,11 @@
             <span>theKapita Apps</span>
           </div>
           <div class="launcher-grid">
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Pay app" onclick="window.location.href='wallet.html'"><div class="launcher-icon" aria-hidden="true">💳</div><span>Pay</span></div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Ride app" onclick="openApp('Ride')"><div class="launcher-icon" aria-hidden="true">🚗</div><span>Ride</span></div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Eats app" onclick="openApp('Eats')"><div class="launcher-icon" aria-hidden="true">🍔</div><span>Eats</span></div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Marketplace app" onclick="window.location.href='marketplace.html'"><div class="launcher-icon" aria-hidden="true">🛍️</div><span>Market</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Pay app" onclick="window.location.href='wallet.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">💳</div><span>Pay</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Bills app" onclick="window.location.href='bills.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🧾</div><span>Bills</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Ride app" onclick="window.location.href='ride.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🚗</div><span>Ride</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Eats app" onclick="window.location.href='food.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🍔</div><span>Eats</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Marketplace app" onclick="window.location.href='marketplace.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🛍️</div><span>Market</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Haven app" onclick="openApp('Haven')"><div class="launcher-icon" aria-hidden="true">🏠</div><span>Haven</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Care app" onclick="openApp('Care')"><div class="launcher-icon" aria-hidden="true">🩺</div><span>Care</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Counsel app" onclick="openApp('Counsel')"><div class="launcher-icon" aria-hidden="true">⚖️</div><span>Counsel</span></div>
@@ -134,10 +137,11 @@
 
       <!-- Quick Action Pills -->
       <div class="quick-pills" id="quickPillsContainer">
-        <button class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" data-icon="💳" onclick="window.location.href='wallet.html'">💳 Kapita Pay</button>
-        <button class="pill" draggable="true" data-id="Ride" data-title="Ride" data-desc="Transportation" data-icon="🚗" onclick="openApp('Ride')">🚗 Book Ride</button>
-        <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="openApp('Eats')">🍔 Order Chow</button>
-        <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'">🛍️ Marketplace</button>
+        <button class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" data-icon="💳" onclick="window.location.href='wallet.html'" style="cursor: pointer;">💳 Kapita Pay</button>
+        <button class="pill" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" data-icon="⚡" onclick="window.location.href='bills.html'" style="cursor: pointer;">⚡ Pay Bills</button>
+        <button class="pill" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Transportation & Delivery" data-icon="🚗" onclick="window.location.href='ride.html'" style="cursor: pointer;">🚗 Book Ride</button>
+        <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="window.location.href='food.html'" style="cursor: pointer;">🍔 Order Chow</button>
+        <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">🛍️ Marketplace</button>
       </div>
     </section>
 
@@ -149,6 +153,34 @@
       </div>
 
       <div class="desktop-app-grid" id="mainGridContainer">
+
+        <!-- Ride & Logistics Superapp Card -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Ride & Courier service" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Taxis & Logistics" data-icon="🚗" onclick="window.location.href='ride.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true" style="background: #e6fdf4; color: #00d084;">🚗</div>
+          <div class="app-info">
+            <h3>Rides</h3>
+            <p>Ride & Logistics</p>
+          </div>
+        </div>
+
+        <!-- Bills & Pay Superapp Card -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Bills & Pay service" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" data-icon="🧾" onclick="window.location.href='bills.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true">🧾</div>
+          <div class="app-info">
+            <h3>Bills & Pay</h3>
+            <p>Utilities & Subs</p>
+          </div>
+        </div>
+
+        <!-- Linked Eats Card to food.html -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Eats service" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="window.location.href='food.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true" style="background: #fef3c7; color: #d97706;">🍔</div>
+          <div class="app-info">
+            <h3>Eats</h3>
+            <p>Food & Bukka</p>
+          </div>
+        </div>
+
         <div class="app-card" tabindex="0" role="button" aria-label="Haven Real Estate service" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" data-icon="🏠" onclick="openApp('Haven')">
           <div class="icon-circle" aria-hidden="true">🏠</div>
           <div class="app-info">

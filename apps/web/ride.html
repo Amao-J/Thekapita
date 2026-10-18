@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>theKapita | Ride & Express Logistics</title>
+
+  <!-- SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Stylesheet Imports -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ride.css">
+</head>
+<body class="ride-page-body">
+
+  <!-- Skip to Main Content Link -->
+  <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+  <!-- Network Connection Status Banner -->
+  <div id="networkAlertBanner" class="network-alert-banner" role="alert" aria-live="assertive" style="display: none;">
+    <span class="material-symbols-outlined" aria-hidden="true">wifi_off</span>
+    <span id="networkAlertText">Network connection lost. Operating in offline mode.</span>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="desktop-header profile-back-header" role="banner">
+    <div class="header-back-action" onclick="window.location.href='index.html'" tabindex="0" role="button" aria-label="Return to index homepage" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='index.html'">
+      <div class="back-btn-circle">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </div>
+      <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #008a57;">Ride & Courier</span></span>
+    </div>
+
+    <!-- Header Dropdown Controls -->
+    <div class="wallet-header-tag">
+      <div class="header-nav-dropdown-wrapper">
+        <button type="button" class="header-menu-pill-btn" id="headerNavMenuBtn" onclick="toggleHeaderNavMenu(event)" aria-expanded="false" aria-controls="headerNavDropdownMenu" aria-label="Open service menu">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
+        </button>
+
+        <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu" role="menu" aria-labelledby="headerNavMenuBtn">
+          <div class="dropdown-balance-card" onclick="window.location.href='wallet.html'" tabindex="0" role="menuitem" aria-label="Available Wallet Balance 245,500 Naira" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='wallet.html'">
+            <div class="balance-card-sub">Available Wallet Balance</div>
+            <div class="balance-card-val" id="headerWalletDisplay">₦245,500.00</div>
+          </div>
+          <div class="dropdown-divider" role="separator"></div>
+          <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchMainService('ride')" onkeydown="if(event.key==='Enter'||event.key===' ') switchMainService('ride')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">local_taxi</span> Book a Taxi Ride
+          </div>
+          <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchMainService('logistics')" onkeydown="if(event.key==='Enter'||event.key===' ') switchMainService('logistics')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> Send Package / Delivery
+          </div>
+          <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchMainService('tracking')" onkeydown="if(event.key==='Enter'||event.key===' ') switchMainService('tracking')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">near_me</span> Track Active Shipments
+          </div>
+          <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="window.location.href='wallet.html'" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='wallet.html'">
+            <span class="material-symbols-outlined icon" aria-hidden="true">account_balance_wallet</span> Kapita Pay Wallet
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main id="main-content" class="ride-main-container" tabindex="-1">
+
+    <!-- Global Error Notice -->
+    <div id="globalErrorNotice" class="global-error-notice" style="display: none;" role="alert">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      <span id="globalErrorText">Unable to communicate with the dispatch server. Check connection.</span>
+      <button type="button" class="retry-btn" onclick="retryLastRideAction()">Retry</button>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <nav class="market-nav-bar" aria-label="Mobile Navigation Dock">
+      <button type="button" class="market-nav-btn active" id="navRideBtn" aria-selected="true" onclick="switchMainService('ride')">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">local_taxi</span>
+        <span class="nav-text">Book Ride</span>
+      </button>
+      <button type="button" class="market-nav-btn" id="navLogisticsBtn" aria-selected="false" onclick="switchMainService('logistics')">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">local_shipping</span>
+        <span class="nav-text">Logistics</span>
+      </button>
+      <button type="button" class="market-nav-btn" id="navTrackingBtn" aria-selected="false" onclick="switchMainService('tracking')">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">near_me</span>
+        <span class="nav-text">Tracking</span>
+      </button>
+      <button type="button" class="market-nav-btn" onclick="window.location.href='wallet.html'" aria-label="Go to Wallet">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">account_balance_wallet</span>
+        <span class="nav-text">Wallet</span>
+      </button>
+    </nav>
+
+    <div class="ride-content-wrapper">
+
+      <!-- Dual Service Switcher Pill Bar -->
+      <div class="service-mode-toggle" role="tablist" aria-label="Ride Service Mode Toggle">
+        <button type="button" class="mode-btn active" id="toggleRideModeBtn" role="tab" aria-selected="true" onclick="switchMainService('ride')">
+          <span class="material-symbols-outlined" aria-hidden="true">directions_car</span> Ride Hailing
+        </button>
+        <button type="button" class="mode-btn" id="toggleLogisticsModeBtn" role="tab" aria-selected="false" onclick="switchMainService('logistics')">
+          <span class="material-symbols-outlined" aria-hidden="true">package_2</span> Parcel & Courier
+        </button>
+      </div>
+
+      <!-- Smart AI Route & Delivery Prediction Insight Banner -->
+      <section class="ai-insight-banner" aria-label="AI Delivery Insight">
+        <div class="ai-insight-icon">
+          <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+        </div>
+        <div class="ai-insight-text">
+          <strong>Kapita AI Delivery Predictor:</strong> Low traffic on Third Mainland Bridge. Express courier dispatch will arrive in ~28 mins.
+        </div>
+        <button type="button" class="ai-insight-action-btn" onclick="prefillExpressDelivery()">Book Priority Dispatch</button>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: RIDE HAILING MODULE -->
+      <!-- ========================================== -->
+      <section id="viewRideModule" class="service-view-pane active" aria-labelledby="rideHeading">
+
+        <!-- Live GPS Routing Input Box -->
+        <div class="location-picker-card">
+          <div class="route-line-connector" aria-hidden="true">
+            <span class="dot origin"></span>
+            <span class="line"></span>
+            <span class="dot destination"></span>
+          </div>
+          <div class="inputs-column">
+            <div class="input-row">
+              <span class="material-symbols-outlined icon" aria-hidden="true">my_location</span>
+              <label for="rideOriginInput" class="sr-only">Pickup Location</label>
+              <input type="text" id="rideOriginInput" placeholder="Pickup Location" value="Current Location (Victoria Island, Lagos)" required />
+            </div>
+            <div class="input-row">
+              <span class="material-symbols-outlined icon" aria-hidden="true">location_on</span>
+              <label for="rideDestinationInput" class="sr-only">Destination Address</label>
+              <input type="text" id="rideDestinationInput" placeholder="Where are you going?" required />
+            </div>
+          </div>
+          <button type="button" class="swap-locations-btn" aria-label="Swap pickup and destination addresses" onclick="swapLocations()">
+            <span class="material-symbols-outlined" aria-hidden="true">swap_vert</span>
+          </button>
+        </div>
+
+        <!-- Innovative Feature: Fare Splitter & Co-Rider Toggle -->
+        <div class="feature-innovative-banner" tabindex="0" role="button" aria-label="Split fare and pool trip with nearby Kapita users" onclick="toggleFareSplitModal()" onkeydown="if(event.key==='Enter'||event.key===' ') toggleFareSplitModal()">
+          <div class="innovative-left">
+            <span class="material-symbols-outlined icon" aria-hidden="true">group_add</span>
+            <div>
+              <h2 id="rideHeading">Split Fare & Pool Trip</h2>
+              <p>Share ride cost automatically with up to 3 nearby Kapita users</p>
+            </div>
+          </div>
+          <span class="badge-new">SAVE 40%</span>
+        </div>
+
+        <!-- Ride Category Selector List -->
+        <div class="ride-category-list" role="radiogroup" aria-label="Select Ride Type">
+          <div class="ride-option-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectRideType(this, 'Kapita Go', 2200)" onkeydown="if(event.key==='Enter'||event.key===' ') selectRideType(this, 'Kapita Go', 2200)">
+            <div class="ride-type-left">
+              <div class="vehicle-icon-box bg-emerald">
+                <span class="material-symbols-outlined" aria-hidden="true">directions_car</span>
+              </div>
+              <div class="ride-type-info">
+                <h3>Kapita Go <span class="passengers"><span class="material-symbols-outlined" aria-hidden="true">person</span> 4</span></h3>
+                <p>Affordable compact everyday rides • 3 mins away</p>
+              </div>
+            </div>
+            <div class="ride-type-right">
+              <span class="price">₦2,200</span>
+              <span class="eta">11:42 AM</span>
+            </div>
+          </div>
+
+          <div class="ride-option-card" role="radio" aria-checked="false" tabindex="0" onclick="selectRideType(this, 'Kapita Comfort', 3500)" onkeydown="if(event.key==='Enter'||event.key===' ') selectRideType(this, 'Kapita Comfort', 3500)">
+            <div class="ride-type-left">
+              <div class="vehicle-icon-box bg-blue">
+                <span class="material-symbols-outlined" aria-hidden="true">minor_crash</span>
+              </div>
+              <div class="ride-type-info">
+                <h3>Kapita Comfort <span class="passengers"><span class="material-symbols-outlined" aria-hidden="true">person</span> 4</span></h3>
+                <p>Top-rated drivers & newer spacious cars • 5 mins away</p>
+              </div>
+            </div>
+            <div class="ride-type-right">
+              <span class="price">₦3,500</span>
+              <span class="eta">11:44 AM</span>
+            </div>
+          </div>
+
+          <div class="ride-option-card" role="radio" aria-checked="false" tabindex="0" onclick="selectRideType(this, 'Kapita Keke Express', 1200)" onkeydown="if(event.key==='Enter'||event.key===' ') selectRideType(this, 'Kapita Keke Express', 1200)">
+            <div class="ride-type-left">
+              <div class="vehicle-icon-box bg-amber">
+                <span class="material-symbols-outlined" aria-hidden="true">electric_rickshaw</span>
+              </div>
+              <div class="ride-type-info">
+                <h3>Kapita Keke Express <span class="passengers"><span class="material-symbols-outlined" aria-hidden="true">person</span> 3</span></h3>
+                <p>Fast traffic-beating local commutes • 1 min away</p>
+              </div>
+            </div>
+            <div class="ride-type-right">
+              <span class="price">₦1,200</span>
+              <span class="eta">11:40 AM</span>
+            </div>
+          </div>
+
+          <div class="ride-option-card" role="radio" aria-checked="false" tabindex="0" onclick="selectRideType(this, 'Kapita Executive', 6500)" onkeydown="if(event.key==='Enter'||event.key===' ') selectRideType(this, 'Kapita Executive', 6500)">
+            <div class="ride-type-left">
+              <div class="vehicle-icon-box bg-dark">
+                <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+              </div>
+              <div class="ride-type-info">
+                <h3>Kapita Executive <span class="passengers"><span class="material-symbols-outlined" aria-hidden="true">person</span> 4</span></h3>
+                <p>Luxury SUVs for business meetings • 8 mins away</p>
+              </div>
+            </div>
+            <div class="ride-type-right">
+              <span class="price">₦6,500</span>
+              <span class="eta">11:47 AM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button type="button" class="confirm-service-btn" id="requestRideBtn" onclick="confirmRideBooking()">
+          Request Kapita Go • ₦2,200
+        </button>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: LOGISTICS & PARCEL COURIER MODULE -->
+      <!-- ========================================== -->
+      <section id="viewLogisticsModule" class="service-view-pane" style="display: none;" aria-labelledby="logisticsHeading">
+
+        <div class="bills-section-title">
+          <h2 id="logisticsHeading">Parcel Booking & Dispatch</h2>
+          <p>Instant bike, van, and freight courier delivery across the city</p>
+        </div>
+
+        <!-- Sender & Receiver Address Form -->
+        <div class="location-picker-card">
+          <div class="route-line-connector" aria-hidden="true">
+            <span class="dot origin"></span>
+            <span class="line"></span>
+            <span class="dot destination"></span>
+          </div>
+          <div class="inputs-column">
+            <div class="input-row">
+              <span class="material-symbols-outlined icon" aria-hidden="true">unarchive</span>
+              <label for="pickupAddressInput" class="sr-only">Pickup Address and Sender Phone</label>
+              <input type="text" id="pickupAddressInput" placeholder="Pickup Address & Sender Phone" value="12 Lekki Phase 1, Lagos" required />
+            </div>
+            <div class="input-row">
+              <span class="material-symbols-outlined icon" aria-hidden="true">archive</span>
+              <label for="dropoffAddressInput" class="sr-only">Receiver Destination and Phone Number</label>
+              <input type="text" id="dropoffAddressInput" placeholder="Receiver Destination & Phone Number" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Package Category Presets -->
+        <div class="bills-section-title" style="margin-top: 20px;">
+          <h3>Select Package Type & Weight</h3>
+        </div>
+
+        <div class="package-size-grid" role="radiogroup" aria-label="Select Package Size">
+          <div class="package-size-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectPackageCategory(this, 'Document / Envelope', 1500)" onkeydown="if(event.key==='Enter'||event.key===' ') selectPackageCategory(this, 'Document / Envelope', 1500)">
+            <span class="material-symbols-outlined icon" aria-hidden="true">mark_as_unread</span>
+            <h4>Envelope & Doc</h4>
+            <p>Up to 1kg</p>
+            <span class="price">₦1,500</span>
+          </div>
+
+          <div class="package-size-card" role="radio" aria-checked="false" tabindex="0" onclick="selectPackageCategory(this, 'Small Box / Bag', 2500)" onkeydown="if(event.key==='Enter'||event.key===' ') selectPackageCategory(this, 'Small Box / Bag', 2500)">
+            <span class="material-symbols-outlined icon" aria-hidden="true">inventory_2</span>
+            <h4>Standard Box</h4>
+            <p>1kg - 10kg</p>
+            <span class="price">₦2,500</span>
+          </div>
+
+          <div class="package-size-card" role="radio" aria-checked="false" tabindex="0" onclick="selectPackageCategory(this, 'Bulk Freight / Van', 8500)" onkeydown="if(event.key==='Enter'||event.key===' ') selectPackageCategory(this, 'Bulk Freight / Van', 8500)">
+            <span class="material-symbols-outlined icon" aria-hidden="true">airport_shuttle</span>
+            <h4>Cargo / Van</h4>
+            <p>10kg - 500kg</p>
+            <span class="price">₦8,500</span>
+          </div>
+        </div>
+
+        <!-- Delivery Speed Options -->
+        <fieldset class="delivery-tier-selector">
+          <legend class="sr-only">Delivery Speed Tier</legend>
+          <label class="tier-option active" onclick="setDeliverySpeed('standard')">
+            <input type="radio" name="speedTier" id="tierStandard" checked />
+            <div class="tier-details">
+              <strong>Standard Delivery</strong>
+              <span>Same-day dispatch within 3 hours</span>
+            </div>
+            <span class="tier-badge">Regular</span>
+          </label>
+
+          <label class="tier-option" onclick="setDeliverySpeed('express')">
+            <input type="radio" name="speedTier" id="tierExpress" />
+            <div class="tier-details">
+              <strong>Express Priority (+₦1,000)</strong>
+              <span>Direct door-to-door dispatch under 45 mins</span>
+            </div>
+            <span class="tier-badge express">FASTEST</span>
+          </label>
+        </fieldset>
+
+        <!-- Business Logistics Banner Callout -->
+        <div class="business-logistics-card">
+          <div class="biz-left">
+            <span class="material-symbols-outlined icon" aria-hidden="true">storefront</span>
+            <div>
+              <h4>Are you an E-commerce Vendor?</h4>
+              <p>Get up to 30% discount with a Kapita Business Courier Account</p>
+            </div>
+          </div>
+          <button type="button" class="biz-action-btn" onclick="alert('Redirecting to Kapita Business Vendor Portal...')">Open Vendor Account</button>
+        </div>
+
+        <button type="button" class="confirm-service-btn" id="requestDispatchBtn" onclick="confirmParcelDispatch()">
+          Dispatch Courier • ₦1,500
+        </button>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: SHIPMENT & TRIP TRACKING MODULE -->
+      <!-- ========================================== -->
+      <section id="viewTrackingModule" class="service-view-pane" style="display: none;" aria-labelledby="trackingHeading">
+
+        <div class="bills-section-title">
+          <h2 id="trackingHeading">Real-Time Shipment & Courier Radar</h2>
+          <p>Live GPS tracking & proof-of-delivery confirmation</p>
+        </div>
+
+        <!-- Live Delivery Status Card -->
+        <div class="active-shipment-card">
+          <div class="shipment-status-header">
+            <div class="status-badge live">
+              <span class="pulse-dot" aria-hidden="true"></span> LIVE IN TRANSIT
+            </div>
+            <span class="tracking-code">Waybill #KPT-LOG-99201</span>
+          </div>
+
+          <div class="tracking-progress-timeline" aria-label="Delivery Progress">
+            <div class="timeline-step completed">
+              <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">check</span></div>
+              <span>Picked Up</span>
+            </div>
+            <div class="timeline-step active">
+              <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span></div>
+              <span>On The Way</span>
+            </div>
+            <div class="timeline-step">
+              <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">home</span></div>
+              <span>Delivered</span>
+            </div>
+          </div>
+
+          <div class="courier-driver-box">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=60" alt="Musa Ibrahim Driver Avatar" class="driver-img" />
+            <div class="driver-details">
+              <h3>Musa Ibrahim <span class="rating" aria-label="Rating 4.9 stars">★ 4.9</span></h3>
+              <p>Honda Rider • Bike License: KJA-881-QB</p>
+            </div>
+            <button type="button" class="driver-call-btn" aria-label="Call Musa Ibrahim" onclick="alert('Calling Musa Ibrahim (+234 812 000 9988)...')">
+              <span class="material-symbols-outlined" aria-hidden="true">call</span>
+            </button>
+          </div>
+
+          <div class="proof-of-delivery-box">
+            <span class="material-symbols-outlined icon" aria-hidden="true">verified_user</span>
+            <div>
+              <strong>Digital OTP Verification Required:</strong>
+              <p>Share this 4-digit code with the rider upon arrival: <span class="otp-code">8842</span></p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FARE SPLITTER & CO-RIDER HUB -->
+  <!-- ========================================== -->
+  <div class="wallet-modal-overlay" id="fareSplitModal" role="dialog" aria-modal="true" aria-labelledby="fareSplitModalTitle" onclick="closeFareSplitModal(event)">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h2 id="fareSplitModalTitle">Split Fare with Contacts</h2>
+          <p class="modal-sub">Automatically request split payment from co-riders</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeFareSplitModal()" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="wallet-modal-body">
+        <div class="form-group">
+          <label for="splitSearchInput">Search Contact or Phone Number</label>
+          <input type="text" id="splitSearchInput" class="form-control" placeholder="e.g. Sarah Okafor (+234...)" />
+        </div>
+
+        <div class="split-users-list">
+          <div class="split-user-row">
+            <div class="user-avatar-circle">SO</div>
+            <div class="user-info">
+              <strong>Sarah Okafor</strong>
+              <span>sarah@example.com</span>
+            </div>
+            <button type="button" class="add-user-split-btn">Add</button>
+          </div>
+
+          <div class="split-user-row">
+            <div class="user-avatar-circle bg-purple">DO</div>
+            <div class="user-info">
+              <strong>David Oloyede</strong>
+              <span>david@example.com</span>
+            </div>
+            <button type="button" class="add-user-split-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="fare-calculation-summary" aria-live="polite">
+          <div class="summary-row">
+            <span>Total Trip Fare:</span>
+            <strong>₦2,200.00</strong>
+          </div>
+          <div class="summary-row highlight">
+            <span>Your Share (100%):</span>
+            <strong style="color: #008a57;">₦2,200.00</strong>
+          </div>
+        </div>
+
+        <button type="button" class="btn-primary w-full" style="margin-top: 16px;" onclick="closeFareSplitModal(); alert('Split request sent to contacts successfully!');">Send Split Request & Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen Reader Polite Announcer -->
+  <div id="ariaLiveAnnouncer" class="sr-only" role="status" aria-live="polite"></div>
+
+  <!-- JavaScript Modules -->
+  <script src="src/pages/app.js"></script>
+  <script src="src/pages/ride.js"></script>
+</body>
+</html>
