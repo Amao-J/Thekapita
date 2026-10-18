@@ -1,8 +1,20 @@
 /* ==========================================================================
-   THEKAPITA PROFILE CONTROLLER (API INTEGRATED WITH SKELETON LOADERS)
+   THEKAPITA PROFILE CONTROLLER
+   Everything on this page that belongs to the user comes from GET /profile/me
+   (identity, personal details, service preferences, privacy + notification
+   settings) and is written back through PATCH /profile/me, /profile/preferences
+   and /profile/settings. The DOM is only ever painted FROM that object.
    ========================================================================== */
 import { refreshBalance, getBalanceDisplay } from '../state/ledger.js';
-import { isAuthenticated, hydrateProfile, updateProfile, getCurrentUser } from '../state/session.js';
+import { renderKapitaQr } from '../ui/kapitaQr.js';
+import {
+  isAuthenticated,
+  hydrateProfile,
+  updateProfile,
+  updatePreferences,
+  updateSettings,
+  getCurrentUser,
+} from '../state/session.js';
 
 if (!isAuthenticated()) {
   window.location.href = 'auth.html';
@@ -11,16 +23,19 @@ if (!isAuthenticated()) {
 let isBalanceMasked = false;
 let currentEditSection = '';
 
+function notify(message, type = 'success') {
+  if (window.showToast) window.showToast(message, type);
+  else if (type === 'error') alert(message);
+}
+
 /* --------------------------------------------------------------------------
-   0. HYDRATION ENGINE (WITH REAL NETWORK LOADING & SKELETON STATES)
+   0. HYDRATION
    -------------------------------------------------------------------------- */
 
 async function hydrateBalance() {
   const balanceEl = document.getElementById('walletBalance');
   if (!balanceEl) return;
-
   balanceEl.innerHTML = `<span class="balance-spinner">Loading...</span>`;
-
   try {
     await refreshBalance();
     if (!isBalanceMasked) balanceEl.textContent = getBalanceDisplay();
@@ -30,249 +45,265 @@ async function hydrateBalance() {
   }
 }
 
-// One place that paints the signed-in user into every data-profile-field on the page.
-function paintIdentity(user) {
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/** The single place that paints the user object into the page. */
+function paint(user) {
   if (!user) return;
-  const fields = { fullName: user.full_name, kapitaId: user.kapita_id, email: user.email, phone: user.phone, handle: user.handle ? `@${user.handle}` : '' };
+  const prefs = user.preferences || {};
+  const settings = user.settings || {};
+  const fields = {
+    fullName: user.full_name,
+    kapitaId: user.kapita_id,
+    email: user.email,
+    phone: user.phone,
+    handle: user.handle ? `@${user.handle}` : '',
+    dateOfBirth: formatDate(user.date_of_birth),
+    location: user.location,
+    address: user.address,
+    language: user.language,
+  };
   for (const [key, value] of Object.entries(fields)) {
     document.querySelectorAll(`[data-profile-field="${key}"]`).forEach((el) => {
       el.textContent = value || '—';
     });
   }
+  document.querySelectorAll('[data-pref]').forEach((el) => {
+    const value = prefs[el.dataset.pref];
+    el.textContent = el.dataset.pref === 'quiet_mode' ? (value ? 'Enabled' : 'Disabled') : value || '—';
+  });
+  document.querySelectorAll('[data-setting]').forEach((el) => {
+    el.checked = Boolean(settings[el.dataset.setting]);
+  });
   const bioEl = document.querySelector('.bio-text');
   if (bioEl) bioEl.textContent = user.bio || '';
 }
 
 async function hydrateIdentity() {
-  const nameEl = document.querySelector('[data-profile-field="fullName"]');
-  const idEl = document.querySelector('[data-profile-field="kapitaId"]');
-  const bioEl = document.querySelector('.bio-text');
-
-  // Render skeleton loaders for user metadata while fetching profile
-  if (nameEl) nameEl.innerHTML = `<span class="skeleton-text" style="width: 140px; display: inline-block;"></span>`;
-  if (idEl) idEl.innerHTML = `<span class="skeleton-text" style="width: 100px; display: inline-block;"></span>`;
-
+  const cached = getCurrentUser();
+  if (cached) {
+    paint(cached); // instant, from the stored session
+  } else {
+    document.querySelectorAll('[data-profile-field="fullName"], [data-profile-field="kapitaId"]').forEach((el) => {
+      el.innerHTML = `<span class="skeleton-text" style="width: 120px; display: inline-block;"></span>`;
+    });
+  }
   try {
-    paintIdentity(getCurrentUser()); // instant, from the stored session
-    paintIdentity(await hydrateProfile());
+    paint(await hydrateProfile());
   } catch (err) {
-    const errorMsg = err instanceof ApiError ? err.message : 'Could not sync identity details.';
-    if (nameEl) nameEl.textContent = 'User Profile';
-    if (idEl) idEl.textContent = 'KPT-OFFLINE';
-    if (window.showToast) window.showToast(errorMsg, 'error');
+    if (!cached) paint({ full_name: 'User Profile', kapita_id: '—' });
+    notify(err.message || 'Could not sync your profile details.', 'error');
   }
 }
 
 /* --------------------------------------------------------------------------
-   1. TAB SWITCHING & VISIBILITY TOGGLES
+   1. TABS, QR, BALANCE MASK
    -------------------------------------------------------------------------- */
 
 function switchTab(tabId, btnElement) {
-  const panes = document.querySelectorAll('.tab-pane');
-  panes.forEach(pane => pane.classList.remove('active'));
-
-  const buttons = document.querySelectorAll('.tab-btn');
-  buttons.forEach(btn => btn.classList.remove('active'));
-
-  const selectedPane = document.getElementById(tabId);
-  if (selectedPane) selectedPane.classList.add('active');
-  if (btnElement) btnElement.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach((btn) => btn.classList.remove('active'));
+  document.getElementById(tabId)?.classList.add('active');
+  btnElement?.classList.add('active');
 }
 
-function openQrModal() {
+async function openQrModal() {
   const modal = document.getElementById('qrModal');
-  if (modal) modal.classList.add('active');
+  const canvas = modal?.querySelector('[data-kapita-qr]');
+  if (!modal || !canvas) return;
+
+  modal.classList.add('active');
+  try {
+    const user = getCurrentUser()?.kapita_id ? getCurrentUser() : await hydrateProfile();
+    if (!await renderKapitaQr(canvas, user?.kapita_id)) {
+      notify('Your Kapita ID is not available yet.', 'error');
+    }
+  } catch (err) {
+    notify(err.message || 'Could not create your Kapita ID QR code.', 'error');
+  }
 }
 
 function closeQrModal(event) {
   if (event && event.target !== event.currentTarget) return;
-  const modal = document.getElementById('qrModal');
-  if (modal) modal.classList.remove('active');
+  document.getElementById('qrModal')?.classList.remove('active');
 }
 
 function toggleBalanceVisibility() {
   const balanceEl = document.getElementById('walletBalance');
   const toggleBtn = document.querySelector('.eye-toggle');
   if (!balanceEl || !toggleBtn) return;
-
   const eyeIcon = toggleBtn.querySelector('.material-symbols-outlined');
-
-  if (isBalanceMasked) {
-    balanceEl.textContent = getBalanceDisplay();
-    isBalanceMasked = false;
-    if (eyeIcon) eyeIcon.textContent = 'visibility';
-  } else {
-    balanceEl.textContent = '••••••••';
-    isBalanceMasked = true;
-    if (eyeIcon) eyeIcon.textContent = 'visibility_off';
-  }
+  isBalanceMasked = !isBalanceMasked;
+  balanceEl.textContent = isBalanceMasked ? '••••••••' : getBalanceDisplay();
+  if (eyeIcon) eyeIcon.textContent = isBalanceMasked ? 'visibility_off' : 'visibility';
 }
 
 function copyKapitaId() {
   const id = getCurrentUser()?.kapita_id;
   if (!id) return;
   navigator.clipboard.writeText(id);
-  alert(`theKapita ID (${id}) copied to clipboard!`);
+  notify(`theKapita ID (${id}) copied to clipboard!`);
 }
 
-/* ==========================================
-   DYNAMIC EDIT MODAL & LIVE DOM UPDATES
-   ========================================== */
+/* --------------------------------------------------------------------------
+   2. EDIT MODAL — one config table drives every section
+   `target` decides which endpoint a section saves to.
+   -------------------------------------------------------------------------- */
 
-let currentEditSection = '';
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-// SECURITY: values read back from the DOM (name, bio, saved preferences)
-// must never be interpolated into an HTML string to rebuild an <input>,
-// because once any of those values can contain a double-quote or "<", it
-// breaks out of the attribute and injects markup. Build the field with real
-// DOM APIs instead, so the value always lands in the `value` property, not
-// in parsed HTML.
-function buildEditField(container, { id, label, type = 'text', value = '', required = true, readOnly = false }) {
+const SECTIONS = {
+  main: {
+    title: 'Edit Main Profile',
+    target: 'profile',
+    fields: [
+      { key: 'full_name', label: 'Full Name' },
+      { key: 'bio', label: 'Bio / Tagline', required: false, maxLength: 200 },
+    ],
+  },
+  personal: {
+    title: 'Update Personal Details',
+    target: 'profile',
+    fields: [
+      { key: 'full_name', label: 'Full Name' },
+      { key: 'email', label: 'Email Address (cannot be changed here)', type: 'email', readOnly: true },
+      { key: 'phone', label: 'Phone Number', type: 'tel' },
+      { key: 'date_of_birth', label: 'Date of Birth', type: 'date', required: false },
+      { key: 'location', label: 'Primary Location', required: false, maxLength: 100 },
+      { key: 'address', label: 'Residential Address', required: false, maxLength: 200 },
+      { key: 'language', label: 'Language', required: false, maxLength: 30 },
+    ],
+  },
+  eats: {
+    title: 'Edit theKapita Eats Profile',
+    target: 'preferences',
+    fields: [
+      { key: 'dietary_preference', label: 'Dietary Preference', required: false, maxLength: 120 },
+      { key: 'favorite_cuisine', label: 'Favorite Cuisine', required: false, maxLength: 120 },
+      { key: 'default_address', label: 'Default Address', required: false, maxLength: 200 },
+    ],
+  },
+  ride: {
+    title: 'Edit theKapita Ride Profile',
+    target: 'preferences',
+    fields: [
+      { key: 'preferred_ride', label: 'Preferred Ride', required: false, maxLength: 60 },
+      { key: 'quiet_mode', label: 'Quiet Mode', type: 'select', options: [['true', 'Enabled'], ['false', 'Disabled']] },
+      { key: 'default_payment', label: 'Default Payment', required: false, maxLength: 60 },
+    ],
+  },
+  talent: {
+    title: 'Edit theKapita Talent Profile',
+    target: 'preferences',
+    fields: [
+      { key: 'primary_skill', label: 'Primary Skill', required: false, maxLength: 100 },
+      { key: 'experience_level', label: 'Experience Level', required: false, maxLength: 60 },
+    ],
+  },
+  health: {
+    title: 'Edit theKapita Health Profile',
+    target: 'preferences',
+    fields: [
+      { key: 'blood_group', label: 'Blood Group', type: 'select', options: [['', 'Not set'], ...BLOOD_GROUPS.map((g) => [g, g])] },
+      { key: 'emergency_contact', label: 'Emergency Contact', type: 'tel', required: false, maxLength: 30 },
+      { key: 'health_insurance_id', label: 'Health Insurance ID', required: false, maxLength: 40 },
+    ],
+  },
+};
+
+// Values go into `.value` via the DOM, never into an HTML string, so a quote or "<" in a saved value can't inject markup.
+function buildEditField(container, field, value) {
+  const id = `edit-${field.key}`;
   const group = document.createElement('div');
   group.className = 'form-group';
-  const labelEl = document.createElement('label');
-  labelEl.setAttribute('for', id);
-  labelEl.textContent = label;
-  const input = document.createElement('input');
-  input.type = type;
+  const label = document.createElement('label');
+  label.setAttribute('for', id);
+  label.textContent = field.label;
+
+  let input;
+  if (field.type === 'select') {
+    input = document.createElement('select');
+    for (const [optValue, optLabel] of field.options) {
+      const opt = document.createElement('option');
+      opt.value = optValue;
+      opt.textContent = optLabel;
+      input.appendChild(opt);
+    }
+    input.value = String(value ?? '');
+  } else {
+    input = document.createElement('input');
+    input.type = field.type || 'text';
+    input.value = value ?? '';
+    if (field.maxLength) input.maxLength = field.maxLength;
+    if (field.type === 'date') input.max = new Date().toISOString().slice(0, 10);
+  }
   input.id = id;
-  input.value = value;
   input.className = 'form-control';
-  input.required = required;
-  input.readOnly = readOnly;
-  group.append(labelEl, input);
+  input.required = field.required !== false;
+  input.readOnly = Boolean(field.readOnly);
+  group.append(label, input);
   container.appendChild(group);
 }
 
-function openEditModal(section) {
-  currentEditSection = section;
+function currentValue(section, key) {
+  const user = getCurrentUser() || {};
+  return section.target === 'preferences' ? user.preferences?.[key] : user[key];
+}
+
+function openEditModal(sectionName) {
+  const section = SECTIONS[sectionName];
   const modal = document.getElementById('editModal');
   const container = document.getElementById('dynamicFormFields');
-  const title = document.getElementById('editModalTitle');
+  if (!section || !modal || !container) return;
 
-  if (!modal || !container) return;
-
-  if (section === 'main') {
-    title.textContent = 'Edit Main Profile';
-    const currentName = document.querySelector('[data-profile-field="fullName"]')?.textContent.trim() || '';
-    const currentBio = document.querySelector('.bio-text')?.textContent.trim() || '';
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Full Name', value: currentName });
-    buildEditField(container, { id: 'input2', label: 'Bio / Tagline', value: currentBio, required: false });
-  } else if (section === 'eats') {
-    title.textContent = 'Edit theKapita Eats Profile';
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(1) .detail-row strong');
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Dietary Preference', value: rows[0]?.textContent.trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Favorite Cuisine', value: rows[1]?.textContent.trim() || '' });
-  } else if (section === 'ride') {
-    title.textContent = 'Edit theKapita Ride Profile';
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(2) .detail-row strong');
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Preferred Ride', value: rows[0]?.textContent.trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Quiet Mode', value: rows[1]?.textContent.trim() || '' });
-  } else if (section === 'talent') {
-    title.textContent = 'Edit theKapita Talent Profile';
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(3) .detail-row strong');
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Primary Skill', value: rows[0]?.textContent.trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Experience Level', value: rows[1]?.textContent.trim() || '' });
-  } else if (section === 'health') {
-    title.textContent = 'Edit theKapita Health Profile';
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(4) .detail-row strong');
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Blood Group', value: rows[0]?.textContent.trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Emergency Contact', value: rows[1]?.textContent.trim() || '' });
-  } else if (section === 'personal') {
-    title.textContent = 'Update Personal Details';
-    const rows = document.querySelectorAll('#securityTab .kapita-card:nth-child(1) .detail-row strong');
-
-    container.innerHTML = '';
-    buildEditField(container, { id: 'input1', label: 'Full Name', value: rows[0]?.textContent.replace('✓', '').trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Email Address (cannot be changed here)', type: 'email', value: rows[1]?.textContent.replace('✓', '').trim() || '', readOnly: true });
-    buildEditField(container, { id: 'input3', label: 'Phone Number', type: 'tel', value: rows[2]?.textContent.replace('✓', '').trim() || '' });
+  currentEditSection = sectionName;
+  document.getElementById('editModalTitle').textContent = section.title;
+  container.replaceChildren();
+  for (const field of section.fields) {
+    buildEditField(container, field, currentValue(section, field.key));
   }
-
   modal.classList.add('active');
 }
 
 function closeEditModal(event) {
   if (event && event.target !== event.currentTarget) return;
-  const modal = document.getElementById('editModal');
-  if (modal) modal.classList.remove('active');
+  document.getElementById('editModal')?.classList.remove('active');
+}
+
+function collectPayload(section) {
+  const payload = {};
+  for (const field of section.fields) {
+    if (field.readOnly) continue;
+    const raw = document.getElementById(`edit-${field.key}`).value.trim();
+    if (field.key === 'quiet_mode') payload[field.key] = raw === 'true';
+    else if (field.key === 'date_of_birth') payload[field.key] = raw || null;
+    else payload[field.key] = raw;
+  }
+  return payload;
 }
 
 async function saveProfileChanges(event) {
   event.preventDefault();
+  const section = SECTIONS[currentEditSection];
+  if (!section) return;
 
   const submitButton = event.currentTarget.querySelector('[type="submit"]');
-  const val1 = document.getElementById('input1')?.value;
-  const val2 = document.getElementById('input2')?.value;
-  const val3 = document.getElementById('input3')?.value;
-
   if (submitButton) {
     submitButton.disabled = true;
     submitButton.innerHTML = `<span class="btn-spinner"></span> Saving...`;
   }
-
   try {
-    if (currentEditSection === 'main') {
-      const user = await updateProfile({ full_name: val1.trim(), bio: val2.trim() });
-      paintIdentity(user);
-      closeEditModal();
-    } catch (err) {
-      alert(err.message || 'Could not save your profile. Please try again.');
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-    return;
-  }
-  else if (currentEditSection === 'personal') {
-    const submitButton = event.currentTarget.querySelector('[type="submit"]');
-    if (submitButton) submitButton.disabled = true;
-    try {
-      // Email is read-only until email verification exists; name + phone persist.
-      paintIdentity(await updateProfile({ full_name: val1.trim(), phone: val3.trim() }));
-      closeEditModal();
-    } catch (err) {
-      alert(err.message || 'Could not save your details. Please try again.');
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-    return;
-  }
-  else if (currentEditSection === 'eats') {
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(1) .detail-row strong');
-    if (val1 && rows[0]) rows[0].textContent = val1;
-    if (val2 && rows[1]) rows[1].textContent = val2;
-  }
-  else if (currentEditSection === 'ride') {
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(2) .detail-row strong');
-    if (val1 && rows[0]) rows[0].textContent = val1;
-    if (val2 && rows[1]) rows[1].textContent = val2;
-  }
-  else if (currentEditSection === 'talent') {
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(3) .detail-row strong');
-    if (val1 && rows[0]) rows[0].textContent = val1;
-    if (val2 && rows[1]) rows[1].textContent = val2;
-  }
-  else if (currentEditSection === 'health') {
-    const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(4) .detail-row strong');
-    if (val1 && rows[0]) rows[0].textContent = val1;
-    if (val2 && rows[1]) rows[1].textContent = val2;
-  }
-
-    if (window.showToast) window.showToast('Preferences saved!', 'success');
+    const payload = collectPayload(section);
+    if (section.target === 'profile') await updateProfile(payload);
+    else await updatePreferences(payload);
+    paint(getCurrentUser());
     closeEditModal();
+    notify('Saved!', 'success');
   } catch (err) {
-    const errorMsg = err instanceof ApiError ? err.message : 'Could not save profile changes.';
-    if (window.showToast) window.showToast(errorMsg, 'error');
-    else alert(errorMsg);
+    notify(err.message || 'Could not save your changes. Please try again.', 'error');
   } finally {
     if (submitButton) {
       submitButton.disabled = false;
@@ -281,12 +312,34 @@ async function saveProfileChanges(event) {
   }
 }
 
+/* --------------------------------------------------------------------------
+   3. PRIVACY + NOTIFICATION TOGGLES (data-setting="<settings field>")
+   -------------------------------------------------------------------------- */
+
+function bindSettingToggles() {
+  document.querySelectorAll('[data-setting]').forEach((input) => {
+    input.addEventListener('change', async () => {
+      const wanted = input.checked;
+      input.disabled = true;
+      try {
+        await updateSettings({ [input.dataset.setting]: wanted });
+      } catch (err) {
+        input.checked = !wanted; // roll the switch back
+        notify(err.message || 'Could not save that setting.', 'error');
+      } finally {
+        input.disabled = false;
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  bindSettingToggles();
   hydrateBalance();
   hydrateIdentity();
 });
 
-// Window Bridge Bindings
+// Window bridge: profile.html uses inline onclick attributes.
 window.switchTab = switchTab;
 window.toggleBalanceVisibility = toggleBalanceVisibility;
 window.openEditModal = openEditModal;

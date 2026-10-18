@@ -10,8 +10,8 @@ One GitHub repo, three Railway services: **Postgres**, **backend**, **web**.
   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`  (add a Postgres service first)
   - DJANGO_SECRET_KEY = 
   - `JWT_SIGNING_KEY` = a different long random string
-  - `CORS_ALLOWED_ORIGINS` = the web service URL, e.g. `https://web-production-xxxx.up.railway.app`
-  - (optional) `CSRF_TRUSTED_ORIGINS` = same URL, for the Django admin
+  - `DJANGO_CORS_ALLOWED_ORIGINS` = comma-separated web origins if they are not already in `Backend/src/app/settings.py`
+  - (optional) `DJANGO_CSRF_TRUSTED_ORIGINS` = web origins used to access the Django admin
 
 Generate secrets with: `python -c "import secrets; print(secrets.token_urlsafe(64))"`
 
@@ -20,7 +20,7 @@ Generate secrets with: `python -c "import secrets; print(secrets.token_urlsafe(6
 - Settings → **Root Directory**: leave as `/` (repo root).
 - Settings → **Config file path**: `/apps/web/railway.toml`.
 - Settings → Networking → **Generate Domain**.
-- Variables: `VITE_API_BASE_URL` = `https://<backend-domain>/api`
+- Variables: `VITE_API_BASE_URL` = `https://api.thekapita.com/api`
   (baked in at build time — redeploy the web service if you change it).
 
 ## 3. Order

@@ -8,6 +8,14 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
 const DEFAULT_TIMEOUT_MS = 10000; // 10s network timeout for live API calls
 
+// Django-ninja returns 422 validation errors as a list of {msg, ...}; turn it into one sentence.
+function readableDetail(detail) {
+  if (Array.isArray(detail)) {
+    return detail.map((d) => String(d?.msg ?? '').replace(/^Value error, /, '')).filter(Boolean).join(' ');
+  }
+  return detail;
+}
+
 export class ApiError extends Error {
   constructor(status, detail) {
     super(detail || `Request failed with status ${status}`);
@@ -42,7 +50,7 @@ export async function request(path, { method = 'GET', body, headers = {}, timeou
     }
 
     if (!res.ok) {
-      throw new ApiError(res.status, data?.detail);
+      throw new ApiError(res.status, readableDetail(data?.detail));
     }
     return data;
   } catch (err) {
@@ -59,7 +67,7 @@ export async function request(path, { method = 'GET', body, headers = {}, timeou
   }
 }
 
-/** One idempotency key per user action */
+
 export function newIdempotencyKey() {
   return crypto.randomUUID();
 }

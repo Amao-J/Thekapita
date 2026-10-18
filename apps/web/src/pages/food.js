@@ -356,6 +356,11 @@ function quickAiOrder() {
   openDishModal('Abula Combo (Buka Special)', 3800, 'Iya Basira Local Buka', 'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=400&q=80');
 }
 
+function handleVendorRegistration(event) {
+  event.preventDefault();
+  window.location.href = 'food-vendor-dashboard.html';
+}
+
 /* Full Vendor Database */
 const vendorMenusData = {
   'Iya Basira Local Buka': [

@@ -2,8 +2,10 @@
    THEKAPITA PAY WALLET INTERACTION ENGINE
    ========================================== */
 import { refreshBalance, getBalanceDisplay, fundWallet, sendMoney, loadTransactions } from '../state/ledger.js';
-import { isAuthenticated, getCurrentUser, hydrateProfile } from '../state/session.js';
+import { isAuthenticated, getCurrentUser, hydrateProfile, authorizedRequest } from '../state/session.js';
 import { formatCurrency } from '@thekapita/shared/currency';
+import { renderKapitaQr } from '../ui/kapitaQr.js';
+import { BrowserQRCodeReader } from '@zxing/browser';
 import { ApiError } from '../api/client.js';
 import { showToast } from './app.js';
 
@@ -15,6 +17,8 @@ if (!isAuthenticated()) {
 let isWalletBalanceMasked = false;
 let activeCategoryFilter = 'all';
 let currentSearchQuery = '';
+let qrScannerControls = null;
+let qrReader = null;
 
 let recipientsData = [
   { id: 'REC-1', name: 'Sarah Okoro', avatar: 'SO', type: 'internal', handle: '@sarah • Instant ₦0 Fee', meta: 'KPT-881092 • Primary Tag', isFavorite: true, isOnline: true },
@@ -22,8 +26,6 @@ let recipientsData = [
   { id: 'REC-3', name: 'Ella Amra', avatar: 'EA', type: 'internal', handle: '@amra • Instant ₦0 Fee', meta: 'KPT-883912 • Primary Tag', isFavorite: true, isOnline: false },
   { id: 'REC-4', name: 'Michael Chen', avatar: 'MC', type: 'bank', handle: 'Access Bank PLC', meta: '•••• 8812 • Verified Name', isFavorite: false, isOnline: false }
 ];
-
-let recentTransactions = [];
 
 /* --------------------------------------------------------------------------
    0. LIVE HYDRATION ENGINE & SKELETON RENDERERS
@@ -44,106 +46,6 @@ async function hydrateBalance() {
     balanceEl.textContent = 'Unavailable';
     if (window.showToast) window.showToast('Could not load live wallet balance from backend.', 'error');
   }
-}
-
-async function hydrateTransactions() {
-  const container = document.querySelector('.activity-timeline');
-  if (!container) return;
-
-  // Render skeleton rows while fetching transactions
-  container.innerHTML = Array(3).fill(0).map(() => `
-    <div class="activity-row skeleton-card" style="padding: 12px; margin-bottom: 8px;">
-      <div style="height: 20px; width: 60%; background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
-    </div>
-  `).join('');
-
-  try {
-    const txs = await authorizedRequest('/wallet/transactions').catch(() => null);
-    if (txs && Array.isArray(txs) && txs.length > 0) {
-      recentTransactions = txs;
-      renderTransactionsList(txs);
-    } else {
-      // Fallback to static initial timeline if empty API array returned
-      restoreStaticTransactions();
-    }
-  } catch (err) {
-    restoreStaticTransactions();
-  }
-}
-
-function restoreStaticTransactions() {
-  const container = document.querySelector('.activity-timeline');
-  if (!container) return;
-
-  container.innerHTML = `
-    <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990812', 'theKapita Eats', 'Food Payment', '8,500.00', 'Today, 1:42 PM')">
-      <div class="act-icon-wrapper eats">
-        <span class="material-symbols-outlined">restaurant</span>
-      </div>
-      <div class="act-details">
-        <p class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Lunch</p>
-        <span class="act-time">Today, 1:42 PM • Food Payment</span>
-      </div>
-      <div class="act-right">
-        <span class="act-amount negative">-₦8,500</span>
-        <span class="tx-status-pill success">Successful</span>
-      </div>
-    </div>
-
-    <div class="activity-row tx-item in" onclick="viewTxDetail('TX-990811', 'Tech Firm Ltd', 'Bank Transfer', '850,000.00', 'Today, 9:15 AM')">
-      <div class="act-icon-wrapper pay">
-        <span class="material-symbols-outlined">payments</span>
-      </div>
-      <div class="act-details">
-        <p class="act-title"><strong>Salary Deposit:</strong> Tech Firm Ltd</p>
-        <span class="act-time">Today, 9:15 AM • Bank Transfer</span>
-      </div>
-      <div class="act-right">
-        <span class="act-amount positive">+₦850,000</span>
-        <span class="tx-status-pill success">Successful</span>
-      </div>
-    </div>
-
-    <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990810', 'John Okafor', 'Peer Transfer', '20,000.00', 'Yesterday')">
-      <div class="act-icon-wrapper ride">
-        <span class="material-symbols-outlined">directions_car</span>
-      </div>
-      <div class="act-details">
-        <p class="act-title"><strong>Transfer to:</strong> John Okafor (@john)</p>
-        <span class="act-time">Yesterday • Peer Transfer</span>
-      </div>
-      <div class="act-right">
-        <span class="act-amount negative">-₦20,000</span>
-        <span class="tx-status-pill success">Successful</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderTransactionsList(txs) {
-  const container = document.querySelector('.activity-timeline');
-  if (!container) return;
-
-  container.innerHTML = txs.map(tx => {
-    const isPositive = tx.amount > 0;
-    const formattedAmount = Math.abs(tx.amount).toLocaleString('en-NG', { minimumFractionDigits: 2 });
-    
-    return `
-      <div class="activity-row tx-item ${isPositive ? 'in' : 'out'}" onclick="viewTxDetail('${tx.id}', '${escapeJs(tx.description || tx.recipient)}', '${escapeJs(tx.category || 'Transfer')}', '${formattedAmount}', '${tx.created_at || 'Just Now'}')">
-        <div class="act-icon-wrapper ${isPositive ? 'pay' : 'eats'}">
-          <span class="material-symbols-outlined">${isPositive ? 'payments' : 'north_east'}</span>
-        </div>
-        <div class="act-details">
-          <p class="act-title"><strong>${isPositive ? 'Received:' : 'Paid:'}</strong> ${escapeHtml(tx.description || tx.recipient)}</p>
-          <span class="act-time">${tx.created_at || 'Recently'} • ${escapeHtml(tx.category || 'Wallet Transfer')}</span>
-        </div>
-        <div class="act-right">
-          <span class="act-amount ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : '-'}₦${formattedAmount}</span>
-          <span class="tx-status-pill success">${tx.status || 'Successful'}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
 }
 
 function escapeHtml(str) {
@@ -202,7 +104,7 @@ function toggleWalletBalance() {
    2. MODAL ENGINE (FUNDING, SENDING, RECEIVING, WITHDRAWING)
    -------------------------------------------------------------------------- */
 
-function openWalletModal(actionType) {
+function openWalletModal(actionType, recipientId = '') {
   const modal = document.getElementById('walletActionModal');
   const title = document.getElementById('walletModalTitle');
   const subtitle = document.getElementById('walletModalSubtitle');
@@ -271,29 +173,26 @@ function openWalletModal(actionType) {
     content.innerHTML = `
       <div class="text-center">
         <div style="background: #ffffff; padding: 16px; border-radius: 20px; width: 180px; margin: 0 auto 16px; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-          <svg viewBox="0 0 100 100" class="qr-svg" style="width: 100%; height: auto; display: block;">
-            <rect width="100" height="100" fill="#ffffff" />
-            <rect x="6" y="6" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="11" y="11" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="15" y="15" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="66" y="6" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="71" y="11" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="75" y="15" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="6" y="66" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="11" y="71" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="15" y="75" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="68" y="68" width="14" height="14" fill="#121212" rx="2" />
-            <rect x="71" y="71" width="8" height="8" fill="#ffffff" rx="1" />
-            <rect x="73" y="73" width="4" height="4" fill="#121212" rx="0.5" />
-            <rect x="43" y="43" width="14" height="14" rx="4" fill="#121212" />
-            <circle cx="50" cy="50" r="3" fill="#00d084" />
-          </svg>
+          <canvas data-kapita-qr aria-label="Kapita ID QR code" style="width: 100%; height: auto; display: block;"></canvas>
         </div>
         <h4>${escapeHtml(getCurrentUser()?.full_name)}</h4>
         <p style="font-size: 13px; color: #666; margin-bottom: 16px;">${escapeHtml(getCurrentUser()?.handle ? '@' + getCurrentUser().handle + ' • ' : '')}${escapeHtml(getCurrentUser()?.kapita_id)}</p>
         <button class="btn-secondary w-full" onclick="copyMyKapitaId()">Copy Kapita ID Tag</button>
       </div>
     `;
+    const qrCanvas = content.querySelector('[data-kapita-qr]');
+    const user = getCurrentUser();
+    if (user?.kapita_id) {
+      renderKapitaQr(qrCanvas, user.kapita_id).catch(() => {
+        if (window.showToast) window.showToast('Could not create your Kapita ID QR code.', 'error');
+      });
+    } else {
+      hydrateProfile()
+        .then((profile) => renderKapitaQr(qrCanvas, profile?.kapita_id))
+        .catch(() => {
+          if (window.showToast) window.showToast('Could not load your Kapita ID.', 'error');
+        });
+    }
   } else if (actionType === 'withdraw') {
     title.textContent = 'Withdraw Funds';
     subtitle.textContent = 'Transfer funds out to external bank account';
@@ -313,23 +212,61 @@ function openWalletModal(actionType) {
     `;
   } else if (actionType === 'scan') {
     title.textContent = 'Scan & Pay QR';
-    subtitle.textContent = 'Point camera at seller or recipient QR code';
+    subtitle.textContent = 'Scan a Kapita ID to start a transfer';
     content.innerHTML = `
-      <div style="text-align: center; padding: 24px; border: 2px dashed #00d084; border-radius: 16px; background: rgba(0, 208, 132, 0.05);">
-        <span class="material-symbols-outlined" style="font-size: 64px; color: #00d084;">qr_code_scanner</span>
-        <p style="margin-top: 12px; font-weight: 600;">Camera scanner initializing...</p>
+      <div style="text-align: center;">
+        <video id="kapitaQrVideo" playsinline style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #111;"></video>
+        <p id="kapitaQrStatus" role="status" aria-live="polite" style="margin: 12px 0 0;">Starting camera...</p>
       </div>
       <button class="btn-secondary w-full" style="margin-top: 16px;" onclick="closeWalletModal()">Cancel</button>
     `;
   }
 
   modal.classList.add('active');
+  if (actionType === 'send' && recipientId) {
+    const recipientInput = content.querySelector('#sendRecipient');
+    if (recipientInput) {
+      recipientInput.value = recipientId;
+      content.querySelector('#sendAmount')?.focus();
+    }
+  }
+  if (actionType === 'scan') startKapitaQrScanner();
 }
 
 function closeWalletModal(e) {
   if (e && e.target !== e.currentTarget) return;
+  qrScannerControls?.stop();
+  qrScannerControls = null;
   const modal = document.getElementById('walletActionModal');
   if (modal) modal.classList.remove('active');
+}
+
+async function startKapitaQrScanner() {
+  const video = document.getElementById('kapitaQrVideo');
+  const status = document.getElementById('kapitaQrStatus');
+  if (!video || !status) return;
+
+  qrReader ||= new BrowserQRCodeReader();
+  try {
+    qrScannerControls = await qrReader.decodeFromVideoDevice(undefined, video, (result, _error, controls) => {
+      if (!result) return;
+
+      const recipientId = result.getText().trim();
+      if (!/^KPT-[A-F0-9]{6}$/i.test(recipientId)) {
+        status.textContent = 'This QR code is not a valid Kapita ID. Keep scanning or cancel.';
+        return;
+      }
+
+      controls.stop();
+      qrScannerControls = null;
+      closeWalletModal();
+      openWalletModal('send', recipientId);
+    });
+  } catch (error) {
+    status.textContent = error.name === 'NotAllowedError'
+      ? 'Camera access is blocked. Allow camera access in your browser and try again.'
+      : 'Could not start the camera. Use a secure connection and check that a camera is available.';
+  }
 }
 
 /* 4. Transaction Detail Viewer */
@@ -529,12 +466,6 @@ function filterTx(type, btnElement) {
 let transactions = [];
 let txFilter = 'all';
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
-
 function formatTxDate(iso) {
   return new Date(iso).toLocaleString('en-NG', {
     day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
@@ -542,7 +473,7 @@ function formatTxDate(iso) {
 }
 
 function renderTransactions() {
-  const list = document.getElementById('txList');
+  const list = document.querySelector('.activity-timeline');
   if (!list) return;
   list.replaceChildren();
   const rows = transactions.filter(
@@ -597,12 +528,20 @@ function renderTransactions() {
 }
 
 async function hydrateTransactions() {
+  const list = document.querySelector('.activity-timeline');
+  if (list) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'activity-row skeleton-card';
+    skeleton.style.cssText = 'height:48px;margin-bottom:8px;background:#f1f5f9;border-radius:8px;';
+    list.replaceChildren(skeleton);
+  }
   try {
     transactions = await loadTransactions();
-    renderTransactions();
   } catch (err) {
-    console.error('Could not load transactions:', err);
+    transactions = [];
+    if (window.showToast) window.showToast('Could not load your transactions.', 'error');
   }
+  renderTransactions();
 }
 
 function copyMyKapitaId() {

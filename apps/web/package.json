@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@thekapita/shared": "*",
+    "@zxing/browser": "^0.2.1",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

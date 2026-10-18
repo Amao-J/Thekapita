@@ -105,7 +105,7 @@
 
             <div class="balance-display">
               <div class="amount-group">
-                <span class="currency" aria-hidden="true">₦</span>
+               
                 <span class="amount" id="walletBalance" aria-labelledby="pay-balance-heading">245,500.00</span>
               </div>
               <button type="button" class="eye-toggle" onclick="toggleBalanceVisibility()" title="Toggle Masking" aria-label="Toggle balance visibility">
@@ -297,9 +297,9 @@
             <button type="button" class="btn-sm" onclick="openEditModal('eats')">Edit</button>
           </div>
           <div class="profile-details-list">
-            <div class="detail-row"><span>Dietary Preference:</span> <strong>No Pork, Halal</strong></div>
-            <div class="detail-row"><span>Favorite Cuisine:</span> <strong>Nigerian, Pan-Asian</strong></div>
-            <div class="detail-row"><span>Default Address:</span> <strong>Home (Admiralty Way)</strong></div>
+            <div class="detail-row"><span>Dietary Preference:</span> <strong data-pref="dietary_preference">No Pork, Halal</strong></div>
+            <div class="detail-row"><span>Favorite Cuisine:</span> <strong data-pref="favorite_cuisine">Nigerian, Pan-Asian</strong></div>
+            <div class="detail-row"><span>Default Address:</span> <strong data-pref="default_address">Home (Admiralty Way)</strong></div>
           </div>
         </section>
 
@@ -312,9 +312,9 @@
             <button type="button" class="btn-sm" onclick="openEditModal('ride')">Edit</button>
           </div>
           <div class="profile-details-list">
-            <div class="detail-row"><span>Preferred Ride:</span> <strong>Comfort / AC SUV</strong></div>
-            <div class="detail-row"><span>Quiet Mode:</span> <strong>Enabled (Driver Quiet)</strong></div>
-            <div class="detail-row"><span>Default Payment:</span> <strong>theKapita Pay Wallet</strong></div>
+            <div class="detail-row"><span>Preferred Ride:</span> <strong data-pref="preferred_ride">Comfort / AC SUV</strong></div>
+            <div class="detail-row"><span>Quiet Mode:</span> <strong data-pref="quiet_mode">Enabled (Driver Quiet)</strong></div>
+            <div class="detail-row"><span>Default Payment:</span> <strong data-pref="default_payment">theKapita Pay Wallet</strong></div>
           </div>
         </section>
 
@@ -327,9 +327,9 @@
             <button type="button" class="btn-sm" onclick="openEditModal('talent')">Manage Resume</button>
           </div>
           <div class="profile-details-list">
-            <div class="detail-row"><span>Primary Skill:</span> <strong>Frontend Engineer</strong></div>
-            <div class="detail-row"><span>Experience Level:</span> <strong>Senior (6+ Years)</strong></div>
-            <div class="detail-row"><span>Resume Attachment:</span> <strong>Ahmed_Ebuka_CV.pdf ✓</strong></div>
+            <div class="detail-row"><span>Primary Skill:</span> <strong data-pref="primary_skill">Frontend Engineer</strong></div>
+            <div class="detail-row"><span>Experience Level:</span> <strong data-pref="experience_level">Senior (6+ Years)</strong></div>
+            <div class="detail-row"><span>Resume Attachment:</span> <strong>Not uploaded</strong></div>
           </div>
         </section>
 
@@ -342,9 +342,9 @@
             <button type="button" class="btn-sm" onclick="openEditModal('health')">Edit</button>
           </div>
           <div class="profile-details-list">
-            <div class="detail-row"><span>Blood Group:</span> <strong>O Positive (O+)</strong></div>
-            <div class="detail-row"><span>Emergency Contact:</span> <strong>+234 803 *** 8921</strong></div>
-            <div class="detail-row"><span>Health Insurance ID:</span> <strong>HMO-KP-99201</strong></div>
+            <div class="detail-row"><span>Blood Group:</span> <strong data-pref="blood_group">O Positive (O+)</strong></div>
+            <div class="detail-row"><span>Emergency Contact:</span> <strong data-pref="emergency_contact">+234 803 *** 8921</strong></div>
+            <div class="detail-row"><span>Health Insurance ID:</span> <strong data-pref="health_insurance_id">HMO-KP-99201</strong></div>
           </div>
         </section>
 
@@ -417,10 +417,10 @@
               <div class="detail-row"><span>Full Name:</span> <strong data-profile-field="fullName">Ahmed Ebuka</strong></div>
               <div class="detail-row"><span>Email Address:</span> <strong data-profile-field="email">Ahmed@example.com ✓</strong></div>
               <div class="detail-row"><span>Phone Number:</span> <strong data-profile-field="phone">+234 810 *** 0021 ✓</strong></div>
-              <div class="detail-row"><span>Date of Birth:</span> <strong>14 October 1996</strong></div>
-              <div class="detail-row"><span>Primary Location:</span> <strong>Lagos, Nigeria</strong></div>
-              <div class="detail-row"><span>Residential Address:</span> <strong>12 Admiralty Way, Lekki</strong></div>
-              <div class="detail-row"><span>Language:</span> <strong>English (US)</strong></div>
+              <div class="detail-row"><span>Date of Birth:</span> <strong data-profile-field="dateOfBirth">14 October 1996</strong></div>
+              <div class="detail-row"><span>Primary Location:</span> <strong data-profile-field="location">Lagos, Nigeria</strong></div>
+              <div class="detail-row"><span>Residential Address:</span> <strong data-profile-field="address">12 Admiralty Way, Lekki</strong></div>
+              <div class="detail-row"><span>Language:</span> <strong data-profile-field="language">English (US)</strong></div>
               <div class="detail-row"><span>Country / Currency:</span> <strong>Nigeria (NGN - ₦)</strong></div>
               <div class="detail-row"><span>Time Zone:</span> <strong>WAT (UTC+1)</strong></div>
             </div>
@@ -468,28 +468,28 @@
                   <label for="switchPublicVis" class="setting-label">Public Profile Visibility</label>
                   <p id="descPublicVis">Allow friends to search your @username</p>
                 </div>
-                <input type="checkbox" id="switchPublicVis" checked class="toggle-switch" aria-describedby="descPublicVis">
+                <input type="checkbox" id="switchPublicVis" data-setting="public_visibility" checked class="toggle-switch" aria-describedby="descPublicVis">
               </div>
               <div class="setting-item">
                 <div>
                   <label for="switchLocation" class="setting-label">Location Services Access</label>
                   <p id="descLocation">Allow accurate pickups &amp; local service matching</p>
                 </div>
-                <input type="checkbox" id="switchLocation" checked class="toggle-switch" aria-describedby="descLocation">
+                <input type="checkbox" id="switchLocation" data-setting="location_services" checked class="toggle-switch" aria-describedby="descLocation">
               </div>
               <div class="setting-item">
                 <div>
                   <label for="switchPersonalization" class="setting-label">Cross-Service Personalization</label>
                   <p id="descPersonalization">Allow Brain AI to offer smart ecosystem suggestions</p>
                 </div>
-                <input type="checkbox" id="switchPersonalization" checked class="toggle-switch" aria-describedby="descPersonalization">
+                <input type="checkbox" id="switchPersonalization" data-setting="personalization" checked class="toggle-switch" aria-describedby="descPersonalization">
               </div>
               <div class="setting-item">
                 <div>
                   <label for="switchMarketing" class="setting-label">Marketing &amp; Ecosystem Offers</label>
                   <p id="descMarketing">Receive localized deals and service discounts</p>
                 </div>
-                <input type="checkbox" id="switchMarketing" class="toggle-switch" aria-describedby="descMarketing">
+                <input type="checkbox" id="switchMarketing" data-setting="marketing" class="toggle-switch" aria-describedby="descMarketing">
               </div>
               
               <div class="setting-action-row settings-action-stack">
@@ -522,28 +522,28 @@
               <label for="switchPushNotif" class="setting-label">Push Notifications</label>
               <p id="descPushNotif">Instant mobile alerts for ride arrivals and orders</p>
             </div>
-            <input type="checkbox" id="switchPushNotif" checked class="toggle-switch" aria-describedby="descPushNotif">
+            <input type="checkbox" id="switchPushNotif" data-setting="push" checked class="toggle-switch" aria-describedby="descPushNotif">
           </div>
           <div class="setting-item">
             <div>
               <label for="switchMsgNotif" class="setting-label">Messages &amp; Chat Alerts</label>
               <p id="descMsgNotif">Direct communications from drivers, sellers, or support</p>
             </div>
-            <input type="checkbox" id="switchMsgNotif" checked class="toggle-switch" aria-describedby="descMsgNotif">
+            <input type="checkbox" id="switchMsgNotif" data-setting="messages" checked class="toggle-switch" aria-describedby="descMsgNotif">
           </div>
           <div class="setting-item">
             <div>
               <label for="switchUpdatesNotif" class="setting-label">Service Updates &amp; Announcements</label>
               <p id="descUpdatesNotif">Important maintenance or ecosystem feature releases</p>
             </div>
-            <input type="checkbox" id="switchUpdatesNotif" checked class="toggle-switch" aria-describedby="descUpdatesNotif">
+            <input type="checkbox" id="switchUpdatesNotif" data-setting="updates" checked class="toggle-switch" aria-describedby="descUpdatesNotif">
           </div>
           <div class="setting-item">
             <div>
               <label for="switchOffersNotif" class="setting-label">Exclusive Offers &amp; Rewards</label>
               <p id="descOffersNotif">Promotions and cashback opportunities</p>
             </div>
-            <input type="checkbox" id="switchOffersNotif" class="toggle-switch" aria-describedby="descOffersNotif">
+            <input type="checkbox" id="switchOffersNotif" data-setting="offers" class="toggle-switch" aria-describedby="descOffersNotif">
           </div>
         </div>
       </section>
@@ -636,29 +636,7 @@
       </div>
 
       <div class="qr-code-box">
-        <svg viewBox="0 0 100 100" class="qr-svg" role="img" aria-label="QR Code for Ahmed Ebuka, Kapita ID KPT-883902">
-          <rect width="100" height="100" fill="#ffffff" />
-          <rect x="10" y="10" width="24" height="24" fill="#121212" />
-          <rect x="14" y="14" width="16" height="16" fill="#ffffff" />
-          <rect x="18" y="18" width="8" height="8" fill="#121212" />
-          <rect x="66" y="10" width="24" height="24" fill="#121212" />
-          <rect x="70" y="14" width="16" height="16" fill="#ffffff" />
-          <rect x="74" y="18" width="8" height="8" fill="#121212" />
-          <rect x="10" y="66" width="24" height="24" fill="#121212" />
-          <rect x="14" y="70" width="16" height="16" fill="#ffffff" />
-          <rect x="18" y="74" width="8" height="8" fill="#121212" />
-          <rect x="42" y="42" width="16" height="16" rx="4" fill="#121212" />
-          <circle cx="50" cy="50" r="3" fill="#00d084" />
-          <rect x="40" y="12" width="6" height="6" fill="#121212" />
-          <rect x="52" y="18" width="6" height="6" fill="#121212" />
-          <rect x="12" y="42" width="6" height="6" fill="#121212" />
-          <rect x="24" y="50" width="6" height="6" fill="#121212" />
-          <rect x="68" y="42" width="6" height="6" fill="#121212" />
-          <rect x="80" y="52" width="6" height="6" fill="#121212" />
-          <rect x="42" y="68" width="6" height="6" fill="#121212" />
-          <rect x="54" y="78" width="6" height="6" fill="#121212" />
-          <rect x="72" y="72" width="8" height="8" fill="#121212" />
-        </svg>
+        <canvas class="qr-svg" data-kapita-qr role="img" aria-label="Kapita ID QR code"></canvas>
       </div>
 
       <div class="qr-user-details">
