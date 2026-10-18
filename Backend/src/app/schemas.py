@@ -3,6 +3,7 @@ Request/response schemas for the endpoints js/api.js calls.
 `ninja.Schema` is a thin wrapper over Pydantic — anything Pydantic can do
 (validators, computed fields) works here.
 """
+import re
 from decimal import Decimal
 
 from ninja import Schema
@@ -50,11 +51,23 @@ class ProfileOut(Schema):
     phone: str
     kyc_tier: int
     kapita_id: str
+    handle: str = ""
 
 
 class ProfileUpdateIn(Schema):
     full_name: str | None = None
     bio: str | None = None
+    phone: str | None = None
+
+    @field_validator("phone")
+    @classmethod
+    def phone_format(cls, v):
+        if v is None:
+            return v
+        v = v.strip().replace(" ", "")
+        if not re.fullmatch(r"\+?\d{7,15}", v):
+            raise ValueError("Enter a valid phone number.")
+        return v
 
 
 # ---- wallet ---------------------------------------------------------------
@@ -78,6 +91,8 @@ class FundWalletIn(Schema):
     def amount_positive(cls, v: Decimal) -> Decimal:
         if v <= 0:
             raise ValueError("Amount must be greater than zero.")
+        if v != v.quantize(Decimal("0.01")) or v >= Decimal("10") ** 12:
+            raise ValueError("Amount must have at most 2 decimal places.")
         return v
 
 
@@ -90,6 +105,8 @@ class SendMoneyIn(Schema):
     def amount_positive(cls, v: Decimal) -> Decimal:
         if v <= 0:
             raise ValueError("Amount must be greater than zero.")
+        if v != v.quantize(Decimal("0.01")) or v >= Decimal("10") ** 12:
+            raise ValueError("Amount must have at most 2 decimal places.")
         return v
 
 
