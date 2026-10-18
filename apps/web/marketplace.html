@@ -18,52 +18,54 @@
 </head>
 <body class="wallet-body">
 
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Desktop Header -->
   <header class="desktop-header profile-back-header">
-    <div class="header-back-action" onclick="window.location.href='index.html'">
+    <a href="index.html" class="header-back-action" aria-label="Return to theKapita Homepage">
       <div class="back-btn-circle">
-        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </div>
-      <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #00d084;">Marketplace</span></span>
-    </div>
+      <span class="header-brand-title">theKapita <span class="accent-text">Marketplace</span></span>
+    </a>
 
     <div class="wallet-header-tag">
-      <!-- Separated Cart Button -->
-      <button class="text-btn" onclick="switchMarketView('cart')" style="position: relative; margin-right: 8px;">
-        <span class="material-symbols-outlined">shopping_cart</span>
-        <span id="cartCountBadge" style="position: absolute; top: -6px; right: -8px; background: #00d084; color: #121212; font-weight: 800; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span>
+      <!-- Cart Button -->
+      <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart, 2 items inside">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
+        <span id="cartCountBadge" class="cart-badge">2</span>
       </button>
 
-      <!-- Desktop Top-Right Menu with Integrated Balance & Nav Links -->
+      <!-- Desktop Header Menu Dropdown -->
       <div class="header-nav-dropdown-wrapper">
-        <button class="header-menu-pill-btn" onclick="toggleHeaderNavMenu(event)">
-          <span class="material-symbols-outlined">menu</span>
-          
-          <span class="material-symbols-outlined arrow-icon">expand_more</span>
+        <button type="button" class="header-menu-pill-btn" onclick="toggleHeaderNavMenu(event)" aria-expanded="false" aria-haspopup="true" aria-controls="headerNavDropdownMenu" aria-label="Account and Wallet Navigation Menu">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
         </button>
 
-        <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu">
-          <!-- Balance Summary Card Inside Dropdown -->
-          <div class="dropdown-balance-card" onclick="window.location.href='wallet.html'">
+        <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu" role="menu">
+          <!-- Balance Summary Card -->
+          <a href="wallet.html" class="dropdown-balance-card" role="menuitem">
             <div class="balance-card-sub">Available Wallet Balance</div>
             <div class="balance-card-val">₦245,500.00</div>
-          </div>
+          </a>
 
-          <div class="dropdown-divider"></div>
+          <div class="dropdown-divider" role="separator"></div>
 
           <!-- Navigation Links -->
-          <div class="header-dropdown-item" onclick="switchMarketView('browse')">
-            <span class="material-symbols-outlined icon">storefront</span> Browse Market
-          </div>
-          <div class="header-dropdown-item" onclick="switchMarketView('orders')">
-            <span class="material-symbols-outlined icon">local_shipping</span> My Orders & Tracking
-          </div>
-          <div class="header-dropdown-item" onclick="switchMarketView('wishlist')">
-            <span class="material-symbols-outlined icon">favorite</span> Saved Wishlist
-          </div>
-          <div class="header-dropdown-item" onclick="window.location.href='seller-dashboard.html'">
-            <span class="material-symbols-outlined icon">store</span> Seller Center
-          </div>
+          <button type="button" class="header-dropdown-item" onclick="switchMarketView('browse')" role="menuitem">
+            <span class="material-symbols-outlined icon" aria-hidden="true">storefront</span> Browse Market
+          </button>
+          <button type="button" class="header-dropdown-item" onclick="switchMarketView('orders')" role="menuitem">
+            <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> My Orders &amp; Tracking
+          </button>
+          <button type="button" class="header-dropdown-item" onclick="switchMarketView('wishlist')" role="menuitem">
+            <span class="material-symbols-outlined icon" aria-hidden="true">favorite</span> Saved Wishlist
+          </button>
+          <a href="seller-dashboard.html" class="header-dropdown-item" role="menuitem">
+            <span class="material-symbols-outlined icon" aria-hidden="true">store</span> Seller Center
+          </a>
         </div>
       </div>
 
@@ -71,248 +73,264 @@
   </header>
 
   <!-- Main Portal Container -->
-  <main class="portal-container wallet-container">
+  <main class="portal-container wallet-container" id="main-content" tabindex="-1">
 
-    <!-- Navigation Bar (Hidden on Desktop, Fixed Mobile Bottom Dock) -->
-    <nav class="market-nav-bar">
-      <button class="market-nav-btn active" onclick="switchMarketView('browse', this)">
-        <span class="material-symbols-outlined nav-icon">storefront</span>
+    <!-- Mobile Bottom Dock Navigation -->
+    <nav class="market-nav-bar" aria-label="Mobile Navigation">
+      <button type="button" class="market-nav-btn active" onclick="switchMarketView('browse', this)" aria-label="Browse Marketplace">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">storefront</span>
         <span class="nav-text">Browse</span>
       </button>
 
-      <button class="market-nav-btn" onclick="switchMarketView('cart', this)">
+      <button type="button" class="market-nav-btn" onclick="switchMarketView('cart', this)" aria-label="View Cart, 2 items">
         <div class="nav-icon-wrapper">
-          <span class="material-symbols-outlined nav-icon">shopping_cart</span>
+          <span class="material-symbols-outlined nav-icon" aria-hidden="true">shopping_cart</span>
           <span class="nav-badge" id="mobileCartBadge">2</span>
         </div>
         <span class="nav-text">Cart</span>
       </button>
 
-      <button class="market-nav-btn" onclick="switchMarketView('orders', this)">
-        <span class="material-symbols-outlined nav-icon">local_shipping</span>
+      <button type="button" class="market-nav-btn" onclick="switchMarketView('orders', this)" aria-label="View Orders and Tracking">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">local_shipping</span>
         <span class="nav-text">Orders</span>
       </button>
 
-      <button class="market-nav-btn" onclick="switchMarketView('wishlist', this)">
-        <span class="material-symbols-outlined nav-icon">favorite</span>
+      <button type="button" class="market-nav-btn" onclick="switchMarketView('wishlist', this)" aria-label="View Saved Wishlist">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">favorite</span>
         <span class="nav-text">Wishlist</span>
       </button>
 
-      <button class="market-nav-btn" onclick="window.location.href='seller-dashboard.html'">
-        <span class="material-symbols-outlined nav-icon">store</span>
+      <a href="seller-dashboard.html" class="market-nav-btn" aria-label="Open Seller Dashboard">
+        <span class="material-symbols-outlined nav-icon" aria-hidden="true">store</span>
         <span class="nav-text">Seller Hub</span>
-      </button>
+      </a>
     </nav>
 
     <!-- BROWSE VIEW -->
-    <div id="viewBrowse" class="market-view-pane active">
+    <section id="viewBrowse" class="market-view-pane active" aria-labelledby="browse-heading">
+      <h2 id="browse-heading" class="sr-only">Browse Marketplace</h2>
       
-      <!-- Light Search Toolbar -->
+      <!-- Search Toolbar -->
       <div class="market-toolbar-box">
         <div class="market-search-wrapper">
-          <span class="material-symbols-outlined search-icon">search</span>
+          <label for="marketSearchInput" class="sr-only">Search products, verified sellers, or categories</label>
+          <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
           <input type="text" id="marketSearchInput" placeholder="Search authentic products, verified sellers, or categories..." class="market-search-input" onkeyup="filterMarketProducts()">
         </div>
-        <button class="ai-ask-btn" onclick="openAIProductAssistant()">
+        <button type="button" class="ai-ask-btn" onclick="openAIProductAssistant()">
           Search
         </button>
       </div>
 
-      <!-- Quick Category Filter Pills -->
-      <div class="market-quick-filters">
-        <button class="filter-pill-btn active" onclick="filterCategory('all', this)">
-          <span class="material-symbols-outlined icon">apps</span> All Items
+      <!-- Category Filters -->
+      <div class="market-quick-filters" role="toolbar" aria-label="Category Filters">
+        <button type="button" class="filter-pill-btn active" onclick="filterCategory('all', this)" aria-pressed="true">
+          <span class="material-symbols-outlined icon" aria-hidden="true">apps</span> All Items
         </button>
-        <button class="filter-pill-btn" onclick="filterCategory('electronics', this)">
-          <span class="material-symbols-outlined icon">laptop</span> Computing & Tech
+        <button type="button" class="filter-pill-btn" onclick="filterCategory('electronics', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">laptop</span> Computing &amp; Tech
         </button>
-        <button class="filter-pill-btn" onclick="filterCategory('fashion', this)">
-          <span class="material-symbols-outlined icon">checkroom</span> Apparel & Fashion
+        <button type="button" class="filter-pill-btn" onclick="filterCategory('fashion', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">checkroom</span> Apparel &amp; Fashion
         </button>
-        <button class="filter-pill-btn" onclick="filterCategory('home', this)">
-          <span class="material-symbols-outlined icon">chair</span> Home & Living
+        <button type="button" class="filter-pill-btn" onclick="filterCategory('home', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">chair</span> Home &amp; Living
         </button>
 
-        <!-- More Categories Dropdown Pill -->
+        <!-- Dropdown Pill -->
         <div class="filter-dropdown-wrapper">
-          <button class="filter-pill-btn dropdown-toggle" onclick="toggleCategoryDropdown(event)">
-            <span class="material-symbols-outlined icon">tune</span> Categories
-            <span class="material-symbols-outlined arrow-icon">expand_more</span>
+          <button type="button" class="filter-pill-btn dropdown-toggle" onclick="toggleCategoryDropdown(event)" aria-expanded="false" aria-haspopup="true" aria-controls="categoryDropdownMenu">
+            <span class="material-symbols-outlined icon" aria-hidden="true">tune</span> Categories
+            <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
           </button>
-          <div class="category-dropdown-menu" id="categoryDropdownMenu">
-            <div class="dropdown-item" onclick="selectDropdownCategory('electronics', 'Computing & Tech', 'laptop', this)">
-              <span class="material-symbols-outlined icon">laptop</span> Computing & Tech
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('fashion', 'Apparel & Fashion', 'checkroom', this)">
-              <span class="material-symbols-outlined icon">checkroom</span> Apparel & Fashion
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('home', 'Home & Living', 'chair', this)">
-              <span class="material-symbols-outlined icon">chair</span> Home & Living
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('beauty', 'Beauty & Care', 'spa', this)">
-              <span class="material-symbols-outlined icon">spa</span> Beauty & Care
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('gaming', 'Gaming & Consoles', 'sports_esports', this)">
-              <span class="material-symbols-outlined icon">sports_esports</span> Gaming & Consoles
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('automotive', 'Automotive & Parts', 'directions_car', this)">
-              <span class="material-symbols-outlined icon">directions_car</span> Automotive & Parts
-            </div>
-            <div class="dropdown-item" onclick="selectDropdownCategory('supermarket', 'Supermarket & Groceries', 'shopping_basket', this)">
-              <span class="material-symbols-outlined icon">shopping_basket</span> Supermarket & Groceries
-            </div>
+          <div class="category-dropdown-menu" id="categoryDropdownMenu" role="menu">
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('electronics', 'Computing & Tech', 'laptop', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">laptop</span> Computing &amp; Tech
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('fashion', 'Apparel & Fashion', 'checkroom', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">checkroom</span> Apparel &amp; Fashion
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('home', 'Home & Living', 'chair', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">chair</span> Home &amp; Living
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('beauty', 'Beauty & Care', 'spa', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">spa</span> Beauty &amp; Care
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('gaming', 'Gaming & Consoles', 'sports_esports', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">sports_esports</span> Gaming &amp; Consoles
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('automotive', 'Automotive & Parts', 'directions_car', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">directions_car</span> Automotive &amp; Parts
+            </button>
+            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('supermarket', 'Supermarket & Groceries', 'shopping_basket', this)" role="menuitem">
+              <span class="material-symbols-outlined icon" aria-hidden="true">shopping_basket</span> Supermarket &amp; Groceries
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Full-Width Marketplace Section -->
+      <!-- Marketplace Sub-Bar -->
       <div class="marketplace-grid-full">
         <div class="market-sub-bar">
-  <span class="product-count-tag"><strong id="productCount">4</strong> products</span>
+          <span class="product-count-tag"><strong id="productCount">4</strong> products available</span>
 
-  <!-- Custom Sort Dropdown Pill -->
-  <div class="filter-dropdown-wrapper">
-    <button class="filter-pill-btn dropdown-toggle" onclick="toggleSortDropdown(event)">
-      <span class="material-symbols-outlined icon">sort</span>
-      <span id="currentSortLabel">Featured</span>
-      <span class="material-symbols-outlined arrow-icon">expand_more</span>
-    </button>
-    <div class="category-dropdown-menu sort-dropdown-menu" id="sortDropdownMenu">
-      <div class="dropdown-item active" onclick="selectSortOption('featured', 'Sort: Featured', this)">
-        <span class="material-symbols-outlined icon">star</span> Sort: Featured
-      </div>
-      <div class="dropdown-item" onclick="selectSortOption('price-low', 'Price: Low to High', this)">
-        <span class="material-symbols-outlined icon">arrow_downward</span> Price: Low to High
-      </div>
-      <div class="dropdown-item" onclick="selectSortOption('price-high', 'Price: High to Low', this)">
-        <span class="material-symbols-outlined icon">arrow_upward</span> Price: High to Low
-      </div>
-      <div class="dropdown-item" onclick="selectSortOption('rating', 'Highest Rated', this)">
-        <span class="material-symbols-outlined icon">thumb_up</span> Highest Rated
-      </div>
-    </div>
-  </div>
-</div>
+          <div class="filter-dropdown-wrapper">
+            <button type="button" class="filter-pill-btn dropdown-toggle" onclick="toggleSortDropdown(event)" aria-expanded="false" aria-haspopup="true" aria-controls="sortDropdownMenu">
+              <span class="material-symbols-outlined icon" aria-hidden="true">sort</span>
+              <span id="currentSortLabel">Featured</span>
+              <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="category-dropdown-menu sort-dropdown-menu" id="sortDropdownMenu" role="menu">
+              <button type="button" class="dropdown-item active" onclick="selectSortOption('featured', 'Sort: Featured', this)" role="menuitem">
+                <span class="material-symbols-outlined icon" aria-hidden="true">star</span> Sort: Featured
+              </button>
+              <button type="button" class="dropdown-item" onclick="selectSortOption('price-low', 'Price: Low to High', this)" role="menuitem">
+                <span class="material-symbols-outlined icon" aria-hidden="true">arrow_downward</span> Price: Low to High
+              </button>
+              <button type="button" class="dropdown-item" onclick="selectSortOption('price-high', 'Price: High to Low', this)" role="menuitem">
+                <span class="material-symbols-outlined icon" aria-hidden="true">arrow_upward</span> Price: High to Low
+              </button>
+              <button type="button" class="dropdown-item" onclick="selectSortOption('rating', 'Highest Rated', this)" role="menuitem">
+                <span class="material-symbols-outlined icon" aria-hidden="true">thumb_up</span> Highest Rated
+              </button>
+            </div>
+          </div>
+        </div>
 
-        <!-- Full-Width Multi-Card Wide Grid -->
+        <!-- Products Grid -->
         <div class="products-grid-full" id="marketProductsGrid">
           
           <!-- Product 1 -->
-          <div class="product-card" data-category="electronics" data-price="450000" data-verified="true">
+          <article class="product-card" data-category="electronics" data-price="450000" data-verified="true">
             <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60" alt="Laptop">
-              <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> HP Authorized</div>
+              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5 Laptop silver finish open view">
+              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add HP EliteBook 840 G5 to wishlist">
+                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+              </button>
+              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> HP Authorized</div>
             </div>
             <div class="product-details">
               <span class="product-meta-sub">Computing</span>
-              <h4 class="product-name" onclick="showProductDetails('P1')">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h4>
-              <div class="product-rating-row">
-                <span class="material-symbols-outlined" style="font-size: 13px;">star</span> 4.9 <span class="review-count">(128)</span>
+              <h3 class="product-name">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P1')">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</button>
+              </h3>
+              <div class="product-rating-row" aria-label="Rating: 4.9 out of 5 stars from 128 reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.9 <span class="review-count">(128)</span>
               </div>
               <div class="product-bottom-row">
                 <div class="product-price-block">
                   <span class="product-price">₦450,000</span>
                   <span class="discount-tag">-10% OFF</span>
                 </div>
-                <button class="add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')">
-                  <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
+                <button type="button" class="add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')" aria-label="Add HP EliteBook 840 G5 to cart">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
                 </button>
               </div>
             </div>
-          </div>
+          </article>
 
           <!-- Product 2 -->
-          <div class="product-card" data-category="fashion" data-price="18500" data-verified="true">
+          <article class="product-card" data-category="fashion" data-price="18500" data-verified="true">
             <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60" alt="T-Shirt">
-              <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> Kapita Apparel</div>
+              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60" alt="Minimalist Onyx Black Heavyweight Cotton Hoodie">
+              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Minimalist Hoodie to wishlist">
+                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+              </button>
+              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Kapita Apparel</div>
             </div>
             <div class="product-details">
               <span class="product-meta-sub">Apparel</span>
-              <h4 class="product-name" onclick="showProductDetails('P2')">Minimalist Heavyweight Cotton Hoodie</h4>
-              <div class="product-rating-row">
-                <span class="material-symbols-outlined" style="font-size: 13px;">star</span> 4.8 <span class="review-count">(64)</span>
+              <h3 class="product-name">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P2')">Minimalist Heavyweight Cotton Hoodie</button>
+              </h3>
+              <div class="product-rating-row" aria-label="Rating: 4.8 out of 5 stars from 64 reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.8 <span class="review-count">(64)</span>
               </div>
               <div class="product-bottom-row">
                 <div class="product-price-block">
                   <span class="product-price">₦18,500</span>
                   <span class="discount-tag">-15% OFF</span>
                 </div>
-                <button class="add-cart-btn" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')">
-                  <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
+                <button type="button" class="add-cart-btn" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')" aria-label="Add Minimalist Hoodie to cart">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
                 </button>
               </div>
             </div>
-          </div>
+          </article>
 
           <!-- Product 3 -->
-          <div class="product-card" data-category="home" data-price="35000" data-verified="false">
+          <article class="product-card" data-category="home" data-price="35000" data-verified="false">
             <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=60" alt="Lamp">
-              <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
+              <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=60" alt="Smart LED Desk Lamp with built-in Wireless Charger base">
+              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Smart Desk Lamp to wishlist">
+                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+              </button>
             </div>
             <div class="product-details">
-              <span class="product-meta-sub">Home & Office</span>
-              <h4 class="product-name" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</h4>
-              <div class="product-rating-row">
-                <span class="material-symbols-outlined" style="font-size: 13px;">star</span> 4.6 <span class="review-count">(32)</span>
+              <span class="product-meta-sub">Home &amp; Office</span>
+              <h3 class="product-name">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</button>
+              </h3>
+              <div class="product-rating-row" aria-label="Rating: 4.6 out of 5 stars from 32 reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.6 <span class="review-count">(32)</span>
               </div>
               <div class="product-bottom-row">
                 <div class="product-price-block">
                   <span class="product-price">₦35,000</span>
                   <span class="discount-tag">-5% OFF</span>
                 </div>
-                <button class="add-cart-btn" onclick="addToCart('P3', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')">
-                  <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
+                <button type="button" class="add-cart-btn" onclick="addToCart('P3', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')" aria-label="Add Smart Desk Lamp to cart">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
                 </button>
               </div>
             </div>
-          </div>
+          </article>
 
           <!-- Product 4 -->
-          <div class="product-card" data-category="beauty" data-price="12000" data-verified="true">
+          <article class="product-card" data-category="beauty" data-price="12000" data-verified="true">
             <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60" alt="Skincare">
-              <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> Organic Care</div>
+              <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60" alt="Hydrating Facial Serum Set bottles 100ml">
+              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Hydrating Serum Set to wishlist">
+                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+              </button>
+              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Organic Care</div>
             </div>
             <div class="product-details">
               <span class="product-meta-sub">Beauty</span>
-              <h4 class="product-name" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</h4>
-              <div class="product-rating-row">
-                <span class="material-symbols-outlined" style="font-size: 13px;">star</span> 4.9 <span class="review-count">(210)</span>
+              <h3 class="product-name">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</button>
+              </h3>
+              <div class="product-rating-row" aria-label="Rating: 4.9 out of 5 stars from 210 reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.9 <span class="review-count">(210)</span>
               </div>
               <div class="product-bottom-row">
                 <div class="product-price-block">
                   <span class="product-price">₦12,000</span>
                   <span class="discount-tag">-20% OFF</span>
                 </div>
-                <button class="add-cart-btn" onclick="addToCart('P4', 'Hydrating Facial Serum Set', 12000, 'Organic Care')">
-                  <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
+                <button type="button" class="add-cart-btn" onclick="addToCart('P4', 'Hydrating Facial Serum Set', 12000, 'Organic Care')" aria-label="Add Hydrating Serum Set to cart">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
                 </button>
               </div>
             </div>
-          </div>
+          </article>
 
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- CART VIEW -->
-    <!-- CART VIEW -->
-    <div id="viewCart" class="market-view-pane" style="display: none;">
+    <section id="viewCart" class="market-view-pane" style="display: none;" aria-labelledby="cart-heading">
       <div class="cart-layout-container">
-        <!-- Main Cart Content Left -->
+        <!-- Main Cart Content -->
         <div class="cart-items-column">
           <div class="cart-header-row">
             <div>
-              <h2 class="cart-title">Shopping Cart</h2>
-              <p class="cart-subtitle">Review items</p>
+              <h2 class="cart-title" id="cart-heading">Shopping Cart</h2>
+              <p class="cart-subtitle">Review items before checkout</p>
             </div>
-            <button class="cart-clear-btn" onclick="clearCart()">
-              <span class="material-symbols-outlined">delete_sweep</span> Clear Cart
+            <button type="button" class="cart-clear-btn" onclick="clearCart()">
+              <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span> Clear Cart
             </button>
           </div>
 
@@ -320,29 +338,32 @@
           <div class="seller-cart-card">
             <div class="seller-card-header">
               <div class="seller-info">
-                <span class="material-symbols-outlined seller-icon">storefront</span>
+                <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
                 <span class="seller-name">HP Authorized Direct</span>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined">verified</span> Verified</span>
+                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
               </div>
-              <span class="seller-dispatch-tag"><span class="material-symbols-outlined">local_shipping</span> Dispatched from Lagos</span>
+              <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Lagos</span>
             </div>
 
             <div class="cart-item-row" id="cart-item-P1">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Laptop">
+              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="HP EliteBook 840 G5">
               <div class="cart-item-details">
                 <span class="cart-item-category">Computing</span>
-                <h4 class="cart-item-title">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h4>
+                <h3 class="cart-item-title">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h3>
                 <div class="cart-item-specs">Color: Silver • Warranty: 1 Year Official</div>
                 <div class="cart-item-price-mobile">₦450,000.00</div>
               </div>
               <div class="cart-item-price-desktop">₦450,000.00</div>
+              
               <div class="cart-qty-control">
-                <button class="cart-qty-btn" onclick="updateCartQty('P1', -1)">-</button>
-                <input type="text" value="1" class="cart-qty-input" readonly>
-                <button class="cart-qty-btn" onclick="updateCartQty('P1', 1)">+</button>
+                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P1', -1)" aria-label="Decrease quantity for HP EliteBook 840 G5">-</button>
+                <label for="qtyInputP1" class="sr-only">Quantity for HP EliteBook 840 G5</label>
+                <input type="number" id="qtyInputP1" value="1" class="cart-qty-input" min="1" readonly>
+                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P1', 1)" aria-label="Increase quantity for HP EliteBook 840 G5">+</button>
               </div>
-              <button class="cart-remove-btn" onclick="removeItem('P1')" title="Remove item">
-                <span class="material-symbols-outlined">delete</span>
+
+              <button type="button" class="cart-remove-btn" onclick="removeItem('P1')" aria-label="Remove HP EliteBook 840 G5 from cart">
+                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
               </button>
             </div>
           </div>
@@ -351,43 +372,47 @@
           <div class="seller-cart-card">
             <div class="seller-card-header">
               <div class="seller-info">
-                <span class="material-symbols-outlined seller-icon">storefront</span>
+                <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
                 <span class="seller-name">Kapita Apparel</span>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined">verified</span> Verified</span>
+                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
               </div>
-              <span class="seller-dispatch-tag"><span class="material-symbols-outlined">local_shipping</span> Dispatched from Abuja</span>
+              <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Abuja</span>
             </div>
 
             <div class="cart-item-row" id="cart-item-P2">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="T-Shirt">
+              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Minimalist Heavyweight Cotton Hoodie">
               <div class="cart-item-details">
                 <span class="cart-item-category">Apparel</span>
-                <h4 class="cart-item-title">Minimalist Heavyweight Cotton Hoodie</h4>
+                <h3 class="cart-item-title">Minimalist Heavyweight Cotton Hoodie</h3>
                 <div class="cart-item-specs">Size: L • Color: Onyx Black</div>
                 <div class="cart-item-price-mobile">₦18,500.00</div>
               </div>
               <div class="cart-item-price-desktop">₦18,500.00</div>
+
               <div class="cart-qty-control">
-                <button class="cart-qty-btn" onclick="updateCartQty('P2', -1)">-</button>
-                <input type="text" value="1" class="cart-qty-input" readonly>
-                <button class="cart-qty-btn" onclick="updateCartQty('P2', 1)">+</button>
+                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P2', -1)" aria-label="Decrease quantity for Minimalist Hoodie">-</button>
+                <label for="qtyInputP2" class="sr-only">Quantity for Minimalist Hoodie</label>
+                <input type="number" id="qtyInputP2" value="1" class="cart-qty-input" min="1" readonly>
+                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P2', 1)" aria-label="Increase quantity for Minimalist Hoodie">+</button>
               </div>
-              <button class="cart-remove-btn" onclick="removeItem('P2')" title="Remove item">
-                <span class="material-symbols-outlined">delete</span>
+
+              <button type="button" class="cart-remove-btn" onclick="removeItem('P2')" aria-label="Remove Minimalist Hoodie from cart">
+                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Order Summary Column Right -->
+        <!-- Order Summary Column -->
         <div class="cart-summary-column">
           <div class="cart-summary-card">
             <h3 class="summary-title">Order Summary</h3>
 
-            <div class="promo-input-group">
-              <input type="text" class="promo-input" placeholder="Promo code or gift voucher">
-              <button class="promo-apply-btn">Apply</button>
-            </div>
+            <form onsubmit="event.preventDefault();" class="promo-input-group">
+              <label for="promoCodeInput" class="sr-only">Promo code or gift voucher</label>
+              <input type="text" id="promoCodeInput" class="promo-input" placeholder="Promo code or gift voucher">
+              <button type="submit" class="promo-apply-btn">Apply</button>
+            </form>
 
             <div class="summary-details">
               <div class="summary-row">
@@ -409,75 +434,78 @@
               </div>
             </div>
 
-            <button class="checkout-submit-btn" onclick="switchMarketView('checkout')">
-              Proceed to Checkout <span class="material-symbols-outlined">arrow_forward</span>
+            <button type="button" class="checkout-submit-btn" onclick="switchMarketView('checkout')">
+              Proceed to Checkout <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </button>
 
             <div class="checkout-guarantee">
-              <span class="material-symbols-outlined">verified_user</span> Protected by <strong>Kapita Escrow Payment</strong>
+              <span class="material-symbols-outlined" aria-hidden="true">verified_user</span> Protected by <strong>Kapita Escrow Payment</strong>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- CHECKOUT VIEW -->
-    <div id="viewCheckout" class="market-view-pane" style="display: none;">
+    <section id="viewCheckout" class="market-view-pane" style="display: none;" aria-labelledby="checkout-heading">
+      <h2 id="checkout-heading" class="sr-only">Checkout Form Process</h2>
       <div class="checkout-layout-container">
         
-        <!-- Left Form Flow Column -->
+        <!-- Left Form Column -->
         <div class="checkout-form-column">
-          <div class="checkout-back-link" onclick="switchMarketView('cart')">
-            <span class="material-symbols-outlined">west</span> Return to Shopping Cart
-          </div>
+          <button type="button" class="checkout-back-link" onclick="switchMarketView('cart')">
+            <span class="material-symbols-outlined" aria-hidden="true">west</span> Return to Shopping Cart
+          </button>
 
           <!-- Section 1: Delivery Address -->
-          <div class="checkout-section-card">
-            <div class="checkout-section-header">
-              <div class="step-number">1</div>
+          <fieldset class="checkout-section-card">
+            <legend class="checkout-section-header">
+              <span class="step-number" aria-hidden="true">1</span>
               <div>
-                <h3 class="step-title">Delivery Address</h3>
+                <span class="step-title">Delivery Address</span>
                 <p class="step-subtitle">Select or enter where your items should be delivered</p>
               </div>
-            </div>
+            </legend>
 
             <div class="address-options-grid">
-              <div class="address-card active">
+              <label class="address-card active">
+                <input type="radio" name="deliveryAddress" checked class="sr-only">
                 <div class="address-card-top">
                   <strong>Home Address</strong>
                   <span class="address-default-badge">Default</span>
                 </div>
                 <p class="address-text">
-  Ahmed Idowu Ebuka<br>
-  14 Commercial Avenue, Yaba<br>
-  Lagos State, Nigeria
-</p>
+                  Ahmed Idowu Ebuka<br>
+                  14 Commercial Avenue, Yaba<br>
+                  Lagos State, Nigeria
+                </p>
                 <span class="address-phone">+234 812 345 6789</span>
-              </div>
+              </label>
 
-              <div class="address-card">
+              <label class="address-card">
+                <input type="radio" name="deliveryAddress" class="sr-only">
                 <div class="address-card-top">
                   <strong>Office Studio</strong>
                 </div>
                 <p class="address-text">Tech Hub Suite 4B, Victoria Island<br>Lagos State, Nigeria</p>
                 <span class="address-phone">+234 812 345 6789</span>
-              </div>
+              </label>
             </div>
 
-            <button class="add-address-btn">
-              <span class="material-symbols-outlined">add</span> Add New Delivery Address
+            <button type="button" class="add-address-btn">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span> Add New Delivery Address
             </button>
-          </div>
+          </fieldset>
 
           <!-- Section 2: Shipping Options -->
-          <div class="checkout-section-card">
-            <div class="checkout-section-header">
-              <div class="step-number">2</div>
+          <fieldset class="checkout-section-card">
+            <legend class="checkout-section-header">
+              <span class="step-number" aria-hidden="true">2</span>
               <div>
-                <h3 class="step-title">Delivery Method</h3>
+                <span class="step-title">Delivery Method</span>
                 <p class="step-subtitle">Choose how fast you want your order delivered</p>
               </div>
-            </div>
+            </legend>
 
             <div class="shipping-methods-list">
               <label class="shipping-method-option active">
@@ -498,23 +526,23 @@
                 <span class="shipping-price">₦5,000.00</span>
               </label>
             </div>
-          </div>
+          </fieldset>
 
           <!-- Section 3: Payment Method -->
-          <div class="checkout-section-card">
-            <div class="checkout-section-header">
-              <div class="step-number">3</div>
+          <fieldset class="checkout-section-card">
+            <legend class="checkout-section-header">
+              <span class="step-number" aria-hidden="true">3</span>
               <div>
-                <h3 class="step-title">Payment Method</h3>
+                <span class="step-title">Payment Method</span>
                 <p class="step-subtitle">Select your preferred payment gateway</p>
               </div>
-            </div>
+            </legend>
 
             <div class="payment-methods-grid">
               <label class="payment-card active">
                 <input type="radio" name="paymentMethod" checked>
                 <div class="payment-card-content">
-                  <span class="material-symbols-outlined payment-icon">account_balance_wallet</span>
+                  <span class="material-symbols-outlined payment-icon" aria-hidden="true">account_balance_wallet</span>
                   <div>
                     <strong>Kapita Pay Wallet</strong>
                     <div class="wallet-balance-note">Available Balance: <strong class="text-emerald">₦245,500.00</strong></div>
@@ -525,7 +553,7 @@
               <label class="payment-card">
                 <input type="radio" name="paymentMethod">
                 <div class="payment-card-content">
-                  <span class="material-symbols-outlined payment-icon">credit_card</span>
+                  <span class="material-symbols-outlined payment-icon" aria-hidden="true">credit_card</span>
                   <div>
                     <strong>Debit / Credit Card</strong>
                     <div class="wallet-balance-note">Visa, Mastercard, Verve</div>
@@ -533,27 +561,27 @@
                 </div>
               </label>
             </div>
-          </div>
+          </fieldset>
         </div>
 
         <!-- Right Summary Column -->
         <div class="checkout-summary-column">
           <div class="cart-summary-card">
-            <h3 class="summary-title">Review & Pay</h3>
+            <h3 class="summary-title">Review &amp; Pay</h3>
 
             <div class="checkout-mini-items">
               <div class="mini-item">
-                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" alt="Laptop">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5">
                 <div class="mini-item-info">
-                  <h6>HP EliteBook 840 G5</h6>
+                  <h4>HP EliteBook 840 G5</h4>
                   <span>Qty: 1 • ₦450,000.00</span>
                 </div>
               </div>
 
               <div class="mini-item">
-                <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=100&auto=format&fit=crop&q=60" alt="Hoodie">
+                <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=100&auto=format&fit=crop&q=60" alt="Heavyweight Cotton Hoodie">
                 <div class="mini-item-info">
-                  <h6>Heavyweight Cotton Hoodie</h6>
+                  <h4>Heavyweight Cotton Hoodie</h4>
                   <span>Qty: 1 • ₦18,500.00</span>
                 </div>
               </div>
@@ -579,63 +607,73 @@
               </div>
             </div>
 
-            <button class="checkout-submit-btn" onclick="placeOrder()">
-              Confirm & Pay ₦469,500.00 <span class="material-symbols-outlined">lock</span>
+            <button type="button" class="checkout-submit-btn" onclick="placeOrder()">
+              Confirm &amp; Pay ₦469,500.00 <span class="material-symbols-outlined" aria-hidden="true">lock</span>
             </button>
 
             <div class="checkout-guarantee">
-              <span class="material-symbols-outlined">shield</span> Bank-Grade 256-Bit SSL Encryption
+              <span class="material-symbols-outlined" aria-hidden="true">shield</span> Bank-Grade 256-Bit SSL Encryption
             </div>
           </div>
         </div>
 
       </div>
-    </div>
+    </section>
 
     <!-- PRODUCT DETAIL VIEW -->
-    <div id="viewProductDetail" class="market-view-pane" style="display: none;">
+    <section id="viewProductDetail" class="market-view-pane" style="display: none;" aria-label="Product Specifications and Details">
       <div class="product-detail-container">
         
-        <!-- Navigation Breadcrumbs -->
-        <div class="pdp-breadcrumbs">
-          <span onclick="switchMarketView('browse')">Browse</span>
-          <span class="material-symbols-outlined icon">chevron_right</span>
-          <span>Computing & Tech</span>
-          <span class="material-symbols-outlined icon">chevron_right</span>
-          <span class="active">HP EliteBook 840 G5</span>
-        </div>
+        <!-- Breadcrumbs Navigation -->
+        <nav class="pdp-breadcrumbs" aria-label="Breadcrumb">
+          <ol class="breadcrumb-list">
+            <li><button type="button" class="breadcrumb-btn" onclick="switchMarketView('browse')">Browse</button></li>
+            <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
+            <li><span class="breadcrumb-text">Computing &amp; Tech</span></li>
+            <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
+            <li><span class="breadcrumb-text active" aria-current="page">HP EliteBook 840 G5</span></li>
+          </ol>
+        </nav>
 
         <div class="pdp-main-grid">
           
-          <!-- Left Column: Image Gallery -->
+          <!-- Image Gallery -->
           <div class="pdp-gallery-card">
             <div class="pdp-main-img-wrapper">
-              <img id="pdpMainImage" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80" alt="Main Product Image">
-              <button class="pdp-fav-btn" onclick="toggleWishlist(this)">
-                <span class="material-symbols-outlined">favorite</span>
+              <img id="pdpMainImage" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80" alt="HP EliteBook 840 G5 main high-res image">
+              <button type="button" class="pdp-fav-btn" onclick="toggleWishlist(this)" aria-label="Save HP EliteBook 840 G5 to wishlist">
+                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
               </button>
               <span class="pdp-discount-badge">-10% OFF</span>
             </div>
 
             <div class="pdp-thumbnails-row">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" class="pdp-thumb active" onclick="changeMainImage(this.src, this)">
-              <img src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200&auto=format&fit=crop&q=60" class="pdp-thumb" onclick="changeMainImage(this.src, this)">
-              <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=200&auto=format&fit=crop&q=60" class="pdp-thumb" onclick="changeMainImage(this.src, this)">
-              <img src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200&auto=format&fit=crop&q=60" class="pdp-thumb" onclick="changeMainImage(this.src, this)">
+              <button type="button" class="pdp-thumb-btn active" onclick="changeMainImage('https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80', this)">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 1 Front View">
+              </button>
+              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80', this)">
+                <img src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 2 Keyboard Profile">
+              </button>
+              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80', this)">
+                <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 3 Screen Display">
+              </button>
+              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&auto=format&fit=crop&q=80', this)">
+                <img src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 4 Side Ports">
+              </button>
             </div>
           </div>
 
-          <!-- Right Column: Product Overview & Buy Box -->
+          <!-- Product Info & Actions -->
           <div class="pdp-buy-card">
             <div class="pdp-seller-pill">
-              <span class="material-symbols-outlined icon">verified</span>
+              <span class="material-symbols-outlined icon" aria-hidden="true">verified</span>
               <strong>HP Authorized Store</strong> • 98.4% Positive Ratings
             </div>
 
             <h1 class="pdp-title">HP EliteBook 840 G5 Laptop (16GB RAM, 512GB NVMe SSD, Intel Core i7)</h1>
             
-            <div class="pdp-rating-row">
-              <div class="stars">
+            <div class="pdp-rating-row" aria-label="Rating 4.9 out of 5 stars from 128 customer reviews">
+              <div class="stars" aria-hidden="true">
                 <span class="material-symbols-outlined star-filled">star</span>
                 <span class="material-symbols-outlined star-filled">star</span>
                 <span class="material-symbols-outlined star-filled">star</span>
@@ -644,7 +682,7 @@
               </div>
               <span class="rating-val">4.9</span>
               <span class="review-count">(128 Customer Reviews)</span>
-              <span class="stock-badge in-stock"><span class="dot"></span> In Stock (14 left)</span>
+              <span class="stock-badge in-stock"><span class="dot" aria-hidden="true"></span> In Stock (14 left)</span>
             </div>
 
             <div class="pdp-price-box">
@@ -652,44 +690,45 @@
               <div class="pdp-old-price">₦500,000.00</div>
             </div>
 
-            <!-- Variant Selectors -->
+            <!-- Variant Controls -->
             <div class="pdp-variant-group">
-              <label class="variant-label">Storage Capacity:</label>
-              <div class="variant-options">
-                <button class="variant-pill active">512GB SSD</button>
-                <button class="variant-pill">1TB SSD</button>
+              <span class="variant-label" id="storageLabel">Storage Capacity:</span>
+              <div class="variant-options" role="radiogroup" aria-labelledby="storageLabel">
+                <button type="button" class="variant-pill active" aria-checked="true" role="radio">512GB SSD</button>
+                <button type="button" class="variant-pill" aria-checked="false" role="radio">1TB SSD</button>
               </div>
             </div>
 
             <div class="pdp-variant-group">
-              <label class="variant-label">Memory (RAM):</label>
-              <div class="variant-options">
-                <button class="variant-pill active">16GB RAM</button>
-                <button class="variant-pill">32GB RAM</button>
+              <span class="variant-label" id="ramLabel">Memory (RAM):</span>
+              <div class="variant-options" role="radiogroup" aria-labelledby="ramLabel">
+                <button type="button" class="variant-pill active" aria-checked="true" role="radio">16GB RAM</button>
+                <button type="button" class="variant-pill" aria-checked="false" role="radio">32GB RAM</button>
               </div>
             </div>
 
             <!-- Quantity & Actions -->
             <div class="pdp-action-row">
               <div class="cart-qty-control pdp-qty">
-                <button class="cart-qty-btn" onclick="updatePdpQty(-1)">-</button>
-                <input type="text" id="pdpQtyInput" value="1" class="cart-qty-input" readonly>
-                <button class="cart-qty-btn" onclick="updatePdpQty(1)">+</button>
+                <button type="button" class="cart-qty-btn" onclick="updatePdpQty(-1)" aria-label="Decrease quantity">-</button>
+                <label for="pdpQtyInput" class="sr-only">Product quantity</label>
+                <input type="number" id="pdpQtyInput" value="1" class="cart-qty-input" min="1" readonly>
+                <button type="button" class="cart-qty-btn" onclick="updatePdpQty(1)" aria-label="Increase quantity">+</button>
               </div>
 
-              <button class="pdp-add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')">
-                <span class="material-symbols-outlined">add_shopping_cart</span> Add to Cart
+              <button type="button" class="pdp-add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')">
+                <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span> Add to Cart
               </button>
 
-              <button class="pdp-buy-now-btn" onclick="buyNowPdp('P1', 'HP EliteBook 840 G5', 450000)">
+              <button type="button" class="pdp-buy-now-btn" onclick="buyNowPdp('P1', 'HP EliteBook 840 G5', 450000)">
                 Buy Now
               </button>
             </div>
 
-            <!-- Logistics Guarantees -->
+            <!-- Guarantees -->
             <div class="pdp-logistics-box">
               <div class="logistics-item">
-                <span class="material-symbols-outlined icon">local_shipping</span>
+                <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span>
                 <div>
                   <strong>Fast Nationwide Delivery</strong>
                   <p>Dispatched within 24 hours from Lagos Hub</p>
@@ -697,9 +736,9 @@
               </div>
 
               <div class="logistics-item">
-                <span class="material-symbols-outlined icon">security</span>
+                <span class="material-symbols-outlined icon" aria-hidden="true">security</span>
                 <div>
-                  <strong>1 Year Warranty & Escrow Protection</strong>
+                  <strong>1 Year Warranty &amp; Escrow Protection</strong>
                   <p>Funds held securely until item delivery confirmation</p>
                 </div>
               </div>
@@ -709,15 +748,15 @@
 
         </div>
 
-        <!-- Specifications & Description Section -->
+        <!-- Specifications & Description -->
         <div class="pdp-details-section">
-          <div class="pdp-tabs-header">
-            <button class="pdp-tab-btn active" onclick="switchPdpTab('specs', this)">Specifications</button>
-            <button class="pdp-tab-btn" onclick="switchPdpTab('overview', this)">Overview & Features</button>
-            <button class="pdp-tab-btn" onclick="switchPdpTab('reviews', this)">Reviews (128)</button>
+          <div class="pdp-tabs-header" role="tablist" aria-label="Product Information Options">
+            <button type="button" role="tab" aria-selected="true" aria-controls="pdpTabSpecs" id="tabSpecs" class="pdp-tab-btn active" onclick="switchPdpTab('specs', this)">Specifications</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="pdpTabOverview" id="tabOverview" class="pdp-tab-btn" onclick="switchPdpTab('overview', this)">Overview &amp; Features</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="pdpTabReviews" id="tabReviews" class="pdp-tab-btn" onclick="switchPdpTab('reviews', this)">Reviews (128)</button>
           </div>
 
-          <div class="pdp-tab-content active" id="pdpTabSpecs">
+          <div class="pdp-tab-content active" id="pdpTabSpecs" role="tabpanel" aria-labelledby="tabSpecs" tabindex="0">
             <div class="specs-grid">
               <div class="spec-row"><span>Brand</span><strong>HP</strong></div>
               <div class="spec-row"><span>Model</span><strong>EliteBook 840 G5</strong></div>
@@ -729,135 +768,133 @@
             </div>
           </div>
 
-          <div class="pdp-tab-content" id="pdpTabOverview" style="display: none;">
+          <div class="pdp-tab-content" id="pdpTabOverview" role="tabpanel" aria-labelledby="tabOverview" tabindex="0" style="display: none;">
             <p class="overview-text">
               Engineered for modern professionals, the HP EliteBook 840 G5 offers security and manageability alongside powerful performance. Its ultra-slim aluminum design combined with a narrow border display makes it easy to work anywhere.
             </p>
           </div>
 
-          <div class="pdp-tab-content" id="pdpTabReviews" style="display: none;">
+          <div class="pdp-tab-content" id="pdpTabReviews" role="tabpanel" aria-labelledby="tabReviews" tabindex="0" style="display: none;">
             <div class="review-item">
               <div class="review-top">
                 <strong>Ahmed I.</strong>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined">verified</span> Verified Purchase</span>
+                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified Purchase</span>
               </div>
-              <div class="stars"><span class="material-symbols-outlined star-filled">star</span> 5.0</div>
+              <div class="stars" aria-label="5 out of 5 stars"><span class="material-symbols-outlined star-filled" aria-hidden="true">star</span> 5.0</div>
               <p class="review-comment">Super fast delivery to Lagos Yaba! The laptop was pristine and well packaged.</p>
             </div>
           </div>
         </div>
 
       </div>
-    </div>
+    </section>
 
     <!-- ORDERS & TRACKING VIEW -->
-    <div id="viewOrders" class="market-view-pane" style="display: none;">
+    <section id="viewOrders" class="market-view-pane" style="display: none;" aria-labelledby="orders-heading">
       <div class="orders-container">
         
-        <!-- Header & Filter Tabs -->
         <div class="orders-header-row">
           <div>
-            <h2 class="cart-title">My Orders & Tracking</h2>
+            <h2 class="cart-title" id="orders-heading">My Orders &amp; Tracking</h2>
             <p class="cart-subtitle">Monitor live escrow status, shipping updates, and purchase history</p>
           </div>
           
-          <div class="orders-filter-pills">
-            <button class="order-filter-btn active" onclick="filterOrders('all', this)">All Orders</button>
-            <button class="order-filter-btn" onclick="filterOrders('active', this)">In Transit</button>
-            <button class="order-filter-btn" onclick="filterOrders('delivered', this)">Delivered</button>
+          <div class="orders-filter-pills" role="toolbar" aria-label="Order Status Filters">
+            <button type="button" class="order-filter-btn active" onclick="filterOrders('all', this)" aria-pressed="true">All Orders</button>
+            <button type="button" class="order-filter-btn" onclick="filterOrders('active', this)" aria-pressed="false">In Transit</button>
+            <button type="button" class="order-filter-btn" onclick="filterOrders('delivered', this)" aria-pressed="false">Delivered</button>
           </div>
         </div>
 
-        <!-- Active Order Card 1: In Transit -->
-        <div class="order-card" data-status="active">
+        <!-- Order 1: In Transit -->
+        <article class="order-card" data-status="active">
           <div class="order-card-header">
             <div class="order-meta-left">
               <span class="order-id">Order #KPT-894201</span>
               <span class="order-date">Placed on Sept 08, 2026</span>
             </div>
             <div class="order-status-badge in-transit">
-              <span class="material-symbols-outlined icon">local_shipping</span> In Transit
+              <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> In Transit
             </div>
           </div>
 
-          <!-- Order Timeline Visualizer -->
+          <!-- Timeline Stepper -->
           <div class="tracking-stepper-box">
             <div class="stepper-track">
               <div class="stepper-progress" style="width: 65%;"></div>
             </div>
-            <div class="stepper-steps">
-              <div class="step completed">
-                <div class="step-circle"><span class="material-symbols-outlined">check</span></div>
+            <ol class="stepper-steps">
+              <li class="step completed">
+                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">check</span></div>
                 <span class="step-label">Order Confirmed</span>
-              </div>
-              <div class="step completed">
-                <div class="step-circle"><span class="material-symbols-outlined">check</span></div>
+              </li>
+              <li class="step completed">
+                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">check</span></div>
                 <span class="step-label">Escrow Secured</span>
-              </div>
-              <div class="step active">
-                <div class="step-circle"><span class="material-symbols-outlined">local_shipping</span></div>
+              </li>
+              <li class="step active">
+                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span></div>
                 <span class="step-label">Out for Delivery</span>
-              </div>
-              <div class="step">
-                <div class="step-circle"><span class="material-symbols-outlined">home</span></div>
+              </li>
+              <li class="step">
+                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">home</span></div>
                 <span class="step-label">Delivered</span>
-              </div>
-            </div>
+              </li>
+            </ol>
           </div>
 
-          <!-- Items inside this order -->
+          <!-- Items list -->
           <div class="order-items-list">
             <div class="order-item-row">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" alt="Laptop">
+              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5">
               <div class="order-item-info">
-                <h4>HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h4>
+                <h3>HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h3>
                 <p>Seller: <strong>HP Authorized Direct</strong> • Qty: 1</p>
                 <div class="order-item-price">₦450,000.00</div>
               </div>
-              <button class="order-action-btn-sub" onclick="showTrackModal('KPT-894201')">
-                <span class="material-symbols-outlined">map</span> Live Map
+              <button type="button" class="order-action-btn-sub" onclick="showTrackModal('KPT-894201')">
+                <span class="material-symbols-outlined" aria-hidden="true">map</span> Live Map
               </button>
             </div>
           </div>
 
-          <!-- Order Card Footer -->
           <div class="order-card-footer">
             <div class="escrow-status-pill">
-              <span class="material-symbols-outlined icon">verified_user</span> Escrow Active (Funds Protected)
+              <span class="material-symbols-outlined icon" aria-hidden="true">verified_user</span> Escrow Active (Funds Protected)
             </div>
             <div class="order-total-block">
               <span>Total Paid:</span>
               <strong>₦452,500.00</strong>
             </div>
           </div>
-        </div>
+        </article>
 
-        <!-- Order Card 2: Delivered -->
-        <div class="order-card" data-status="delivered">
+        <!-- Order 2: Delivered -->
+        <article class="order-card" data-status="delivered">
           <div class="order-card-header">
             <div class="order-meta-left">
               <span class="order-id">Order #KPT-742910</span>
               <span class="order-date">Delivered on Aug 24, 2026</span>
             </div>
             <div class="order-status-badge delivered">
-              <span class="material-symbols-outlined icon">task_alt</span> Delivered
+              <span class="material-symbols-outlined icon" aria-hidden="true">task_alt</span> Delivered
             </div>
           </div>
 
           <div class="order-items-list">
             <div class="order-item-row">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=60" alt="Hoodie">
+              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=60" alt="Minimalist Heavyweight Cotton Hoodie">
               <div class="order-item-info">
-                <h4>Minimalist Heavyweight Cotton Hoodie</h4>
+                <h3>Minimalist Heavyweight Cotton Hoodie</h3>
                 <p>Seller: <strong>Kapita Apparel</strong> • Qty: 1</p>
                 <div class="order-item-price">₦18,500.00</div>
               </div>
               <div class="order-actions-right">
-                <button class="order-action-btn-sub" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')">
-                  <span class="material-symbols-outlined">replay</span> Buy Again
+                <button type="button" class="order-action-btn-sub" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')">
+                  <span class="material-symbols-outlined" aria-hidden="true">replay</span> Buy Again
                 </button>
-                <button class="order-action-btn-sub" onclick="openReviewModal('KPT-742910')">
-                  <span class="material-symbols-outlined">rate_review</span> Leave Review
+                <button type="button" class="order-action-btn-sub" onclick="openReviewModal('KPT-742910')">
+                  <span class="material-symbols-outlined" aria-hidden="true">rate_review</span> Leave Review
                 </button>
               </div>
             </div>
@@ -865,95 +902,96 @@
 
           <div class="order-card-footer">
             <div class="escrow-status-pill released">
-              <span class="material-symbols-outlined icon">lock_open</span> Escrow Released to Seller
+              <span class="material-symbols-outlined icon" aria-hidden="true">lock_open</span> Escrow Released to Seller
             </div>
             <div class="order-total-block">
               <span>Total Paid:</span>
               <strong>₦21,000.00</strong>
             </div>
           </div>
-        </div>
+        </article>
 
       </div>
-    </div>
+    </section>
 
     <!-- WISHLIST VIEW -->
-    <!-- WISHLIST VIEW (HORIZONTAL CARD LAYOUT) -->
-<!-- WISHLIST VIEW (SELLER GROUPED LAYOUT) -->
-<!-- WISHLIST VIEW (SELLER GROUPED LAYOUT) -->
-<div id="viewWishlist" class="market-view-pane" style="display: none;">
-  <div class="wishlist-container">
-    
-    <div class="wishlist-header-row">
-      <div>
-        <h2 class="cart-title">Saved Wishlist</h2>
-        <p class="cart-subtitle">Saved items organized by verified store</p>
-      </div>
-      <button class="cart-clear-btn" onclick="clearWishlist()">
-        <span class="material-symbols-outlined">delete_sweep</span> Clear Wishlist
-      </button>
-    </div>
-
-    <!-- Seller Group 1 -->
-    <div class="seller-cart-card">
-      <div class="seller-card-header">
-        <div class="seller-info">
-          <span class="material-symbols-outlined seller-icon">storefront</span>
-          <span class="seller-name">Lumina Essentials</span>
-          <span class="seller-verified-badge"><span class="material-symbols-outlined">verified</span> Verified</span>
+    <section id="viewWishlist" class="market-view-pane" style="display: none;" aria-labelledby="wishlist-heading">
+      <div class="wishlist-container">
+        
+        <div class="wishlist-header-row">
+          <div>
+            <h2 class="cart-title" id="wishlist-heading">Saved Wishlist</h2>
+            <p class="cart-subtitle">Saved items organized by verified store</p>
+          </div>
+          <button type="button" class="cart-clear-btn" onclick="clearWishlist()">
+            <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span> Clear Wishlist
+          </button>
         </div>
-        <span class="seller-dispatch-tag"><span class="material-symbols-outlined">local_shipping</span> Dispatched from Lagos</span>
-      </div>
 
-      <div class="cart-item-row" id="wishlist-item-W1">
-        <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Lamp">
-        <div class="cart-item-details">
-          <span class="cart-item-category">Home & Office</span>
-          <h4 class="cart-item-title" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</h4>
-          <div class="cart-item-specs">Color: Space Grey • In Stock</div>
-          <div class="cart-item-price-mobile">₦35,000.00</div>
+        <!-- Wishlist Seller Group 1 -->
+        <div class="seller-cart-card">
+          <div class="seller-card-header">
+            <div class="seller-info">
+              <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
+              <span class="seller-name">Lumina Essentials</span>
+              <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
+            </div>
+            <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Lagos</span>
+          </div>
+
+          <div class="cart-item-row" id="wishlist-item-W1">
+            <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Smart LED Desk Lamp">
+            <div class="cart-item-details">
+              <span class="cart-item-category">Home &amp; Office</span>
+              <h3 class="cart-item-title">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</button>
+              </h3>
+              <div class="cart-item-specs">Color: Space Grey • In Stock</div>
+              <div class="cart-item-price-mobile">₦35,000.00</div>
+            </div>
+            <div class="cart-item-price-desktop">₦35,000.00</div>
+            <button type="button" class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W1', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')">
+              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span> Add to Cart
+            </button>
+            <button type="button" class="cart-remove-btn" onclick="removeFromWishlist('W1')" aria-label="Remove Smart LED Desk Lamp from wishlist">
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
         </div>
-        <div class="cart-item-price-desktop">₦35,000.00</div>
-        <button class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W1', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')">
-          <span class="material-symbols-outlined">shopping_cart</span> Add to Cart
-        </button>
-        <button class="cart-remove-btn" onclick="removeFromWishlist('W1')" title="Remove item">
-          <span class="material-symbols-outlined">delete</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- Seller Group 2 -->
-    <div class="seller-cart-card">
-      <div class="seller-card-header">
-        <div class="seller-info">
-          <span class="material-symbols-outlined seller-icon">storefront</span>
-          <span class="seller-name">Organic Care</span>
-          <span class="seller-verified-badge"><span class="material-symbols-outlined">verified</span> Verified</span>
+        <!-- Wishlist Seller Group 2 -->
+        <div class="seller-cart-card">
+          <div class="seller-card-header">
+            <div class="seller-info">
+              <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
+              <span class="seller-name">Organic Care</span>
+              <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
+            </div>
+            <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Abuja</span>
+          </div>
+
+          <div class="cart-item-row" id="wishlist-item-W2">
+            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Hydrating Facial Serum Set">
+            <div class="cart-item-details">
+              <span class="cart-item-category">Beauty &amp; Care</span>
+              <h3 class="cart-item-title">
+                <button type="button" class="product-title-btn" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</button>
+              </h3>
+              <div class="cart-item-specs">Volume: 100ml • In Stock</div>
+              <div class="cart-item-price-mobile">₦12,000.00</div>
+            </div>
+            <div class="cart-item-price-desktop">₦12,000.00</div>
+            <button type="button" class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W2', 'Hydrating Facial Serum Set', 12000, 'Organic Care')">
+              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span> Add to Cart
+            </button>
+            <button type="button" class="cart-remove-btn" onclick="removeFromWishlist('W2')" aria-label="Remove Hydrating Facial Serum Set from wishlist">
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
         </div>
-        <span class="seller-dispatch-tag"><span class="material-symbols-outlined">local_shipping</span> Dispatched from Abuja</span>
-      </div>
 
-      <div class="cart-item-row" id="wishlist-item-W2">
-        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Skincare">
-        <div class="cart-item-details">
-          <span class="cart-item-category">Beauty & Care</span>
-          <h4 class="cart-item-title" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</h4>
-          <div class="cart-item-specs">Volume: 100ml • In Stock</div>
-          <div class="cart-item-price-mobile">₦12,000.00</div>
-        </div>
-        <div class="cart-item-price-desktop">₦12,000.00</div>
-        <button class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W2', 'Hydrating Facial Serum Set', 12000, 'Organic Care')">
-          <span class="material-symbols-outlined">shopping_cart</span> Add to Cart
-        </button>
-        <button class="cart-remove-btn" onclick="removeFromWishlist('W2')" title="Remove item">
-          <span class="material-symbols-outlined">delete</span>
-        </button>
       </div>
-    </div>
-
-  </div>
-</div>
+    </section>
 
   </main>
 

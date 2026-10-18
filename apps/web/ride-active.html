@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>theKapita | Trip in Progress</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ride.css">
+</head>
+<body class="ride-page-body">
+
+  <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="desktop-header profile-back-header" role="banner">
+    <div class="header-back-action" onclick="window.location.href='ride.html'" tabindex="0" role="button" aria-label="Return to ride home" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='ride.html'">
+      <div class="back-btn-circle"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></div>
+      <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #008a57;">Live Ride</span></span>
+    </div>
+    <div class="status-badge live" role="status" aria-live="polite"><span class="pulse-dot" aria-hidden="true"></span> DRIVER ARRIVING</div>
+  </header>
+
+  <main id="main-content" class="ride-main-container" tabindex="-1">
+    <div class="ride-content-wrapper">
+
+      <!-- Simulated Live GPS Radar Screen -->
+      <div class="gps-map-container" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; height: 260px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid #334155;" role="img" aria-label="Live GPS Map showing vehicle approaching">
+        <div class="radar-pulse-ring" style="position: absolute; width: 180px; height: 180px; border: 2px dashed rgba(0,208,132,0.3); border-radius: 50%;"></div>
+        <div class="radar-center-marker" style="z-index: 2; text-align: center; color: #ffffff;">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: #00d084;" aria-hidden="true">directions_car</span>
+          <p style="font-size: 12px; margin-top: 4px; font-weight: 600;">Toyota Corolla (KJA-482-AB) • 2 Mins Away</p>
+        </div>
+      </div>
+
+      <!-- Driver & Vehicle Profile Details -->
+      <div class="active-shipment-card" style="margin-bottom: 20px;">
+        <div class="courier-driver-box" style="margin-bottom: 0;">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=60" alt="Emeka Okafor Driver Photo" class="driver-img" />
+          <div class="driver-details">
+            <h2>Emeka Okafor <span class="rating" aria-label="4.92 stars rating">★ 4.92</span></h2>
+            <p>Kapita Go • Silver Toyota Corolla</p>
+          </div>
+          <button type="button" class="driver-call-btn" aria-label="Call Emeka Okafor" onclick="alert('Calling Emeka Okafor (+234 803 111 2233)...')">
+            <span class="material-symbols-outlined" aria-hidden="true">call</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Route Details Card -->
+      <div class="location-picker-card" style="margin-bottom: 20px;">
+        <div class="route-line-connector" aria-hidden="true">
+          <span class="dot origin"></span>
+          <span class="line"></span>
+          <span class="dot destination"></span>
+        </div>
+        <div class="inputs-column">
+          <div class="input-row" style="background: transparent; border: none; padding: 0;">
+            <div style="font-size: 12px; color: #475569;">Pickup: <strong>12 Lekki Phase 1, Lagos</strong></div>
+          </div>
+          <div class="input-row" style="background: transparent; border: none; padding: 0;">
+            <div style="font-size: 12px; color: #0f172a;">Dropoff: <strong>Victoria Island Tech Hub</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment & Fare Breakdown -->
+      <div class="fare-calculation-summary" style="margin-bottom: 20px;">
+        <div class="summary-row">
+          <span>Payment Method:</span>
+          <strong>Kapita Pay Wallet (₦245,500.00)</strong>
+        </div>
+        <div class="summary-row highlight">
+          <span>Total Fare:</span>
+          <strong style="color: #008a57;">₦2,200.00</strong>
+        </div>
+      </div>
+
+      <!-- Complete Trip Trigger -->
+      <button type="button" class="confirm-service-btn" onclick="window.location.href='ride-rating.html'">
+        Simulate Arrive & Complete Trip
+      </button>
+
+    </div>
+  </main>
+</body>
+</html>

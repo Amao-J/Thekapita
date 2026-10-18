@@ -2,25 +2,34 @@ import { login, register, isAuthenticated } from '../state/session.js';
 import { validateRegisterForm } from '@thekapita/shared/validators';
 import { ApiError } from '../api/client.js';
 
-// If a token already exists (e.g. the user hit back after signing in),
-// don't make them log in again.
 if (isAuthenticated()) {
   window.location.href = 'profile.html';
 }
 
 function showError(el, message) {
+  if (!el) return;
   el.textContent = message;
   el.hidden = false;
+  el.classList.add('visible-error');
 }
+
 function hideError(el) {
+  if (!el) return;
   el.hidden = true;
+  el.classList.remove('visible-error');
 }
-function setBusy(form, busy) {
+
+function setBusy(form, busy, busyText = 'Please wait...') {
   const btn = form.querySelector('button[type="submit"]');
   if (!btn) return;
   btn.disabled = busy;
   btn.dataset.originalText ??= btn.textContent;
-  btn.textContent = busy ? 'Please wait…' : btn.dataset.originalText;
+  
+  if (busy) {
+    btn.innerHTML = `<span class="btn-spinner"></span> ${busyText}`;
+  } else {
+    btn.textContent = btn.dataset.originalText;
+  }
 }
 
 function wireSignIn() {
@@ -34,12 +43,12 @@ function wireSignIn() {
     const identifier = document.getElementById('signinIdentifier').value.trim();
     const password = document.getElementById('signinPassword').value;
 
-    setBusy(form, true);
+    setBusy(form, true, 'Signing in...');
     try {
       await login(identifier, password);
       window.location.href = 'profile.html';
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Could not reach theKapita. Check your connection and try again.';
+      const message = err instanceof ApiError ? err.message : 'Could not reach theKapita API server. Check your connection.';
       showError(errorEl, message);
     } finally {
       setBusy(form, false);
@@ -69,12 +78,12 @@ function wireSignUp() {
       return;
     }
 
-    setBusy(form, true);
+    setBusy(form, true, 'Creating Account...');
     try {
       await register(fields);
       window.location.href = 'profile.html';
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Could not reach theKapita. Check your connection and try again.';
+      const message = err instanceof ApiError ? err.message : 'Could not reach theKapita API server. Check your connection.';
       showError(errorEl, message);
     } finally {
       setBusy(form, false);
@@ -84,12 +93,6 @@ function wireSignUp() {
 
 wireSignIn();
 wireSignUp();
-
-/* ---- Pure UI helpers below: still bridged onto window because the HTML
-   keeps their onclick="..." attributes for now (tab switching, the
-   password show/hide eye icon). Nothing security- or state-relevant lives
-   in these two — that's why they're the ones left as a bridge rather than
-   rewired to addEventListener like the two form submissions above. */
 
 function switchAuthMode(mode) {
   const signInForm = document.getElementById('signInForm');
@@ -127,9 +130,6 @@ function togglePasswordVisibility(inputId, btn) {
 }
 
 function handleSocialConnect(provider) {
-  // TODO(backend): real OAuth — this stub is unchanged from the vanilla
-  // scaffold, just moved into the module so it doesn't silently error now
-  // that auth.js is no longer a global script.
   alert(`Connecting with ${provider}... (not yet wired to a real OAuth flow)`);
 }
 

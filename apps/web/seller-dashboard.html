@@ -19,18 +19,21 @@
 </head>
 <body class="seller-body">
 
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Header -->
   <header class="desktop-header profile-back-header">
-    <div class="header-back-action" onclick="window.location.href='marketplace.html'">
+    <a href="marketplace.html" class="header-back-action" aria-label="Return to theKapita Marketplace">
       <div class="back-btn-circle">
-        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </div>
-      <span style="font-weight: 700; font-size: 16px;"><span style="color: #00d084;">Seller Center</span></span>
-    </div>
+      <span class="header-brand-title"><span class="accent-text">Seller Center</span></span>
+    </a>
 
     <div class="wallet-header-tag">
       <div class="seller-header-badge">
-        <span class="material-symbols-outlined icon">verified</span>
+        <span class="material-symbols-outlined icon" aria-hidden="true">verified</span>
         <span>HP Authorized Direct</span>
       </div>
     </div>
@@ -40,88 +43,89 @@
   <div class="seller-layout-wrapper">
     
     <!-- Sidebar Navigation (Desktop) -->
-    <aside class="seller-sidebar">
+    <aside class="seller-sidebar" aria-label="Seller Dashboard Sidebar">
       <div class="seller-profile-summary">
-        <div class="seller-avatar">HP</div>
+        <div class="seller-avatar" aria-hidden="true">HP</div>
         <div class="seller-details">
-          <h4>HP Authorized Direct</h4>
-          <span class="seller-location"><span class="material-symbols-outlined">location_on</span> Lagos, Nigeria</span>
+          <h1 class="seller-name-heading">HP Authorized Direct</h1>
+          <span class="seller-location"><span class="material-symbols-outlined" aria-hidden="true">location_on</span> Lagos, Nigeria</span>
         </div>
       </div>
 
-      <nav class="seller-nav-menu">
-        <button class="seller-nav-btn active" onclick="switchSellerView('overview', this)">
-          <span class="material-symbols-outlined icon">dashboard</span>
+      <nav class="seller-nav-menu" aria-label="Main Navigation">
+        <button type="button" class="seller-nav-btn active" onclick="switchSellerView('overview', this)" aria-pressed="true">
+          <span class="material-symbols-outlined icon" aria-hidden="true">dashboard</span>
           <span>Overview</span>
         </button>
 
-        <button class="seller-nav-btn" onclick="switchSellerView('products', this)">
-          <span class="material-symbols-outlined icon">inventory_2</span>
+        <button type="button" class="seller-nav-btn" onclick="switchSellerView('products', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">inventory_2</span>
           <span>Products Catalog</span>
         </button>
 
-        <button class="seller-nav-btn" onclick="switchSellerView('orders', this)">
-          <span class="material-symbols-outlined icon">local_shipping</span>
-          <span>Orders & Escrow</span>
-          <span class="nav-count-badge">3</span>
+        <button type="button" class="seller-nav-btn" onclick="switchSellerView('orders', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span>
+          <span>Orders &amp; Escrow</span>
+          <span class="nav-count-badge" aria-label="3 pending orders">3</span>
         </button>
 
-        <button class="seller-nav-btn" onclick="switchSellerView('payouts', this)">
-          <span class="material-symbols-outlined icon">account_balance_wallet</span>
-          <span>Payouts & Wallet</span>
+        <button type="button" class="seller-nav-btn" onclick="switchSellerView('payouts', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">account_balance_wallet</span>
+          <span>Payouts &amp; Wallet</span>
         </button>
 
-        <button class="seller-nav-btn" onclick="switchSellerView('settings', this)">
-          <span class="material-symbols-outlined icon">store</span>
+        <button type="button" class="seller-nav-btn" onclick="switchSellerView('settings', this)" aria-pressed="false">
+          <span class="material-symbols-outlined icon" aria-hidden="true">store</span>
           <span>Store Settings</span>
         </button>
       </nav>
     </aside>
 
     <!-- Mobile Icon Navigation Bar -->
-    <div class="seller-mobile-nav">
-      <button class="seller-mobile-icon-btn active" title="Overview" onclick="switchSellerView('overview', this)">
-        <span class="material-symbols-outlined">dashboard</span>
+    <nav class="seller-mobile-nav" aria-label="Mobile Navigation Menu">
+      <button type="button" class="seller-mobile-icon-btn active" aria-label="Overview" onclick="switchSellerView('overview', this)" aria-pressed="true">
+        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
       </button>
 
-      <button class="seller-mobile-icon-btn" title="Products" onclick="switchSellerView('products', this)">
-        <span class="material-symbols-outlined">inventory_2</span>
+      <button type="button" class="seller-mobile-icon-btn" aria-label="Products Catalog" onclick="switchSellerView('products', this)" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
       </button>
 
-      <button class="seller-mobile-icon-btn" title="Orders" onclick="switchSellerView('orders', this)">
-        <span class="material-symbols-outlined">local_shipping</span>
-        <span class="mobile-icon-badge">3</span>
+      <button type="button" class="seller-mobile-icon-btn" aria-label="Orders and Escrow (3 pending)" onclick="switchSellerView('orders', this)" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+        <span class="mobile-icon-badge" aria-hidden="true">3</span>
       </button>
 
-      <button class="seller-mobile-icon-btn" title="Payouts" onclick="switchSellerView('payouts', this)">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
+      <button type="button" class="seller-mobile-icon-btn" aria-label="Payouts and Wallet" onclick="switchSellerView('payouts', this)" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
       </button>
 
-      <button class="seller-mobile-icon-btn" title="Settings" onclick="switchSellerView('settings', this)">
-        <span class="material-symbols-outlined">store</span>
+      <button type="button" class="seller-mobile-icon-btn" aria-label="Store Settings" onclick="switchSellerView('settings', this)" aria-pressed="false">
+        <span class="material-symbols-outlined" aria-hidden="true">store</span>
       </button>
-    </div>
+    </nav>
 
     <!-- Content Workspace -->
-    <main class="seller-content-pane">
+    <main class="seller-content-pane" id="main-content" tabindex="-1">
 
       <!-- VIEW 1: OVERVIEW -->
-      <div id="sellerViewOverview" class="seller-view-pane active">
+      <section id="sellerViewOverview" class="seller-view-pane active" aria-labelledby="overview-heading">
+        <h2 id="overview-heading" class="sr-only">Dashboard Overview</h2>
         
         <div class="seller-metrics-grid">
           <div class="metric-card">
             <div class="metric-top">
               <span class="metric-label">Total Net Revenue</span>
-              <span class="material-symbols-outlined metric-icon emerald">payments</span>
+              <span class="material-symbols-outlined metric-icon emerald" aria-hidden="true">payments</span>
             </div>
             <div class="metric-value">₦4,850,000.00</div>
-            <div class="metric-sub-note text-emerald"><span class="material-symbols-outlined icon-inline">trending_up</span> +14.2% from last month</div>
+            <div class="metric-sub-note text-emerald"><span class="material-symbols-outlined icon-inline" aria-hidden="true">trending_up</span> +14.2% from last month</div>
           </div>
 
           <div class="metric-card">
             <div class="metric-top">
               <span class="metric-label">Escrow Locked Funds</span>
-              <span class="material-symbols-outlined metric-icon amber">lock</span>
+              <span class="material-symbols-outlined metric-icon amber" aria-hidden="true">lock</span>
             </div>
             <div class="metric-value">₦450,000.00</div>
             <div class="metric-sub-note">1 Order awaiting customer delivery confirmation</div>
@@ -130,10 +134,10 @@
           <div class="metric-card">
             <div class="metric-top">
               <span class="metric-label">Active Listings</span>
-              <span class="material-symbols-outlined metric-icon blue">inventory</span>
+              <span class="material-symbols-outlined metric-icon blue" aria-hidden="true">inventory</span>
             </div>
             <div class="metric-value">18 Items</div>
-            <div class="metric-sub-note text-rose"><span class="material-symbols-outlined icon-inline">warning</span> 2 Low stock warnings</div>
+            <div class="metric-sub-note text-rose"><span class="material-symbols-outlined icon-inline" aria-hidden="true">warning</span> 2 Low stock warnings</div>
           </div>
         </div>
 
@@ -144,19 +148,20 @@
               <h3 class="section-title">Recent Customer Orders</h3>
               <p class="section-subtitle">Real-time status of orders and escrow settlements</p>
             </div>
-            <button class="seller-btn seller-btn-outline" onclick="switchSellerView('orders')">View All Orders</button>
+            <button type="button" class="seller-btn seller-btn-outline" onclick="switchSellerView('orders')">View All Orders</button>
           </div>
 
           <div class="seller-table-responsive">
             <table class="seller-data-table">
+              <caption>Recent Customer Orders Summary</caption>
               <thead>
                 <tr>
-                  <th>Order ID</th>
-                  <th>Product Title</th>
-                  <th>Customer</th>
-                  <th>Amount</th>
-                  <th>Escrow Status</th>
-                  <th>Action</th>
+                  <th scope="col">Order ID</th>
+                  <th scope="col">Product Title</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Escrow Status</th>
+                  <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,53 +170,54 @@
                   <td>HP EliteBook 840 G5</td>
                   <td>Ahmed Idowu Ebuka</td>
                   <td><strong>₦450,000.00</strong></td>
-                  <td><span class="status-pill status-transit" id="status-badge-894201"><span class="material-symbols-outlined icon-small">local_shipping</span> In Transit</span></td>
-                  <td><button class="seller-btn seller-btn-primary seller-btn-sm" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update</button></td>
+                  <td><span class="status-pill status-transit" id="status-badge-894201"><span class="material-symbols-outlined icon-small" aria-hidden="true">local_shipping</span> In Transit</span></td>
+                  <td><button type="button" class="seller-btn seller-btn-primary seller-btn-sm" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update</button></td>
                 </tr>
                 <tr id="order-row-742910">
                   <td><strong>#KPT-742910</strong></td>
                   <td>HP ZBook Studio G8</td>
                   <td>Chidi Okafor</td>
                   <td><strong>₦1,200,000.00</strong></td>
-                  <td><span class="status-pill status-cleared"><span class="material-symbols-outlined icon-small">verified</span> Escrow Released</span></td>
-                  <td><button class="seller-btn seller-btn-outline seller-btn-sm" onclick="openOrderDetailsModal('KPT-742910', 'HP ZBook Studio G8', 'Chidi Okafor', '₦1,200,000.00', 'Escrow Released', 'DHL Express', 'DHL-9920148')">View</button></td>
+                  <td><span class="status-pill status-cleared"><span class="material-symbols-outlined icon-small" aria-hidden="true">verified</span> Escrow Released</span></td>
+                  <td><button type="button" class="seller-btn seller-btn-outline seller-btn-sm" onclick="openOrderDetailsModal('KPT-742910', 'HP ZBook Studio G8', 'Chidi Okafor', '₦1,200,000.00', 'Escrow Released', 'DHL Express', 'DHL-9920148')">View</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-      </div>
+      </section>
 
       <!-- VIEW 2: PRODUCTS CATALOG -->
-      <div id="sellerViewProducts" class="seller-view-pane" style="display: none;">
+      <section id="sellerViewProducts" class="seller-view-pane" style="display: none;" aria-labelledby="products-heading">
         <div class="seller-section-card">
           <div class="section-card-header">
             <div>
-              <h2 class="cart-title">Products Inventory</h2>
+              <h2 id="products-heading" class="cart-title">Products Inventory</h2>
               <p class="cart-subtitle">Manage active marketplace listings, stock levels, and prices</p>
             </div>
-            <button class="seller-btn seller-btn-primary" onclick="toggleAddProductModal(true)">
-              <span class="material-symbols-outlined">add</span> Add New Product
+            <button type="button" class="seller-btn seller-btn-primary" onclick="toggleAddProductModal(true)">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span> Add New Product
             </button>
           </div>
 
           <div class="seller-table-responsive">
             <table class="seller-data-table">
+              <caption>Product Catalog and Stock Control</caption>
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Unit Price</th>
-                  <th>Stock Available</th>
-                  <th>Status</th>
-                  <th style="text-align: right;">Actions</th>
+                  <th scope="col">Product</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Unit Price</th>
+                  <th scope="col">Stock Available</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" style="text-align: right;">Actions</th>
                 </tr>
               </thead>
               <tbody id="productsTableBody">
                 <tr id="product-row-1">
                   <td class="product-cell">
-                    <img id="p-img-1" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Laptop">
+                    <img id="p-img-1" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="HP EliteBook 840 G5 silver finish">
                     <div>
                       <strong class="product-title-text" id="p-title-1">HP EliteBook 840 G5</strong>
                       <span class="product-sub-text" id="p-sub-1">16GB RAM • 512GB SSD</span>
@@ -223,14 +229,14 @@
                   <td><span class="status-pill status-active">Active</span></td>
                   <td style="text-align: right;">
                     <div class="action-btn-group">
-                      <button class="icon-action-btn" title="Edit Product" onclick="openEditProductModal('1', 'HP EliteBook 840 G5', 'Computing', 450000, 14, '16GB RAM • 512GB SSD', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined">edit</span></button>
-                      <button class="icon-action-btn danger" title="Delete Listing" onclick="deleteProduct('1')"><span class="material-symbols-outlined">delete</span></button>
+                      <button type="button" class="icon-action-btn" aria-label="Edit HP EliteBook 840 G5" onclick="openEditProductModal('1', 'HP EliteBook 840 G5', 'Computing', 450000, 14, '16GB RAM • 512GB SSD', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined" aria-hidden="true">edit</span></button>
+                      <button type="button" class="icon-action-btn danger" aria-label="Delete HP EliteBook 840 G5 listing" onclick="deleteProduct('1')"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button>
                     </div>
                   </td>
                 </tr>
                 <tr id="product-row-2">
                   <td class="product-cell">
-                    <img id="p-img-2" src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Laptop">
+                    <img id="p-img-2" src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="HP ZBook Studio G8 dark grey workstation">
                     <div>
                       <strong class="product-title-text" id="p-title-2">HP ZBook Studio G8</strong>
                       <span class="product-sub-text" id="p-sub-2">32GB RAM • 1TB NVMe SSD</span>
@@ -242,8 +248,8 @@
                   <td><span class="status-pill status-active">Active</span></td>
                   <td style="text-align: right;">
                     <div class="action-btn-group">
-                      <button class="icon-action-btn" title="Edit Product" onclick="openEditProductModal('2', 'HP ZBook Studio G8', 'Computing', 1200000, 3, '32GB RAM • 1TB NVMe SSD', 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined">edit</span></button>
-                      <button class="icon-action-btn danger" title="Delete Listing" onclick="deleteProduct('2')"><span class="material-symbols-outlined">delete</span></button>
+                      <button type="button" class="icon-action-btn" aria-label="Edit HP ZBook Studio G8" onclick="openEditProductModal('2', 'HP ZBook Studio G8', 'Computing', 1200000, 3, '32GB RAM • 1TB NVMe SSD', 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=100&auto=format&fit=crop&q=60')"><span class="material-symbols-outlined" aria-hidden="true">edit</span></button>
+                      <button type="button" class="icon-action-btn danger" aria-label="Delete HP ZBook Studio G8 listing" onclick="deleteProduct('2')"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button>
                     </div>
                   </td>
                 </tr>
@@ -251,30 +257,30 @@
             </table>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- VIEW 3: ORDERS & ESCROW -->
-      <div id="sellerViewOrders" class="seller-view-pane" style="display: none;">
+      <section id="sellerViewOrders" class="seller-view-pane" style="display: none;" aria-labelledby="seller-orders-heading">
         <div class="seller-section-card">
           <div class="section-card-header">
             <div>
-              <h2 class="cart-title">Fulfillment & Escrow Orders</h2>
+              <h2 id="seller-orders-heading" class="cart-title">Fulfillment &amp; Escrow Orders</h2>
               <p class="cart-subtitle">Dispatch pending orders to release locked escrow funds</p>
             </div>
           </div>
           
-          <div class="seller-order-card" id="card-order-894201">
+          <article class="seller-order-card" id="card-order-894201">
             <div class="seller-order-header">
               <div>
                 <span class="order-id">Order #KPT-894201</span>
                 <p class="order-sub-info">Customer: <strong>Ahmed Idowu Ebuka</strong> • Yaba, Lagos State</p>
               </div>
-              <span class="status-pill status-transit" id="card-badge-894201"><span class="material-symbols-outlined icon-small">lock</span> Escrow Locked (₦450,000.00)</span>
+              <span class="status-pill status-transit" id="card-badge-894201"><span class="material-symbols-outlined icon-small" aria-hidden="true">lock</span> Escrow Locked (₦450,000.00)</span>
             </div>
 
             <div class="seller-order-body">
               <div class="order-item-detail-row">
-                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="Item">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img" alt="HP EliteBook 840 G5">
                 <div>
                   <strong>HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</strong>
                   <p class="item-specs-text">Quantity: 1 • Courier: Standard Door Delivery</p>
@@ -284,21 +290,22 @@
             </div>
 
             <div class="seller-order-footer">
-              <span class="dispatch-note" id="dispatch-note-894201"><span class="material-symbols-outlined icon-inline text-emerald">local_shipping</span> Dispatched via Red Star Express (Ref: RSE-882910)</span><br>
-              <button class="seller-btn seller-btn-primary" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update Tracking Code</button>
+              <span class="dispatch-note" id="dispatch-note-894201"><span class="material-symbols-outlined icon-inline text-emerald" aria-hidden="true">local_shipping</span> Dispatched via Red Star Express (Ref: RSE-882910)</span>
+              <button type="button" class="seller-btn seller-btn-primary" onclick="openFulfillModal('KPT-894201', 'HP EliteBook 840 G5', 'Ahmed Idowu Ebuka')">Update Tracking Code</button>
             </div>
-          </div>
+          </article>
         </div>
-      </div>
+      </section>
 
       <!-- VIEW 4: PAYOUTS & ESCROW WALLET -->
-      <div id="sellerViewPayouts" class="seller-view-pane" style="display: none;">
+      <section id="sellerViewPayouts" class="seller-view-pane" style="display: none;" aria-labelledby="payouts-heading">
+        <h2 id="payouts-heading" class="sr-only">Payouts &amp; Wallet</h2>
         <div class="seller-metrics-grid">
           <div class="metric-card highlight-card">
             <div class="metric-top"><span class="metric-label">Cleared Balance (Available)</span></div>
             <div class="metric-value text-emerald" id="payoutAvailableBalance">₦4,400,000.00</div>
-            <button class="seller-btn seller-btn-primary full-width" style="margin-top: 16px;" onclick="openWithdrawalModal()">
-              <span class="material-symbols-outlined">account_balance</span> Withdraw to Commercial Bank
+            <button type="button" class="seller-btn seller-btn-primary full-width" style="margin-top: 16px;" onclick="openWithdrawalModal()">
+              <span class="material-symbols-outlined" aria-hidden="true">account_balance</span> Withdraw to Commercial Bank
             </button>
           </div>
 
@@ -312,56 +319,56 @@
         <div class="seller-section-card" style="margin-top: 24px;">
           <h3 class="section-title">Linked Bank Account</h3>
           <div class="bank-account-box">
-            <span class="material-symbols-outlined bank-icon">account_balance</span>
+            <span class="material-symbols-outlined bank-icon" aria-hidden="true">account_balance</span>
             <div>
               <strong id="displayBankName">Guaranty Trust Bank (GTBank)</strong>
               <p>Account Number: <strong id="displayAccountNo">0123456789</strong> • Name: <span id="displayAccountName">HP Direct Nigeria LTD</span></p>
             </div>
-            <button class="seller-btn seller-btn-outline seller-btn-sm" style="margin-left: auto;" onclick="openChangeBankModal()">Change Bank</button>
+            <button type="button" class="seller-btn seller-btn-outline seller-btn-sm" style="margin-left: auto;" onclick="openChangeBankModal()">Change Bank</button>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- VIEW 5: STORE SETTINGS -->
-      <div id="sellerViewSettings" class="seller-view-pane" style="display: none;">
+      <section id="sellerViewSettings" class="seller-view-pane" style="display: none;" aria-labelledby="settings-heading">
         <div class="seller-section-card">
-          <h3 class="section-title">Merchant Profile & Dispatch Settings</h3>
+          <h2 id="settings-heading" class="section-title">Merchant Profile &amp; Dispatch Settings</h2>
           <p class="section-subtitle">Configure complete store details visible to buyers across theKapita Marketplace</p>
 
           <form onsubmit="saveStoreSettings(event)" class="seller-form">
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Store Brand Name</label>
+                <label for="settingStoreName" class="form-label">Store Brand Name</label>
                 <input type="text" class="seller-input" id="settingStoreName" value="HP Authorized Direct" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">CAC / Business Registration No.</label>
+                <label for="settingCacNo" class="form-label">CAC / Business Registration No.</label>
                 <input type="text" class="seller-input" id="settingCacNo" value="RC-1492048" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Official Merchant Email</label>
+                <label for="settingEmail" class="form-label">Official Merchant Email</label>
                 <input type="email" class="seller-input" id="settingEmail" value="support@hpdirect.ng" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Merchant Phone Contact</label>
+                <label for="settingPhone" class="form-label">Merchant Phone Contact</label>
                 <input type="tel" class="seller-input" id="settingPhone" value="+234 803 123 4567" required>
               </div>
 
               <div class="form-group full-width">
-                <label class="form-label">Primary Warehouse & Dispatch Origin</label>
+                <label for="settingWarehouse" class="form-label">Primary Warehouse &amp; Dispatch Origin</label>
                 <input type="text" class="seller-input" id="settingWarehouse" value="14 Commercial Avenue, Yaba, Lagos State" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Standard Shipping Fee (₦)</label>
+                <label for="settingShipFee" class="form-label">Standard Shipping Fee (₦)</label>
                 <input type="number" class="seller-input" id="settingShipFee" value="2500" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Default Processing Time</label>
+                <label for="settingProcTime" class="form-label">Default Processing Time</label>
                 <select class="seller-input" id="settingProcTime">
                   <option value="Same Day Dispatch" selected>Same Day Dispatch (Orders before 2PM)</option>
                   <option value="24 Hours">24 Hours</option>
@@ -370,144 +377,144 @@
               </div>
 
               <div class="form-group full-width">
-                <label class="form-label">Return & Refund Policy Notice</label>
+                <label for="settingReturnPolicy" class="form-label">Return &amp; Refund Policy Notice</label>
                 <textarea class="seller-input" id="settingReturnPolicy" rows="3" required>100% money-back guarantee within 7 days of delivery if product is returned in original, unsealed condition with full accessories.</textarea>
               </div>
 
               <div class="form-group full-width">
-                <label class="form-label">Store Description & Bio</label>
+                <label for="settingBio" class="form-label">Store Description &amp; Bio</label>
                 <textarea class="seller-input" id="settingBio" rows="2" required>Official HP Direct Partner providing certified computing laptops, workstations, and original accessories with manufacturer warranty across Nigeria.</textarea>
               </div>
             </div>
 
             <button type="submit" class="seller-btn seller-btn-primary" style="margin-top: 20px;">
-              <span class="material-symbols-outlined">save</span> Save Store Profile
+              <span class="material-symbols-outlined" aria-hidden="true">save</span> Save Store Profile
             </button>
           </form>
         </div>
-      </div>
+      </section>
 
     </main>
   </div>
 
   <!-- MODAL 1: ADD PRODUCT -->
-  <div class="seller-modal-overlay" id="addProductModal" style="display: none;">
+  <div class="seller-modal-overlay" id="addProductModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="addProductModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
-        <h3>Add New Product Listing</h3>
-        <button class="icon-action-btn" onclick="toggleAddProductModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <h3 id="addProductModalTitle">Add New Product Listing</h3>
+        <button type="button" class="icon-action-btn" aria-label="Close add product modal" onclick="toggleAddProductModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <form onsubmit="saveNewProduct(event)" class="seller-form">
         <div class="form-group">
-          <label class="form-label">Product Title</label>
+          <label for="newProdTitle" class="form-label">Product Title</label>
           <input type="text" class="seller-input" id="newProdTitle" placeholder="e.g. HP Pavilion 15 Laptop" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Product Image URL / Photo Link</label>
+          <label for="newProdImg" class="form-label">Product Image URL / Photo Link</label>
           <div class="image-input-wrapper">
             <input type="url" class="seller-input" id="newProdImg" placeholder="https://images.unsplash.com/..." oninput="previewImageInput(this.value, 'newProdImgPreview')" required>
-            <img id="newProdImgPreview" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img input-preview-thumb" alt="Preview">
+            <img id="newProdImgPreview" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" class="seller-thumb-img input-preview-thumb" alt="Product image preview">
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Category</label>
+          <label for="newProdCategory" class="form-label">Category</label>
           <select class="seller-input" id="newProdCategory" required>
-            <option value="Computing">Computing & Tech</option>
-            <option value="Apparel">Apparel & Fashion</option>
-            <option value="Home">Home & Living</option>
-            <option value="Beauty">Beauty & Care</option>
+            <option value="Computing">Computing &amp; Tech</option>
+            <option value="Apparel">Apparel &amp; Fashion</option>
+            <option value="Home">Home &amp; Living</option>
+            <option value="Beauty">Beauty &amp; Care</option>
           </select>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Unit Price (₦)</label>
+          <label for="newProdPrice" class="form-label">Unit Price (₦)</label>
           <input type="number" class="seller-input" id="newProdPrice" placeholder="350000" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Stock Quantity</label>
+          <label for="newProdStock" class="form-label">Stock Quantity</label>
           <input type="number" class="seller-input" id="newProdStock" placeholder="10" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Specifications Summary</label>
+          <label for="newProdSub" class="form-label">Specifications Summary</label>
           <input type="text" class="seller-input" id="newProdSub" placeholder="e.g. 8GB RAM • 256GB SSD" required>
         </div>
 
         <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
-          <span class="material-symbols-outlined">publish</span> Publish Listing
+          <span class="material-symbols-outlined" aria-hidden="true">publish</span> Publish Listing
         </button>
       </form>
     </div>
   </div>
 
   <!-- MODAL 2: EDIT PRODUCT -->
-  <div class="seller-modal-overlay" id="editProductModal" style="display: none;">
+  <div class="seller-modal-overlay" id="editProductModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="editProductModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
-        <h3>Edit Product Listing</h3>
-        <button class="icon-action-btn" onclick="toggleEditProductModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <h3 id="editProductModalTitle">Edit Product Listing</h3>
+        <button type="button" class="icon-action-btn" aria-label="Close edit product modal" onclick="toggleEditProductModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <form onsubmit="saveEditProduct(event)" class="seller-form">
         <input type="hidden" id="editProdId">
 
         <div class="form-group">
-          <label class="form-label">Product Title</label>
+          <label for="editProdTitle" class="form-label">Product Title</label>
           <input type="text" class="seller-input" id="editProdTitle" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Product Image URL / Photo Link</label>
+          <label for="editProdImg" class="form-label">Product Image URL / Photo Link</label>
           <div class="image-input-wrapper">
             <input type="url" class="seller-input" id="editProdImg" oninput="previewImageInput(this.value, 'editProdImgPreview')" required>
-            <img id="editProdImgPreview" src="" class="seller-thumb-img input-preview-thumb" alt="Preview">
+            <img id="editProdImgPreview" src="" class="seller-thumb-img input-preview-thumb" alt="Product image preview">
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Category</label>
+          <label for="editProdCategory" class="form-label">Category</label>
           <input type="text" class="seller-input" id="editProdCategory" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Unit Price (₦)</label>
+          <label for="editProdPrice" class="form-label">Unit Price (₦)</label>
           <input type="number" class="seller-input" id="editProdPrice" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Stock Available</label>
+          <label for="editProdStock" class="form-label">Stock Available</label>
           <input type="number" class="seller-input" id="editProdStock" required>
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Specifications Summary</label>
+          <label for="editProdSub" class="form-label">Specifications Summary</label>
           <input type="text" class="seller-input" id="editProdSub" required>
         </div>
 
         <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
-          <span class="material-symbols-outlined">save</span> Save Changes
+          <span class="material-symbols-outlined" aria-hidden="true">save</span> Save Changes
         </button>
       </form>
     </div>
   </div>
 
   <!-- MODAL 3: FULFILL & TRACKING UPDATE -->
-  <div class="seller-modal-overlay" id="fulfillModal" style="display: none;">
+  <div class="seller-modal-overlay" id="fulfillModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="fulfillModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
-        <h3>Update Order Shipping Status</h3>
-        <button class="icon-action-btn" onclick="toggleFulfillModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <h3 id="fulfillModalTitle">Update Order Shipping Status</h3>
+        <button type="button" class="icon-action-btn" aria-label="Close tracking update modal" onclick="toggleFulfillModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <form onsubmit="saveFulfillStatus(event)" class="seller-form">
         <input type="hidden" id="fulfillOrderId">
         <div class="form-group">
-          <label class="form-label">Order Ref</label>
+          <label for="fulfillOrderDisplay" class="form-label">Order Ref</label>
           <input type="text" class="seller-input" id="fulfillOrderDisplay" readonly>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Logistics Courier Partner</label>
+          <label for="fulfillCourier" class="form-label">Logistics Courier Partner</label>
           <select class="seller-input" id="fulfillCourier" required>
             <option value="Red Star Express">Red Star Express</option>
             <option value="DHL Express">DHL Express</option>
@@ -516,22 +523,22 @@
           </select>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Waybill / Tracking Reference Number</label>
+          <label for="fulfillTrackingNo" class="form-label">Waybill / Tracking Reference Number</label>
           <input type="text" class="seller-input" id="fulfillTrackingNo" placeholder="e.g. RSE-9912048" required>
         </div>
         <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
-          <span class="material-symbols-outlined">local_shipping</span> Confirm Dispatch & Notify Buyer
+          <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Confirm Dispatch &amp; Notify Buyer
         </button>
       </form>
     </div>
   </div>
 
   <!-- MODAL 4: ORDER DETAILS -->
-  <div class="seller-modal-overlay" id="orderDetailsModal" style="display: none;">
+  <div class="seller-modal-overlay" id="orderDetailsModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="detModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
         <h3 id="detModalTitle">Order Details</h3>
-        <button class="icon-action-btn" onclick="toggleOrderDetailsModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <button type="button" class="icon-action-btn" aria-label="Close order details modal" onclick="toggleOrderDetailsModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <div class="seller-form" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
         <div><strong>Customer:</strong> <span id="detCustomer"></span></div>
@@ -541,20 +548,20 @@
         <div><strong>Courier:</strong> <span id="detCourier"></span></div>
         <div><strong>Tracking No:</strong> <span id="detTracking"></span></div>
       </div>
-      <button class="seller-btn seller-btn-outline full-width" style="margin-top: 20px;" onclick="toggleOrderDetailsModal(false)">Close</button>
+      <button type="button" class="seller-btn seller-btn-outline full-width" style="margin-top: 20px;" onclick="toggleOrderDetailsModal(false)">Close</button>
     </div>
   </div>
 
   <!-- MODAL 5: CHANGE BANK ACCOUNT -->
-  <div class="seller-modal-overlay" id="changeBankModal" style="display: none;">
+  <div class="seller-modal-overlay" id="changeBankModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="changeBankModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
-        <h3>Link Payout Bank Account</h3>
-        <button class="icon-action-btn" onclick="toggleChangeBankModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <h3 id="changeBankModalTitle">Link Payout Bank Account</h3>
+        <button type="button" class="icon-action-btn" aria-label="Close link bank modal" onclick="toggleChangeBankModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <form onsubmit="saveBankDetails(event)" class="seller-form">
         <div class="form-group">
-          <label class="form-label">Commercial Bank</label>
+          <label for="inputBankName" class="form-label">Commercial Bank</label>
           <select class="seller-input" id="inputBankName" required>
             <option value="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
             <option value="Access Bank">Access Bank</option>
@@ -564,42 +571,42 @@
           </select>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">10-Digit NUBAN Account Number</label>
+          <label for="inputAccountNo" class="form-label">10-Digit NUBAN Account Number</label>
           <input type="text" maxlength="10" class="seller-input" id="inputAccountNo" placeholder="0123456789" required>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Verified Account Name</label>
+          <label for="inputAccountName" class="form-label">Verified Account Name</label>
           <input type="text" class="seller-input" id="inputAccountName" value="HP Direct Nigeria LTD" required>
         </div>
         <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
-          <span class="material-symbols-outlined">check_circle</span> Update Bank Account
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span> Update Bank Account
         </button>
       </form>
     </div>
   </div>
 
   <!-- MODAL 6: WITHDRAWAL -->
-  <div class="seller-modal-overlay" id="withdrawalModal" style="display: none;">
+  <div class="seller-modal-overlay" id="withdrawalModal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="withdrawalModalTitle">
     <div class="seller-modal-box">
       <div class="modal-header">
-        <h3>Withdraw Cleared Funds</h3>
-        <button class="icon-action-btn" onclick="toggleWithdrawalModal(false)"><span class="material-symbols-outlined">close</span></button>
+        <h3 id="withdrawalModalTitle">Withdraw Cleared Funds</h3>
+        <button type="button" class="icon-action-btn" aria-label="Close withdrawal modal" onclick="toggleWithdrawalModal(false)"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
       </div>
       <form onsubmit="processWithdrawal(event)" class="seller-form">
         <div class="form-group">
-          <label class="form-label">Available Cleared Balance</label>
-          <input type="text" class="seller-input" value="₦4,400,000.00" readonly>
+          <label for="withdrawAvailableDisplay" class="form-label">Available Cleared Balance</label>
+          <input type="text" class="seller-input" id="withdrawAvailableDisplay" value="₦4,400,000.00" readonly>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Withdrawal Amount (₦)</label>
+          <label for="withdrawAmount" class="form-label">Withdrawal Amount (₦)</label>
           <input type="number" max="4400000" class="seller-input" id="withdrawAmount" placeholder="e.g. 500000" required>
         </div>
         <div class="form-group" style="margin-top: 12px;">
-          <label class="form-label">Transaction PIN</label>
-          <input type="password" maxlength="4" class="seller-input" placeholder="••••" required>
+          <label for="withdrawPin" class="form-label">Transaction PIN</label>
+          <input type="password" id="withdrawPin" maxlength="4" class="seller-input" placeholder="••••" required>
         </div>
         <button type="submit" class="seller-btn seller-btn-primary full-width" style="margin-top: 20px;">
-          <span class="material-symbols-outlined">send</span> Confirm Withdrawal
+          <span class="material-symbols-outlined" aria-hidden="true">send</span> Confirm Withdrawal
         </button>
       </form>
     </div>

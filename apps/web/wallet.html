@@ -20,105 +20,105 @@
 <body class="wallet-body">
 
   <header class="desktop-header profile-back-header">
-    <div class="header-back-action" onclick="window.location.href='index.html'">
-      <div class="back-btn-circle">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </div>
-    </div>
+    <button type="button" class="header-back-action" onclick="window.location.href='index.html'" aria-label="Go back to dashboard">
+      <span class="back-btn-circle">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </span>
+    </button>
     
     <div class="wallet-header-tag">
-      <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon">check_circle</span></span>
+      <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon" aria-hidden="true">check_circle</span></span>
       <span class="id-badge">ID: <strong>KPT-883902</strong></span>
     </div>
   </header>
 
-  <main class="portal-container wallet-container">
+  <main class="portal-container wallet-container" id="main-content">
     
     <div id="heroCardWrapper">
-      <section class="wallet-hero-card">
+      <section class="wallet-hero-card" aria-labelledby="wallet-heading">
         <div class="hero-top-row">
           <div class="hero-brand">
-            <span class="material-symbols-outlined brand-icon">account_balance_wallet</span>
-            <h2>theKapita Pay</h2>
+            <span class="material-symbols-outlined brand-icon" aria-hidden="true">account_balance_wallet</span>
+            <h1 id="wallet-heading">theKapita Pay</h1>
           </div>
           <div class="hero-security-pill">
-            <span class="pulse-dot"></span>
+            <span class="pulse-dot" aria-hidden="true"></span>
             <span>Tier 3 Verified</span>
           </div>
         </div>
 
         <div class="hero-balance-block">
-          <span class="balance-label">Available Balance</span>
+          <span class="balance-label" id="balance-label">Available Balance</span>
           <div class="balance-row">
-            <span class="hero-currency">₦</span>
-            <span class="hero-amount" id="mainWalletBalance">245,500.00</span>
-            <button class="eye-toggle wallet-eye" onclick="toggleWalletBalance()" aria-label="Toggle balance mask">
-              <span class="material-symbols-outlined" id="balanceEyeIcon">visibility</span>
+            <span class="hero-currency" aria-hidden="true">₦</span>
+            <span class="hero-amount" id="mainWalletBalance" aria-labelledby="balance-label">245,500.00</span>
+            <button type="button" class="eye-toggle wallet-eye" onclick="toggleWalletBalance()" aria-label="Toggle balance visibility">
+              <span class="material-symbols-outlined" id="balanceEyeIcon" aria-hidden="true">visibility</span>
             </button>
           </div>
         </div>
 
-        <div class="wallet-quick-actions">
-          <button class="quick-action-btn primary-action" onclick="openWalletModal('add')">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">add</span>
-            </div>
+        <div class="wallet-quick-actions" aria-label="Quick Actions">
+          <button type="button" class="quick-action-btn primary-action" onclick="openWalletModal('add')">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+            </span>
             <span>Add Money</span>
           </button>
-          <button class="quick-action-btn" onclick="openWalletModal('send')">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">north_east</span>
-            </div>
+          <button type="button" class="quick-action-btn" onclick="openWalletModal('send')">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">north_east</span>
+            </span>
             <span>Send</span>
           </button>
-          <button class="quick-action-btn" onclick="openWalletModal('receive')">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">south_west</span>
-            </div>
+          <button type="button" class="quick-action-btn" onclick="openWalletModal('receive')">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">south_west</span>
+            </span>
             <span>Receive</span>
           </button>
-          <button class="quick-action-btn" onclick="openWalletModal('withdraw')">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">account_balance</span>
-            </div>
+          <button type="button" class="quick-action-btn" onclick="openWalletModal('withdraw')">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+            </span>
             <span>Withdraw</span>
           </button>
-          <button class="quick-action-btn" onclick="switchWalletTab('bills', document.querySelectorAll('.w-tab-btn')[2])">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">receipt_long</span>
-            </div>
+          <button type="button" class="quick-action-btn" onclick="switchWalletTab('bills', document.getElementById('tab-btn-bills'))">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+            </span>
             <span>Pay Bills</span>
           </button>
-          <button class="quick-action-btn" onclick="openWalletModal('scan')">
-            <div class="action-icon-circle">
-              <span class="material-symbols-outlined">qr_code_scanner</span>
-            </div>
-            <span>Scan & Pay</span>
+          <button type="button" class="quick-action-btn" onclick="openWalletModal('scan')">
+            <span class="action-icon-circle">
+              <span class="material-symbols-outlined" aria-hidden="true">qr_code_scanner</span>
+            </span>
+            <span>Scan &amp; Pay</span>
           </button>
         </div>
       </section>
     </div>
 
-    <nav class="wallet-tabs">
-      <button class="w-tab-btn active" onclick="switchWalletTab('overview', this)">Overview</button>
-      <button class="w-tab-btn" onclick="switchWalletTab('cards', this)">Kapita Cards</button>
-      <button class="w-tab-btn" onclick="switchWalletTab('bills', this)">Bills & Utility</button>
-      <button class="w-tab-btn" onclick="switchWalletTab('recipients', this)">Recipients</button>
-      <button class="w-tab-btn" onclick="switchWalletTab('insights', this)">Analytics</button>
-      <button class="w-tab-btn" onclick="switchWalletTab('security', this)">Security & Limits</button>
+    <nav class="wallet-tabs" role="tablist" aria-label="Wallet Sections">
+      <button type="button" role="tab" aria-selected="true" id="tab-btn-overview" aria-controls="walletTabOverview" class="w-tab-btn active" onclick="switchWalletTab('overview', this)">Overview</button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-cards" aria-controls="walletTabCards" class="w-tab-btn" tabindex="-1" onclick="switchWalletTab('cards', this)">Kapita Cards</button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-bills" aria-controls="walletTabBills" class="w-tab-btn" tabindex="-1" onclick="switchWalletTab('bills', this)">Bills &amp; Utility</button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-recipients" aria-controls="walletTabRecipients" class="w-tab-btn" tabindex="-1" onclick="switchWalletTab('recipients', this)">Recipients</button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-insights" aria-controls="walletTabInsights" class="w-tab-btn" tabindex="-1" onclick="switchWalletTab('insights', this)">Analytics</button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-security" aria-controls="walletTabSecurity" class="w-tab-btn" tabindex="-1" onclick="switchWalletTab('security', this)">Security &amp; Limits</button>
     </nav>
 
-    <div id="walletTabOverview" class="w-tab-pane active">
+    <div id="walletTabOverview" role="tabpanel" aria-labelledby="tab-btn-overview" class="w-tab-pane active" tabindex="0">
       <div class="profile-grid-two">
 
         <div class="grid-column gap-24">
 
-          <div class="kapita-card van-funding-card">
+          <section class="kapita-card van-funding-card" aria-labelledby="van-heading">
             <div class="van-header">
               <div class="van-title-box">
-                <span class="material-symbols-outlined van-icon">account_balance</span>
+                <span class="material-symbols-outlined van-icon" aria-hidden="true">account_balance</span>
                 <div>
-                  <h4>Virtual Funding Account</h4>
+                  <h2 id="van-heading" class="card-heading-md">Virtual Funding Account</h2>
                   <p>Transfer to top up your Kapita wallet instantly</p>
                 </div>
               </div>
@@ -132,83 +132,83 @@
                 <span class="label">Account Number</span>
                 <div class="copy-num-row">
                   <strong id="vanAccountNumber">9920188219</strong>
-                  <button class="copy-btn" onclick="navigator.clipboard.writeText('9920188219'); alert('Account copied!');">
-                    <span class="material-symbols-outlined">content_copy</span>
+                  <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText('9920188219'); alert('Account copied!');" aria-label="Copy account number 9920188219 to clipboard">
+                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="tx-heading">
             <div class="card-header">
-              <h3>Recent Transactions</h3>
-              <div class="filter-pills">
-                <span class="pill active" onclick="filterTx('all', this)">All</span>
-                <span class="pill" onclick="filterTx('in', this)">In</span>
-                <span class="pill" onclick="filterTx('out', this)">Out</span>
+              <h2 id="tx-heading" class="card-heading-md">Recent Transactions</h2>
+              <div class="filter-pills" role="group" aria-label="Transaction filters">
+                <button type="button" class="pill active" aria-pressed="true" onclick="filterTx('all', this)">All</button>
+                <button type="button" class="pill" aria-pressed="false" onclick="filterTx('in', this)">In</button>
+                <button type="button" class="pill" aria-pressed="false" onclick="filterTx('out', this)">Out</button>
               </div>
             </div>
 
             <div class="activity-timeline">
-              <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990812')">
-                <div class="act-icon-wrapper eats">
-                  <span class="material-symbols-outlined">restaurant</span>
-                </div>
-                <div class="act-details">
-                  <p class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Lunch</p>
+              <button type="button" class="activity-row tx-item out" onclick="viewTxDetail('TX-990812')" aria-label="View details for theKapita Eats Bukka Hut Lunch, Today 1:42 PM, negative 8,500 Naira, Successful">
+                <span class="act-icon-wrapper eats">
+                  <span class="material-symbols-outlined" aria-hidden="true">restaurant</span>
+                </span>
+                <span class="act-details">
+                  <span class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Lunch</span>
                   <span class="act-time">Today, 1:42 PM • Food Payment</span>
-                </div>
-                <div class="act-right">
+                </span>
+                <span class="act-right">
                   <span class="act-amount negative">-₦8,500</span>
                   <span class="tx-status-pill success">Successful</span>
-                </div>
-              </div>
+                </span>
+              </button>
 
-              <div class="activity-row tx-item in" onclick="viewTxDetail('TX-990811')">
-                <div class="act-icon-wrapper pay">
-                  <span class="material-symbols-outlined">payments</span>
-                </div>
-                <div class="act-details">
-                  <p class="act-title"><strong>Salary Deposit:</strong> Tech Firm Ltd</p>
+              <button type="button" class="activity-row tx-item in" onclick="viewTxDetail('TX-990811')" aria-label="View details for Salary Deposit Tech Firm Ltd, Today 9:15 AM, positive 850,000 Naira, Successful">
+                <span class="act-icon-wrapper pay">
+                  <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                </span>
+                <span class="act-details">
+                  <span class="act-title"><strong>Salary Deposit:</strong> Tech Firm Ltd</span>
                   <span class="act-time">Today, 9:15 AM • Bank Transfer</span>
-                </div>
-                <div class="act-right">
+                </span>
+                <span class="act-right">
                   <span class="act-amount positive">+₦850,000</span>
                   <span class="tx-status-pill success">Successful</span>
-                </div>
-              </div>
+                </span>
+              </button>
 
-              <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990810')">
-                <div class="act-icon-wrapper ride">
-                  <span class="material-symbols-outlined">directions_car</span>
-                </div>
-                <div class="act-details">
-                  <p class="act-title"><strong>Transfer to:</strong> John Okafor (@john)</p>
+              <button type="button" class="activity-row tx-item out" onclick="viewTxDetail('TX-990810')" aria-label="View details for Transfer to John Okafor, Yesterday, negative 20,000 Naira, Successful">
+                <span class="act-icon-wrapper ride">
+                  <span class="material-symbols-outlined" aria-hidden="true">directions_car</span>
+                </span>
+                <span class="act-details">
+                  <span class="act-title"><strong>Transfer to:</strong> John Okafor (@john)</span>
                   <span class="act-time">Yesterday • Peer Transfer</span>
-                </div>
-                <div class="act-right">
+                </span>
+                <span class="act-right">
                   <span class="act-amount negative">-₦20,000</span>
                   <span class="tx-status-pill success">Successful</span>
-                </div>
-              </div>
+                </span>
+              </button>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="pm-heading">
             <div class="card-header">
-              <h3>Payment Methods</h3>
-              <button class="text-btn" onclick="openWalletModal('addMethod')">+ Add New</button>
+              <h2 id="pm-heading" class="card-heading-md">Payment Methods</h2>
+              <button type="button" class="text-btn" onclick="openWalletModal('addMethod')">+ Add New</button>
             </div>
             
             <div class="payment-methods-list">
               <div class="method-item default">
                 <div class="method-left">
                   <div class="method-icon-box">
-                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
                   </div>
                   <div class="method-details">
-                    <h4>theKapita Pay Wallet</h4>
+                    <h3>theKapita Pay Wallet</h3>
                     <p>Primary Ecosystem Wallet • ₦245,500.00</p>
                   </div>
                 </div>
@@ -218,43 +218,43 @@
               <div class="method-item">
                 <div class="method-left">
                   <div class="method-icon-box">
-                    <span class="material-symbols-outlined">account_balance</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
                   </div>
                   <div class="method-details">
-                    <h4>GTBank Guarantee Trust</h4>
+                    <h3>GTBank Guarantee Trust</h3>
                     <p>Account ending in •••• 4902</p>
                   </div>
                 </div>
-                <button class="btn-sm text-btn">Options</button>
+                <button type="button" class="btn-sm text-btn" aria-label="Options for GTBank Account ending in 4902">Options</button>
               </div>
 
               <div class="method-item">
                 <div class="method-left">
                   <div class="method-icon-box">
-                    <span class="material-symbols-outlined">credit_card</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
                   </div>
                   <div class="method-details">
-                    <h4>Visa Corporate Card</h4>
+                    <h3>Visa Corporate Card</h3>
                     <p>Card ending in •••• 8821</p>
                   </div>
                 </div>
-                <button class="btn-sm text-btn">Options</button>
+                <button type="button" class="btn-sm text-btn" aria-label="Options for Visa Corporate Card ending in 8821">Options</button>
               </div>
             </div>
-          </div>
+          </section>
 
         </div>
 
         <div class="grid-column gap-24">
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="analytics-heading">
             <div class="card-header">
-              <h3>Monthly Analytics</h3>
+              <h2 id="analytics-heading" class="card-heading-md">Monthly Analytics</h2>
               <span class="sec-indicator">Total: ₦185,400</span>
             </div>
 
             <div class="spending-breakdown">
-              <div class="spending-bar-wrapper">
+              <div class="spending-bar-wrapper" role="img" aria-label="Spending Breakdown: Eats 28 percent 52,000 Naira, Ride 21 percent 38,500 Naira, Bills 24 percent 45,000 Naira, Marketplace 17 percent 31,900 Naira, Other 10 percent 18,000 Naira">
                 <div class="spending-segment eats" style="width: 28%;" title="Eats: ₦52,000"></div>
                 <div class="spending-segment ride" style="width: 21%;" title="Ride: ₦38,500"></div>
                 <div class="spending-segment bills" style="width: 24%;" title="Bills: ₦45,000"></div>
@@ -263,81 +263,81 @@
               </div>
 
               <div class="insight-legend">
-                <div class="legend-item"><span class="legend-dot eats"></span> Eats <strong>₦52,000</strong></div>
-                <div class="legend-item"><span class="legend-dot ride"></span> Ride <strong>₦38,500</strong></div>
-                <div class="legend-item"><span class="legend-dot bills"></span> Bills <strong>₦45,000</strong></div>
-                <div class="legend-item"><span class="legend-dot market"></span> Market <strong>₦31,900</strong></div>
+                <div class="legend-item"><span class="legend-dot eats" aria-hidden="true"></span> Eats <strong>₦52,000</strong></div>
+                <div class="legend-item"><span class="legend-dot ride" aria-hidden="true"></span> Ride <strong>₦38,500</strong></div>
+                <div class="legend-item"><span class="legend-dot bills" aria-hidden="true"></span> Bills <strong>₦45,000</strong></div>
+                <div class="legend-item"><span class="legend-dot market" aria-hidden="true"></span> Market <strong>₦31,900</strong></div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="utilities-heading">
             <div class="card-header">
-              <h3>Quick Utilities</h3>
-              <button class="text-btn" onclick="switchWalletTab('bills', document.querySelectorAll('.w-tab-btn')[2])">View All</button>
+              <h2 id="utilities-heading" class="card-heading-md">Quick Utilities</h2>
+              <button type="button" class="text-btn" onclick="switchWalletTab('bills', document.getElementById('tab-btn-bills'))">View All</button>
             </div>
 
             <div class="bills-category-grid">
-              <div class="bill-tile" onclick="openBillPay('Airtime & Data')">
-                <span class="material-symbols-outlined bill-icon">smartphone</span>
-                <h4>Airtime / Data</h4>
-                <p>MTN, Airtel</p>
-              </div>
-              <div class="bill-tile" onclick="openBillPay('Electricity')">
-                <span class="material-symbols-outlined bill-icon">bolt</span>
-                <h4>Electricity</h4>
-                <p>IKEDC, EKEDC</p>
-              </div>
-              <div class="bill-tile" onclick="openBillPay('Cable TV')">
-                <span class="material-symbols-outlined bill-icon">tv</span>
-                <h4>Cable TV</h4>
-                <p>DSTV, GOTV</p>
-              </div>
-              <div class="bill-tile" onclick="openBillPay('Internet')">
-                <span class="material-symbols-outlined bill-icon">wifi</span>
-                <h4>Internet</h4>
-                <p>Smile, Spectranet</p>
-              </div>
+              <button type="button" class="bill-tile" onclick="openBillPay('Airtime & Data')">
+                <span class="material-symbols-outlined bill-icon" aria-hidden="true">smartphone</span>
+                <span class="bill-title-text">Airtime / Data</span>
+                <span class="bill-sub-text">MTN, Airtel</span>
+              </button>
+              <button type="button" class="bill-tile" onclick="openBillPay('Electricity')">
+                <span class="material-symbols-outlined bill-icon" aria-hidden="true">bolt</span>
+                <span class="bill-title-text">Electricity</span>
+                <span class="bill-sub-text">IKEDC, EKEDC</span>
+              </button>
+              <button type="button" class="bill-tile" onclick="openBillPay('Cable TV')">
+                <span class="material-symbols-outlined bill-icon" aria-hidden="true">tv</span>
+                <span class="bill-title-text">Cable TV</span>
+                <span class="bill-sub-text">DSTV, GOTV</span>
+              </button>
+              <button type="button" class="bill-tile" onclick="openBillPay('Internet')">
+                <span class="material-symbols-outlined bill-icon" aria-hidden="true">wifi</span>
+                <span class="bill-title-text">Internet</span>
+                <span class="bill-sub-text">Smile, Spectranet</span>
+              </button>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card rewards-wallet-card">
+          <section class="kapita-card rewards-wallet-card" aria-labelledby="rewards-heading">
             <div class="card-header">
               <div class="header-title">
-                <span class="material-symbols-outlined card-icon">stars</span>
-                <h3>theKapita Rewards</h3>
+                <span class="material-symbols-outlined card-icon" aria-hidden="true">stars</span>
+                <h2 id="rewards-heading" class="card-heading-md">theKapita Rewards</h2>
               </div>
               <span class="points-badge">2,450 Points</span>
             </div>
             <p class="rewards-subtitle">Earn 1% cashback on every Eats order, Ride booking, or Bill payment.</p>
             
-            <div class="rewards-progress-bar">
+            <div class="rewards-progress-bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Progress to Platinum tier">
               <div class="progress-fill" style="width: 65%;"></div>
             </div>
             <div class="rewards-tier-row">
               <span>550 pts to Platinum</span>
             </div>
 
-            <button class="btn-secondary w-full" style="margin-top: 16px;">Redeem Marketplace Rewards</button>
-          </div>
+            <button type="button" class="btn-secondary w-full" style="margin-top: 16px;">Redeem Marketplace Rewards</button>
+          </section>
 
         </div>
 
       </div>
     </div>
 
-    <div id="walletTabCards" class="w-tab-pane">
-      <div class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;">
+    <div id="walletTabCards" role="tabpanel" aria-labelledby="tab-btn-cards" class="w-tab-pane" tabindex="0" hidden>
+      <section class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;" aria-labelledby="card-sec-heading">
         <div class="card-header justify-center">
-          <h3>theKapita Black Virtual Card</h3>
+          <h2 id="card-sec-heading" class="card-heading-md">theKapita Black Virtual Card</h2>
         </div>
         
-        <div class="kapita-virtual-card">
+        <div class="kapita-virtual-card" aria-label="Virtual Card showing holder Ahmed Ebuka, expiring 08/29">
           <div class="card-chip-row">
             <span class="card-brand-logo">theKapita.</span>
-            <span class="material-symbols-outlined card-chip-icon">contactless</span>
+            <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
           </div>
-          <div class="card-number-display" id="cardNumberDisplay">
+          <div class="card-number-display" id="cardNumberDisplay" aria-label="Card Number masked ending in 8821">
             •••• •••• •••• 8821
           </div>
           <div class="card-bottom-meta">
@@ -357,250 +357,251 @@
         </div>
 
         <div class="card-controls-row">
-          <button class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
-          <button class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
-          <button class="btn-primary">Manage Limits</button>
+          <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
+          <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
+          <button type="button" class="btn-primary">Manage Limits</button>
         </div>
-      </div>
+      </section>
     </div>
 
-    <div id="walletTabBills" class="w-tab-pane">
-      <div class="kapita-card w-full">
+    <div id="walletTabBills" role="tabpanel" aria-labelledby="tab-btn-bills" class="w-tab-pane" tabindex="0" hidden>
+      <section class="kapita-card w-full" aria-labelledby="all-bills-heading">
         <div class="card-header">
           <div>
-            <h3>All Utility & Bill Payments</h3>
+            <h2 id="all-bills-heading" class="card-heading-md">All Utility &amp; Bill Payments</h2>
             <p class="tab-subtitle">Pay directly from your available balance with 0 transaction fees.</p>
           </div>
         </div>
 
         <div class="bills-full-grid">
-          <div class="bill-tile-item" onclick="openBillPay('Airtime & Data')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">smartphone</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Airtime & Data</h4>
-              <p>MTN, Airtel, Glo, 9mobile</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Airtime & Data')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">smartphone</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Airtime &amp; Data</span>
+              <span class="bill-tile-desc">MTN, Airtel, Glo, 9mobile</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
 
-          <div class="bill-tile-item" onclick="openBillPay('Electricity')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">bolt</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Electricity Tokens</h4>
-              <p>IKEDC, EKEDC, AEDC & others</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Electricity')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Electricity Tokens</span>
+              <span class="bill-tile-desc">IKEDC, EKEDC, AEDC &amp; others</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
 
-          <div class="bill-tile-item" onclick="openBillPay('Cable TV')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">tv</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Cable TV Subscriptions</h4>
-              <p>DStv, GOtv, StarTimes</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Cable TV')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">tv</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Cable TV Subscriptions</span>
+              <span class="bill-tile-desc">DStv, GOtv, StarTimes</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
 
-          <div class="bill-tile-item" onclick="openBillPay('Internet')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">wifi</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Internet Broadband</h4>
-              <p>Spectranet, Smile, Fibre</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Internet')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">wifi</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Internet Broadband</span>
+              <span class="bill-tile-desc">Spectranet, Smile, Fibre</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
 
-          <div class="bill-tile-item" onclick="openBillPay('Education')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">school</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Education & Exams</h4>
-              <p>WAEC, JAMB, Tuition Fees</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Education')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">school</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Education &amp; Exams</span>
+              <span class="bill-tile-desc">WAEC, JAMB, Tuition Fees</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
 
-          <div class="bill-tile-item" onclick="openBillPay('Health HMO')">
-            <div class="bill-tile-icon-box">
-              <span class="material-symbols-outlined">health_and_safety</span>
-            </div>
-            <div class="bill-tile-info">
-              <h4>Health & HMO Insurance</h4>
-              <p>Ecosystem Health Plans</p>
-            </div>
-            <span class="material-symbols-outlined tile-arrow">chevron_right</span>
-          </div>
+          <button type="button" class="bill-tile-item" onclick="openBillPay('Health HMO')">
+            <span class="bill-tile-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">health_and_safety</span>
+            </span>
+            <span class="bill-tile-info">
+              <span class="bill-tile-title">Health &amp; HMO Insurance</span>
+              <span class="bill-tile-desc">Ecosystem Health Plans</span>
+            </span>
+            <span class="material-symbols-outlined tile-arrow" aria-hidden="true">chevron_right</span>
+          </button>
         </div>
-      </div>
+      </section>
     </div>
 
-    <div id="walletTabRecipients" class="w-tab-pane">
-      <div class="kapita-card w-full">
+    <div id="walletTabRecipients" role="tabpanel" aria-labelledby="tab-btn-recipients" class="w-tab-pane" tabindex="0" hidden>
+      <section class="kapita-card w-full" aria-labelledby="recipients-heading">
         <div class="card-header">
           <div>
-            <h3>Saved Recipients & Directory</h3>
+            <h2 id="recipients-heading" class="card-heading-md">Saved Recipients &amp; Directory</h2>
             <p class="tab-subtitle">Manage frequent payees for instant 0-fee Kapita tags or external bank transfers</p>
           </div>
-          <button class="btn-primary" onclick="openWalletModal('send')">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">person_add</span> Add New Recipient
+          <button type="button" class="btn-primary" onclick="openWalletModal('send')">
+            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;" aria-hidden="true">person_add</span> Add New Recipient
           </button>
         </div>
 
         <div class="recipients-toolbar">
           <div class="search-input-wrapper recipient-search-box">
-            <span class="material-symbols-outlined search-icon">search</span>
-            <input type="text" placeholder="Search by name, @username, or account number..." class="form-control">
+            <label for="recipientSearchInput" class="sr-only">Search recipients by name, username, or account number</label>
+            <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+            <input type="text" id="recipientSearchInput" placeholder="Search by name, @username, or account number..." class="form-control">
           </div>
-          <div class="filter-pills">
-            <span class="pill active">All (8)</span>
-            <span class="pill">Kapita Network</span>
-            <span class="pill">Bank Accounts</span>
-            <span class="pill">Favorites</span>
+          <div class="filter-pills" role="group" aria-label="Filter recipients">
+            <button type="button" class="pill active" aria-pressed="true">All (8)</button>
+            <button type="button" class="pill" aria-pressed="false">Kapita Network</button>
+            <button type="button" class="pill" aria-pressed="false">Bank Accounts</button>
+            <button type="button" class="pill" aria-pressed="false">Favorites</button>
           </div>
         </div>
 
         <div class="quick-send-rail-container">
-          <span class="rail-label">Frequent Transfers</span>
-          <div class="quick-send-rail">
-            <div class="rail-item" onclick="openWalletModal('send')">
-              <div class="rail-avatar add-new-rail">
-                <span class="material-symbols-outlined">add</span>
-              </div>
+          <span class="rail-label" id="frequent-rail-label">Frequent Transfers</span>
+          <div class="quick-send-rail" role="region" aria-labelledby="frequent-rail-label">
+            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+              <span class="rail-avatar add-new-rail">
+                <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              </span>
               <span>New Payee</span>
-            </div>
-            <div class="rail-item" onclick="openWalletModal('send')">
-              <div class="rail-avatar">SO<span class="online-indicator"></span></div>
+            </button>
+            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+              <span class="rail-avatar">SO<span class="online-indicator" aria-label="Online"></span></span>
               <span>Sarah</span>
-            </div>
-            <div class="rail-item" onclick="openWalletModal('send')">
-              <div class="rail-avatar">JO<span class="online-indicator"></span></div>
+            </button>
+            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+              <span class="rail-avatar">JO<span class="online-indicator" aria-label="Online"></span></span>
               <span>John</span>
-            </div>
-            <div class="rail-item" onclick="openWalletModal('send')">
-              <div class="rail-avatar">EA</div>
+            </button>
+            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+              <span class="rail-avatar">EA</span>
               <span>Ella</span>
-            </div>
-            <div class="rail-item" onclick="openWalletModal('send')">
-              <div class="rail-avatar">MC</div>
+            </button>
+            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+              <span class="rail-avatar">MC</span>
               <span>Michael</span>
-            </div>
+            </button>
           </div>
         </div>
 
         <div class="recipients-grid">
-          <div class="recipient-card favorited">
+          <article class="recipient-card favorited">
             <div class="rec-card-top">
               <span class="network-badge internal">
-                <span class="material-symbols-outlined">bolt</span> Kapita ID
+                <span class="material-symbols-outlined" aria-hidden="true">bolt</span> Kapita ID
               </span>
-              <button class="fav-star-btn active" title="Remove from Favorites">
-                <span class="material-symbols-outlined">star</span>
+              <button type="button" class="fav-star-btn active" aria-label="Remove Sarah Okoro from Favorites">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span>
               </button>
             </div>
             <div class="rec-avatar-lg">
               SO
-              <span class="badge-dot kapita-dot"></span>
+              <span class="badge-dot kapita-dot" aria-hidden="true"></span>
             </div>
-            <h4>Sarah Okoro</h4>
+            <h3>Sarah Okoro</h3>
             <p class="handle">@sarah • Instant ₦0 Fee</p>
             <span class="account-meta">KPT-881092 • Primary Tag</span>
             <div class="rec-card-actions">
-              <button class="btn-primary" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Send Money
+              <button type="button" class="btn-primary" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Send Money
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="recipient-card">
+          <article class="recipient-card">
             <div class="rec-card-top">
               <span class="network-badge bank">
-                <span class="material-symbols-outlined">account_balance</span> Bank Account
+                <span class="material-symbols-outlined" aria-hidden="true">account_balance</span> Bank Account
               </span>
-              <button class="fav-star-btn" title="Add to Favorites">
-                <span class="material-symbols-outlined">star</span>
+              <button type="button" class="fav-star-btn" aria-label="Add John Okafor to Favorites">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span>
               </button>
             </div>
             <div class="rec-avatar-lg bank-avatar">
               JO
             </div>
-            <h4>John Okafor</h4>
+            <h3>John Okafor</h3>
             <p class="handle">GTBank Guarantee Trust</p>
             <span class="account-meta">•••• 4902 • Verified Name</span>
             <div class="rec-card-actions">
-              <button class="btn-secondary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Transfer
+              <button type="button" class="btn-secondary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Transfer
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="recipient-card">
+          <article class="recipient-card">
             <div class="rec-card-top">
               <span class="network-badge internal">
-                <span class="material-symbols-outlined">bolt</span> Kapita ID
+                <span class="material-symbols-outlined" aria-hidden="true">bolt</span> Kapita ID
               </span>
-              <button class="fav-star-btn active" title="Remove from Favorites">
-                <span class="material-symbols-outlined">star</span>
+              <button type="button" class="fav-star-btn active" aria-label="Remove Ella Amra from Favorites">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span>
               </button>
             </div>
             <div class="rec-avatar-lg">
               EA
-              <span class="badge-dot kapita-dot"></span>
+              <span class="badge-dot kapita-dot" aria-hidden="true"></span>
             </div>
-            <h4>Ella Amra</h4>
+            <h3>Ella Amra</h3>
             <p class="handle">@amra • Instant ₦0 Fee</p>
             <span class="account-meta">KPT-883912 • Primary Tag</span>
             <div class="rec-card-actions">
-              <button class="btn-primary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Send Money
+              <button type="button" class="btn-primary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Send Money
               </button>
             </div>
-          </div>
+          </article>
 
-          <div class="recipient-card">
+          <article class="recipient-card">
             <div class="rec-card-top">
               <span class="network-badge bank">
-                <span class="material-symbols-outlined">account_balance</span> Bank Account
+                <span class="material-symbols-outlined" aria-hidden="true">account_balance</span> Bank Account
               </span>
-              <button class="fav-star-btn" title="Add to Favorites">
-                <span class="material-symbols-outlined">star</span>
+              <button type="button" class="fav-star-btn" aria-label="Add Michael Chen to Favorites">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span>
               </button>
             </div>
             <div class="rec-avatar-lg bank-avatar">
               MC
             </div>
-            <h4>Michael Chen</h4>
+            <h3>Michael Chen</h3>
             <p class="handle">Access Bank PLC</p>
             <span class="account-meta">•••• 8812 • Verified Name</span>
             <div class="rec-card-actions">
-              <button class="btn-secondary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span> Transfer
+              <button type="button" class="btn-secondary w-full" onclick="openWalletModal('send')">
+                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Transfer
               </button>
             </div>
-          </div>
+          </article>
         </div>
-      </div>
+      </section>
     </div>
 
-    <div id="walletTabInsights" class="w-tab-pane">
-      <div class="kapita-card w-full">
+    <div id="walletTabInsights" role="tabpanel" aria-labelledby="tab-btn-insights" class="w-tab-pane" tabindex="0" hidden>
+      <section class="kapita-card w-full" aria-labelledby="cashflow-heading">
         <div class="card-header">
           <div>
-            <h3>Ecosystem Cashflow Analytics</h3>
+            <h2 id="cashflow-heading" class="card-heading-md">Ecosystem Cashflow Analytics</h2>
             <p class="tab-subtitle">Visualizing month-over-month cashflow across theKapita network</p>
           </div>
-          <div class="analytics-timeframe-picker">
-            <button class="pill active">August 2026</button>
-            <button class="pill">Q3 2026</button>
-            <button class="pill">Yearly</button>
+          <div class="analytics-timeframe-picker" role="group" aria-label="Select timeframe">
+            <button type="button" class="pill active" aria-pressed="true">August 2026</button>
+            <button type="button" class="pill" aria-pressed="false">Q3 2026</button>
+            <button type="button" class="pill" aria-pressed="false">Yearly</button>
           </div>
         </div>
 
@@ -609,12 +610,12 @@
             <div class="kpi-header">
               <span class="label">Total Inflow</span>
               <span class="kpi-icon positive">
-                <span class="material-symbols-outlined">south_west</span>
+                <span class="material-symbols-outlined" aria-hidden="true">south_west</span>
               </span>
             </div>
             <div class="kpi-value">₦475,000.00</div>
             <span class="kpi-trend positive">
-              <span class="material-symbols-outlined">trending_up</span> +14.2% vs last month
+              <span class="material-symbols-outlined" aria-hidden="true">trending_up</span> +14.2% vs last month
             </span>
           </div>
 
@@ -622,12 +623,12 @@
             <div class="kpi-header">
               <span class="label">Total Outflow</span>
               <span class="kpi-icon negative">
-                <span class="material-symbols-outlined">north_east</span>
+                <span class="material-symbols-outlined" aria-hidden="true">north_east</span>
               </span>
             </div>
             <div class="kpi-value">₦185,400.00</div>
             <span class="kpi-trend negative">
-              <span class="material-symbols-outlined">trending_down</span> -3.5% vs last month
+              <span class="material-symbols-outlined" aria-hidden="true">trending_down</span> -3.5% vs last month
             </span>
           </div>
 
@@ -635,26 +636,26 @@
             <div class="kpi-header">
               <span class="label">Net Savings Rate</span>
               <span class="kpi-icon accent">
-                <span class="material-symbols-outlined">savings</span>
+                <span class="material-symbols-outlined" aria-hidden="true">savings</span>
               </span>
             </div>
             <div class="kpi-value">60.9%</div>
             <span class="kpi-trend positive">
-              <span class="material-symbols-outlined">check_circle</span> Healthy Cashflow Ratio
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span> Healthy Cashflow Ratio
             </span>
           </div>
         </div>
 
         <div class="analytics-chart-box">
           <div class="chart-box-header">
-            <h4>6-Month Cashflow Overview</h4>
+            <h3>6-Month Cashflow Overview</h3>
             <div class="chart-legend">
-              <span class="legend-item"><span class="legend-dot inflow"></span> Inflow</span>
-              <span class="legend-item"><span class="legend-dot outflow"></span> Outflow</span>
+              <span class="legend-item"><span class="legend-dot inflow" aria-hidden="true"></span> Inflow</span>
+              <span class="legend-item"><span class="legend-dot outflow" aria-hidden="true"></span> Outflow</span>
             </div>
           </div>
 
-          <div class="bar-chart-container">
+          <div class="bar-chart-container" role="img" aria-label="6-Month Bar Chart from March to August showing higher monthly inflows than outflows">
             <div class="bar-group">
               <div class="bar-wrapper">
                 <div class="bar inflow" style="height: 60%;" title="Inflow: ₦300,000"></div>
@@ -706,12 +707,12 @@
         </div>
 
         <div class="service-analytics-section">
-          <h4>Top Ecosystem Channels</h4>
+          <h3>Top Ecosystem Channels</h3>
           <div class="channel-distribution-grid">
             <div class="channel-card">
               <div class="channel-info">
                 <div class="channel-icon eats">
-                  <span class="material-symbols-outlined">fastfood</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">fastfood</span>
                 </div>
                 <div>
                   <strong>theKapita Eats</strong>
@@ -724,10 +725,10 @@
             <div class="channel-card">
               <div class="channel-info">
                 <div class="channel-icon bills">
-                  <span class="material-symbols-outlined">receipt_long</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
                 </div>
                 <div>
-                  <strong>Bills & Utility</strong>
+                  <strong>Bills &amp; Utility</strong>
                   <p>24% of monthly spend</p>
                 </div>
               </div>
@@ -737,7 +738,7 @@
             <div class="channel-card">
               <div class="channel-info">
                 <div class="channel-icon ride">
-                  <span class="material-symbols-outlined">directions_car</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">directions_car</span>
                 </div>
                 <div>
                   <strong>theKapita Ride</strong>
@@ -750,7 +751,7 @@
             <div class="channel-card">
               <div class="channel-info">
                 <div class="channel-icon market">
-                  <span class="material-symbols-outlined">shopping_bag</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
                 </div>
                 <div>
                   <strong>Marketplace</strong>
@@ -763,29 +764,29 @@
         </div>
 
         <div class="analytics-footer-action">
-          <button class="btn-secondary" onclick="alert('Exporting statement PDF...');">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px;">download</span> Download Full Financial Statement (PDF)
+          <button type="button" class="btn-secondary" onclick="alert('Exporting statement PDF...');">
+            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px;" aria-hidden="true">download</span> Download Full Financial Statement (PDF)
           </button>
         </div>
 
-      </div>
+      </section>
     </div>
 
-    <div id="walletTabSecurity" class="w-tab-pane">
-      <div class="kapita-card w-full">
+    <div id="walletTabSecurity" role="tabpanel" aria-labelledby="tab-btn-security" class="w-tab-pane" tabindex="0" hidden>
+      <section class="kapita-card w-full" aria-labelledby="sec-controls-heading">
         <div class="card-header">
           <div>
-            <h3>Security Controls & Limits</h3>
+            <h2 id="sec-controls-heading" class="card-heading-md">Security Controls &amp; Limits</h2>
             <p class="tab-subtitle">Manage your payment PIN, authorization options, and daily transaction thresholds.</p>
           </div>
-          <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon">check_circle</span></span>
+          <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon" aria-hidden="true">check_circle</span></span>
         </div>
 
         <div class="security-full-grid">
           <div class="security-panel-box">
             <div class="panel-box-title">
-              <span class="material-symbols-outlined panel-icon">speed</span>
-              <h4>Transaction Limits</h4>
+              <span class="material-symbols-outlined panel-icon" aria-hidden="true">speed</span>
+              <h3>Transaction Limits</h3>
             </div>
             <div class="settings-list">
               <div class="detail-row">
@@ -809,66 +810,66 @@
                   <span>Available Balance Today</span>
                   <small>Remaining transferable limit</small>
                 </div>
-                <strong style="color: #00d084;">₦350,000.00</strong>
+                <strong class="limit-avail-text">₦350,000.00</strong>
               </div>
             </div>
-            <button class="btn-secondary w-full" style="margin-top: 16px;">Request Limit Increase</button>
+            <button type="button" class="btn-secondary w-full" style="margin-top: 16px;">Request Limit Increase</button>
           </div>
 
           <div class="security-panel-box">
             <div class="panel-box-title">
-              <span class="material-symbols-outlined panel-icon">shield</span>
-              <h4>Authentication & Protection</h4>
+              <span class="material-symbols-outlined panel-icon" aria-hidden="true">shield</span>
+              <h3>Authentication &amp; Protection</h3>
             </div>
             <div class="settings-list">
               <div class="setting-item">
                 <div class="setting-info-block">
-                  <strong>Biometric Payment Auth</strong>
-                  <p>Require FaceID or Fingerprint for transfers</p>
+                  <label for="switchBiometric" class="setting-label">Biometric Payment Auth</label>
+                  <p id="descBiometric">Require FaceID or Fingerprint for transfers</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switchBiometric" checked class="toggle-switch" aria-describedby="descBiometric">
               </div>
 
               <div class="setting-item">
                 <div class="setting-info-block">
-                  <strong>Security Transaction PIN</strong>
+                  <span class="setting-label">Security Transaction PIN</span>
                   <p>4-digit pin prompt required for transfers over ₦10,000</p>
                 </div>
-                <button class="btn-sm">Change PIN</button>
+                <button type="button" class="btn-sm">Change PIN</button>
               </div>
 
               <div class="setting-item">
                 <div class="setting-info-block">
-                  <strong>Two-Factor Login (2FA)</strong>
-                  <p>Send OTP verification code on untrusted device logins</p>
+                  <label for="switch2fa" class="setting-label">Two-Factor Login (2FA)</label>
+                  <p id="desc2fa">Send OTP verification code on untrusted device logins</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switch2fa" checked class="toggle-switch" aria-describedby="desc2fa">
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
   </main>
 
-  <div class="modal-overlay" id="walletActionModal" onclick="closeWalletModal(event)">
-    <div class="edit-modal-card wallet-modal-body" onclick="event.stopPropagation()">
-      <button class="close-modal-btn" onclick="closeWalletModal()">✕</button>
+  <div class="modal-overlay" id="walletActionModal" tabindex="-1" aria-hidden="true" onclick="closeWalletModal(event)">
+    <div class="edit-modal-card wallet-modal-body" role="dialog" aria-modal="true" aria-labelledby="walletModalTitle" onclick="event.stopPropagation()">
+      <button type="button" class="close-modal-btn" onclick="closeWalletModal()" aria-label="Close modal">✕</button>
       <div class="edit-modal-header text-center">
-        <h3 id="walletModalTitle">Wallet Action</h3>
+        <h2 id="walletModalTitle" class="modal-title">Wallet Action</h2>
         <p id="walletModalSubtitle">Instant settlement via theKapita Pay</p>
       </div>
       <div id="walletModalContent" class="form-fields-container"></div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="txDetailModal" onclick="closeTxModal(event)">
-    <div class="edit-modal-card tx-detail-card" onclick="event.stopPropagation()">
-      <button class="close-modal-btn" onclick="closeTxModal()">✕</button>
+  <div class="modal-overlay" id="txDetailModal" tabindex="-1" aria-hidden="true" onclick="closeTxModal(event)">
+    <div class="edit-modal-card tx-detail-card" role="dialog" aria-modal="true" aria-labelledby="txDetailAmount" onclick="event.stopPropagation()">
+      <button type="button" class="close-modal-btn" onclick="closeTxModal()" aria-label="Close transaction details">✕</button>
       <div class="tx-header-status text-center">
         <div class="success-badge-circle">
-          <span class="material-symbols-outlined">check</span>
+          <span class="material-symbols-outlined" aria-hidden="true">check</span>
         </div>
         <h2 id="txDetailAmount">₦8,500.00</h2>
         <span class="status-text-success">Payment Successful</span>
@@ -876,14 +877,14 @@
       <div class="tx-meta-list">
         <div class="detail-row"><span>Recipient:</span> <strong id="txDetailRecipient">theKapita Eats</strong></div>
         <div class="detail-row"><span>Transaction Type:</span> <strong id="txDetailType">Food Payment</strong></div>
-        <div class="detail-row"><span>Date & Time:</span> <strong id="txDetailDate">27 Aug 2026, 1:42 PM</strong></div>
+        <div class="detail-row"><span>Date &amp; Time:</span> <strong id="txDetailDate">27 Aug 2026, 1:42 PM</strong></div>
         <div class="detail-row"><span>Reference ID:</span> <strong id="txDetailRef">KPT-88910293</strong></div>
         <div class="detail-row"><span>Payment Method:</span> <strong>theKapita Pay Wallet</strong></div>
       </div>
       <div class="tx-modal-actions">
-        <button class="btn-secondary w-full" onclick="alert('Receipt downloaded (PDF)')">Download Receipt</button>
-        <button class="btn-secondary w-full" onclick="alert('Receipt link copied')">Share Receipt</button>
-        <button class="text-btn danger-text w-full" style="margin-top: 8px;">Report a Problem</button>
+        <button type="button" class="btn-secondary w-full" onclick="alert('Receipt downloaded (PDF)')">Download Receipt</button>
+        <button type="button" class="btn-secondary w-full" onclick="alert('Receipt link copied')">Share Receipt</button>
+        <button type="button" class="text-btn danger-text w-full" style="margin-top: 8px;">Report a Problem</button>
       </div>
     </div>
   </div>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita - Restaurants & Buka</title>
+  
+  <!-- Fonts: Bricolage Grotesque & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/food.css">
+</head>
+<body class="food-page-body">
+
+  <!-- Accessibility Skip Link -->
+  <a href="#main-food-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Announcements Region -->
+  <div id="srAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- 0. Header Navigation -->
+  <header class="profile-back-header" role="banner">
+    <div class="header-back-action">
+      <a href="index.html" class="back-btn-circle" aria-label="Return to Kapita Home">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </a>
+      <div class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span class="brand-sub">Food</span>
+      </div>
+    </div>
+
+    <div class="header-right-actions">
+      <!-- Delivery Location Pill -->
+      <button type="button" class="location-pill" onclick="triggerAddressChange()" aria-label="Change delivery location. Current location: Yaba, Lagos">
+        <span class="material-symbols-outlined loc-icon" aria-hidden="true">location_on</span>
+        <span id="headerLocationText">Yaba, Lagos</span>
+        <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">expand_more</span>
+      </button>
+
+      <!-- Account & Menu Navigation Pill -->
+      <div class="header-nav-dropdown-wrapper">
+        <button type="button" class="header-menu-pill-btn" onclick="toggleDropdown()" aria-expanded="false" aria-controls="navDropdown" aria-label="Account and Escrow Wallet Menu">
+          <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">account_circle</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">arrow_drop_down</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="header-nav-dropdown-menu" id="navDropdown" role="menu">
+          <a href="wallet.html" class="dropdown-balance-card" title="Cleared Escrow Balance" role="menuitem">
+            <div class="balance-card-sub">Cleared Escrow Wallet</div>
+            <div class="balance-card-val" id="escrowWalletVal">₦48,500.00</div>
+          </a>
+          <div class="dropdown-divider" role="separator"></div>
+          
+          <button type="button" class="header-dropdown-item" role="menuitem" onclick="openModal('reservationModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">table_restaurant</span>
+            <span>Reserve a Table</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" role="menuitem" onclick="openReservationsListModal()">
+            <span class="material-symbols-outlined icon" aria-hidden="true">event_seat</span>
+            <span>My Table Reservations</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" role="menuitem" onclick="openModal('rouletteModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">casino</span>
+            <span>Taste-Test Roulette</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" role="menuitem" onclick="openModal('buddySplitModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">alt_route</span>
+            <span>Taste-Buddy Split</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" role="menuitem" onclick="openModal('historyModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">receipt_long</span>
+            <span>Escrow Order History</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container View -->
+  <main id="main-food-content" class="food-main-container" tabindex="-1">
+    <div class="food-content-wrapper">
+
+      <!-- 1. Dual Service Switcher Bar -->
+      <div class="service-mode-toggle" role="tablist" aria-label="Food Categories">
+        <button type="button" class="mode-btn active" id="tab-all" role="tab" aria-selected="true" aria-controls="restaurantCardList" onclick="switchVendorCategory('all', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">restaurant</span>
+          <span>Explore &amp; Order</span>
+        </button>
+        <button type="button" class="mode-btn" id="tab-buka" role="tab" aria-selected="false" aria-controls="restaurantCardList" onclick="switchVendorCategory('buka', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">rice_bowl</span>
+          <span>Authentic Buka</span>
+        </button>
+        <button type="button" class="mode-btn" id="tab-fine" role="tab" aria-selected="false" aria-controls="restaurantCardList" onclick="switchVendorCategory('fine', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">wine_bar</span>
+          <span>Fine Dining</span>
+        </button>
+      </div>
+
+      <!-- Floating AI Assistant Widget -->
+      <div class="ai-floating-widget" id="aiFloatingWidget">
+        <div class="ai-expanded-card" id="aiExpandedCard" role="dialog" aria-labelledby="aiWidgetTitle">
+          <div class="ai-card-header-row">
+            <div class="ai-badge-title" id="aiWidgetTitle">
+              <span class="material-symbols-outlined" style="font-size: 14px; color: var(--emerald);" aria-hidden="true">auto_awesome</span>
+              <span>theKapita Assistant</span>
+            </div>
+            <button type="button" class="ai-close-icon-btn" onclick="toggleAiWidget()" aria-label="Close AI recommendation">
+              <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">close</span>
+            </button>
+          </div>
+          
+          <button type="button" class="ai-card-body" onclick="quickAiOrder()" aria-label="Order usual Abula Combo from Iya Basira for ₦3,800">
+            <span class="ai-pill-text">
+              Time for your usual Abula Combo from <strong>Iya Basira</strong>?
+            </span>
+            <span class="ai-pill-action">
+              <span>₦3,800</span>
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward_ios</span>
+            </span>
+          </button>
+        </div>
+
+        <button type="button" class="ai-float-trigger-btn" onclick="toggleAiWidget()" aria-label="Open Kapita AI recommendation">
+          <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+          <span class="ai-pulse-ring" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- 3. Location Picker & Discovery Search -->
+      <section class="location-picker-card" aria-label="Location and Search Settings">
+        <div class="inputs-column">
+          <div class="input-row">
+            <label for="deliveryLocationInput" class="sr-only">Delivery location</label>
+            <span class="material-symbols-outlined icon" aria-hidden="true">location_on</span>
+            <input type="text" id="deliveryLocationInput" value="Victoria Island, Lagos" placeholder="Deliver to...">
+          </div>
+          <div class="input-row">
+            <label for="foodSearchInput" class="sr-only">Search dish, buka, or restaurant name</label>
+            <span class="material-symbols-outlined icon" aria-hidden="true">search</span>
+            <input type="search" id="foodSearchInput" placeholder="Search dish, buka, or restaurant name..." onkeyup="handleFilterSearch()">
+          </div>
+        </div>
+      </section>
+
+      <!-- Cuisine Filter Chips -->
+      <div class="cuisine-filter-bar" role="region" aria-label="Cuisine Categories">
+        <button type="button" class="cuisine-chip active" onclick="filterByCuisine('all', this)">All Vendors</button>
+        <button type="button" class="cuisine-chip" onclick="filterByCuisine('buka', this)">Local Buka 🔥</button>
+        <button type="button" class="cuisine-chip" onclick="filterByCuisine('swallow', this)">Swallows &amp; Soups</button>
+        <button type="button" class="cuisine-chip" onclick="filterByCuisine('fine', this)">Fine Dining</button>
+        <button type="button" class="cuisine-chip" onclick="filterByCuisine('suya', this)">Grills &amp; Suya</button>
+        <button type="button" class="cuisine-chip" onclick="filterByCuisine('pastry', this)">Pastries &amp; Drinks</button>
+      </div>
+
+      <!-- 4. Vendor AI Callout Banner -->
+      <section class="feature-innovative-banner" onclick="openModal('vendorRegisterModal')" role="button" tabindex="0" aria-label="Partner as a food vendor">
+        <div class="innovative-left">
+          <span class="material-symbols-outlined icon" aria-hidden="true">storefront</span>
+          <div>
+            <h4>Are you a Food Vendor?</h4>
+            <p>List dishes, get orders, and dispatch fast.</p>
+          </div>
+        </div>
+        <span class="badge-new">Partner Up</span>
+      </section>
+
+      <!-- 5. Restaurant & Buka Vendor List -->
+      <section class="bills-section-title">
+        <div>
+          <h3>Top Restaurants &amp; Local Bukas</h3>
+          <p>Curated dining spots with fast delivery dispatch</p>
+        </div>
+        <span class="count-tag" id="merchantCountTag">Loading...</span>
+      </section>
+
+      <!-- Network State Overlay / Container for Vendor Cards -->
+      <div class="restaurant-card-list" id="restaurantCardList" aria-live="polite">
+        <!-- Initial Skeleton Loading UI -->
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton-box img"></div>
+          <div class="skeleton-box title"></div>
+          <div class="skeleton-box text"></div>
+        </div>
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton-box img"></div>
+          <div class="skeleton-box title"></div>
+          <div class="skeleton-box text"></div>
+        </div>
+      </div>
+
+      <!-- 6. Digital Menu Grid -->
+      <section class="bills-section-title">
+        <div>
+          <h3>Featured Menu Selection</h3>
+          <p>Order directly for instant pickup or door delivery</p>
+        </div>
+      </section>
+
+      <div class="menu-items-grid" id="menuItemsGrid" aria-live="polite">
+        <article class="menu-dish-card">
+          <div class="dish-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=400&q=80" alt="Special Smoked Jollof served with plantains and chicken">
+          </div>
+          <div class="dish-details">
+            <h4>Special Smoked Jollof</h4>
+            <p>Served with fried plantains, grilled chicken &amp; coleslaw.</p>
+          </div>
+          <div class="dish-bottom-row">
+            <span class="dish-price">₦4,500</span>
+            <button type="button" class="add-dish-btn" aria-label="Add Special Smoked Jollof to cart" onclick="openDishModal('Special Smoked Jollof', 4500, 'The Kapita Grand Bistro', 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=400&q=80')">+</button>
+          </div>
+        </article>
+
+        <article class="menu-dish-card">
+          <div class="dish-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=400&q=80" alt="Abula Combo Buka Special">
+          </div>
+          <div class="dish-details">
+            <h4>Abula Combo (Buka Special)</h4>
+            <p>Hot Amala with Gbegiri, Ewedu and tender goat meat.</p>
+          </div>
+          <div class="dish-bottom-row">
+            <span class="dish-price">₦3,800</span>
+            <button type="button" class="add-dish-btn" aria-label="Add Abula Combo to cart" onclick="openDishModal('Abula Combo (Buka Special)', 3800, 'Iya Basira Local Buka', 'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=400&q=80')">+</button>
+          </div>
+        </article>
+      </div>
+
+      <!-- 7. Live Logistics Tracking Card -->
+      <section class="bills-section-title">
+        <div>
+          <h3>Active Food Dispatch</h3>
+          <p>Track your delivery rider in real time</p>
+        </div>
+      </section>
+
+      <div class="active-shipment-card">
+        <div class="shipment-status-header">
+          <div class="status-badge live">
+            <div class="pulse-dot"></div>
+            <span>RIDER EN ROUTE</span>
+          </div>
+          <span class="tracking-code">Order #TK-8842</span>
+        </div>
+
+        <div class="tracking-progress-timeline" role="region" aria-label="Delivery progress timeline">
+          <div class="timeline-step completed">
+            <div class="step-circle" aria-hidden="true">✓</div>
+            <span>Ordered</span>
+          </div>
+          <div class="timeline-step completed">
+            <div class="step-circle" aria-hidden="true">✓</div>
+            <span>Preparing</span>
+          </div>
+          <div class="timeline-step active">
+            <div class="step-circle">
+              <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">two_wheeler</span>
+            </div>
+            <span>On the Way</span>
+          </div>
+          <div class="timeline-step">
+            <div class="step-circle" aria-hidden="true">•</div>
+            <span>Delivered</span>
+          </div>
+        </div>
+
+        <div class="courier-driver-box">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Dispatch Rider Sani Ibrahim" class="driver-img">
+          <div class="driver-details">
+            <h4>Sani Ibrahim</h4>
+            <p>Logistics Dispatch Rider • Honda Ace</p>
+          </div>
+          <button type="button" class="driver-call-btn" aria-label="Call Dispatch Rider Sani Ibrahim" onclick="alert('Calling Dispatch Rider: Sani Ibrahim (+234-800-KAPITA)...')">
+            <span class="material-symbols-outlined" aria-hidden="true">call</span>
+          </button>
+        </div>
+
+        <div class="proof-of-delivery-box">
+          <span class="material-symbols-outlined icon" aria-hidden="true">key</span>
+          <div>Give Delivery PIN to Rider: <span class="otp-code">5924</span></div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button type="button" class="confirm-service-btn" onclick="openModal('reservationModal')">
+        Reserve a Table
+      </button>
+
+    </div>
+  </main>
+
+  <!-- 8. Mobile Bottom Navigation Dock -->
+  <nav class="market-nav-bar" aria-label="Mobile Bottom Navigation">
+    <button type="button" class="market-nav-btn active" onclick="switchDockTab('explore', this)">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">restaurant</span>
+      <span class="nav-text">Explore</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="focusSearchInput(this)">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">search</span>
+      <span class="nav-text">Search</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="openModal('reservationModal')">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">event_seat</span>
+      <span class="nav-text">Reserve</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="openReservationsListModal()">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">table_restaurant</span>
+      <span class="nav-text">Bookings</span>
+    </button>
+  </nav>
+
+  <!-- ==========================================
+        MODAL DIALOG OVERLAYS
+        ========================================== -->
+
+  <!-- MODAL 1: Table Reservation Input -->
+  <div class="wallet-modal-overlay" id="reservationModal" role="dialog" aria-modal="true" aria-labelledby="resModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="resModalTitle">Reserve a Table</h3>
+          <p class="modal-sub">Book dining spots ahead at your favorite restaurant or buka.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('reservationModal')" aria-label="Close reservation modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form id="reservationForm" onsubmit="handleReservationSubmit(event)">
+        <div class="form-group">
+          <label for="resRestaurantSelect">Select Restaurant / Buka</label>
+          <select id="resRestaurantSelect" class="form-control" required>
+            <option value="The Kapita Grand Bistro">The Kapita Grand Bistro (Victoria Island)</option>
+            <option value="Iya Basira Local Buka">Iya Basira Local Buka (Lekki Phase 1)</option>
+            <option value="Mama Tobi Bukateria">Mama Tobi Bukateria (Yaba)</option>
+            <option value="Alhaji's Northern Suya">Alhaji's Northern Suya (Surulere)</option>
+            <option value="Oleku Fine Dining & Lounge">Oleku Fine Dining & Lounge (Ikoyi)</option>
+            <option value="Crust & Cream Bakery">Crust & Cream Bakery (Victoria Island)</option>
+          </select>
+        </div>
+
+        <div class="reservation-grid">
+          <div class="form-group">
+            <label for="resDate">Date</label>
+            <input type="date" id="resDate" class="form-control" value="2026-10-20" required>
+          </div>
+          <div class="form-group">
+            <label for="resTime">Time</label>
+            <input type="time" id="resTime" class="form-control" value="19:00" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="resGuests">Number of Guests</label>
+          <input type="number" id="resGuests" class="form-control" value="2" min="1" max="20" required>
+        </div>
+
+        <div class="fare-calculation-summary">
+          <div class="summary-row">
+            <span>Reservation Deposit</span>
+            <strong>Free</strong>
+          </div>
+          <div class="summary-row">
+            <span>Instant Confirmation</span>
+            <strong style="color: var(--emerald-dark);">Active</strong>
+          </div>
+        </div>
+
+        <button type="submit" id="resSubmitBtn" class="btn-primary w-full">Confirm Table Booking</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Reservations List Modal -->
+  <div class="wallet-modal-overlay" id="reservationsListModal" role="dialog" aria-modal="true" aria-labelledby="resListModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="resListModalTitle">My Table Reservations</h3>
+          <p class="modal-sub">View and manage your active restaurant bookings</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('reservationsListModal')" aria-label="Close table reservations modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div id="reservationsListContainer" style="display:flex; flex-direction:column; gap:12px; max-height:300px; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Vendor Registration -->
+  <div class="wallet-modal-overlay" id="vendorRegisterModal" role="dialog" aria-modal="true" aria-labelledby="vendorRegTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="vendorRegTitle">Join as a Food Vendor</h3>
+          <p class="modal-sub">Grow your restaurant or buka with theKapita Escrow &amp; Logistics</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('vendorRegisterModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form id="vendorRegisterForm" onsubmit="handleVendorRegistration(event)">
+        <div class="form-group">
+          <label for="vendorStoreName">Business / Restaurant Name</label>
+          <input type="text" id="vendorStoreName" class="form-control" placeholder="e.g. Iya Basira Local Buka" required>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorCategorySelect">Establishment Type</label>
+          <select id="vendorCategorySelect" class="form-control" required>
+            <option value="buka">Authentic Local Buka</option>
+            <option value="fine">Fine Dining Restaurant</option>
+            <option value="grill">Grills &amp; Suya Spot</option>
+            <option value="bakery">Bakery &amp; Pastries</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorAddress">Kitchen / Store Address</label>
+          <input type="text" id="vendorAddress" class="form-control" placeholder="e.g. 14 Herbert Macaulay Way, Yaba" required>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorPhone">WhatsApp / Contact Phone</label>
+          <input type="tel" id="vendorPhone" class="form-control" placeholder="08000000000" required>
+        </div>
+
+        <button type="submit" id="vendorSubmitBtn" class="btn-primary w-full" style="margin-top: 16px;">Submit Vendor Application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Taste-Test Roulette -->
+  <div class="wallet-modal-overlay" id="rouletteModal" role="dialog" aria-modal="true" aria-labelledby="rouletteTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="rouletteTitle">Taste-Test Roulette</h3>
+          <p class="modal-sub">Indecisive? Spin our craving wheel for a random surprise meal &amp; 5% discount.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('rouletteModal')" aria-label="Close roulette modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form onsubmit="handleRouletteSpin(event)">
+        <div class="form-group">
+          <label for="rouletteBudget">Max Budget (₦)</label>
+          <input type="number" id="rouletteBudget" class="form-control" value="4000" min="1000" required>
+        </div>
+        <div class="form-group">
+          <label id="cravingPreferenceLabel">Craving Preference</label>
+          
+          <div class="custom-select-wrapper" id="rouletteCustomSelect">
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="cravingPreferenceLabel selectedRouletteLabel" onclick="toggleCustomDropdown(event)">
+              <span id="selectedRouletteLabel">Surprise Me With Anything</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+            </button>
+            
+            <div class="custom-options-menu" id="rouletteOptionsMenu" role="listbox">
+              <div class="custom-option-item selected" role="option" aria-selected="true" tabindex="0" onclick="selectRouletteOption('any', 'Surprise Me With Anything')">Surprise Me With Anything</div>
+              <div class="custom-option-item" role="option" aria-selected="false" tabindex="0" onclick="selectRouletteOption('spicy', 'Spicy Local Swallows')">Spicy Local Swallows</div>
+              <div class="custom-option-item" role="option" aria-selected="false" tabindex="0" onclick="selectRouletteOption('grills', 'Grills & Suya')">Grills &amp; Suya</div>
+              <div class="custom-option-item" role="option" aria-selected="false" tabindex="0" onclick="selectRouletteOption('pastry', 'Pastries & Sweet Treats')">Pastries &amp; Sweet Treats</div>
+            </div>
+            
+            <input type="hidden" id="rouletteCravingValue" value="any">
+          </div>
+        </div>
+
+        <div id="rouletteResultBox" style="display: none; background: var(--surface-gray); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px dashed var(--emerald);">
+          <h4 id="rouletteDishName" style="font-size: 14px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 2px;"></h4>
+          <p id="rouletteDishDetails" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+          <button type="button" class="btn-primary w-full" style="font-size: 12px; padding: 10px;" onclick="proceedRouletteOrder()">Claim &amp; Order This Dish</button>
+        </div>
+
+        <button type="submit" id="rouletteSpinBtn" class="btn-primary w-full">Spin the Wheel!</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Taste-Buddy Split -->
+  <div class="wallet-modal-overlay" id="buddySplitModal" role="dialog" aria-modal="true" aria-labelledby="buddySplitTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="buddySplitTitle">Taste-Buddy Split</h3>
+          <p class="modal-sub">Pair your order with a nearby neighbor and split dispatch fees instantly.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('buddySplitModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="fare-calculation-summary" style="margin-bottom: 16px;">
+        <h4 style="font-size: 14px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Live Neighborhood Matcher</h4>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">We found <strong>Chidi O.</strong> ordering from <em>Iya Basira Local Buka</em> 400m away from your drop-off address.</p>
+        <div style="font-size: 12px; color: var(--emerald-dark); font-weight: 700;">Potential Delivery Saving: ₦250 refunded to escrow wallet</div>
+      </div>
+
+      <button type="button" class="btn-primary w-full" onclick="confirmBuddySplit()">Pair Order &amp; Split Dispatch Fee</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Escrow Order History -->
+  <div class="wallet-modal-overlay" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="historyModalTitle">Escrow Order History</h3>
+          <p class="modal-sub">Your recent orders and reorder history</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('historyModal')" aria-label="Close history modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="history-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
+        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
+            <span>Iya Basira Local Buka</span>
+            <span style="color: var(--emerald-dark);">₦3,800.00</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Abula Combo • Delivered Oct 6, 2026</p>
+          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderItem('Abula Combo', 3800)">
+            Reorder Dish
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Dish Selection & Ordering -->
+  <div class="wallet-modal-overlay" id="dishModal" role="dialog" aria-modal="true" aria-labelledby="modalDishTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="modalVendorTitle">Vendor Menu</h3>
+          <p class="modal-sub">Escrow Protected Checkout</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('dishModal')" aria-label="Close dish checkout modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <img src="" id="modalDishImg" alt="Dish Preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
+      <h4 id="modalDishTitle" style="font-size: 17px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Dish Name</h4>
+      <div id="modalDishPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 16px;">₦0.00</div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: inline-flex; align-items: center; background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
+          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" aria-label="Decrease quantity" onclick="adjustQty(-1)">-</button>
+          <span id="dishModalQty" style="width: 36px; text-align: center; font-weight: 800; font-size: 14px;" aria-live="polite">1</span>
+          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" aria-label="Increase quantity" onclick="adjustQty(1)">+</button>
+        </div>
+
+        <button type="button" class="btn-primary" style="padding: 12px 20px; border-radius: 12px; margin-top: 0;" onclick="confirmOrderCheckout()">
+          Add to Escrow Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Full Vendor Menu List -->
+  <div class="wallet-modal-overlay" id="fullMenuModal" role="dialog" aria-modal="true" aria-labelledby="fullMenuVendorName">
+    <div class="wallet-modal-card" style="padding: 20px 16px;">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="fullMenuVendorName">Vendor Menu</h3>
+          <p class="modal-sub">Select dishes to add to Escrow Cart</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('fullMenuModal')" aria-label="Close vendor menu modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="full-menu-list" id="fullMenuList"></div>
+    </div>
+  </div>
+
+  <div id="toastNotificationContainer" aria-live="polite"></div>
+
+  <!-- JavaScript State & Action Controller -->
+  <script src="src/pages/food.js"></script>
+</body>
+</html>

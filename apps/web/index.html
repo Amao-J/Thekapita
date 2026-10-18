@@ -17,6 +17,9 @@
 </head>
 <body>
 
+  <!-- Skip to Main Content Link for Screen Readers -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Top Navigation Header -->
   <header class="desktop-header">
     <div class="logo-container">
@@ -30,20 +33,21 @@
       
       <!-- Notification Bell Widget -->
       <div class="notif-wrapper">
-        <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" onclick="toggleNotifMenu(event)">
-          <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-7c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v7z"/></svg>
-          <span class="notif-badge">3</span>
+        <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" aria-label="Notifications, 3 unread" aria-haspopup="true" aria-expanded="false" onclick="toggleNotifMenu(event)">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-7c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v7z"/></svg>
+          <span class="notif-badge" aria-hidden="true">3</span>
         </button>
 
         <!-- Dropdown Notification Panel -->
-        <div class="notif-menu" id="notifMenu">
+        <div class="notif-menu" id="notifMenu" role="dialog" aria-label="Notifications Panel">
           <div class="notif-header">
             <span>Activity & Alerts</span>
-            <span class="mark-read">Mark all as read</span>
+            <button class="mark-read text-btn-link" type="button">Mark all as read</button>
           </div>
           <div class="notif-list">
-            <div class="notif-item unread">
-              <div class="notif-icon-circle eats-icon">🍔</div>
+            <!-- Linked Eats Notification to food.html -->
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Eats: Your order from Bukka Hut is on the way! 2 minutes ago" onclick="window.location.href='food.html'" style="cursor: pointer;">
+              <div class="notif-icon-circle eats-icon" aria-hidden="true">🍔</div>
               <div class="notif-content">
                 <p class="notif-title"><strong>theKapita Eats</strong></p>
                 <p class="notif-body">Your order from Bukka Hut is on the way!</p>
@@ -52,8 +56,8 @@
             </div>
             
             <!-- Link to wallet.html on Pay Notification -->
-            <div class="notif-item unread" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
-              <div class="notif-icon-circle pay-icon">💳</div>
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Pay: Transfer of 15,000 Naira to Sarah was successful. 1 hour ago" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
+              <div class="notif-icon-circle pay-icon" aria-hidden="true">💳</div>
               <div class="notif-content">
                 <p class="notif-title"><strong>theKapita Pay</strong></p>
                 <p class="notif-body">Transfer of ₦15,000 to Sarah was successful.</p>
@@ -61,12 +65,13 @@
               </div>
             </div>
 
-            <div class="notif-item">
-              <div class="notif-icon-circle brain-icon">🤖</div>
+            <!-- Bills Notification linked to bills.html -->
+            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Bills: Electricity token generated for Ikeja Electric Meter. 3 hours ago" onclick="window.location.href='bills.html'" style="cursor: pointer;">
+              <div class="notif-icon-circle pay-icon" aria-hidden="true">⚡</div>
               <div class="notif-content">
-                <p class="notif-title"><strong>theKapita Brain AI</strong></p>
-                <p class="notif-body">Your requested legal summary is ready.</p>
-                <span class="notif-time">Yesterday</span>
+                <p class="notif-title"><strong>theKapita Bills</strong></p>
+                <p class="notif-body">Electricity token generated for Ikeja Electric Meter.</p>
+                <span class="notif-time">3 hours ago</span>
               </div>
             </div>
           </div>
@@ -75,33 +80,36 @@
 
       <!-- App Launcher Button (9-Dot Grid) -->
       <div class="launcher-wrapper">
-        <div class="app-launcher-menu" id="launcherMenu">
+        <button class="icon-btn app-launcher-btn" id="launcherBtn" title="App Launcher" aria-label="Open theKapita Apps launcher" aria-haspopup="true" aria-expanded="false" onclick="toggleLauncherMenu(event)">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+        </button>
+
+        <div class="app-launcher-menu" id="launcherMenu" role="dialog" aria-label="Apps Menu">
           <div class="menu-header">
             <span>theKapita Apps</span>
           </div>
           <div class="launcher-grid">
-            <!-- Link to wallet.html on Launcher Pay Item -->
-            <div class="launcher-item" onclick="window.location.href='wallet.html'" style="cursor: pointer;"><div class="launcher-icon">💳</div><span>Pay</span></div>
-            <div class="launcher-item" onclick="openApp('Ride')"><div class="launcher-icon">🚗</div><span>Ride</span></div>
-            <div class="launcher-item" onclick="openApp('Eats')"><div class="launcher-icon">🍔</div><span>Eats</span></div>
-            <!-- Link to marketplace.html on Launcher Market Item -->
-            <div class="launcher-item" onclick="window.location.href='marketplace.html'" style="cursor: pointer;"><div class="launcher-icon">🛍️</div><span>Market</span></div>
-            <div class="launcher-item" onclick="openApp('Haven')"><div class="launcher-icon">🏠</div><span>Haven</span></div>
-            <div class="launcher-item" onclick="openApp('Care')"><div class="launcher-icon">🩺</div><span>Care</span></div>
-            <div class="launcher-item" onclick="openApp('Counsel')"><div class="launcher-icon">⚖️</div><span>Counsel</span></div>
-            <div class="launcher-item" onclick="openApp('Talent')"><div class="launcher-icon">💼</div><span>Talent</span></div>
-            <div class="launcher-item" onclick="openApp('Brain')"><div class="launcher-icon">🤖</div><span>Brain AI</span></div>
-            <div class="launcher-item" onclick="openApp('Stays')"><div class="launcher-icon">🏨</div><span>Stays</span></div>
-            <div class="launcher-item" onclick="openApp('Handy')"><div class="launcher-icon">🔧</div><span>Handy</span></div>
-            <div class="launcher-item" onclick="openApp('More')"><div class="launcher-icon dark-bg">+12</div><span>All Apps</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Pay app" onclick="window.location.href='wallet.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">💳</div><span>Pay</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Bills app" onclick="window.location.href='bills.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🧾</div><span>Bills</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Ride app" onclick="window.location.href='ride.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🚗</div><span>Ride</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Eats app" onclick="window.location.href='food.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🍔</div><span>Eats</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Marketplace app" onclick="window.location.href='marketplace.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🛍️</div><span>Market</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Haven app" onclick="openApp('Haven')"><div class="launcher-icon" aria-hidden="true">🏠</div><span>Haven</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Care app" onclick="openApp('Care')"><div class="launcher-icon" aria-hidden="true">🩺</div><span>Care</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Counsel app" onclick="openApp('Counsel')"><div class="launcher-icon" aria-hidden="true">⚖️</div><span>Counsel</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Talent app" onclick="openApp('Talent')"><div class="launcher-icon" aria-hidden="true">💼</div><span>Talent</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Brain AI app" onclick="openApp('Brain')"><div class="launcher-icon" aria-hidden="true">🤖</div><span>Brain AI</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Stays app" onclick="openApp('Stays')"><div class="launcher-icon" aria-hidden="true">🏨</div><span>Stays</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Handy app" onclick="openApp('Handy')"><div class="launcher-icon" aria-hidden="true">🔧</div><span>Handy</span></div>
+            <div class="launcher-item" tabindex="0" role="button" aria-label="View all applications" onclick="openApp('More')"><div class="launcher-icon dark-bg" aria-hidden="true">+12</div><span>All Apps</span></div>
           </div>
         </div>
       </div>
 
       <!-- User Profile Avatar Shortcut -->
       <div class="profile-avatar photo-avatar" title="Account Settings">
-        <a href="profile.html" aria-label="Account settings">
-          <svg class="avatar-img avatar-placeholder" viewBox="0 0 24 24" aria-hidden="true">
+        <a href="profile.html" aria-label="Account Settings and Profile">
+          <svg class="avatar-img avatar-placeholder" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <circle cx="12" cy="8" r="4"></circle>
             <path d="M4 21a8 8 0 0 1 16 0z"></path>
           </svg>
@@ -112,7 +120,7 @@
   </header>
 
   <!-- Hero Portal Container -->
-  <main class="portal-container">
+  <main class="portal-container" id="main-content">
     
     <!-- Hero Brand Statement & Search -->
     <section class="search-hero">
@@ -121,89 +129,119 @@
       </div>
       
       <div class="sleek-search-bar">
-        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <label for="globalSearch" class="sr-only">Search ecosystem services</label>
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <input type="text" placeholder="Search rides, pay bills, order food, or ask AI..." id="globalSearch">
-        <button class="ai-trigger-btn">Ask AI</button>
+        <button type="button" class="ai-trigger-btn">Ask AI</button>
       </div>
 
       <!-- Quick Action Pills -->
       <div class="quick-pills" id="quickPillsContainer">
-        <div class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" data-icon="💳" onclick="window.location.href='wallet.html'" style="cursor: pointer;">💳 Kapita Pay</div>
-        <div class="pill" draggable="true" data-id="Ride" data-title="Ride" data-desc="Transportation" data-icon="🚗">🚗 Book Ride</div>
-        <div class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔">🍔 Order Chow</div>
-        <div class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">🛍️ Marketplace</div>
+        <button class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" data-icon="💳" onclick="window.location.href='wallet.html'" style="cursor: pointer;">💳 Kapita Pay</button>
+        <button class="pill" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" data-icon="⚡" onclick="window.location.href='bills.html'" style="cursor: pointer;">⚡ Pay Bills</button>
+        <button class="pill" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Transportation & Delivery" data-icon="🚗" onclick="window.location.href='ride.html'" style="cursor: pointer;">🚗 Book Ride</button>
+        <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="window.location.href='food.html'" style="cursor: pointer;">🍔 Order Chow</button>
+        <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">🛍️ Marketplace</button>
       </div>
     </section>
 
-    <!-- Sleek Ecosystem App Grid Container -->
+    <!-- Ecosystem App Grid Container -->
     <section class="ecosystem-section">
       <div class="grid-title">
-        <h3>Services & Ecosystem</h3>
+        <h2>Services & Ecosystem</h2>
         <span class="count-tag">20+ Apps</span>
       </div>
 
       <div class="desktop-app-grid" id="mainGridContainer">
-        <div class="app-card" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" data-icon="🏠">
-          <div class="icon-circle">🏠</div>
+
+        <!-- Ride & Logistics Superapp Card -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Ride & Courier service" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Taxis & Logistics" data-icon="🚗" onclick="window.location.href='ride.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true" style="background: #e6fdf4; color: #00d084;">🚗</div>
           <div class="app-info">
-            <h4>Haven</h4>
+            <h3>Rides</h3>
+            <p>Ride & Logistics</p>
+          </div>
+        </div>
+
+        <!-- Bills & Pay Superapp Card -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Bills & Pay service" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" data-icon="🧾" onclick="window.location.href='bills.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true">🧾</div>
+          <div class="app-info">
+            <h3>Bills & Pay</h3>
+            <p>Utilities & Subs</p>
+          </div>
+        </div>
+
+        <!-- Linked Eats Card to food.html -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Eats service" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="window.location.href='food.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true" style="background: #fef3c7; color: #d97706;">🍔</div>
+          <div class="app-info">
+            <h3>Eats</h3>
+            <p>Food & Bukka</p>
+          </div>
+        </div>
+
+        <div class="app-card" tabindex="0" role="button" aria-label="Haven Real Estate service" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" data-icon="🏠" onclick="openApp('Haven')">
+          <div class="icon-circle" aria-hidden="true">🏠</div>
+          <div class="app-info">
+            <h3>Haven</h3>
             <p>Real Estate</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Care" data-title="Care" data-desc="Healthcare" data-icon="🩺">
-          <div class="icon-circle">🩺</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Care Healthcare service" draggable="true" data-id="Care" data-title="Care" data-desc="Healthcare" data-icon="🩺" onclick="openApp('Care')">
+          <div class="icon-circle" aria-hidden="true">🩺</div>
           <div class="app-info">
-            <h4>Care</h4>
+            <h3>Care</h3>
             <p>Healthcare</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Counsel" data-title="Counsel" data-desc="Legal Directory" data-icon="⚖️">
-          <div class="icon-circle">⚖️</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Counsel Legal Directory service" draggable="true" data-id="Counsel" data-title="Counsel" data-desc="Legal Directory" data-icon="⚖️" onclick="openApp('Counsel')">
+          <div class="icon-circle" aria-hidden="true">⚖️</div>
           <div class="app-info">
-            <h4>Counsel</h4>
+            <h3>Counsel</h3>
             <p>Legal Directory</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Talent" data-title="Talent" data-desc="Jobs & Hiring" data-icon="💼">
-          <div class="icon-circle">💼</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Talent Jobs and Hiring service" draggable="true" data-id="Talent" data-title="Talent" data-desc="Jobs & Hiring" data-icon="💼" onclick="openApp('Talent')">
+          <div class="icon-circle" aria-hidden="true">💼</div>
           <div class="app-info">
-            <h4>Talent</h4>
+            <h3>Talent</h3>
             <p>Jobs & Hiring</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Brain" data-title="Brain AI" data-desc="AI Assistant" data-icon="🤖">
-          <div class="icon-circle">🤖</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Brain AI Assistant service" draggable="true" data-id="Brain" data-title="Brain AI" data-desc="AI Assistant" data-icon="🤖" onclick="openApp('Brain')">
+          <div class="icon-circle" aria-hidden="true">🤖</div>
           <div class="app-info">
-            <h4>Brain AI</h4>
+            <h3>Brain AI</h3>
             <p>AI Assistant</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Stays" data-title="Stays" data-desc="Hospitality" data-icon="🏨">
-          <div class="icon-circle">🏨</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Stays Hospitality service" draggable="true" data-id="Stays" data-title="Stays" data-desc="Hospitality" data-icon="🏨" onclick="openApp('Stays')">
+          <div class="icon-circle" aria-hidden="true">🏨</div>
           <div class="app-info">
-            <h4>Stays</h4>
+            <h3>Stays</h3>
             <p>Hospitality</p>
           </div>
         </div>
 
-        <div class="app-card" draggable="true" data-id="Handy" data-title="Handy" data-desc="Skilled Artisans" data-icon="🔧">
-          <div class="icon-circle">🔧</div>
+        <div class="app-card" tabindex="0" role="button" aria-label="Handy Skilled Artisans service" draggable="true" data-id="Handy" data-title="Handy" data-desc="Skilled Artisans" data-icon="🔧" onclick="openApp('Handy')">
+          <div class="icon-circle" aria-hidden="true">🔧</div>
           <div class="app-info">
-            <h4>Handy</h4>
+            <h3>Handy</h3>
             <p>Skilled Artisans</p>
           </div>
         </div>
 
         <!-- Fixed non-draggable view all card -->
-        <div class="app-card view-all" onclick="openApp('More')">
-          <div class="icon-circle dark-circle">+12</div>
+        <div class="app-card view-all" tabindex="0" role="button" aria-label="View all apps" onclick="openApp('More')">
+          <div class="icon-circle dark-circle" aria-hidden="true">+12</div>
           <div class="app-info">
-            <h4>All Apps</h4>
+            <h3>All Apps</h3>
             <p>View More</p>
           </div>
         </div>

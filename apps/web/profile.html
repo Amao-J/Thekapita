@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>theKapita. — Central Identity & Control Center</title>
+  <title>theKapita. — Central Identity &amp; Control Center</title>
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
 
@@ -16,204 +16,222 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/profile.css">
 </head>
-<body>
+<body class="profile-body">
 
   <header class="desktop-header profile-back-header">
-    <div class="header-back-action" onclick="window.location.href='index.html'">
-      <div class="back-btn-circle">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </div>
+    <button type="button" class="header-back-action" onclick="window.location.href='index.html'" aria-label="Go back to Ecosystem Dashboard">
+      <span class="back-btn-circle">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </span>
       <span class="header-back-title">Back to Ecosystem</span>
-    </div>
+    </button>
   </header>
 
-  <main class="portal-container profile-container">
+  <main class="portal-container profile-container" id="main-content">
     
-    <section class="profile-overview-card">
+    <section class="profile-overview-card" aria-labelledby="profile-user-name">
       <div class="profile-main-info">
         <div class="avatar-wrapper">
           <div class="profile-avatar-lg">
-            <span class="material-symbols-outlined" style="font-size: 48px; color: #00D084;">account_circle</span>
+            <span class="material-symbols-outlined" style="font-size: 48px; color: #00d084;" aria-hidden="true">account_circle</span>
           </div>
-          <span class="verified-badge-floating" title="Verified Tier 3 Identity">
-            <span class="material-symbols-outlined" style="font-size: 12px; color: #fff;">check</span>
+          <span class="verified-badge-floating" title="Verified Tier 3 Identity" aria-label="Verified Tier 3 Identity">
+            <span class="material-symbols-outlined" style="font-size: 12px; color: #121212;" aria-hidden="true">check</span>
           </span>
         </div>
 
         <div class="user-meta">
           <div class="name-line">
-            <h2 data-profile-field="fullName">Ahmed Ebuka</h2>
+            <h1 id="profile-user-name" data-profile-field="fullName">Ahmed Ebuka</h1>
             <span class="verified-tag">
-              <span class="material-symbols-outlined" style="font-size: 14px; margin-right: 2px;">verified</span> Verified
+              <span class="material-symbols-outlined" style="font-size: 14px; margin-right: 2px;" aria-hidden="true">verified</span> Verified
             </span>
             <span class="membership-tag">theKapita+</span>
           </div>
           <p class="username-tag"><span class="id-text">theKapita ID: <strong data-profile-field="kapitaId">KPT-883902</strong></span></p>
-          <p class="bio-text">Frontend Architecture & Ecosystem Identity Manager</p>
+          <p class="bio-text">Frontend Architecture &amp; Ecosystem Identity Manager</p>
         </div>
       </div>
 
       <div class="profile-actions">
-        <button class="btn-secondary" onclick="openQrModal()">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">qr_code_2</span>
+        <button type="button" class="btn-secondary" onclick="openQrModal()" aria-label="Open QR Code Modal">
+          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;" aria-hidden="true">qr_code_2</span>
           QR
         </button>
-        <button class="btn-primary" onclick="openEditModal('main')">Edit Profile</button>
+        <button type="button" class="btn-primary" onclick="openEditModal('main')">Edit Profile</button>
       </div>
     </section>
 
-    <nav class="profile-tabs">
-      <button class="tab-btn active" onclick="switchTab('overviewTab', this)">Overview</button>
-      <button class="tab-btn" onclick="switchTab('serviceProfilesTab', this)">Service Profiles</button>
-      <button class="tab-btn" onclick="switchTab('activityTab', this)">Ecosystem Activity</button>
-      <button class="tab-btn" onclick="switchTab('securityTab', this)">Security & Settings</button>
-      <button class="tab-btn" onclick="switchTab('notificationsTab', this)">Notifications</button>
-      <button class="tab-btn" onclick="switchTab('helpTab', this)">Help & Support</button>
+    <nav class="profile-tabs" role="tablist" aria-label="Profile navigation sections">
+      <button type="button" role="tab" aria-selected="true" id="tab-btn-overview" aria-controls="overviewTab" class="tab-btn active" onclick="switchTab('overviewTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">person</span>
+        <span class="tab-text">Overview</span>
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-services" aria-controls="serviceProfilesTab" class="tab-btn" tabindex="-1" onclick="switchTab('serviceProfilesTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">tune</span>
+        <span class="tab-text">Service Profiles</span>
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-activity" aria-controls="activityTab" class="tab-btn" tabindex="-1" onclick="switchTab('activityTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">bolt</span>
+        <span class="tab-text">Ecosystem Activity</span>
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-security" aria-controls="securityTab" class="tab-btn" tabindex="-1" onclick="switchTab('securityTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">lock</span>
+        <span class="tab-text">Security &amp; Settings</span>
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-notifications" aria-controls="notificationsTab" class="tab-btn" tabindex="-1" onclick="switchTab('notificationsTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">notifications</span>
+        <span class="tab-text">Notifications</span>
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-btn-help" aria-controls="helpTab" class="tab-btn" tabindex="-1" onclick="switchTab('helpTab', this)">
+        <span class="material-symbols-outlined tab-icon" aria-hidden="true">support_agent</span>
+        <span class="tab-text">Help &amp; Support</span>
+      </button>
     </nav>
 
-    <div id="overviewTab" class="tab-pane active">
+    <div id="overviewTab" role="tabpanel" aria-labelledby="tab-btn-overview" class="tab-pane active" tabindex="0">
       <div class="profile-grid-two">
         
         <div class="grid-column gap-24">
           
-          <div class="kapita-card wallet-card">
+          <section class="kapita-card wallet-card" aria-labelledby="pay-balance-heading">
             <div class="card-header">
               <div class="header-title">
-                <span class="material-symbols-outlined card-icon">account_balance_wallet</span>
-                <h3>theKapita Pay Balance</h3>
+                <span class="material-symbols-outlined card-icon" aria-hidden="true">account_balance_wallet</span>
+                <h2 id="pay-balance-heading" class="card-title-md">theKapita Pay Balance</h2>
               </div>
-              <span class="sec-indicator">Protected <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span></span>
+              <span class="sec-indicator">Protected <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">check_circle</span></span>
             </div>
 
             <div class="balance-display">
               <div class="amount-group">
-                <span class="currency">₦</span>
-                <span class="amount" id="walletBalance">245,500.00</span>
+                <span class="currency" aria-hidden="true">₦</span>
+                <span class="amount" id="walletBalance" aria-labelledby="pay-balance-heading">245,500.00</span>
               </div>
-              <button class="eye-toggle" onclick="toggleBalanceVisibility()" title="Toggle Masking" aria-label="Toggle balance visibility">
-                <span class="material-symbols-outlined" id="balanceEyeIcon">visibility</span>
+              <button type="button" class="eye-toggle" onclick="toggleBalanceVisibility()" title="Toggle Masking" aria-label="Toggle balance visibility">
+                <span class="material-symbols-outlined" id="balanceEyeIcon" aria-hidden="true">visibility</span>
               </button>
             </div>
 
-            <div class="wallet-actions">
-              <button class="action-btn"><span class="material-symbols-outlined btn-ic">add</span> Deposit</button>
-              <button class="action-btn"><span class="material-symbols-outlined btn-ic">north_east</span> Send</button>
-              <button class="action-btn"><span class="material-symbols-outlined btn-ic">south_west</span> Receive</button>
-              <button class="action-btn"><span class="material-symbols-outlined btn-ic">account_balance</span> Withdraw</button>
+            <div class="wallet-actions" aria-label="Quick Wallet Actions">
+              <button type="button" class="action-btn"><span class="material-symbols-outlined btn-ic" aria-hidden="true">add</span> Deposit</button>
+              <button type="button" class="action-btn"><span class="material-symbols-outlined btn-ic" aria-hidden="true">north_east</span> Send</button>
+              <button type="button" class="action-btn"><span class="material-symbols-outlined btn-ic" aria-hidden="true">south_west</span> Receive</button>
+              <button type="button" class="action-btn"><span class="material-symbols-outlined btn-ic" aria-hidden="true">account_balance</span> Withdraw</button>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="active-services-heading">
             <div class="card-header">
-              <h3>My Active Services</h3>
+              <h2 id="active-services-heading" class="card-title-md">My Active Services</h2>
               <span class="count-tag">12 Connected</span>
             </div>
 
             <div class="services-status-grid">
-              <div class="service-status-tile" onclick="openApp('Eats')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">fastfood</span>
-                  <span class="status-dot active"></span>
-                </div>
-                <h4>Eats</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Eats')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">fastfood</span>
+                  <span class="status-dot active" aria-label="Active service"></span>
+                </span>
+                <h3>Eats</h3>
                 <p>3 active orders</p>
-              </div>
+              </button>
 
-              <div class="service-status-tile" onclick="openApp('Ride')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">directions_car</span>
-                  <span class="status-dot"></span>
-                </div>
-                <h4>Ride</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Ride')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">directions_car</span>
+                  <span class="status-dot" aria-label="Inactive service"></span>
+                </span>
+                <h3>Ride</h3>
                 <p>12 trips this month</p>
-              </div>
+              </button>
 
-              <div class="service-status-tile" onclick="openApp('Market')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">shopping_bag</span>
-                  <span class="status-dot active"></span>
-                </div>
-                <h4>Marketplace</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Market')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">shopping_bag</span>
+                  <span class="status-dot active" aria-label="Active service"></span>
+                </span>
+                <h3>Marketplace</h3>
                 <p>2 items in transit</p>
-              </div>
+              </button>
 
-              <div class="service-status-tile" onclick="openApp('Jobs')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">work</span>
-                  <span class="status-dot"></span>
-                </div>
-                <h4>Talent / Jobs</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Jobs')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">work</span>
+                  <span class="status-dot" aria-label="Inactive service"></span>
+                </span>
+                <h3>Talent / Jobs</h3>
                 <p>Profile 85% complete</p>
-              </div>
+              </button>
 
-              <div class="service-status-tile" onclick="openApp('Homes')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">home_work</span>
-                  <span class="status-dot"></span>
-                </div>
-                <h4>Haven</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Homes')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">home_work</span>
+                  <span class="status-dot" aria-label="Inactive service"></span>
+                </span>
+                <h3>Haven</h3>
                 <p>1 saved tour</p>
-              </div>
+              </button>
 
-              <div class="service-status-tile" onclick="openApp('Brain')">
-                <div class="tile-top">
-                  <span class="material-symbols-outlined tile-icon">psychology</span>
-                  <span class="status-dot active"></span>
-                </div>
-                <h4>Brain AI</h4>
+              <button type="button" class="service-status-tile" onclick="openApp('Brain')">
+                <span class="tile-top">
+                  <span class="material-symbols-outlined tile-icon" aria-hidden="true">psychology</span>
+                  <span class="status-dot active" aria-label="Active service"></span>
+                </span>
+                <h3>Brain AI</h3>
                 <p>Pro Plan Active</p>
-              </div>
+              </button>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card rewards-card">
+          <section class="kapita-card rewards-card" aria-labelledby="rewards-section-heading">
             <div class="card-header">
               <div class="header-title">
-                <span class="material-symbols-outlined card-icon">stars</span>
-                <h3>theKapita Rewards</h3>
+                <span class="material-symbols-outlined card-icon" aria-hidden="true">stars</span>
+                <h2 id="rewards-section-heading" class="card-title-md">theKapita Rewards</h2>
               </div>
               <span class="points-badge">2,450 Points</span>
             </div>
             <p class="rewards-subtitle">Earn rewards seamlessly whenever you order food, book rides, or transfer money.</p>
             
             <div class="points-breakdown">
-              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;">fastfood</span> Eats</span><strong>+500</strong></div>
-              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;">directions_car</span> Ride</span><strong>+200</strong></div>
-              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;">shopping_bag</span> Market</span><strong>+750</strong></div>
-              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;">payments</span> Pay</span><strong>+1,000</strong></div>
+              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">fastfood</span> Eats</span><strong>+500</strong></div>
+              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">directions_car</span> Ride</span><strong>+200</strong></div>
+              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">shopping_bag</span> Market</span><strong>+750</strong></div>
+              <div class="point-item"><span><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">payments</span> Pay</span><strong>+1,000</strong></div>
             </div>
 
-            <button class="btn-secondary w-full rewards-redeem-btn">Redeem Rewards Marketplace</button>
-          </div>
+            <button type="button" class="btn-secondary w-full rewards-redeem-btn">Redeem Rewards Marketplace</button>
+          </section>
 
         </div>
 
         <div class="grid-column gap-24">
           
-          <div class="kapita-card membership-card">
+          <section class="kapita-card membership-card" aria-labelledby="vip-pass-heading">
             <div class="membership-header">
               <div>
                 <span class="vip-badge">THEKAPITA+</span>
-                <h4>VIP Super Pass</h4>
+                <h2 id="vip-pass-heading" class="card-title-md">VIP Super Pass</h2>
               </div>
               <span class="active-pill">Active</span>
             </div>
             <ul class="benefit-list">
-              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00D084;">check</span> Free delivery on all theKapita Eats orders over ₦5,000</li>
-              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00D084;">check</span> 5% cashback on theKapita Rides</li>
-              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00D084;">check</span> Zero transfer fees on theKapita Pay wallet transfers</li>
+              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00d084;" aria-hidden="true">check</span> Free delivery on all theKapita Eats orders over ₦5,000</li>
+              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00d084;" aria-hidden="true">check</span> 5% cashback on theKapita Rides</li>
+              <li><span class="material-symbols-outlined" style="font-size: 16px; color: #00d084;" aria-hidden="true">check</span> Zero transfer fees on theKapita Pay wallet transfers</li>
             </ul>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="overview-activity-heading">
             <div class="card-header">
-              <h3>Ecosystem Activity</h3>
-              <a href="#" class="view-link" onclick="switchTab('activityTab', document.querySelectorAll('.tab-btn')[2])">View All</a>
+              <h2 id="overview-activity-heading" class="card-title-md">Ecosystem Activity</h2>
+              <button type="button" class="view-link" onclick="switchTab('activityTab', document.getElementById('tab-btn-activity'))">View All</button>
             </div>
 
             <div class="activity-timeline">
               <div class="activity-row">
-                <div class="act-icon-wrapper eats"><span class="material-symbols-outlined">fastfood</span></div>
+                <div class="act-icon-wrapper eats"><span class="material-symbols-outlined" aria-hidden="true">fastfood</span></div>
                 <div class="act-details">
                   <p class="act-title"><strong>Eats:</strong> Bukka Hut Lunch</p>
                   <span class="act-time">Today, 1:15 PM</span>
@@ -222,7 +240,7 @@
               </div>
 
               <div class="activity-row">
-                <div class="act-icon-wrapper pay"><span class="material-symbols-outlined">payments</span></div>
+                <div class="act-icon-wrapper pay"><span class="material-symbols-outlined" aria-hidden="true">payments</span></div>
                 <div class="act-details">
                   <p class="act-title"><strong>Pay:</strong> Received from @sarah</p>
                   <span class="act-time">Today, 10:30 AM</span>
@@ -231,7 +249,7 @@
               </div>
 
               <div class="activity-row">
-                <div class="act-icon-wrapper ride"><span class="material-symbols-outlined">directions_car</span></div>
+                <div class="act-icon-wrapper ride"><span class="material-symbols-outlined" aria-hidden="true">directions_car</span></div>
                 <div class="act-details">
                   <p class="act-title"><strong>Ride:</strong> Trip to Ikoyi Link Bridge</p>
                   <span class="act-time">Yesterday, 6:45 PM</span>
@@ -239,116 +257,116 @@
                 <span class="act-amount negative">-₦3,200</span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="saved-places-heading">
             <div class="card-header">
-              <h3>Universal Saved Places</h3>
-              <button class="text-btn">+ Add Place</button>
+              <h2 id="saved-places-heading" class="card-title-md">Universal Saved Places</h2>
+              <button type="button" class="text-btn">+ Add Place</button>
             </div>
             <div class="locations-list">
               <div class="location-item">
-                <span class="loc-badge"><span class="material-symbols-outlined" style="font-size: 14px;">home</span> Home</span>
+                <span class="loc-badge"><span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">home</span> Home</span>
                 <p>12 Admiralty Way, Lekki Phase 1, Lagos</p>
               </div>
               <div class="location-item">
-                <span class="loc-badge"><span class="material-symbols-outlined" style="font-size: 14px;">business</span> Office</span>
+                <span class="loc-badge"><span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">business</span> Office</span>
                 <p>Victoria Tower, Sam Mbakwe St, VI, Lagos</p>
               </div>
             </div>
-          </div>
+          </section>
 
         </div>
 
       </div>
     </div>
 
-    <div id="serviceProfilesTab" class="tab-pane">
+    <div id="serviceProfilesTab" role="tabpanel" aria-labelledby="tab-btn-services" class="tab-pane" tabindex="0" hidden>
       <div class="section-intro">
-        <h3>Service Preferences</h3>
+        <h2>Service Preferences</h2>
       </div>
 
       <div class="service-profiles-grid">
         
-        <div class="kapita-card service-profile-card">
+        <section class="kapita-card service-profile-card" aria-labelledby="eats-pref-heading">
           <div class="card-header">
             <div class="header-title">
-              <span class="material-symbols-outlined card-icon">restaurant</span>
-              <h3>theKapita Eats Profile</h3>
+              <span class="material-symbols-outlined card-icon" aria-hidden="true">restaurant</span>
+              <h3 id="eats-pref-heading">theKapita Eats Profile</h3>
             </div>
-            <button class="btn-sm" onclick="openEditModal('eats')">Edit</button>
+            <button type="button" class="btn-sm" onclick="openEditModal('eats')">Edit</button>
           </div>
           <div class="profile-details-list">
             <div class="detail-row"><span>Dietary Preference:</span> <strong>No Pork, Halal</strong></div>
             <div class="detail-row"><span>Favorite Cuisine:</span> <strong>Nigerian, Pan-Asian</strong></div>
             <div class="detail-row"><span>Default Address:</span> <strong>Home (Admiralty Way)</strong></div>
           </div>
-        </div>
+        </section>
 
-        <div class="kapita-card service-profile-card">
+        <section class="kapita-card service-profile-card" aria-labelledby="ride-pref-heading">
           <div class="card-header">
             <div class="header-title">
-              <span class="material-symbols-outlined card-icon">local_taxi</span>
-              <h3>theKapita Ride Profile</h3>
+              <span class="material-symbols-outlined card-icon" aria-hidden="true">local_taxi</span>
+              <h3 id="ride-pref-heading">theKapita Ride Profile</h3>
             </div>
-            <button class="btn-sm" onclick="openEditModal('ride')">Edit</button>
+            <button type="button" class="btn-sm" onclick="openEditModal('ride')">Edit</button>
           </div>
           <div class="profile-details-list">
             <div class="detail-row"><span>Preferred Ride:</span> <strong>Comfort / AC SUV</strong></div>
             <div class="detail-row"><span>Quiet Mode:</span> <strong>Enabled (Driver Quiet)</strong></div>
             <div class="detail-row"><span>Default Payment:</span> <strong>theKapita Pay Wallet</strong></div>
           </div>
-        </div>
+        </section>
 
-        <div class="kapita-card service-profile-card">
+        <section class="kapita-card service-profile-card" aria-labelledby="talent-pref-heading">
           <div class="card-header">
             <div class="header-title">
-              <span class="material-symbols-outlined card-icon">badge</span>
-              <h3>theKapita Talent Profile</h3>
+              <span class="material-symbols-outlined card-icon" aria-hidden="true">badge</span>
+              <h3 id="talent-pref-heading">theKapita Talent Profile</h3>
             </div>
-            <button class="btn-sm" onclick="openEditModal('talent')">Manage Resume</button>
+            <button type="button" class="btn-sm" onclick="openEditModal('talent')">Manage Resume</button>
           </div>
           <div class="profile-details-list">
             <div class="detail-row"><span>Primary Skill:</span> <strong>Frontend Engineer</strong></div>
             <div class="detail-row"><span>Experience Level:</span> <strong>Senior (6+ Years)</strong></div>
             <div class="detail-row"><span>Resume Attachment:</span> <strong>Ahmed_Ebuka_CV.pdf ✓</strong></div>
           </div>
-        </div>
+        </section>
 
-        <div class="kapita-card service-profile-card">
+        <section class="kapita-card service-profile-card" aria-labelledby="health-pref-heading">
           <div class="card-header">
             <div class="header-title">
-              <span class="material-symbols-outlined card-icon">health_and_safety</span>
-              <h3>theKapita Health Profile</h3>
+              <span class="material-symbols-outlined card-icon" aria-hidden="true">health_and_safety</span>
+              <h3 id="health-pref-heading">theKapita Health Profile</h3>
             </div>
-            <button class="btn-sm" onclick="openEditModal('health')">Edit</button>
+            <button type="button" class="btn-sm" onclick="openEditModal('health')">Edit</button>
           </div>
           <div class="profile-details-list">
             <div class="detail-row"><span>Blood Group:</span> <strong>O Positive (O+)</strong></div>
             <div class="detail-row"><span>Emergency Contact:</span> <strong>+234 803 *** 8921</strong></div>
             <div class="detail-row"><span>Health Insurance ID:</span> <strong>HMO-KP-99201</strong></div>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>
 
-    <div id="activityTab" class="tab-pane">
-      <div class="kapita-card">
+    <div id="activityTab" role="tabpanel" aria-labelledby="tab-btn-activity" class="tab-pane" tabindex="0" hidden>
+      <section class="kapita-card" aria-labelledby="full-ledger-heading">
         <div class="card-header">
-          <h3>Universal Ecosystem Ledger</h3><br>
-          <div class="filter-pills">
-            <span class="pill active">All</span>
-            <span class="pill">Payments</span>
-            <span class="pill">Eats</span>
-            <span class="pill">Ride</span>
-            <span class="pill">Marketplace</span>
+          <h2 id="full-ledger-heading" class="card-title-md">Universal Ecosystem Ledger</h2>
+          <div class="filter-pills" role="group" aria-label="Filter activity transactions">
+            <button type="button" class="pill active" aria-pressed="true">All</button>
+            <button type="button" class="pill" aria-pressed="false">Payments</button>
+            <button type="button" class="pill" aria-pressed="false">Eats</button>
+            <button type="button" class="pill" aria-pressed="false">Ride</button>
+            <button type="button" class="pill" aria-pressed="false">Marketplace</button>
           </div>
         </div>
 
         <div class="activity-timeline full-timeline">
           <div class="activity-row">
-            <div class="act-icon-wrapper eats"><span class="material-symbols-outlined">fastfood</span></div>
+            <div class="act-icon-wrapper eats"><span class="material-symbols-outlined" aria-hidden="true">fastfood</span></div>
             <div class="act-details">
               <p class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Meal</p>
               <span class="act-time">Today, 1:15 PM</span>
@@ -357,7 +375,7 @@
           </div>
 
           <div class="activity-row">
-            <div class="act-icon-wrapper pay"><span class="material-symbols-outlined">payments</span></div>
+            <div class="act-icon-wrapper pay"><span class="material-symbols-outlined" aria-hidden="true">payments</span></div>
             <div class="act-details">
               <p class="act-title"><strong>theKapita Pay:</strong> Wallet Transfer from @sarah</p>
               <span class="act-time">Today, 10:30 AM</span>
@@ -366,7 +384,7 @@
           </div>
 
           <div class="activity-row">
-            <div class="act-icon-wrapper ride"><span class="material-symbols-outlined">directions_car</span></div>
+            <div class="act-icon-wrapper ride"><span class="material-symbols-outlined" aria-hidden="true">directions_car</span></div>
             <div class="act-details">
               <p class="act-title"><strong>theKapita Ride:</strong> Lekki to Victoria Island</p>
               <span class="act-time">Yesterday, 6:45 PM</span>
@@ -375,7 +393,7 @@
           </div>
 
           <div class="activity-row">
-            <div class="act-icon-wrapper market"><span class="material-symbols-outlined">shopping_bag</span></div>
+            <div class="act-icon-wrapper market"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span></div>
             <div class="act-details">
               <p class="act-title"><strong>theKapita Market:</strong> Wireless Headphones Order</p>
               <span class="act-time">18 Aug 2026, 2:10 PM</span>
@@ -383,17 +401,17 @@
             <span class="act-amount negative">-₦18,500</span>
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
-    <div id="securityTab" class="tab-pane">
+    <div id="securityTab" role="tabpanel" aria-labelledby="tab-btn-security" class="tab-pane" tabindex="0" hidden>
       <div class="profile-grid-two">
         
         <div class="grid-column gap-24">
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="personal-details-heading">
             <div class="card-header">
-              <h3>Personal Details</h3>
-              <button class="btn-sm" onclick="openEditModal('personal')">Update</button>
+              <h2 id="personal-details-heading" class="card-title-md">Personal Details</h2>
+              <button type="button" class="btn-sm" onclick="openEditModal('personal')">Update</button>
             </div>
             <div class="settings-list">
               <div class="detail-row"><span>Full Name:</span> <strong data-profile-field="fullName">Ahmed Ebuka</strong></div>
@@ -406,218 +424,219 @@
               <div class="detail-row"><span>Country / Currency:</span> <strong>Nigeria (NGN - ₦)</strong></div>
               <div class="detail-row"><span>Time Zone:</span> <strong>WAT (UTC+1)</strong></div>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="security-status-heading">
             <div class="card-header">
-              <h3>Security Status</h3>
-              <span class="sec-indicator">Protected <span class="material-symbols-outlined" style="font-size: 14px;">shield</span></span>
+              <h2 id="security-status-heading" class="card-title-md">Security Status</h2>
+              <span class="sec-indicator">Protected <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">shield</span></span>
             </div>
             <div class="settings-list">
               <div class="setting-item">
                 <div>
-                  <strong>Biometric Authentication</strong>
-                  <p>Use FaceID / Fingerprint for quick payments</p>
+                  <label for="switchBiometric" class="setting-label">Biometric Authentication</label>
+                  <p id="descBiometric">Use FaceID / Fingerprint for quick payments</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switchBiometric" checked class="toggle-switch" aria-describedby="descBiometric">
               </div>
               <div class="setting-item">
                 <div>
-                  <strong>Two-Factor Authentication (2FA)</strong>
-                  <p>SMS / Authenticator app code required</p>
+                  <label for="switch2fa" class="setting-label">Two-Factor Authentication (2FA)</label>
+                  <p id="desc2fa">SMS / Authenticator app code required</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switch2fa" checked class="toggle-switch" aria-describedby="desc2fa">
               </div>
               <div class="setting-item">
                 <div>
-                  <strong>theKapita Pay Security PIN</strong>
+                  <span class="setting-label">theKapita Pay Security PIN</span>
                   <p>Required for transactions above ₦10,000</p>
                 </div>
-                <button class="btn-sm">Change PIN</button>
+                <button type="button" class="btn-sm">Change PIN</button>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         <div class="grid-column gap-24">
-          <div class="kapita-card">
+          <section class="kapita-card" aria-labelledby="privacy-perm-heading">
             <div class="card-header">
-              <h3>Privacy & Permissions</h3>
+              <h2 id="privacy-perm-heading" class="card-title-md">Privacy &amp; Permissions</h2>
             </div>
             <div class="settings-list">
               <div class="setting-item">
                 <div>
-                  <strong>Public Profile Visibility</strong>
-                  <p>Allow friends to search your @username</p>
+                  <label for="switchPublicVis" class="setting-label">Public Profile Visibility</label>
+                  <p id="descPublicVis">Allow friends to search your @username</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switchPublicVis" checked class="toggle-switch" aria-describedby="descPublicVis">
               </div>
               <div class="setting-item">
                 <div>
-                  <strong>Location Services Access</strong>
-                  <p>Allow accurate pickups & local service matching</p>
+                  <label for="switchLocation" class="setting-label">Location Services Access</label>
+                  <p id="descLocation">Allow accurate pickups &amp; local service matching</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switchLocation" checked class="toggle-switch" aria-describedby="descLocation">
               </div>
               <div class="setting-item">
                 <div>
-                  <strong>Cross-Service Personalization</strong>
-                  <p>Allow Brain AI to offer smart ecosystem suggestions</p>
+                  <label for="switchPersonalization" class="setting-label">Cross-Service Personalization</label>
+                  <p id="descPersonalization">Allow Brain AI to offer smart ecosystem suggestions</p>
                 </div>
-                <input type="checkbox" checked class="toggle-switch">
+                <input type="checkbox" id="switchPersonalization" checked class="toggle-switch" aria-describedby="descPersonalization">
               </div>
               <div class="setting-item">
                 <div>
-                  <strong>Marketing & Ecosystem Offers</strong>
-                  <p>Receive localized deals and service discounts</p>
+                  <label for="switchMarketing" class="setting-label">Marketing &amp; Ecosystem Offers</label>
+                  <p id="descMarketing">Receive localized deals and service discounts</p>
                 </div>
-                <input type="checkbox" class="toggle-switch">
+                <input type="checkbox" id="switchMarketing" class="toggle-switch" aria-describedby="descMarketing">
               </div>
               
               <div class="setting-action-row settings-action-stack">
-                <button class="text-btn text-btn-left"><span class="material-symbols-outlined" style="font-size: 16px;">link</span> Manage Connected Services (12 Active)</button>
-                <button class="text-btn text-btn-left"><span class="material-symbols-outlined" style="font-size: 16px;">download</span> Download My theKapita Data (JSON)</button>
+                <button type="button" class="text-btn text-btn-left"><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">link</span> Manage Connected Services (12 Active)</button>
+                <button type="button" class="text-btn text-btn-left"><span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">download</span> Download My theKapita Data (JSON)</button>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="kapita-card danger-card">
+          <section class="kapita-card danger-card" aria-labelledby="danger-actions-heading">
             <div class="card-header">
-              <h3 class="danger-title">Account Actions</h3>
+              <h2 id="danger-actions-heading" class="danger-title card-title-md">Account Actions</h2>
             </div>
             <p class="danger-desc">Permanently delete your theKapita ID, connected balances, and ecosystem data.</p>
-            <button class="btn-secondary w-full danger-btn">Delete Ecosystem Account</button>
-          </div>
+            <button type="button" class="btn-secondary w-full danger-btn">Delete Ecosystem Account</button>
+          </section>
         </div>
 
       </div>
     </div>
 
-    <div id="notificationsTab" class="tab-pane">
-      <div class="kapita-card tab-card-centered">
+    <div id="notificationsTab" role="tabpanel" aria-labelledby="tab-btn-notifications" class="tab-pane" tabindex="0" hidden>
+      <section class="kapita-card tab-card-centered" aria-labelledby="notif-pref-heading">
         <div class="card-header">
-          <h3>Notifications & Preferences</h3>
+          <h2 id="notif-pref-heading" class="card-title-md">Notifications &amp; Preferences</h2>
         </div>
         <div class="settings-list">
           <div class="setting-item">
             <div>
-              <strong>Push Notifications</strong>
-              <p>Instant mobile alerts for ride arrivals and orders</p>
+              <label for="switchPushNotif" class="setting-label">Push Notifications</label>
+              <p id="descPushNotif">Instant mobile alerts for ride arrivals and orders</p>
             </div>
-            <input type="checkbox" checked class="toggle-switch">
+            <input type="checkbox" id="switchPushNotif" checked class="toggle-switch" aria-describedby="descPushNotif">
           </div>
           <div class="setting-item">
             <div>
-              <strong>Messages & Chat Alerts</strong>
-              <p>Direct communications from drivers, sellers, or support</p>
+              <label for="switchMsgNotif" class="setting-label">Messages &amp; Chat Alerts</label>
+              <p id="descMsgNotif">Direct communications from drivers, sellers, or support</p>
             </div>
-            <input type="checkbox" checked class="toggle-switch">
+            <input type="checkbox" id="switchMsgNotif" checked class="toggle-switch" aria-describedby="descMsgNotif">
           </div>
           <div class="setting-item">
             <div>
-              <strong>Service Updates & Announcements</strong>
-              <p>Important maintenance or ecosystem feature releases</p>
+              <label for="switchUpdatesNotif" class="setting-label">Service Updates &amp; Announcements</label>
+              <p id="descUpdatesNotif">Important maintenance or ecosystem feature releases</p>
             </div>
-            <input type="checkbox" checked class="toggle-switch">
+            <input type="checkbox" id="switchUpdatesNotif" checked class="toggle-switch" aria-describedby="descUpdatesNotif">
           </div>
           <div class="setting-item">
             <div>
-              <strong>Exclusive Offers & Rewards</strong>
-              <p>Promotions and cashback opportunities</p>
+              <label for="switchOffersNotif" class="setting-label">Exclusive Offers &amp; Rewards</label>
+              <p id="descOffersNotif">Promotions and cashback opportunities</p>
             </div>
-            <input type="checkbox" class="toggle-switch">
+            <input type="checkbox" id="switchOffersNotif" class="toggle-switch" aria-describedby="descOffersNotif">
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
-    <div id="helpTab" class="tab-pane">
-      <div class="kapita-card">
+    <div id="helpTab" role="tabpanel" aria-labelledby="tab-btn-help" class="tab-pane" tabindex="0" hidden>
+      <section class="kapita-card" aria-labelledby="help-search-title">
         <div class="help-search-header">
-          <h2 class="help-search-title">How can we help you?</h2>
+          <h2 id="help-search-title" class="help-search-title">How can we help you?</h2>
           <p class="help-search-subtitle">Universal support for all theKapita services. No need to hunt for individual departments.</p>
           
           <div class="search-input-wrapper">
-            <input type="text" placeholder="Search for help, orders, transactions, or topics..." class="form-control help-search-input">
+            <label for="helpSearchInput" class="sr-only">Search help articles and topics</label>
+            <input type="text" id="helpSearchInput" placeholder="Search for help, orders, transactions, or topics..." class="form-control help-search-input">
           </div>
         </div>
 
         <h3 class="help-categories-title">Browse Support by Category</h3>
         
         <div class="help-categories-grid">
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">account_balance_wallet</span>
-            <h4 class="help-tile-title">Kapita Pay</h4>
-            <p class="help-tile-desc">Transfers, wallet, withdrawals</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">account_balance_wallet</span>
+            <span class="help-tile-title">Kapita Pay</span>
+            <span class="help-tile-desc">Transfers, wallet, withdrawals</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">fastfood</span>
-            <h4 class="help-tile-title">Eats</h4>
-            <p class="help-tile-desc">Orders, deliveries, refunds</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">fastfood</span>
+            <span class="help-tile-title">Eats</span>
+            <span class="help-tile-desc">Orders, deliveries, refunds</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">directions_car</span>
-            <h4 class="help-tile-title">Ride</h4>
-            <p class="help-tile-desc">Trips, fare reviews, lost items</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">directions_car</span>
+            <span class="help-tile-title">Ride</span>
+            <span class="help-tile-desc">Trips, fare reviews, lost items</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">shopping_bag</span>
-            <h4 class="help-tile-title">Marketplace</h4>
-            <p class="help-tile-desc">Shipments, returns, disputes</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">shopping_bag</span>
+            <span class="help-tile-title">Marketplace</span>
+            <span class="help-tile-desc">Shipments, returns, disputes</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">work</span>
-            <h4 class="help-tile-title">Jobs & Talent</h4>
-            <p class="help-tile-desc">Applications, resumes, hiring</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">work</span>
+            <span class="help-tile-title">Jobs &amp; Talent</span>
+            <span class="help-tile-desc">Applications, resumes, hiring</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">health_and_safety</span>
-            <h4 class="help-tile-title">Health</h4>
-            <p class="help-tile-desc">Consultations, HMO records</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">health_and_safety</span>
+            <span class="help-tile-title">Health</span>
+            <span class="help-tile-desc">Consultations, HMO records</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">gavel</span>
-            <h4 class="help-tile-title">Legal & Terms</h4>
-            <p class="help-tile-desc">Privacy policy, service terms</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">gavel</span>
+            <span class="help-tile-title">Legal &amp; Terms</span>
+            <span class="help-tile-desc">Privacy policy, service terms</span>
+          </button>
 
-          <div class="help-tile">
-            <span class="material-symbols-outlined help-tile-icon">lock</span>
-            <h4 class="help-tile-title">Account & Security</h4>
-            <p class="help-tile-desc">Passwords, 2FA, verification</p>
-          </div>
+          <button type="button" class="help-tile">
+            <span class="material-symbols-outlined help-tile-icon" aria-hidden="true">lock</span>
+            <span class="help-tile-title">Account &amp; Security</span>
+            <span class="help-tile-desc">Passwords, 2FA, verification</span>
+          </button>
         </div>
 
         <div class="support-conversations-section">
           <div class="support-conversations-header">
             <h3 class="support-conversations-title">Support</h3>
-            <button class="btn-primary">+ New Ticket</button>
+            <button type="button" class="btn-primary">+ New Ticket</button>
           </div>
           <p class="support-conversations-empty">No open support tickets. Our team is available 24/7 whenever you need help.</p>
         </div>
-      </div>
+      </section>
     </div>
 
   </main>
 
-  <div class="modal-overlay" id="qrModal" onclick="closeQrModal(event)">
-    <div class="qr-modal-card" onclick="event.stopPropagation()">
-      <button class="close-modal-btn" onclick="closeQrModal()">✕</button>
+  <div class="modal-overlay" id="qrModal" tabindex="-1" aria-hidden="true" onclick="closeQrModal(event)">
+    <div class="qr-modal-card" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle" onclick="event.stopPropagation()">
+      <button type="button" class="close-modal-btn" onclick="closeQrModal()" aria-label="Close QR Code Modal">✕</button>
       
       <div class="qr-modal-header">
-        <div class="app-icon qr-app-icon">K<span class="dot">.</span></div>
-        <h3>Universal theKapita ID</h3>
+        <div class="app-icon qr-app-icon" aria-hidden="true">K<span class="dot">.</span></div>
+        <h2 id="qrModalTitle" class="modal-title-md">Universal theKapita ID</h2>
         <p>Scan to send payments, verify profile, or connect</p>
       </div>
 
       <div class="qr-code-box">
-        <svg viewBox="0 0 100 100" class="qr-svg">
+        <svg viewBox="0 0 100 100" class="qr-svg" role="img" aria-label="QR Code for Ahmed Ebuka, Kapita ID KPT-883902">
           <rect width="100" height="100" fill="#ffffff" />
           <rect x="10" y="10" width="24" height="24" fill="#121212" />
           <rect x="14" y="14" width="16" height="16" fill="#ffffff" />
@@ -648,23 +667,23 @@
       </div>
 
       <div class="qr-modal-actions">
-        <button class="btn-primary w-full" onclick="copyKapitaId()">Copy theKapita ID Tag</button>
+        <button type="button" class="btn-primary w-full" onclick="copyKapitaId()">Copy theKapita ID Tag</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
-    <div class="edit-modal-card" onclick="event.stopPropagation()">
-      <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
+  <div class="modal-overlay" id="editModal" tabindex="-1" aria-hidden="true" onclick="closeEditModal(event)">
+    <div class="edit-modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" onclick="event.stopPropagation()">
+      <button type="button" class="close-modal-btn" onclick="closeEditModal()" aria-label="Close Edit Modal">✕</button>
       
       <div class="edit-modal-header">
-        <h3 id="editModalTitle">Edit Details</h3>
+        <h2 id="editModalTitle" class="modal-title-md">Edit Details</h2>
         <p>Update your information across theKapita ecosystem.</p>
       </div>
 
       <form id="dynamicEditForm" onsubmit="saveProfileChanges(event)">
         <div id="dynamicFormFields" class="form-fields-container">
-          </div>
+        </div>
 
         <div class="edit-modal-actions">
           <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>

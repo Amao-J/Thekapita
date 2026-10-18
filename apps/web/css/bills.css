@@ -1,0 +1,765 @@
+/* ==========================================
+   THEKAPITA BILLS — MERGED PRODUCTION STYLES
+   ========================================== */
+
+/* 1. Global Box Sizing & Reset */
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+
+html, body.bills-page-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* 2. Accessibility & Screen Reader Utilities */
+.skip-to-main {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: #121212;
+  color: #00d084;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  z-index: 100000;
+  transition: top 0.2s ease;
+  text-decoration: none;
+}
+
+.skip-to-main:focus {
+  top: 16px;
+}
+
+a:focus-visible, 
+button:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+[tabindex="0"]:focus-visible {
+  outline: 3px solid #008a57 !important;
+  outline-offset: 2px !important;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 3. Main Page Container */
+.bills-main-container {
+  width: 100% !important;
+  max-width: 1000px !important;
+  margin: 0 auto !important;
+  padding: 72px 16px 100px 16px !important;
+  box-sizing: border-box !important;
+  float: none !important;
+  position: relative !important;
+}
+
+.bills-content-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 4. Network Alerts & Error Handling */
+.network-alert-banner {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.global-error-notice {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.global-error-notice .retry-btn {
+  margin-left: auto;
+  background: #991b1b;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pending-ledger-alert {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pending-badge {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 5. Smart AI Insight Banner */
+.ai-insight-banner {
+  background: linear-gradient(135deg, #121212 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.ai-insight-icon {
+  background: rgba(0, 208, 132, 0.2);
+  color: #00d084;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-insight-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e2e8f0;
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-insight-text strong {
+  color: #ffffff;
+}
+
+.ai-insight-action-btn {
+  background: #00d084;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.ai-insight-action-btn:hover {
+  background: #00b371;
+}
+
+/* 6. Section Titles */
+.bills-section-title {
+  margin-bottom: 16px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.bills-section-title h2, 
+.bills-section-title h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.bills-section-title p {
+  font-size: 13px;
+  color: #475569; /* WCAG AA Contrast Compliant */
+  margin: 0;
+}
+
+/* 7. Utility & Payment Services Grid */
+.bills-category-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.bill-service-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 12px 16px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+.bill-service-card:hover {
+  border-color: #00d084;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.bill-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff;
+  flex-shrink: 0 !important;
+}
+
+.bg-emerald { background: #008a57; color: #ffffff; }
+.bg-blue { background: #2563eb; }
+.bg-purple { background: #7c3aed; }
+.bg-amber { background: #d97706; }
+.bg-indigo { background: #4f46e5; }
+.bg-teal { background: #0d9488; }
+.bg-rose { background: #e11d48; }
+.bg-dark { background: #0f172a; }
+
+.bill-service-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.bill-service-info h3, 
+.bill-service-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bill-service-info p {
+  font-size: 11px;
+  color: #475569;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bill-service-card .arrow {
+  color: #94a3b8;
+  font-size: 20px;
+  flex-shrink: 0 !important;
+  display: block !important;
+  margin-left: auto !important;
+}
+
+.badge-new {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #0f172a;
+  color: #00d084;
+  font-weight: 800;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+@media screen and (min-width: 641px) {
+  .bills-category-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  }
+}
+
+/* 8. Quick Beneficiaries Rail */
+.quick-bills-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  scrollbar-width: none;
+}
+
+.quick-bills-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-bill-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font: inherit;
+  text-align: left;
+}
+
+.chip-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eab308;
+  color: #000000;
+  font-weight: 800;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-details strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.chip-details span {
+  font-size: 11px;
+  color: #475569;
+}
+
+/* 9. Auto-Pay List */
+.autopay-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  width: 100% !important;
+}
+
+.autopay-item-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.autopay-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.autopay-left h3,
+.autopay-left h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: #0f172a;
+}
+
+.autopay-left p {
+  font-size: 12px;
+  color: #475569;
+  margin: 0 0 4px 0;
+}
+
+.status-tag.active {
+  font-size: 11px;
+  color: #008a57;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-tag.active .dot {
+  width: 6px;
+  height: 6px;
+  background: #008a57;
+  border-radius: 50%;
+}
+
+.add-autopay-btn {
+  width: 100% !important;
+  padding: 14px;
+  background: #ffffff;
+  border: 2px dashed #94a3b8;
+  border-radius: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-sizing: border-box !important;
+}
+
+/* 10. History Table */
+.bill-history-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100% !important;
+}
+
+.history-item {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.history-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.history-left h3,
+.history-left h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: #0f172a;
+}
+
+.history-meta {
+  font-size: 11px;
+  color: #475569;
+  display: block;
+}
+
+.token-code-box {
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 6px;
+  display: inline-block;
+  color: #0f172a;
+}
+
+.history-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.history-right .price {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.copy-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.status-success {
+  font-size: 11px;
+  color: #008a57;
+  font-weight: 700;
+}
+
+/* 11. Toggle Switch Control */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input { 
+  opacity: 0; 
+  width: 0; 
+  height: 0; 
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s ease;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: .3s ease;
+}
+
+input:checked + .slider { background-color: #008a57; }
+input:checked + .slider:before { transform: translateX(20px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
+
+/* 12. Modal Overlay & Form Controls */
+.wallet-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.wallet-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.wallet-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transform: translateY(20px);
+  transition: transform 0.25s ease;
+  box-sizing: border-box;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.wallet-modal-overlay.active .wallet-modal-card {
+  transform: translateY(0);
+}
+
+.wallet-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.wallet-modal-header h2,
+.wallet-modal-header h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.wallet-modal-header .modal-sub {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: #008a57;
+}
+
+.btn-primary.w-full {
+  width: 100%;
+  padding: 14px;
+  background: #00d084;
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary.w-full:hover {
+  background: #00b371;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(15, 23, 42, 0.2);
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 13. Mobile Responsive Rules <= 640px */
+@media screen and (max-width: 640px) {
+  .bills-main-container {
+    padding: 68px 16px 90px 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .ai-insight-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .ai-insight-action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .history-right {
+    text-align: left;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
