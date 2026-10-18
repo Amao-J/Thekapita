@@ -2,7 +2,7 @@
    PROFILE CONTROLLER & TAB SWITCHING
    ========================================== */
 import { refreshBalance, getBalanceDisplay } from '../state/ledger.js';
-import { isAuthenticated, hydrateProfile, updateProfile } from '../state/session.js';
+import { isAuthenticated, hydrateProfile, updateProfile, getCurrentUser } from '../state/session.js';
 
 if (!isAuthenticated()) {
   window.location.href = 'auth.html';
@@ -20,15 +20,23 @@ async function hydrateBalance() {
   }
 }
 
+// One place that paints the signed-in user into every data-profile-field on the page.
+function paintIdentity(user) {
+  if (!user) return;
+  const fields = { fullName: user.full_name, kapitaId: user.kapita_id, email: user.email, phone: user.phone, handle: user.handle ? `@${user.handle}` : '' };
+  for (const [key, value] of Object.entries(fields)) {
+    document.querySelectorAll(`[data-profile-field="${key}"]`).forEach((el) => {
+      el.textContent = value || '—';
+    });
+  }
+  const bioEl = document.querySelector('.bio-text');
+  if (bioEl) bioEl.textContent = user.bio || '';
+}
+
 async function hydrateIdentity() {
   try {
-    const user = await hydrateProfile();
-    const nameEl = document.querySelector('[data-profile-field="fullName"]');
-    if (nameEl && user?.full_name) nameEl.textContent = user.full_name;
-    const idEl = document.querySelector('[data-profile-field="kapitaId"]');
-    if (idEl && user?.kapita_id) idEl.textContent = user.kapita_id;
-    const bioEl = document.querySelector('.bio-text');
-    if (bioEl) bioEl.textContent = user?.bio || '';
+    paintIdentity(getCurrentUser()); // instant, from the stored session
+    paintIdentity(await hydrateProfile());
   } catch (err) {
     console.error('Could not load profile:', err);
   }
@@ -90,8 +98,10 @@ function toggleBalanceVisibility() {
 
 /* Clipboard Copy */
 function copyKapitaId() {
-  navigator.clipboard.writeText('KPT-883902');
-  alert('theKapita ID (KPT-883902) copied to clipboard!');
+  const id = getCurrentUser()?.kapita_id;
+  if (!id) return;
+  navigator.clipboard.writeText(id);
+  alert(`theKapita ID (${id}) copied to clipboard!`);
 }
 
 /* ==========================================
@@ -106,7 +116,7 @@ let currentEditSection = '';
 // breaks out of the attribute and injects markup. Build the field with real
 // DOM APIs instead, so the value always lands in the `value` property, not
 // in parsed HTML.
-function buildEditField(container, { id, label, type = 'text', value = '', required = true }) {
+function buildEditField(container, { id, label, type = 'text', value = '', required = true, readOnly = false }) {
   const group = document.createElement('div');
   group.className = 'form-group';
   const labelEl = document.createElement('label');
@@ -118,6 +128,7 @@ function buildEditField(container, { id, label, type = 'text', value = '', requi
   input.value = value;
   input.className = 'form-control';
   input.required = required;
+  input.readOnly = readOnly;
   group.append(labelEl, input);
   container.appendChild(group);
 }
@@ -188,7 +199,7 @@ function openEditModal(section) {
 
     container.innerHTML = '';
     buildEditField(container, { id: 'input1', label: 'Full Name', value: rows[0]?.textContent.replace('✓', '').trim() || '' });
-    buildEditField(container, { id: 'input2', label: 'Email Address', type: 'email', value: rows[1]?.textContent.replace('✓', '').trim() || '' });
+    buildEditField(container, { id: 'input2', label: 'Email Address (cannot be changed here)', type: 'email', value: rows[1]?.textContent.replace('✓', '').trim() || '', readOnly: true });
     buildEditField(container, { id: 'input3', label: 'Phone Number', type: 'tel', value: rows[2]?.textContent.replace('✓', '').trim() || '' });
   }
 
@@ -213,11 +224,24 @@ async function saveProfileChanges(event) {
     if (submitButton) submitButton.disabled = true;
     try {
       const user = await updateProfile({ full_name: val1.trim(), bio: val2.trim() });
-      document.querySelector('[data-profile-field="fullName"]').textContent = user.full_name;
-      document.querySelector('.bio-text').textContent = user.bio;
+      paintIdentity(user);
       closeEditModal();
     } catch (err) {
       alert(err.message || 'Could not save your profile. Please try again.');
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+    return;
+  }
+  else if (currentEditSection === 'personal') {
+    const submitButton = event.currentTarget.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    try {
+      // Email is read-only until email verification exists; name + phone persist.
+      paintIdentity(await updateProfile({ full_name: val1.trim(), phone: val3.trim() }));
+      closeEditModal();
+    } catch (err) {
+      alert(err.message || 'Could not save your details. Please try again.');
     } finally {
       if (submitButton) submitButton.disabled = false;
     }
@@ -242,12 +266,6 @@ async function saveProfileChanges(event) {
     const rows = document.querySelectorAll('#serviceProfilesTab .service-profile-card:nth-child(4) .detail-row strong');
     if (val1 && rows[0]) rows[0].textContent = val1;
     if (val2 && rows[1]) rows[1].textContent = val2;
-  }
-  else if (currentEditSection === 'personal') {
-    const rows = document.querySelectorAll('#securityTab .kapita-card:nth-child(1) .detail-row strong');
-    if (val1 && rows[0]) rows[0].textContent = val1;
-    if (val2 && rows[1]) rows[1].textContent = val2 + ' ✓';
-    if (val3 && rows[2]) rows[2].textContent = val3 + ' ✓';
   }
 
   closeEditModal();

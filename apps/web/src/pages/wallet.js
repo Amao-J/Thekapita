@@ -1,8 +1,9 @@
 /* ==========================================
    THEKAPITA PAY WALLET INTERACTION ENGINE
    ========================================== */
-import { refreshBalance, getBalanceDisplay, fundWallet, sendMoney } from '../state/ledger.js';
-import { isAuthenticated } from '../state/session.js';
+import { refreshBalance, getBalanceDisplay, fundWallet, sendMoney, loadTransactions } from '../state/ledger.js';
+import { isAuthenticated, getCurrentUser, hydrateProfile } from '../state/session.js';
+import { formatCurrency } from '@thekapita/shared/currency';
 import { ApiError } from '../api/client.js';
 
 // Gate the page: no token, no wallet. Matches the same check src/pages/auth.js
@@ -113,8 +114,8 @@ function openWalletModal(actionType) {
     subtitle.textContent = 'Instant zero-fee transfers within theKapita network';
     content.innerHTML = `
       <div class="form-group">
-        <label>Recipient ID, Email or Bank Account</label>
-        <input type="text" id="sendRecipient" placeholder="e.g. @sarah or KPT-881029" class="form-control" required />
+        <label>Kapita ID, @handle or Email</label>
+        <input type="text" id="sendRecipient" placeholder="e.g. @sarah, KPT-881029 or sarah@mail.com" class="form-control" required />
       </div>
       <div class="form-group">
         <label>Amount (₦)</label>
@@ -186,9 +187,9 @@ function openWalletModal(actionType) {
             <circle cx="50" cy="50" r="3" fill="#00d084" />
           </svg>
         </div>
-        <h4>Ahmed Ebuka</h4>
-        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">@ahmed • KPT-883902</p>
-        <button class="btn-secondary w-full" onclick="navigator.clipboard.writeText('KPT-883902'); alert('ID Copied!');">Copy Kapita ID Tag</button>
+        <h4>${escapeHtml(getCurrentUser()?.full_name)}</h4>
+        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">${escapeHtml(getCurrentUser()?.handle ? '@' + getCurrentUser().handle + ' • ' : '')}${escapeHtml(getCurrentUser()?.kapita_id)}</p>
+        <button class="btn-secondary w-full" onclick="copyMyKapitaId()">Copy Kapita ID Tag</button>
       </div>
     `;
   }
@@ -204,8 +205,19 @@ function closeWalletModal(e) {
 
 /* 4. Transaction Detail Viewer */
 function viewTxDetail(txId) {
+  const tx = transactions.find((t) => t.id === txId);
   const modal = document.getElementById('txDetailModal');
-  if (modal) modal.classList.add('active');
+  if (!tx || !modal) return;
+  const set = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+  set('txDetailAmount', formatCurrency(tx.amount));
+  set('txDetailRecipient', tx.counterparty);
+  set('txDetailType', tx.kind === 'credit' ? 'Money received' : 'Money sent');
+  set('txDetailDate', formatTxDate(tx.created_at));
+  set('txDetailRef', tx.id);
+  modal.classList.add('active');
 }
 
 function closeTxModal(e) {
@@ -235,6 +247,7 @@ async function executeFunding() {
     alert('Funding initiated — you will get a push notification once it clears.');
     closeWalletModal();
     document.getElementById('mainWalletBalance').textContent = getBalanceDisplay();
+    hydrateTransactions();
   } catch (err) {
     alert(err instanceof ApiError ? err.message : 'Could not reach theKapita. Try again.');
   }
@@ -245,7 +258,7 @@ async function executeSend() {
   const amount = parseFloat(document.getElementById('sendAmount')?.value);
 
   if (!recipient) {
-    alert('Enter a recipient ID, email or bank account.');
+    alert('Enter a Kapita ID, @handle or email.');
     return;
   }
   if (!amount || amount <= 0) {
@@ -258,6 +271,7 @@ async function executeSend() {
     alert('Transfer complete!');
     closeWalletModal();
     document.getElementById('mainWalletBalance').textContent = getBalanceDisplay();
+    hydrateTransactions();
   } catch (err) {
     alert(err instanceof ApiError ? err.message : 'Could not reach theKapita. Try again.');
   }
@@ -353,9 +367,95 @@ function filterTx(type, btnElement) {
   const scope = btnElement?.closest('.filter-pills');
   scope?.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
   if (btnElement) btnElement.classList.add('active');
-  // TODO(backend): once transactions come from GET /wallet/transactions
-  // instead of static markup, filter the fetched list by `type` here and
-  // re-render — this only handles the visual active-state for now.
+  txFilter = type;
+  renderTransactions();
+}
+
+/* ---- Transactions (GET /wallet/transactions) ---- */
+let transactions = [];
+let txFilter = 'all';
+
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = value ?? '';
+  return div.innerHTML;
+}
+
+function formatTxDate(iso) {
+  return new Date(iso).toLocaleString('en-NG', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
+
+function renderTransactions() {
+  const list = document.getElementById('txList');
+  if (!list) return;
+  list.replaceChildren();
+  const rows = transactions.filter(
+    (t) => txFilter === 'all' || (txFilter === 'in' ? t.kind === 'credit' : t.kind === 'debit'),
+  );
+  if (rows.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'act-time';
+    empty.style.padding = '16px';
+    empty.textContent = 'No transactions yet.';
+    list.appendChild(empty);
+    return;
+  }
+  for (const tx of rows) {
+    const credit = tx.kind === 'credit';
+    const row = document.createElement('div');
+    row.className = `activity-row tx-item ${credit ? 'in' : 'out'}`;
+    row.addEventListener('click', () => viewTxDetail(tx.id));
+
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'act-icon-wrapper';
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.textContent = credit ? 'south_west' : 'north_east';
+    iconWrap.appendChild(icon);
+
+    const details = document.createElement('div');
+    details.className = 'act-details';
+    const title = document.createElement('p');
+    title.className = 'act-title';
+    const strong = document.createElement('strong');
+    strong.textContent = credit ? 'Received from ' : 'Sent to ';
+    title.append(strong, document.createTextNode(tx.counterparty));
+    const time = document.createElement('span');
+    time.className = 'act-time';
+    time.textContent = formatTxDate(tx.created_at);
+    details.append(title, time);
+
+    const right = document.createElement('div');
+    right.className = 'act-right';
+    const amount = document.createElement('span');
+    amount.className = `act-amount ${credit ? 'positive' : 'negative'}`;
+    amount.textContent = `${credit ? '+' : '-'}${formatCurrency(tx.amount)}`;
+    const status = document.createElement('span');
+    status.className = 'tx-status-pill success';
+    status.textContent = 'Successful';
+    right.append(amount, status);
+
+    row.append(iconWrap, details, right);
+    list.appendChild(row);
+  }
+}
+
+async function hydrateTransactions() {
+  try {
+    transactions = await loadTransactions();
+    renderTransactions();
+  } catch (err) {
+    console.error('Could not load transactions:', err);
+  }
+}
+
+function copyMyKapitaId() {
+  const id = getCurrentUser()?.kapita_id;
+  if (!id) return;
+  navigator.clipboard.writeText(id);
+  alert('ID Copied!');
 }
 
 function openBillPay() {
@@ -367,6 +467,8 @@ function openBillPay() {
 
 document.addEventListener('DOMContentLoaded', () => {
   hydrateBalance();
+  hydrateTransactions();
+  if (!getCurrentUser()) hydrateProfile().catch(() => {});
   initRecipientsEngine();
 });
 
@@ -387,6 +489,7 @@ window.executeSend = executeSend;
 window.toggleCardDetails = toggleCardDetails;
 window.toggleFreezeCard = toggleFreezeCard;
 window.filterTx = filterTx;
+window.copyMyKapitaId = copyMyKapitaId;
 window.openBillPay = openBillPay;
 window.quickSendTo = quickSendTo;
 window.toggleFavorite = toggleFavorite;

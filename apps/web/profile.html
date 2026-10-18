@@ -396,9 +396,9 @@
               <button class="btn-sm" onclick="openEditModal('personal')">Update</button>
             </div>
             <div class="settings-list">
-              <div class="detail-row"><span>Full Name:</span> <strong>Ahmed Ebuka</strong></div>
-              <div class="detail-row"><span>Email Address:</span> <strong>Ahmed@example.com ✓</strong></div>
-              <div class="detail-row"><span>Phone Number:</span> <strong>+234 810 *** 0021 ✓</strong></div>
+              <div class="detail-row"><span>Full Name:</span> <strong data-profile-field="fullName">Ahmed Ebuka</strong></div>
+              <div class="detail-row"><span>Email Address:</span> <strong data-profile-field="email">Ahmed@example.com ✓</strong></div>
+              <div class="detail-row"><span>Phone Number:</span> <strong data-profile-field="phone">+234 810 *** 0021 ✓</strong></div>
               <div class="detail-row"><span>Date of Birth:</span> <strong>14 October 1996</strong></div>
               <div class="detail-row"><span>Primary Location:</span> <strong>Lagos, Nigeria</strong></div>
               <div class="detail-row"><span>Residential Address:</span> <strong>12 Admiralty Way, Lekki</strong></div>
@@ -643,8 +643,8 @@
       </div>
 
       <div class="qr-user-details">
-        <h4>Ahmed Ebuka</h4>
-        <p class="tag">@Ahmed • KPT-883902</p>
+        <h4 data-profile-field="fullName">Ahmed Ebuka</h4>
+        <p class="tag"><span data-profile-field="handle">@ahmed</span> • <span data-profile-field="kapitaId">KPT-883902</span></p>
       </div>
 
       <div class="qr-modal-actions">

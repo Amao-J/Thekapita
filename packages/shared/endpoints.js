@@ -11,6 +11,7 @@ export const ENDPOINTS = Object.freeze({
     register: '/auth/register',
     login: '/auth/login',
     refresh: '/auth/refresh',
+    logout: '/auth/logout',
   },
   profile: {
     me: '/profile/me',
@@ -19,5 +20,6 @@ export const ENDPOINTS = Object.freeze({
     balance: '/wallet/balance',
     fund: '/wallet/fund',
     send: '/wallet/send',
+    transactions: '/wallet/transactions',
   },
 });
