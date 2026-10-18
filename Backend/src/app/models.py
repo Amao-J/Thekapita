@@ -9,6 +9,10 @@ class Profile(models.Model):
     kyc_tier = models.PositiveSmallIntegerField(default=1)
     kapita_id = models.CharField(max_length=20, unique=True)
     handle = models.CharField(max_length=20, unique=True, null=True, blank=True)  # stored lowercase, no '@'
+    date_of_birth = models.DateField(null=True, blank=True)
+    location = models.CharField(max_length=100, blank=True)   # "Lagos, Nigeria"
+    address = models.CharField(max_length=200, blank=True)    # residential address
+    language = models.CharField(max_length=30, default="English")
 
 
 class Wallet(models.Model):
@@ -19,13 +23,7 @@ class Wallet(models.Model):
 
 
 class UsedRefreshToken(models.Model):
-    """One row per refresh token that has been redeemed or revoked (by its jti).
-
-    A refresh token is single-use: /auth/refresh records its jti here and issues a
-    new pair. Presenting a recorded jti again is rejected, so a stolen refresh
-    token stops working the moment the real client rotates it. Rows older than the
-    token lifetime (30 days) are safe to purge.
-    """
+    """Used refresh tokens are stored to prevent reuse (replay attacks)."""
     jti = models.CharField(max_length=32, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     used_at = models.DateTimeField(auto_now_add=True)
@@ -60,3 +58,38 @@ class LedgerEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise RuntimeError("Ledger entries are append-only.")
+
+
+class ServicePreference(models.Model):
+    """Per-user preferences for the ecosystem services (profile page > Service Profiles)."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="service_prefs")
+    # Eats
+    dietary_preference = models.CharField(max_length=120, blank=True)
+    favorite_cuisine = models.CharField(max_length=120, blank=True)
+    default_address = models.CharField(max_length=200, blank=True)
+    # Ride
+    preferred_ride = models.CharField(max_length=60, blank=True)
+    quiet_mode = models.BooleanField(default=False)
+    default_payment = models.CharField(max_length=60, default="theKapita Pay Wallet")
+    # Talent
+    primary_skill = models.CharField(max_length=100, blank=True)
+    experience_level = models.CharField(max_length=60, blank=True)
+    # Health (sensitive: only ever returned to the owner)
+    blood_group = models.CharField(max_length=3, blank=True)
+    emergency_contact = models.CharField(max_length=30, blank=True)
+    health_insurance_id = models.CharField(max_length=40, blank=True)
+
+
+class UserSettings(models.Model):
+    """Privacy + notification toggles (profile page > Security & Settings / Notifications)."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="app_settings")
+    # Privacy
+    public_visibility = models.BooleanField(default=True)   # others can find me by @handle
+    location_services = models.BooleanField(default=True)
+    personalization = models.BooleanField(default=True)
+    marketing = models.BooleanField(default=False)
+    # Notifications
+    push = models.BooleanField(default=True)
+    messages = models.BooleanField(default=True)
+    updates = models.BooleanField(default=True)
+    offers = models.BooleanField(default=False)

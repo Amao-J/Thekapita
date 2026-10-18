@@ -12,8 +12,12 @@ from ninja.throttling import AnonRateThrottle
 from .auth import JWTAuth, decode_token, issue_token_pair
 from .idempotency import IdempotencyConflict, get_or_create_idempotent_response
 from . import ledger
-from .models import LedgerEntry, Profile, UsedRefreshToken, Wallet
+from .models import LedgerEntry, Profile, ServicePreference, UsedRefreshToken, UserSettings, Wallet
 from .schemas import (
+    PreferencesIn,
+    PreferencesOut,
+    SettingsIn,
+    SettingsOut,
     TransactionOut,
     FundWalletIn, LoginIn, ProfileOut, ProfileUpdateIn, RefreshIn,
     RegisterIn, SendMoneyIn, TokenOut, WalletBalanceOut,
@@ -51,7 +55,10 @@ def resolve_recipient(raw: str):
     key = raw.lstrip("@")
     if key.upper().startswith("KPT-"):
         return User.objects.filter(profile__kapita_id__iexact=key, is_active=True).first()
-    return User.objects.filter(profile__handle=key.lower(), is_active=True).first()
+    # @handle lookup honours "Public Profile Visibility"; email and Kapita ID always work.
+    return User.objects.filter(
+        profile__handle=key.lower(), is_active=True, app_settings__public_visibility=True
+    ).first()
 
 
 # ---- auth ---------------------------------------------------------------
@@ -75,6 +82,8 @@ def register(request, payload: RegisterIn):
         handle=new_handle(email),
     )
     Wallet.objects.create(user=user)
+    ServicePreference.objects.create(user=user)
+    UserSettings.objects.create(user=user)
     return issue_token_pair(user)
 
 
@@ -140,6 +149,8 @@ def _profile(user):
         profile.handle = new_handle(user.email or user.username)
         profile.save(update_fields=["handle"])
     Wallet.objects.get_or_create(user=user)
+    ServicePreference.objects.get_or_create(user=user)
+    UserSettings.objects.get_or_create(user=user)
     return profile
 
 
@@ -153,6 +164,12 @@ def _profile_out(user):
         "kyc_tier": p.kyc_tier,
         "kapita_id": p.kapita_id,
         "handle": p.handle or "",
+        "date_of_birth": p.date_of_birth,
+        "location": p.location,
+        "address": p.address,
+        "language": p.language,
+        "preferences": user.service_prefs,
+        "settings": user.app_settings,
     }
 
 
@@ -175,8 +192,34 @@ def update_profile(request, payload: ProfileUpdateIn):
         profile.bio = payload.bio.strip()[:200]
     if payload.phone is not None:
         profile.phone = payload.phone
+    if "date_of_birth" in payload.model_fields_set:  # explicit null clears it
+        profile.date_of_birth = payload.date_of_birth
+    for field in ("location", "address", "language"):
+        value = getattr(payload, field)
+        if value is not None:
+            setattr(profile, field, value.strip())
     profile.save()
     return _profile_out(user)
+
+
+def _apply_partial(instance, payload):
+    for field, value in payload.dict(exclude_unset=True).items():
+        if value is not None:
+            setattr(instance, field, value.strip() if isinstance(value, str) else value)
+    instance.save()
+    return instance
+
+
+@profile_router.patch("/preferences", response=PreferencesOut, auth=JWTAuth())
+def update_preferences(request, payload: PreferencesIn):
+    _profile(request.auth)
+    return _apply_partial(request.auth.service_prefs, payload)
+
+
+@profile_router.patch("/settings", response=SettingsOut, auth=JWTAuth())
+def update_settings(request, payload: SettingsIn):
+    _profile(request.auth)
+    return _apply_partial(request.auth.app_settings, payload)
 
 
 # ---- wallet (requires auth) ----------------------------------------------
