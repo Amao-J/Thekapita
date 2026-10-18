@@ -36,6 +36,7 @@ JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY") or SECRET_KEY
 
 ALLOWED_HOSTS = [
     "thekapita-production.up.railway.app",
+    "api.thekapita.com",
     "thekapita.com",
     "www.thekapita.com",
     "localhost",
@@ -110,6 +111,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = [
     "https://thekapita.com",
     "https://thekapita-production.up.railway.app",
+    "https://api.thekapita.com",
     "https://www.thekapita.com",
 ]
 CSRF_TRUSTED_ORIGINS += [
