@@ -28,5 +28,6 @@ Deploy backend → copy its domain → set `VITE_API_BASE_URL` on web → deploy
 copy web domain → set `CORS_ALLOWED_ORIGINS` on backend.
 
 ## Local dev
-- Backend: `cd Backend && pip install -r requirements.txt && python src/manage.py migrate && python src/manage.py runserver`
+- Backend (PowerShell): `$env:DJANGO_DEBUG="1"; cd Backend; pip install -r requirements.txt; python src/manage.py migrate; python src/manage.py runserver`
+- Backend (macOS/Linux): `cd Backend && DJANGO_DEBUG=1 python -m pip install -r requirements.txt && DJANGO_DEBUG=1 python src/manage.py migrate && DJANGO_DEBUG=1 python src/manage.py runserver`
 - Web: `cp apps/web/.env.example apps/web/.env && npm install && npm run dev -w @thekapita/web`
