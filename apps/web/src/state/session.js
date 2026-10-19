@@ -148,7 +148,14 @@ export async function authorizedRequest(path, opts = {}) {
   try {
     return await attempt();
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401 && state.refreshToken) {
+    if (err instanceof ApiError && err.status === 401) {
+      if (!state.refreshToken) {
+        state = emptyState();
+        persist();
+        window.location.href = 'auth.html';
+        throw err;
+      }
+
       try {
         await refreshTokens();
       } catch (refreshErr) {

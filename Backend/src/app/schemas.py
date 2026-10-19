@@ -125,9 +125,28 @@ class WalletBalanceOut(Schema):
     monthly_limit: Decimal
 
 
+class WalletMonthOut(Schema):
+    month: str
+    inflow: Decimal
+    outflow: Decimal
+
+
+class WalletAnalyticsOut(Schema):
+    months: list[WalletMonthOut]
+    current_month_inflow: Decimal
+    current_month_outflow: Decimal
+
+
 class FundWalletIn(Schema):
     amount: Decimal
     channel: str  # "card" | "bank_transfer" | "ussd"
+
+    @field_validator("channel")
+    @classmethod
+    def channel_supported(cls, v: str) -> str:
+        if v not in {"card", "bank_transfer", "ussd"}:
+            raise ValueError("Choose a supported funding channel.")
+        return v
 
     @field_validator("amount")
     @classmethod
@@ -153,11 +172,41 @@ class SendMoneyIn(Schema):
         return v
 
 
+class WalletBeneficiaryIn(Schema):
+    name: str = Field(min_length=1, max_length=80)
+    recipient: str = Field(min_length=1, max_length=254)
+
+    @field_validator("name")
+    @classmethod
+    def name_not_blank(cls, v: str) -> str:
+        value = v.strip()
+        if not value:
+            raise ValueError("Enter a beneficiary name.")
+        return value
+
+    @field_validator("recipient")
+    @classmethod
+    def recipient_not_blank(cls, v: str) -> str:
+        value = v.strip()
+        if not value:
+            raise ValueError("Enter a Kapita ID, @handle or email.")
+        return value
+
+
+class WalletBeneficiaryOut(Schema):
+    id: int
+    full_name: str
+    kapita_id: str
+    handle: str
+
+
 class TransactionOut(Schema):
     id: str
     kind: str  # "credit" | "debit"
     amount: Decimal
     counterparty: str
+    counterparty_kapita_id: str | None = None
+    counterparty_handle: str | None = None
     status: str  # "pending" | "success" | "failed"
     created_at: str
 

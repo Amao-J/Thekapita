@@ -81,6 +81,12 @@ def main():
     status, body = call('GET', '/wallet/balance', token=access_token)
     check('GET /wallet/balance returns 200', status == 200, f'status={status} body={body}')
 
+        print('6a. Fetch wallet analytics')
+        status, body = call('GET', '/wallet/analytics', token=access_token)
+        check('GET /wallet/analytics returns six ledger-backed months',
+            status == 200 and len(body.get('months', [])) == 6 and 'current_month_inflow' in body,
+            f'status={status} body={body}')
+
     print('7. Fund wallet WITHOUT an Idempotency-Key (should be rejected)')
     status, body = call('POST', '/wallet/fund', {'amount': 5000, 'channel': 'bank_transfer'}, token=access_token)
     check('POST /wallet/fund with no Idempotency-Key returns 400', status == 400, f'status={status} body={body}')
@@ -89,7 +95,14 @@ def main():
     idem_key = str(uuid.uuid4())
     status, body = call('POST', '/wallet/fund', {'amount': 5000, 'channel': 'bank_transfer'},
                          token=access_token, extra_headers={'Idempotency-Key': idem_key})
-    check('POST /wallet/fund returns 202 pending', status == 202, f'status={status} body={body}')
+        check('POST /wallet/fund persists a pending request',
+            status == 202 and body.get('status') == 'pending' and bool(body.get('reference')),
+            f'status={status} body={body}')
+
+        status, body = call('GET', '/wallet/transactions', token=access_token)
+        check('GET /wallet/transactions includes the pending funding request',
+            status == 200 and any(tx.get('status') == 'pending' for tx in body),
+            f'status={status} body={body}')
 
     print('9. Retry the SAME fund request with the SAME Idempotency-Key')
     status2, body2 = call('POST', '/wallet/fund', {'amount': 5000, 'channel': 'bank_transfer'},

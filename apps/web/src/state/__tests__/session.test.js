@@ -10,11 +10,11 @@ import {
   authorizedRequest,
   subscribe,
   hydrateProfile,
-} from './session.js';
-import { ApiError } from '../api/client.js';
+} from '../session.js';
+import { ApiError } from '../../api/client.js';
 
 // Mock the client request method
-vi.mock('../api/client.js', async (importOriginal) => {
+vi.mock('../../api/client.js', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -22,10 +22,20 @@ vi.mock('../api/client.js', async (importOriginal) => {
   };
 });
 
-import { request } from '../api/client.js';
+import { request } from '../../api/client.js';
 
 describe('session state & retry logic', () => {
   beforeEach(() => {
+    vi.stubGlobal('localStorage', {
+      store: {},
+      getItem(key) { return this.store[key] ?? null; },
+      setItem(key, value) { this.store[key] = String(value); },
+      removeItem(key) { delete this.store[key]; },
+      clear() { this.store = {}; },
+    });
+    vi.stubGlobal('window', { location: { href: '' } });
+    vi.clearAllMocks();
+    request.mockResolvedValue({});
     localStorage.clear();
     logout(); // Resets session module state before each test
     vi.clearAllMocks();
@@ -153,6 +163,18 @@ describe('session state & retry logic', () => {
 
       expect(res).toEqual({ balance: 245500 });
       expect(getAccessToken()).toBe('new_fresh_token');
+    });
+
+    it('clears an access-only legacy session when a protected request returns 401', async () => {
+      request.mockResolvedValueOnce({ access_token: 'stale_access_token' });
+      request.mockResolvedValueOnce({ id: 'u1' });
+      await login('user', 'pass');
+      request.mockRejectedValueOnce(new ApiError(401, 'Invalid token'));
+
+      await expect(authorizedRequest('/wallet/balance')).rejects.toThrow('Invalid token');
+
+      expect(isAuthenticated()).toBe(false);
+      expect(getAccessToken()).toBeNull();
     });
 
     it('throws error when initial request fails with non-401 error', async () => {

@@ -22,6 +22,48 @@ class Wallet(models.Model):
     monthly_limit = models.DecimalField(max_digits=14, decimal_places=2, default=5000000)
 
 
+class WalletFundingRequest(models.Model):
+    class Channel(models.TextChoices):
+        BANK_TRANSFER = "bank_transfer"
+        CARD = "card"
+        USSD = "ussd"
+
+    class Status(models.TextChoices):
+        PENDING = "pending"
+        CONFIRMED = "confirmed"
+        FAILED = "failed"
+
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="funding_requests")
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    channel = models.CharField(max_length=20, choices=Channel.choices)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    reference = models.CharField(max_length=40, unique=True)
+    idempotency_key = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["wallet", "idempotency_key"], name="uniq_wallet_funding_idem")
+        ]
+
+
+class WalletBeneficiary(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_beneficiaries"
+    )
+    beneficiary = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_by_wallet_users"
+    )
+    name = models.CharField(max_length=80)
+    handle = models.CharField(max_length=254)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "beneficiary"], name="uniq_wallet_beneficiary")
+        ]
+
+
 class UsedRefreshToken(models.Model):
     """Used refresh tokens are stored to prevent reuse (replay attacks)."""
     jti = models.CharField(max_length=32, unique=True)
