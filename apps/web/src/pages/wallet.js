@@ -173,7 +173,7 @@ function openWalletModal(actionType, recipientId = '') {
     content.innerHTML = `
       <div class="text-center">
         <div style="background: #ffffff; padding: 16px; border-radius: 20px; width: 180px; margin: 0 auto 16px; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-          <canvas data-kapita-qr aria-label="Kapita ID QR code" style="width: 100%; height: auto; display: block;"></canvas>
+          <canvas class="qr-svg" data-kapita-qr aria-label="Kapita ID QR code"></canvas>
         </div>
         <h4>${escapeHtml(getCurrentUser()?.full_name)}</h4>
         <p style="font-size: 13px; color: #666; margin-bottom: 16px;">${escapeHtml(getCurrentUser()?.handle ? '@' + getCurrentUser().handle + ' • ' : '')}${escapeHtml(getCurrentUser()?.kapita_id)}</p>
