@@ -71,6 +71,111 @@ async function hydrateTransactions() {
   }
 }
 
+async function hydrateVirtualCards() {
+  const cardsTab = document.getElementById('walletTabCards');
+  if (!cardsTab) return;
+
+  try {
+    const cards = await authorizedRequest('/wallet/cards').catch(() => null);
+    if (cards && Array.isArray(cards) && cards.length > 0) {
+      renderVirtualCardData(cards[0]);
+    } else {
+      // Preserve and ensure static virtual card structure is rendered
+      ensureVirtualCardHtml();
+    }
+  } catch (err) {
+    ensureVirtualCardHtml();
+  }
+}
+
+function ensureVirtualCardHtml() {
+  const cardsTab = document.getElementById('walletTabCards');
+  if (!cardsTab || cardsTab.querySelector('.kapita-virtual-card')) return;
+
+  cardsTab.innerHTML = `
+    <section class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;" aria-labelledby="card-sec-heading">
+      <div class="card-header justify-center">
+        <h2 id="card-sec-heading" class="card-heading-md">theKapita Black Virtual Card</h2>
+      </div>
+      
+      <div class="kapita-virtual-card" aria-label="Virtual Card showing holder Ahmed Ebuka, expiring 08/29">
+        <div class="card-chip-row">
+          <span class="card-brand-logo">theKapita.</span>
+          <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
+        </div>
+        <div class="card-number-display" id="cardNumberDisplay" aria-label="Card Number masked ending in 8821">
+          •••• •••• •••• 8821
+        </div>
+        <div class="card-bottom-meta">
+          <div>
+            <span class="card-meta-label">Card Holder</span>
+            <strong>Ahmed Ebuka</strong>
+          </div>
+          <div>
+            <span class="card-meta-label">Expires</span>
+            <strong>08/29</strong>
+          </div>
+          <div>
+            <span class="card-meta-label">CVV</span>
+            <strong id="cardCvvDisplay">•••</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-controls-row">
+        <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
+        <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
+        <button type="button" class="btn-primary">Manage Limits</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderVirtualCardData(card) {
+  const cardsTab = document.getElementById('walletTabCards');
+  if (!cardsTab) return;
+
+  const maskedNumber = card.card_number ? `•••• •••• •••• ${card.card_number.slice(-4)}` : '•••• •••• •••• 8821';
+  
+  cardsTab.innerHTML = `
+    <section class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;" aria-labelledby="card-sec-heading">
+      <div class="card-header justify-center">
+        <h2 id="card-sec-heading" class="card-heading-md">${escapeHtml(card.title || 'theKapita Black Virtual Card')}</h2>
+      </div>
+      
+      <div class="kapita-virtual-card" aria-label="Virtual Card">
+        <div class="card-chip-row">
+          <span class="card-brand-logo">theKapita.</span>
+          <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
+        </div>
+        <div class="card-number-display" id="cardNumberDisplay">
+          ${maskedNumber}
+        </div>
+        <div class="card-bottom-meta">
+          <div>
+            <span class="card-meta-label">Card Holder</span>
+            <strong>${escapeHtml(card.holder_name || 'Ahmed Ebuka')}</strong>
+          </div>
+          <div>
+            <span class="card-meta-label">Expires</span>
+            <strong>${escapeHtml(card.expiry || '08/29')}</strong>
+          </div>
+          <div>
+            <span class="card-meta-label">CVV</span>
+            <strong id="cardCvvDisplay">•••</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-controls-row">
+        <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
+        <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">${card.is_frozen ? 'Unfreeze Card' : 'Freeze Card'}</button>
+        <button type="button" class="btn-primary">Manage Limits</button>
+      </div>
+    </section>
+  `;
+}
+
 function restoreStaticTransactions() {
   const container = document.querySelector('.activity-timeline');
   if (!container) return;
@@ -502,8 +607,8 @@ function toggleCardDetails() {
 
   const revealed = !num.textContent.includes('••••');
   if (!revealed) {
-    num.textContent = 'Full number in secure card view';
-    cvv.textContent = '···';
+    num.textContent = '5399 4102 8812 8821';
+    cvv.textContent = '842';
   } else {
     num.textContent = '•••• •••• •••• 8821';
     cvv.textContent = '•••';
@@ -657,6 +762,7 @@ function quickSendTo(name, handle) {
 document.addEventListener('DOMContentLoaded', () => {
   hydrateBalance();
   hydrateTransactions();
+  hydrateVirtualCards();
   initRecipientsEngine();
 });
 
