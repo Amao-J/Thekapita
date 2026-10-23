@@ -1,6 +1,8 @@
-import { login, register, isAuthenticated } from '../state/session.js';
+import { login, loginWithGoogle, register, isAuthenticated } from '../state/session.js';
 import { validateRegisterForm } from '@thekapita/shared/validators';
 import { ApiError } from '../api/client.js';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (isAuthenticated()) {
   window.location.href = 'profile.html';
@@ -132,6 +134,50 @@ function togglePasswordVisibility(inputId, btn) {
 function handleSocialConnect(provider) {
   alert(`Connecting with ${provider}... (not yet wired to a real OAuth flow)`);
 }
+
+let googleScript;
+function loadGoogleScript() {
+  googleScript ||= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Could not load Google sign-in.'));
+    document.head.appendChild(script);
+  });
+  return googleScript;
+}
+
+async function onGoogleCredential({ credential }) {
+  const errorEl = document.getElementById('signInError') || document.getElementById('signUpError');
+  try {
+    await loginWithGoogle(credential);
+    window.location.href = 'profile.html';
+  } catch (err) {
+    showError(errorEl, err instanceof ApiError ? err.message : 'Could not reach theKapita API server.');
+  }
+}
+
+async function initGoogleSignIn() {
+  const holder = document.getElementById('googleSignIn');
+  if (!holder) return;
+  if (!GOOGLE_CLIENT_ID) {
+    holder.hidden = true;
+    return;
+  }
+  try {
+    await loadGoogleScript();
+  } catch {
+    holder.hidden = true;
+    return;
+  }
+  window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential });
+  window.google.accounts.id.renderButton(holder, {
+    theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', width: holder.clientWidth || 280,
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initGoogleSignIn);
 
 window.switchAuthMode = switchAuthMode;
 window.togglePasswordVisibility = togglePasswordVisibility;

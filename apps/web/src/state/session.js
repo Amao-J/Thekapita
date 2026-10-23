@@ -64,6 +64,12 @@ export async function login(identifier, password) {
   await hydrateProfile();
 }
 
+export async function loginWithGoogle(credential) {
+  const tokens = await request(ENDPOINTS.auth.google, { method: 'POST', body: { credential } });
+  applyTokens(tokens);
+  await hydrateProfile();
+}
+
 export async function register({ fullName, email, phone, password }) {
   const tokens = await request(ENDPOINTS.auth.register, {
     method: 'POST',
@@ -138,12 +144,49 @@ function refreshTokens() {
   return refreshInFlight;
 }
 
+function accessTokenExpiresSoon() {
+  const payloadSegment = state.accessToken?.split('.')[1];
+  if (!payloadSegment) return false;
+
+  try {
+    const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+    return typeof payload.exp === 'number' && payload.exp <= Date.now() / 1000 + 30;
+  } catch {
+    return false;
+  }
+}
+
+async function refreshOrSignOut() {
+  try {
+    await refreshTokens();
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) {
+      state = emptyState();
+      persist();
+      window.location.href = 'auth.html';
+    }
+    throw err;
+  }
+}
+
 export async function authorizedRequest(path, opts = {}) {
   const attempt = () =>
     request(path, {
       ...opts,
       headers: { ...(opts.headers || {}), Authorization: `Bearer ${state.accessToken}` },
     });
+
+  if (accessTokenExpiresSoon()) {
+    if (state.refreshToken) {
+      await refreshOrSignOut();
+    } else {
+      state = emptyState();
+      persist();
+      window.location.href = 'auth.html';
+      throw new ApiError(401, 'Your session has expired. Please sign in again.');
+    }
+  }
 
   try {
     return await attempt();
@@ -156,17 +199,7 @@ export async function authorizedRequest(path, opts = {}) {
         throw err;
       }
 
-      try {
-        await refreshTokens();
-      } catch (refreshErr) {
-        // Refresh token expired/revoked: the session is over.
-        if (refreshErr instanceof ApiError && refreshErr.status === 401) {
-          state = emptyState();
-          persist();
-          window.location.href = 'auth.html';
-        }
-        throw refreshErr;
-      }
+      await refreshOrSignOut();
       return attempt();
     }
     throw err;

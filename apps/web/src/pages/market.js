@@ -3,9 +3,14 @@
    ========================================================================== */
 import { addItem, subscribe as cartSubscribe, clearCart as clearCartState, getItems, getTotal } from '../state/cart.js';
 import { request, ApiError } from '../api/client.js';
+import { authorizedRequest } from '../state/session.js';
 import { showToast } from './app.js';
 
 let currentCategory = 'all';
+let checkoutKey = null; // Idempotency-Key for the current cart state
+
+// Seller-supplied text goes into innerHTML, so escape it.
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let onlyVerified = false;
 
 /* --------------------------------------------------------------------------
@@ -65,23 +70,23 @@ function renderProductCards(products) {
   }
 
   grid.innerHTML = products.map(p => `
-    <div class="product-card" data-category="${p.category}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}">
+    <div class="product-card" data-category="${esc(p.category)}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}">
       <div class="product-img-wrapper">
-        <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+        ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy">` : ''}
         <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
-        ${p.is_verified ? `<div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> ${p.seller_name}</div>` : ''}
+        ${p.is_verified ? `<div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> ${esc(p.seller_name)}</div>` : ''}
       </div>
       <div class="product-details">
-        <span class="product-meta-sub">${p.category_label || p.category}</span>
-        <h4 class="product-name" onclick="showProductDetails('${p.id}')">${p.title}</h4>
-        <div class="product-rating-row">
-          <span class="material-symbols-outlined" style="font-size: 13px;">star</span> ${p.rating || '4.8'} <span class="review-count">(${p.review_count || 12})</span>
-        </div>
+        <span class="product-meta-sub">${esc(p.category_label || p.category)}</span>
+        <h4 class="product-name" onclick="showProductDetails('${p.id}')">${esc(p.title)}</h4>
+        ${p.rating ? `<div class="product-rating-row">
+          <span class="material-symbols-outlined" style="font-size: 13px;">star</span> ${p.rating} <span class="review-count">(${p.review_count || 0})</span>
+        </div>` : ''}
         <div class="product-bottom-row">
           <div class="product-price-block">
             <span class="product-price">₦${p.price.toLocaleString()}</span>
           </div>
-          <button class="add-cart-btn" onclick="addToCart('${p.id}', '${p.title.replace(/'/g, "\\'")}', ${p.price}, '${p.seller_name || 'Seller'}')">
+          <button class="add-cart-btn" data-add-to-cart data-id="${p.id}" data-title="${esc(p.title)}" data-price="${p.price}" data-seller="${esc(p.seller_name)}" ${p.in_stock ? '' : 'disabled title="Out of stock"'}>
             <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
           </button>
         </div>
@@ -144,6 +149,7 @@ function addToCart(id, name, price, seller) {
 }
 
 cartSubscribe((items) => {
+  checkoutKey = null; // cart changed: next checkout is a new purchase
   const badge = document.getElementById('cartCountBadge');
   const mobileBadge = document.getElementById('mobileCartBadge');
   const totalCount = items.reduce((sum, i) => sum + i.qty, 0);
@@ -511,10 +517,15 @@ async function placeOrder() {
 
   try {
     // API Call to create live order in escrow
-    const response = await request('/marketplace/orders', {
+    // The server re-prices everything from its own catalog; only ids and quantities are sent.
+    // One key per cart state, so a retry after a lost response can't charge twice.
+    checkoutKey ||= crypto.randomUUID();
+    await authorizedRequest('/marketplace/orders', {
       method: 'POST',
-      body: { items, total_amount: getTotal() }
+      body: { items: items.map((i) => ({ id: Number(i.id), qty: i.qty })) },
+      headers: { 'Idempotency-Key': checkoutKey },
     });
+    checkoutKey = null;
 
     if (window.showToast) window.showToast('Order placed successfully! Funds secured in escrow.', 'success');
     else alert('Order placed! Funds secured in escrow.');
@@ -538,6 +549,10 @@ function openAIProductAssistant() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('marketProductsGrid')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-add-to-cart]');
+    if (btn && !btn.disabled) addToCart(btn.dataset.id, btn.dataset.title, btn.dataset.price, btn.dataset.seller);
+  });
   // Load products dynamically on page load
   fetchAndRenderProducts();
 });

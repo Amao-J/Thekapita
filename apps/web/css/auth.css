@@ -283,6 +283,10 @@
   gap: 12px;
 }
 
+.social-btn-google {
+  flex: 1;
+}
+
 .social-btn {
   flex: 1;
   display: flex;

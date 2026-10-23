@@ -8,3 +8,7 @@ whitenoise
 psycopg[binary,pool]
 dj-database-url
 python-decouple
+google-auth
+boto3
+django-storages[s3]
+pillow
