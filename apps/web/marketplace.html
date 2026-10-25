@@ -32,9 +32,9 @@
 
     <div class="wallet-header-tag">
       <!-- Cart Button -->
-      <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart, 2 items inside">
+      <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart">
         <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
-        <span id="cartCountBadge" class="cart-badge">2</span>
+        <span id="cartCountBadge" class="cart-badge">0</span>
       </button>
 
       <!-- Desktop Header Menu Dropdown -->
@@ -48,7 +48,7 @@
           <!-- Balance Summary Card -->
           <a href="wallet.html" class="dropdown-balance-card" role="menuitem">
             <div class="balance-card-sub">Available Wallet Balance</div>
-            <div class="balance-card-val">₦245,500.00</div>
+            <div class="balance-card-val" id="marketWalletBalance">—</div>
           </a>
 
           <div class="dropdown-divider" role="separator"></div>
@@ -82,10 +82,10 @@
         <span class="nav-text">Browse</span>
       </button>
 
-      <button type="button" class="market-nav-btn" onclick="switchMarketView('cart', this)" aria-label="View Cart, 2 items">
+      <button type="button" class="market-nav-btn" onclick="switchMarketView('cart', this)" aria-label="View Cart">
         <div class="nav-icon-wrapper">
           <span class="material-symbols-outlined nav-icon" aria-hidden="true">shopping_cart</span>
-          <span class="nav-badge" id="mobileCartBadge">2</span>
+          <span class="nav-badge" id="mobileCartBadge">0</span>
         </div>
         <span class="nav-text">Cart</span>
       </button>
@@ -172,7 +172,7 @@
       <!-- Marketplace Sub-Bar -->
       <div class="marketplace-grid-full">
         <div class="market-sub-bar">
-          <span class="product-count-tag"><strong id="productCount">4</strong> products available</span>
+          <span class="product-count-tag"><strong id="productCount">0</strong> products available</span>
 
           <div class="filter-dropdown-wrapper">
             <button type="button" class="filter-pill-btn dropdown-toggle" onclick="toggleSortDropdown(event)" aria-expanded="false" aria-haspopup="true" aria-controls="sortDropdownMenu">
@@ -199,122 +199,6 @@
 
         <!-- Products Grid -->
         <div class="products-grid-full" id="marketProductsGrid">
-          
-          <!-- Product 1 -->
-          <article class="product-card" data-category="electronics" data-price="450000" data-verified="true">
-            <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5 Laptop silver finish open view">
-              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add HP EliteBook 840 G5 to wishlist">
-                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-              </button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> HP Authorized</div>
-            </div>
-            <div class="product-details">
-              <span class="product-meta-sub">Computing</span>
-              <h3 class="product-name">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P1')">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</button>
-              </h3>
-              <div class="product-rating-row" aria-label="Rating: 4.9 out of 5 stars from 128 reviews">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.9 <span class="review-count">(128)</span>
-              </div>
-              <div class="product-bottom-row">
-                <div class="product-price-block">
-                  <span class="product-price">₦450,000</span>
-                  <span class="discount-tag">-10% OFF</span>
-                </div>
-                <button type="button" class="add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')" aria-label="Add HP EliteBook 840 G5 to cart">
-                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 2 -->
-          <article class="product-card" data-category="fashion" data-price="18500" data-verified="true">
-            <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60" alt="Minimalist Onyx Black Heavyweight Cotton Hoodie">
-              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Minimalist Hoodie to wishlist">
-                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-              </button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Kapita Apparel</div>
-            </div>
-            <div class="product-details">
-              <span class="product-meta-sub">Apparel</span>
-              <h3 class="product-name">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P2')">Minimalist Heavyweight Cotton Hoodie</button>
-              </h3>
-              <div class="product-rating-row" aria-label="Rating: 4.8 out of 5 stars from 64 reviews">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.8 <span class="review-count">(64)</span>
-              </div>
-              <div class="product-bottom-row">
-                <div class="product-price-block">
-                  <span class="product-price">₦18,500</span>
-                  <span class="discount-tag">-15% OFF</span>
-                </div>
-                <button type="button" class="add-cart-btn" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')" aria-label="Add Minimalist Hoodie to cart">
-                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 3 -->
-          <article class="product-card" data-category="home" data-price="35000" data-verified="false">
-            <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=60" alt="Smart LED Desk Lamp with built-in Wireless Charger base">
-              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Smart Desk Lamp to wishlist">
-                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-              </button>
-            </div>
-            <div class="product-details">
-              <span class="product-meta-sub">Home &amp; Office</span>
-              <h3 class="product-name">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</button>
-              </h3>
-              <div class="product-rating-row" aria-label="Rating: 4.6 out of 5 stars from 32 reviews">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.6 <span class="review-count">(32)</span>
-              </div>
-              <div class="product-bottom-row">
-                <div class="product-price-block">
-                  <span class="product-price">₦35,000</span>
-                  <span class="discount-tag">-5% OFF</span>
-                </div>
-                <button type="button" class="add-cart-btn" onclick="addToCart('P3', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')" aria-label="Add Smart Desk Lamp to cart">
-                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 4 -->
-          <article class="product-card" data-category="beauty" data-price="12000" data-verified="true">
-            <div class="product-img-wrapper">
-              <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60" alt="Hydrating Facial Serum Set bottles 100ml">
-              <button type="button" class="product-fav-btn" onclick="toggleWishlist(this)" aria-label="Add Hydrating Serum Set to wishlist">
-                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-              </button>
-              <div class="seller-badge-tag"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Organic Care</div>
-            </div>
-            <div class="product-details">
-              <span class="product-meta-sub">Beauty</span>
-              <h3 class="product-name">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</button>
-              </h3>
-              <div class="product-rating-row" aria-label="Rating: 4.9 out of 5 stars from 210 reviews">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span> 4.9 <span class="review-count">(210)</span>
-              </div>
-              <div class="product-bottom-row">
-                <div class="product-price-block">
-                  <span class="product-price">₦12,000</span>
-                  <span class="discount-tag">-20% OFF</span>
-                </div>
-                <button type="button" class="add-cart-btn" onclick="addToCart('P4', 'Hydrating Facial Serum Set', 12000, 'Organic Care')" aria-label="Add Hydrating Serum Set to cart">
-                  <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
         </div>
       </div>
     </section>
@@ -322,7 +206,6 @@
     <!-- CART VIEW -->
     <section id="viewCart" class="market-view-pane" style="display: none;" aria-labelledby="cart-heading">
       <div class="cart-layout-container">
-        <!-- Main Cart Content -->
         <div class="cart-items-column">
           <div class="cart-header-row">
             <div>
@@ -333,114 +216,32 @@
               <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span> Clear Cart
             </button>
           </div>
-
-          <!-- Seller Group 1 -->
-          <div class="seller-cart-card">
-            <div class="seller-card-header">
-              <div class="seller-info">
-                <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
-                <span class="seller-name">HP Authorized Direct</span>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
-              </div>
-              <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Lagos</span>
-            </div>
-
-            <div class="cart-item-row" id="cart-item-P1">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="HP EliteBook 840 G5">
-              <div class="cart-item-details">
-                <span class="cart-item-category">Computing</span>
-                <h3 class="cart-item-title">HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h3>
-                <div class="cart-item-specs">Color: Silver • Warranty: 1 Year Official</div>
-                <div class="cart-item-price-mobile">₦450,000.00</div>
-              </div>
-              <div class="cart-item-price-desktop">₦450,000.00</div>
-              
-              <div class="cart-qty-control">
-                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P1', -1)" aria-label="Decrease quantity for HP EliteBook 840 G5">-</button>
-                <label for="qtyInputP1" class="sr-only">Quantity for HP EliteBook 840 G5</label>
-                <input type="number" id="qtyInputP1" value="1" class="cart-qty-input" min="1" readonly>
-                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P1', 1)" aria-label="Increase quantity for HP EliteBook 840 G5">+</button>
-              </div>
-
-              <button type="button" class="cart-remove-btn" onclick="removeItem('P1')" aria-label="Remove HP EliteBook 840 G5 from cart">
-                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Seller Group 2 -->
-          <div class="seller-cart-card">
-            <div class="seller-card-header">
-              <div class="seller-info">
-                <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
-                <span class="seller-name">Kapita Apparel</span>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
-              </div>
-              <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Abuja</span>
-            </div>
-
-            <div class="cart-item-row" id="cart-item-P2">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Minimalist Heavyweight Cotton Hoodie">
-              <div class="cart-item-details">
-                <span class="cart-item-category">Apparel</span>
-                <h3 class="cart-item-title">Minimalist Heavyweight Cotton Hoodie</h3>
-                <div class="cart-item-specs">Size: L • Color: Onyx Black</div>
-                <div class="cart-item-price-mobile">₦18,500.00</div>
-              </div>
-              <div class="cart-item-price-desktop">₦18,500.00</div>
-
-              <div class="cart-qty-control">
-                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P2', -1)" aria-label="Decrease quantity for Minimalist Hoodie">-</button>
-                <label for="qtyInputP2" class="sr-only">Quantity for Minimalist Hoodie</label>
-                <input type="number" id="qtyInputP2" value="1" class="cart-qty-input" min="1" readonly>
-                <button type="button" class="cart-qty-btn" onclick="updateCartQty('P2', 1)" aria-label="Increase quantity for Minimalist Hoodie">+</button>
-              </div>
-
-              <button type="button" class="cart-remove-btn" onclick="removeItem('P2')" aria-label="Remove Minimalist Hoodie from cart">
-                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-              </button>
-            </div>
-          </div>
+          <div id="cartItems"></div>
         </div>
 
-        <!-- Order Summary Column -->
         <div class="cart-summary-column">
           <div class="cart-summary-card">
             <h3 class="summary-title">Order Summary</h3>
-
-            <form onsubmit="event.preventDefault();" class="promo-input-group">
-              <label for="promoCodeInput" class="sr-only">Promo code or gift voucher</label>
-              <input type="text" id="promoCodeInput" class="promo-input" placeholder="Promo code or gift voucher">
-              <button type="submit" class="promo-apply-btn">Apply</button>
-            </form>
-
             <div class="summary-details">
               <div class="summary-row">
-                <span>Subtotal (2 items)</span>
-                <strong>₦468,500.00</strong>
-              </div>
-              <div class="summary-row">
-                <span>Estimated Shipping</span>
-                <strong class="text-emerald">₦2,500.00</strong>
-              </div>
-              <div class="summary-row">
-                <span>Platform Discount</span>
-                <strong class="text-rose">-₦1,500.00</strong>
+                <span>Subtotal (<span id="cartItemCount">0</span> items)</span>
+                <strong id="cartSubtotal">₦0.00</strong>
               </div>
               <hr class="summary-divider">
               <div class="summary-total-row">
                 <span>Total Amount</span>
-                <span class="total-amount">₦469,500.00</span>
+                <span class="total-amount" id="cartTotal">₦0.00</span>
               </div>
             </div>
 
-            <button type="button" class="checkout-submit-btn" onclick="switchMarketView('checkout')">
+            <button type="button" class="checkout-submit-btn" id="proceedCheckout" onclick="switchMarketView('checkout')" disabled>
               Proceed to Checkout <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </button>
 
             <div class="checkout-guarantee">
               <span class="material-symbols-outlined" aria-hidden="true">verified_user</span> Protected by <strong>Kapita Escrow Payment</strong>
             </div>
+            <p id="cartEmptyState" class="cart-subtitle">Your cart is empty. Add products from the marketplace to get started.</p>
           </div>
         </div>
       </div>
@@ -457,111 +258,31 @@
             <span class="material-symbols-outlined" aria-hidden="true">west</span> Return to Shopping Cart
           </button>
 
-          <!-- Section 1: Delivery Address -->
-          <fieldset class="checkout-section-card">
-            <legend class="checkout-section-header">
+          <form id="checkoutDelivery" class="checkout-section-card">
+            <div class="checkout-section-header">
               <span class="step-number" aria-hidden="true">1</span>
               <div>
                 <span class="step-title">Delivery Address</span>
-                <p class="step-subtitle">Select or enter where your items should be delivered</p>
+                <p class="step-subtitle">Enter where your items should be delivered</p>
               </div>
-            </legend>
-
-            <div class="address-options-grid">
-              <label class="address-card active">
-                <input type="radio" name="deliveryAddress" checked class="sr-only">
-                <div class="address-card-top">
-                  <strong>Home Address</strong>
-                  <span class="address-default-badge">Default</span>
-                </div>
-                <p class="address-text">
-                  Ahmed Idowu Ebuka<br>
-                  14 Commercial Avenue, Yaba<br>
-                  Lagos State, Nigeria
-                </p>
-                <span class="address-phone">+234 812 345 6789</span>
-              </label>
-
-              <label class="address-card">
-                <input type="radio" name="deliveryAddress" class="sr-only">
-                <div class="address-card-top">
-                  <strong>Office Studio</strong>
-                </div>
-                <p class="address-text">Tech Hub Suite 4B, Victoria Island<br>Lagos State, Nigeria</p>
-                <span class="address-phone">+234 812 345 6789</span>
-              </label>
             </div>
+            <label class="checkout-field" for="deliveryFullName">Full name</label>
+            <input class="promo-input" id="deliveryFullName" name="full_name" maxlength="150" autocomplete="name" required>
+            <label class="checkout-field" for="deliveryPhone">Phone</label>
+            <input class="promo-input" id="deliveryPhone" name="phone" maxlength="30" autocomplete="tel" required>
+            <label class="checkout-field" for="deliveryAddress">Address</label>
+            <input class="promo-input" id="deliveryAddress" name="address" maxlength="255" autocomplete="street-address" required>
+            <label class="checkout-field" for="deliveryCity">City</label>
+            <input class="promo-input" id="deliveryCity" name="city" maxlength="100" autocomplete="address-level2" required>
+            <label class="checkout-field" for="deliveryState">State</label>
+            <input class="promo-input" id="deliveryState" name="state" maxlength="100" autocomplete="address-level1" required>
+          </form>
 
-            <button type="button" class="add-address-btn">
-              <span class="material-symbols-outlined" aria-hidden="true">add</span> Add New Delivery Address
-            </button>
-          </fieldset>
-
-          <!-- Section 2: Shipping Options -->
-          <fieldset class="checkout-section-card">
-            <legend class="checkout-section-header">
-              <span class="step-number" aria-hidden="true">2</span>
-              <div>
-                <span class="step-title">Delivery Method</span>
-                <p class="step-subtitle">Choose how fast you want your order delivered</p>
-              </div>
-            </legend>
-
-            <div class="shipping-methods-list">
-              <label class="shipping-method-option active">
-                <input type="radio" name="shippingMethod" checked>
-                <div class="shipping-method-info">
-                  <strong>Standard Door Delivery</strong>
-                  <span>Delivered within 2–4 business days</span>
-                </div>
-                <span class="shipping-price">₦2,500.00</span>
-              </label>
-
-              <label class="shipping-method-option">
-                <input type="radio" name="shippingMethod">
-                <div class="shipping-method-info">
-                  <strong>Kapita Express Instant</strong>
-                  <span>Same-day priority delivery (Lagos only)</span>
-                </div>
-                <span class="shipping-price">₦5,000.00</span>
-              </label>
-            </div>
-          </fieldset>
-
-          <!-- Section 3: Payment Method -->
-          <fieldset class="checkout-section-card">
-            <legend class="checkout-section-header">
-              <span class="step-number" aria-hidden="true">3</span>
-              <div>
-                <span class="step-title">Payment Method</span>
-                <p class="step-subtitle">Select your preferred payment gateway</p>
-              </div>
-            </legend>
-
-            <div class="payment-methods-grid">
-              <label class="payment-card active">
-                <input type="radio" name="paymentMethod" checked>
-                <div class="payment-card-content">
-                  <span class="material-symbols-outlined payment-icon" aria-hidden="true">account_balance_wallet</span>
-                  <div>
-                    <strong>Kapita Pay Wallet</strong>
-                    <div class="wallet-balance-note">Available Balance: <strong class="text-emerald">₦245,500.00</strong></div>
-                  </div>
-                </div>
-              </label>
-
-              <label class="payment-card">
-                <input type="radio" name="paymentMethod">
-                <div class="payment-card-content">
-                  <span class="material-symbols-outlined payment-icon" aria-hidden="true">credit_card</span>
-                  <div>
-                    <strong>Debit / Credit Card</strong>
-                    <div class="wallet-balance-note">Visa, Mastercard, Verve</div>
-                  </div>
-                </div>
-              </label>
-            </div>
-          </fieldset>
+          <div class="checkout-section-card">
+            <span class="step-title">Payment Method</span>
+            <p class="step-subtitle">Marketplace orders are paid from your Kapita Pay wallet and held in escrow.</p>
+            <p class="wallet-balance-note">Available Balance: <strong class="text-emerald" id="checkoutWalletBalance">—</strong></p>
+          </div>
         </div>
 
         <!-- Right Summary Column -->
@@ -569,46 +290,22 @@
           <div class="cart-summary-card">
             <h3 class="summary-title">Review &amp; Pay</h3>
 
-            <div class="checkout-mini-items">
-              <div class="mini-item">
-                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5">
-                <div class="mini-item-info">
-                  <h4>HP EliteBook 840 G5</h4>
-                  <span>Qty: 1 • ₦450,000.00</span>
-                </div>
-              </div>
-
-              <div class="mini-item">
-                <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=100&auto=format&fit=crop&q=60" alt="Heavyweight Cotton Hoodie">
-                <div class="mini-item-info">
-                  <h4>Heavyweight Cotton Hoodie</h4>
-                  <span>Qty: 1 • ₦18,500.00</span>
-                </div>
-              </div>
-            </div>
+            <div class="checkout-mini-items" id="checkoutItems"></div>
 
             <div class="summary-details">
               <div class="summary-row">
                 <span>Items Subtotal</span>
-                <strong>₦468,500.00</strong>
-              </div>
-              <div class="summary-row">
-                <span>Shipping Fee</span>
-                <strong>₦2,500.00</strong>
-              </div>
-              <div class="summary-row">
-                <span>Discount</span>
-                <strong class="text-rose">-₦1,500.00</strong>
+                <strong id="checkoutSubtotal">₦0.00</strong>
               </div>
               <hr class="summary-divider">
               <div class="summary-total-row">
                 <span>Total Amount</span>
-                <span class="total-amount">₦469,500.00</span>
+                <span class="total-amount" id="checkoutTotal">₦0.00</span>
               </div>
             </div>
 
-            <button type="button" class="checkout-submit-btn" onclick="placeOrder()">
-              Confirm &amp; Pay ₦469,500.00 <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+            <button type="button" class="checkout-submit-btn" onclick="placeOrder()" disabled>
+              Confirm &amp; Pay <span class="material-symbols-outlined" aria-hidden="true">lock</span>
             </button>
 
             <div class="checkout-guarantee">
@@ -621,382 +318,23 @@
     </section>
 
     <!-- PRODUCT DETAIL VIEW -->
-    <section id="viewProductDetail" class="market-view-pane" style="display: none;" aria-label="Product Specifications and Details">
-      <div class="product-detail-container">
-        
-        <!-- Breadcrumbs Navigation -->
-        <nav class="pdp-breadcrumbs" aria-label="Breadcrumb">
-          <ol class="breadcrumb-list">
-            <li><button type="button" class="breadcrumb-btn" onclick="switchMarketView('browse')">Browse</button></li>
-            <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
-            <li><span class="breadcrumb-text">Computing &amp; Tech</span></li>
-            <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
-            <li><span class="breadcrumb-text active" aria-current="page">HP EliteBook 840 G5</span></li>
-          </ol>
-        </nav>
-
-        <div class="pdp-main-grid">
-          
-          <!-- Image Gallery -->
-          <div class="pdp-gallery-card">
-            <div class="pdp-main-img-wrapper">
-              <img id="pdpMainImage" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80" alt="HP EliteBook 840 G5 main high-res image">
-              <button type="button" class="pdp-fav-btn" onclick="toggleWishlist(this)" aria-label="Save HP EliteBook 840 G5 to wishlist">
-                <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
-              </button>
-              <span class="pdp-discount-badge">-10% OFF</span>
-            </div>
-
-            <div class="pdp-thumbnails-row">
-              <button type="button" class="pdp-thumb-btn active" onclick="changeMainImage('https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80', this)">
-                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 1 Front View">
-              </button>
-              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80', this)">
-                <img src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 2 Keyboard Profile">
-              </button>
-              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&auto=format&fit=crop&q=80', this)">
-                <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 3 Screen Display">
-              </button>
-              <button type="button" class="pdp-thumb-btn" onclick="changeMainImage('https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&auto=format&fit=crop&q=80', this)">
-                <img src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200&auto=format&fit=crop&q=60" alt="Thumbnail 4 Side Ports">
-              </button>
-            </div>
-          </div>
-
-          <!-- Product Info & Actions -->
-          <div class="pdp-buy-card">
-            <div class="pdp-seller-pill">
-              <span class="material-symbols-outlined icon" aria-hidden="true">verified</span>
-              <strong>HP Authorized Store</strong> • 98.4% Positive Ratings
-            </div>
-
-            <h1 class="pdp-title">HP EliteBook 840 G5 Laptop (16GB RAM, 512GB NVMe SSD, Intel Core i7)</h1>
-            
-            <div class="pdp-rating-row" aria-label="Rating 4.9 out of 5 stars from 128 customer reviews">
-              <div class="stars" aria-hidden="true">
-                <span class="material-symbols-outlined star-filled">star</span>
-                <span class="material-symbols-outlined star-filled">star</span>
-                <span class="material-symbols-outlined star-filled">star</span>
-                <span class="material-symbols-outlined star-filled">star</span>
-                <span class="material-symbols-outlined star-filled">star</span>
-              </div>
-              <span class="rating-val">4.9</span>
-              <span class="review-count">(128 Customer Reviews)</span>
-              <span class="stock-badge in-stock"><span class="dot" aria-hidden="true"></span> In Stock (14 left)</span>
-            </div>
-
-            <div class="pdp-price-box">
-              <div class="pdp-current-price">₦450,000.00</div>
-              <div class="pdp-old-price">₦500,000.00</div>
-            </div>
-
-            <!-- Variant Controls -->
-            <div class="pdp-variant-group">
-              <span class="variant-label" id="storageLabel">Storage Capacity:</span>
-              <div class="variant-options" role="radiogroup" aria-labelledby="storageLabel">
-                <button type="button" class="variant-pill active" aria-checked="true" role="radio">512GB SSD</button>
-                <button type="button" class="variant-pill" aria-checked="false" role="radio">1TB SSD</button>
-              </div>
-            </div>
-
-            <div class="pdp-variant-group">
-              <span class="variant-label" id="ramLabel">Memory (RAM):</span>
-              <div class="variant-options" role="radiogroup" aria-labelledby="ramLabel">
-                <button type="button" class="variant-pill active" aria-checked="true" role="radio">16GB RAM</button>
-                <button type="button" class="variant-pill" aria-checked="false" role="radio">32GB RAM</button>
-              </div>
-            </div>
-
-            <!-- Quantity & Actions -->
-            <div class="pdp-action-row">
-              <div class="cart-qty-control pdp-qty">
-                <button type="button" class="cart-qty-btn" onclick="updatePdpQty(-1)" aria-label="Decrease quantity">-</button>
-                <label for="pdpQtyInput" class="sr-only">Product quantity</label>
-                <input type="number" id="pdpQtyInput" value="1" class="cart-qty-input" min="1" readonly>
-                <button type="button" class="cart-qty-btn" onclick="updatePdpQty(1)" aria-label="Increase quantity">+</button>
-              </div>
-
-              <button type="button" class="pdp-add-cart-btn" onclick="addToCart('P1', 'HP EliteBook 840 G5', 450000, 'HP Authorized')">
-                <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span> Add to Cart
-              </button>
-
-              <button type="button" class="pdp-buy-now-btn" onclick="buyNowPdp('P1', 'HP EliteBook 840 G5', 450000)">
-                Buy Now
-              </button>
-            </div>
-
-            <!-- Guarantees -->
-            <div class="pdp-logistics-box">
-              <div class="logistics-item">
-                <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span>
-                <div>
-                  <strong>Fast Nationwide Delivery</strong>
-                  <p>Dispatched within 24 hours from Lagos Hub</p>
-                </div>
-              </div>
-
-              <div class="logistics-item">
-                <span class="material-symbols-outlined icon" aria-hidden="true">security</span>
-                <div>
-                  <strong>1 Year Warranty &amp; Escrow Protection</strong>
-                  <p>Funds held securely until item delivery confirmation</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- Specifications & Description -->
-        <div class="pdp-details-section">
-          <div class="pdp-tabs-header" role="tablist" aria-label="Product Information Options">
-            <button type="button" role="tab" aria-selected="true" aria-controls="pdpTabSpecs" id="tabSpecs" class="pdp-tab-btn active" onclick="switchPdpTab('specs', this)">Specifications</button>
-            <button type="button" role="tab" aria-selected="false" aria-controls="pdpTabOverview" id="tabOverview" class="pdp-tab-btn" onclick="switchPdpTab('overview', this)">Overview &amp; Features</button>
-            <button type="button" role="tab" aria-selected="false" aria-controls="pdpTabReviews" id="tabReviews" class="pdp-tab-btn" onclick="switchPdpTab('reviews', this)">Reviews (128)</button>
-          </div>
-
-          <div class="pdp-tab-content active" id="pdpTabSpecs" role="tabpanel" aria-labelledby="tabSpecs" tabindex="0">
-            <div class="specs-grid">
-              <div class="spec-row"><span>Brand</span><strong>HP</strong></div>
-              <div class="spec-row"><span>Model</span><strong>EliteBook 840 G5</strong></div>
-              <div class="spec-row"><span>Processor</span><strong>Intel Core i7 8th Gen (1.9 GHz base)</strong></div>
-              <div class="spec-row"><span>Graphics</span><strong>Intel UHD Graphics 620</strong></div>
-              <div class="spec-row"><span>Display</span><strong>14-inch FHD Anti-Glare IPS (1920x1080)</strong></div>
-              <div class="spec-row"><span>Battery Life</span><strong>Up to 8 Hours</strong></div>
-              <div class="spec-row"><span>Operating System</span><strong>Windows 11 Pro Pre-installed</strong></div>
-            </div>
-          </div>
-
-          <div class="pdp-tab-content" id="pdpTabOverview" role="tabpanel" aria-labelledby="tabOverview" tabindex="0" style="display: none;">
-            <p class="overview-text">
-              Engineered for modern professionals, the HP EliteBook 840 G5 offers security and manageability alongside powerful performance. Its ultra-slim aluminum design combined with a narrow border display makes it easy to work anywhere.
-            </p>
-          </div>
-
-          <div class="pdp-tab-content" id="pdpTabReviews" role="tabpanel" aria-labelledby="tabReviews" tabindex="0" style="display: none;">
-            <div class="review-item">
-              <div class="review-top">
-                <strong>Ahmed I.</strong>
-                <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified Purchase</span>
-              </div>
-              <div class="stars" aria-label="5 out of 5 stars"><span class="material-symbols-outlined star-filled" aria-hidden="true">star</span> 5.0</div>
-              <p class="review-comment">Super fast delivery to Lagos Yaba! The laptop was pristine and well packaged.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
+    <section id="viewProductDetail" class="market-view-pane" style="display: none;" aria-label="Product Details">
+      <div class="product-detail-container" id="productDetailContent"></div>
     </section>
 
     <!-- ORDERS & TRACKING VIEW -->
     <section id="viewOrders" class="market-view-pane" style="display: none;" aria-labelledby="orders-heading">
-      <div class="orders-container">
-        
-        <div class="orders-header-row">
-          <div>
-            <h2 class="cart-title" id="orders-heading">My Orders &amp; Tracking</h2>
-            <p class="cart-subtitle">Monitor live escrow status, shipping updates, and purchase history</p>
-          </div>
-          
-          <div class="orders-filter-pills" role="toolbar" aria-label="Order Status Filters">
-            <button type="button" class="order-filter-btn active" onclick="filterOrders('all', this)" aria-pressed="true">All Orders</button>
-            <button type="button" class="order-filter-btn" onclick="filterOrders('active', this)" aria-pressed="false">In Transit</button>
-            <button type="button" class="order-filter-btn" onclick="filterOrders('delivered', this)" aria-pressed="false">Delivered</button>
-          </div>
-        </div>
-
-        <!-- Order 1: In Transit -->
-        <article class="order-card" data-status="active">
-          <div class="order-card-header">
-            <div class="order-meta-left">
-              <span class="order-id">Order #KPT-894201</span>
-              <span class="order-date">Placed on Sept 08, 2026</span>
-            </div>
-            <div class="order-status-badge in-transit">
-              <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> In Transit
-            </div>
-          </div>
-
-          <!-- Timeline Stepper -->
-          <div class="tracking-stepper-box">
-            <div class="stepper-track">
-              <div class="stepper-progress" style="width: 65%;"></div>
-            </div>
-            <ol class="stepper-steps">
-              <li class="step completed">
-                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">check</span></div>
-                <span class="step-label">Order Confirmed</span>
-              </li>
-              <li class="step completed">
-                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">check</span></div>
-                <span class="step-label">Escrow Secured</span>
-              </li>
-              <li class="step active">
-                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span></div>
-                <span class="step-label">Out for Delivery</span>
-              </li>
-              <li class="step">
-                <div class="step-circle"><span class="material-symbols-outlined" aria-hidden="true">home</span></div>
-                <span class="step-label">Delivered</span>
-              </li>
-            </ol>
-          </div>
-
-          <!-- Items list -->
-          <div class="order-items-list">
-            <div class="order-item-row">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&auto=format&fit=crop&q=60" alt="HP EliteBook 840 G5">
-              <div class="order-item-info">
-                <h3>HP EliteBook 840 G5 (16GB RAM, 512GB SSD)</h3>
-                <p>Seller: <strong>HP Authorized Direct</strong> • Qty: 1</p>
-                <div class="order-item-price">₦450,000.00</div>
-              </div>
-              <button type="button" class="order-action-btn-sub" onclick="showTrackModal('KPT-894201')">
-                <span class="material-symbols-outlined" aria-hidden="true">map</span> Live Map
-              </button>
-            </div>
-          </div>
-
-          <div class="order-card-footer">
-            <div class="escrow-status-pill">
-              <span class="material-symbols-outlined icon" aria-hidden="true">verified_user</span> Escrow Active (Funds Protected)
-            </div>
-            <div class="order-total-block">
-              <span>Total Paid:</span>
-              <strong>₦452,500.00</strong>
-            </div>
-          </div>
-        </article>
-
-        <!-- Order 2: Delivered -->
-        <article class="order-card" data-status="delivered">
-          <div class="order-card-header">
-            <div class="order-meta-left">
-              <span class="order-id">Order #KPT-742910</span>
-              <span class="order-date">Delivered on Aug 24, 2026</span>
-            </div>
-            <div class="order-status-badge delivered">
-              <span class="material-symbols-outlined icon" aria-hidden="true">task_alt</span> Delivered
-            </div>
-          </div>
-
-          <div class="order-items-list">
-            <div class="order-item-row">
-              <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=60" alt="Minimalist Heavyweight Cotton Hoodie">
-              <div class="order-item-info">
-                <h3>Minimalist Heavyweight Cotton Hoodie</h3>
-                <p>Seller: <strong>Kapita Apparel</strong> • Qty: 1</p>
-                <div class="order-item-price">₦18,500.00</div>
-              </div>
-              <div class="order-actions-right">
-                <button type="button" class="order-action-btn-sub" onclick="addToCart('P2', 'Minimalist Heavyweight Cotton Hoodie', 18500, 'Kapita Apparel')">
-                  <span class="material-symbols-outlined" aria-hidden="true">replay</span> Buy Again
-                </button>
-                <button type="button" class="order-action-btn-sub" onclick="openReviewModal('KPT-742910')">
-                  <span class="material-symbols-outlined" aria-hidden="true">rate_review</span> Leave Review
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="order-card-footer">
-            <div class="escrow-status-pill released">
-              <span class="material-symbols-outlined icon" aria-hidden="true">lock_open</span> Escrow Released to Seller
-            </div>
-            <div class="order-total-block">
-              <span>Total Paid:</span>
-              <strong>₦21,000.00</strong>
-            </div>
-          </div>
-        </article>
-
-      </div>
+      <div class="orders-container"></div>
     </section>
 
     <!-- WISHLIST VIEW -->
     <section id="viewWishlist" class="market-view-pane" style="display: none;" aria-labelledby="wishlist-heading">
-      <div class="wishlist-container">
-        
-        <div class="wishlist-header-row">
-          <div>
-            <h2 class="cart-title" id="wishlist-heading">Saved Wishlist</h2>
-            <p class="cart-subtitle">Saved items organized by verified store</p>
-          </div>
-          <button type="button" class="cart-clear-btn" onclick="clearWishlist()">
-            <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span> Clear Wishlist
-          </button>
-        </div>
-
-        <!-- Wishlist Seller Group 1 -->
-        <div class="seller-cart-card">
-          <div class="seller-card-header">
-            <div class="seller-info">
-              <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
-              <span class="seller-name">Lumina Essentials</span>
-              <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
-            </div>
-            <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Lagos</span>
-          </div>
-
-          <div class="cart-item-row" id="wishlist-item-W1">
-            <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Smart LED Desk Lamp">
-            <div class="cart-item-details">
-              <span class="cart-item-category">Home &amp; Office</span>
-              <h3 class="cart-item-title">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P3')">Smart LED Desk Lamp with Wireless Charger</button>
-              </h3>
-              <div class="cart-item-specs">Color: Space Grey • In Stock</div>
-              <div class="cart-item-price-mobile">₦35,000.00</div>
-            </div>
-            <div class="cart-item-price-desktop">₦35,000.00</div>
-            <button type="button" class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W1', 'Smart LED Desk Lamp', 35000, 'Lumina Essentials')">
-              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span> Add to Cart
-            </button>
-            <button type="button" class="cart-remove-btn" onclick="removeFromWishlist('W1')" aria-label="Remove Smart LED Desk Lamp from wishlist">
-              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Wishlist Seller Group 2 -->
-        <div class="seller-cart-card">
-          <div class="seller-card-header">
-            <div class="seller-info">
-              <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
-              <span class="seller-name">Organic Care</span>
-              <span class="seller-verified-badge"><span class="material-symbols-outlined" aria-hidden="true">verified</span> Verified</span>
-            </div>
-            <span class="seller-dispatch-tag"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span> Dispatched from Abuja</span>
-          </div>
-
-          <div class="cart-item-row" id="wishlist-item-W2">
-            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&auto=format&fit=crop&q=60" class="cart-item-img" alt="Hydrating Facial Serum Set">
-            <div class="cart-item-details">
-              <span class="cart-item-category">Beauty &amp; Care</span>
-              <h3 class="cart-item-title">
-                <button type="button" class="product-title-btn" onclick="showProductDetails('P4')">Hydrating Facial Serum Set (100ml)</button>
-              </h3>
-              <div class="cart-item-specs">Volume: 100ml • In Stock</div>
-              <div class="cart-item-price-mobile">₦12,000.00</div>
-            </div>
-            <div class="cart-item-price-desktop">₦12,000.00</div>
-            <button type="button" class="wishlist-move-cart-btn" onclick="moveToCartFromWishlist('W2', 'Hydrating Facial Serum Set', 12000, 'Organic Care')">
-              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span> Add to Cart
-            </button>
-            <button type="button" class="cart-remove-btn" onclick="removeFromWishlist('W2')" aria-label="Remove Hydrating Facial Serum Set from wishlist">
-              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </div>
-
-      </div>
+      <div class="wishlist-container"></div>
     </section>
 
   </main>
 
   <script type="module" src="src/pages/app.js"></script>
-  <script type="module" src="src/pages/wallet.js"></script>
   <script type="module" src="src/pages/market.js"></script>
 </body>
 </html>

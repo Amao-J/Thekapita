@@ -1201,6 +1201,21 @@ html body .wallet-container {
   margin-bottom: 16px;
 }
 
+.checkout-field {
+  display: block;
+  margin: 12px 0 6px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#checkoutDelivery .promo-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  font-size: 14px;
+}
+
 .checkout-section-header {
   display: flex;
   align-items: center;

@@ -33,9 +33,9 @@
       
       <!-- Notification Bell Widget -->
       <div class="notif-wrapper">
-        <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" aria-label="Notifications, 3 unread" aria-haspopup="true" aria-expanded="false" onclick="toggleNotifMenu(event)">
+        <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" aria-label="Notifications" aria-haspopup="true" aria-expanded="false" onclick="toggleNotifMenu(event)">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-7c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v7z"/></svg>
-          <span class="notif-badge" aria-hidden="true">3</span>
+          <span class="notif-badge" aria-hidden="true" hidden>0</span>
         </button>
 
         <!-- Dropdown Notification Panel -->
@@ -45,35 +45,7 @@
             <button class="mark-read text-btn-link" type="button">Mark all as read</button>
           </div>
           <div class="notif-list">
-            <!-- Linked Eats Notification to food.html -->
-            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Eats: Your order from Bukka Hut is on the way! 2 minutes ago" onclick="window.location.href='food.html'" style="cursor: pointer;">
-              <div class="notif-icon-circle eats-icon" aria-hidden="true">🍔</div>
-              <div class="notif-content">
-                <p class="notif-title"><strong>theKapita Eats</strong></p>
-                <p class="notif-body">Your order from Bukka Hut is on the way!</p>
-                <span class="notif-time">2 mins ago</span>
-              </div>
-            </div>
-            
-            <!-- Link to wallet.html on Pay Notification -->
-            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Pay: Transfer of 15,000 Naira to Sarah was successful. 1 hour ago" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
-              <div class="notif-icon-circle pay-icon" aria-hidden="true">💳</div>
-              <div class="notif-content">
-                <p class="notif-title"><strong>theKapita Pay</strong></p>
-                <p class="notif-body">Transfer of ₦15,000 to Sarah was successful.</p>
-                <span class="notif-time">1 hour ago</span>
-              </div>
-            </div>
-
-            <!-- Bills Notification linked to bills.html -->
-            <div class="notif-item unread" tabindex="0" role="button" aria-label="theKapita Bills: Electricity token generated for Ikeja Electric Meter. 3 hours ago" onclick="window.location.href='bills.html'" style="cursor: pointer;">
-              <div class="notif-icon-circle pay-icon" aria-hidden="true">⚡</div>
-              <div class="notif-content">
-                <p class="notif-title"><strong>theKapita Bills</strong></p>
-                <p class="notif-body">Electricity token generated for Ikeja Electric Meter.</p>
-                <span class="notif-time">3 hours ago</span>
-              </div>
-            </div>
+            <p class="notif-empty">Loading recent activity…</p>
           </div>
         </div>
       </div>

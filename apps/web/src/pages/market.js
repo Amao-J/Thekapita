@@ -1,17 +1,32 @@
 /* ==========================================================================
    THEKAPITA MARKETPLACE ENGINE (WITH REAL NETWORK FEEDBACK & API INTEGRATION)
    ========================================================================== */
-import { addItem, subscribe as cartSubscribe, clearCart as clearCartState, getItems, getTotal } from '../state/cart.js';
+import { addItem, subscribe as cartSubscribe, clearCart as clearCartState, getItems, getTotal, removeItem as removeCartItem, setQty } from '../state/cart.js';
 import { request, ApiError } from '../api/client.js';
-import { authorizedRequest } from '../state/session.js';
+import { authorizedRequest, isAuthenticated } from '../state/session.js';
 import { showToast } from './app.js';
+import { refreshBalance, getBalanceDisplay } from '../state/ledger.js';
 
 let currentCategory = 'all';
 let checkoutKey = null; // Idempotency-Key for the current cart state
+let products = [];
+let wishlist = new Set();
+let selectedProduct = null;
+
+try {
+  wishlist = new Set(JSON.parse(localStorage.getItem('kapita.market.wishlist') || '[]').map(String));
+} catch {
+  wishlist = new Set();
+}
 
 // Seller-supplied text goes into innerHTML, so escape it.
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let onlyVerified = false;
+
+function setHtml(element, markup) {
+  // eslint-disable-next-line no-restricted-properties -- Marketplace data is escaped before dynamic templates are rendered.
+  element.innerHTML = markup;
+}
 
 /* --------------------------------------------------------------------------
    0. REAL NETWORK LOADING & SKELETON RENDERER
@@ -21,7 +36,7 @@ async function fetchAndRenderProducts() {
   if (!grid) return;
 
   // Render 4 Skeleton Shimmer Cards while fetching live data
-  grid.innerHTML = Array(4).fill(0).map(() => `
+  setHtml(grid, Array(4).fill(0).map(() => `
     <div class="product-card skeleton-card">
       <div class="skeleton-img"></div>
       <div class="product-details">
@@ -30,25 +45,25 @@ async function fetchAndRenderProducts() {
         <div class="skeleton-text medium"></div>
       </div>
     </div>
-  `).join('');
+  `).join(''));
 
   try {
     // Live API call with timeout & offline error catch via client.js
-    const products = await request('/marketplace/products');
+    products = await request('/marketplace/products');
     renderProductCards(products);
   } catch (err) {
     // Real Network Error Fallback Card with Retry Button
     const errorMsg = err instanceof ApiError ? err.message : 'Could not load products. Please check your network connection.';
-    grid.innerHTML = `
+    setHtml(grid, `
       <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0;">
         <span class="material-symbols-outlined" style="font-size: 48px; color: #ff4d4d; margin-bottom: 12px;">cloud_off</span>
         <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">Unable to connect to Marketplace API</h3>
-        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">${errorMsg}</p>
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">${esc(errorMsg)}</p>
         <button class="filter-pill-btn active" onclick="fetchAndRenderProducts()" style="padding: 10px 20px;">
           <span class="material-symbols-outlined icon">refresh</span> Try Again
         </button>
       </div>
-    `;
+    `);
     if (window.showToast) {
       window.showToast(errorMsg, 'error');
     }
@@ -60,25 +75,27 @@ function renderProductCards(products) {
   if (!grid) return;
 
   if (!products || products.length === 0) {
-    grid.innerHTML = `
+    setHtml(grid, `
       <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0;">
         <span class="material-symbols-outlined" style="font-size: 48px; color: #94a3b8; margin-bottom: 12px;">storefront</span>
         <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">No products found</h3>
       </div>
-    `;
+    `);
+    const count = document.getElementById('productCount');
+    if (count) count.textContent = '0';
     return;
   }
 
-  grid.innerHTML = products.map(p => `
-    <div class="product-card" data-category="${esc(p.category)}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}">
+  setHtml(grid, products.map(p => `
+    <article class="product-card" data-category="${esc(p.category)}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}" data-in-stock="${p.stock > 0 ? 'true' : 'false'}">
       <div class="product-img-wrapper">
         ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy">` : ''}
-        <button class="product-fav-btn" onclick="toggleWishlist(this)"><span class="material-symbols-outlined">favorite</span></button>
+        <button class="product-fav-btn ${wishlist.has(String(p.id)) ? 'active' : ''}" data-wishlist-id="${esc(p.id)}" onclick="toggleWishlist(this)" aria-label="Toggle ${esc(p.title)} in wishlist"><span class="material-symbols-outlined">favorite</span></button>
         ${p.is_verified ? `<div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> ${esc(p.seller_name)}</div>` : ''}
       </div>
       <div class="product-details">
         <span class="product-meta-sub">${esc(p.category_label || p.category)}</span>
-        <h4 class="product-name" onclick="showProductDetails('${p.id}')">${esc(p.title)}</h4>
+        <h4 class="product-name"><button class="product-title-btn" onclick="showProductDetails('${esc(p.id)}')">${esc(p.title)}</button></h4>
         ${p.rating ? `<div class="product-rating-row">
           <span class="material-symbols-outlined" style="font-size: 13px;">star</span> ${p.rating} <span class="review-count">(${p.review_count || 0})</span>
         </div>` : ''}
@@ -86,15 +103,16 @@ function renderProductCards(products) {
           <div class="product-price-block">
             <span class="product-price">₦${p.price.toLocaleString()}</span>
           </div>
-          <button class="add-cart-btn" data-add-to-cart data-id="${p.id}" data-title="${esc(p.title)}" data-price="${p.price}" data-seller="${esc(p.seller_name)}" ${p.in_stock ? '' : 'disabled title="Out of stock"'}>
+          <button class="add-cart-btn" data-add-to-cart data-id="${p.id}" data-title="${esc(p.title)}" data-price="${p.price}" data-seller="${esc(p.seller_name)}" data-category="${esc(p.category_label || p.category)}" data-image="${esc(p.image_url || '')}" ${p.in_stock ? '' : 'disabled title="Out of stock"'}>
             <span class="material-symbols-outlined" style="font-size: 16px;">add_shopping_cart</span>
           </button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </article>
+  `).join(''));
 
-  document.getElementById('productCount').textContent = products.length;
+  filterMarketProducts();
+  renderWishlist();
 }
 
 /* --------------------------------------------------------------------------
@@ -129,7 +147,7 @@ function filterMarketProducts() {
 
     if (matchesSearch && matchesCategory && matchesVerified) {
       card.style.display = 'flex';
-      count++;
+      if (card.dataset.inStock === 'true') count++;
     } else {
       card.style.display = 'none';
     }
@@ -140,7 +158,21 @@ function filterMarketProducts() {
 }
 
 function addToCart(id, name, price, seller) {
-  addItem({ id, title: name, price: parseFloat(price), sellerId: seller });
+  const product = products.find((item) => String(item.id) === String(id));
+  const existing = getItems().find((item) => String(item.id) === String(id));
+  const maxQty = product ? Math.min(Number(product.stock), 50) : 50;
+  if (product && (!product.in_stock || (existing && existing.qty >= maxQty))) {
+    showToast(product.in_stock ? `Only ${Number(product.stock)} of ${name} are in stock.` : `${name} is out of stock.`, 'info');
+    return;
+  }
+  addItem({
+    id: Number(id),
+    title: name,
+    price: Number(price),
+    sellerId: seller,
+    category: product?.category_label || product?.category || '',
+    image: product?.image_url || '',
+  });
   if (window.showToast) {
     window.showToast(`${name} added to cart!`, 'success');
   } else {
@@ -155,10 +187,19 @@ cartSubscribe((items) => {
   const totalCount = items.reduce((sum, i) => sum + i.qty, 0);
   if (badge) badge.textContent = String(totalCount);
   if (mobileBadge) mobileBadge.textContent = String(totalCount);
+  renderCart();
 });
 
 function toggleWishlist(btn) {
-  btn.classList.toggle('active');
+  const id = String(btn.dataset.wishlistId || '');
+  if (!id) return;
+  if (wishlist.has(id)) wishlist.delete(id);
+  else wishlist.add(id);
+  localStorage.setItem('kapita.market.wishlist', JSON.stringify([...wishlist]));
+  document.querySelectorAll('[data-wishlist-id]').forEach((button) => {
+    button.classList.toggle('active', wishlist.has(button.dataset.wishlistId));
+  });
+  renderWishlist();
 }
 
 function toggleCategoryDropdown(e) {
@@ -197,6 +238,10 @@ function toggleHeaderNavMenu(e) {
 }
 
 function switchMarketView(viewKey, btn) {
+  if (viewKey === 'checkout' && getItems().length === 0) {
+    showToast('Add at least one product before checkout.', 'info');
+    return;
+  }
   document.querySelectorAll('.market-view-pane').forEach(pane => pane.style.display = 'none');
 
   if (btn) {
@@ -214,6 +259,13 @@ function switchMarketView(viewKey, btn) {
 
   const target = document.getElementById(`view${viewKey.charAt(0).toUpperCase() + viewKey.slice(1)}`);
   if (target) target.style.display = 'block';
+  if (viewKey === 'cart') renderCart();
+  if (viewKey === 'checkout') {
+    renderCheckoutSummary();
+    hydrateMarketplaceBalance();
+  }
+  if (viewKey === 'orders') loadOrders();
+  if (viewKey === 'wishlist') renderWishlist();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -301,90 +353,194 @@ document.addEventListener('click', () => {
 });
 
 function updateCartQty(itemId, delta) {
-  const itemRow = document.getElementById(`cart-item-${itemId}`);
-  if (!itemRow) return;
-
-  const input = itemRow.querySelector('.cart-qty-input');
-  let currentQty = parseInt(input.value) || 1;
-  currentQty += delta;
-
-  if (currentQty < 1) {
-    removeItem(itemId);
+  const item = getItems().find((entry) => String(entry.id) === String(itemId));
+  if (!item) return;
+  const product = products.find((entry) => String(entry.id) === String(itemId));
+  const maxQty = product ? Math.min(Number(product.stock), 50) : 50;
+  if (item.qty + delta > maxQty) {
+    showToast(`Only ${maxQty} of ${item.title} can be ordered at once.`, 'info');
     return;
   }
-
-  input.value = currentQty;
+  if (item.qty + delta < 1) removeCartItem(item.id);
+  else setQty(item.id, item.qty + delta);
 }
 
 function removeItem(itemId) {
-  const itemRow = document.getElementById(`cart-item-${itemId}`);
-  if (!itemRow) return;
-
-  const sellerCard = itemRow.closest('.seller-cart-card');
-
-  itemRow.style.opacity = '0';
-  itemRow.style.transform = 'scale(0.95)';
-  itemRow.style.transition = 'all 0.2s ease';
-
-  setTimeout(() => {
-    itemRow.remove();
-
-    if (sellerCard) {
-      const remainingItems = sellerCard.querySelectorAll('.cart-item-row');
-      if (remainingItems.length === 0) {
-        sellerCard.style.opacity = '0';
-        sellerCard.style.transform = 'translateY(-8px)';
-        sellerCard.style.transition = 'all 0.2s ease';
-        
-        setTimeout(() => {
-          sellerCard.remove();
-          checkEmptyCartState();
-        }, 200);
-      }
-    }
-  }, 200);
+  removeCartItem(Number(itemId));
 }
 
-function checkEmptyCartState() {
-  const remainingSellers = document.querySelectorAll('#viewCart .seller-cart-card');
-  if (remainingSellers.length === 0) {
-    const cartColumn = document.querySelector('.cart-items-column');
-    if (cartColumn) {
-      cartColumn.innerHTML = `
-        <div style="text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0;">
-          <span class="material-symbols-outlined" style="font-size: 48px; color: #94a3b8; margin-bottom: 12px;">shopping_cart_off</span>
-          <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">Your cart is empty</h3>
-          <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">Explore the marketplace and discover premium items.</p>
-          <button class="filter-pill-btn active" onclick="switchMarketView('browse')" style="padding: 10px 20px;">
-            <span class="material-symbols-outlined icon">storefront</span> Continue Shopping
-          </button>
+function formatMoney(amount) {
+  return `₦${Number(amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  if (!container) return;
+  const items = getItems();
+  const empty = document.getElementById('cartEmptyState');
+  const proceed = document.getElementById('proceedCheckout');
+  if (empty) empty.hidden = items.length > 0;
+  if (proceed) proceed.disabled = items.length === 0;
+  setHtml(container, items.length ? items.map((item) => `
+    <article class="seller-cart-card">
+      <div class="seller-card-header">
+        <div class="seller-info">
+          <span class="material-symbols-outlined seller-icon" aria-hidden="true">storefront</span>
+          <span class="seller-name">${esc(item.sellerId)}</span>
         </div>
-      `;
-    }
+      </div>
+      <div class="cart-item-row" id="cart-item-${Number(item.id)}">
+        ${item.image ? `<img src="${esc(item.image)}" class="cart-item-img" alt="${esc(item.title)}">` : ''}
+        <div class="cart-item-details">
+          <span class="cart-item-category">${esc(item.category)}</span>
+          <h3 class="cart-item-title">${esc(item.title)}</h3>
+          <div class="cart-item-price-mobile">${formatMoney(item.price)}</div>
+        </div>
+        <div class="cart-item-price-desktop">${formatMoney(item.price)}</div>
+        <div class="cart-qty-control">
+          <button type="button" class="cart-qty-btn" onclick="updateCartQty(${Number(item.id)}, -1)" aria-label="Decrease quantity">-</button>
+          <label class="sr-only" for="qtyInput${Number(item.id)}">Quantity for ${esc(item.title)}</label>
+          <input type="number" id="qtyInput${Number(item.id)}" value="${Number(item.qty)}" class="cart-qty-input" min="1" readonly>
+          <button type="button" class="cart-qty-btn" onclick="updateCartQty(${Number(item.id)}, 1)" aria-label="Increase quantity">+</button>
+        </div>
+        <button type="button" class="cart-remove-btn" onclick="removeItem(${Number(item.id)})" aria-label="Remove ${esc(item.title)}">
+          <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+        </button>
+      </div>
+    </article>
+  `).join('') : '');
+
+  const total = getTotal();
+  const count = items.reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById('cartItemCount').textContent = String(count);
+  document.getElementById('cartSubtotal').textContent = formatMoney(total);
+  document.getElementById('cartTotal').textContent = formatMoney(total);
+  renderCheckoutSummary();
+}
+
+function renderCheckoutSummary() {
+  const itemsContainer = document.getElementById('checkoutItems');
+  if (!itemsContainer) return;
+  const items = getItems();
+  setHtml(itemsContainer, items.map((item) => `
+    <div class="mini-item">
+      ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.title)}">` : ''}
+      <div class="mini-item-info">
+        <h4>${esc(item.title)}</h4>
+        <span>Qty: ${Number(item.qty)} · ${formatMoney(item.price * item.qty)}</span>
+      </div>
+    </div>
+  `).join(''));
+  const total = getTotal();
+  document.getElementById('checkoutSubtotal').textContent = formatMoney(total);
+  document.getElementById('checkoutTotal').textContent = formatMoney(total);
+  const submit = document.querySelector('#viewCheckout .checkout-submit-btn');
+  if (submit) submit.disabled = items.length === 0;
+  if (submit && !submit.disabled) {
+    setHtml(submit, `Confirm &amp; Pay ${formatMoney(total)} <span class="material-symbols-outlined" aria-hidden="true">lock</span>`);
+  }
+}
+
+async function hydrateMarketplaceBalance() {
+  const balance = document.getElementById('checkoutWalletBalance');
+  const headerBalance = document.getElementById('marketWalletBalance');
+  try {
+    await refreshBalance();
+    if (balance) balance.textContent = getBalanceDisplay();
+    if (headerBalance) headerBalance.textContent = getBalanceDisplay();
+  } catch (err) {
+    if (balance) balance.textContent = 'Unavailable';
+    if (headerBalance) headerBalance.textContent = 'Unavailable';
+    showToast(err instanceof ApiError ? err.message : 'Could not load your wallet balance.', 'error');
   }
 }
 
 function changeMainImage(src, thumbEl) {
-  document.getElementById('pdpMainImage').src = src;
+  const image = document.getElementById('pdpMainImage');
+  if (image) image.src = src;
   document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
-  thumbEl.classList.add('active');
+  if (thumbEl) thumbEl.classList.add('active');
 }
 
 function updatePdpQty(delta) {
   const input = document.getElementById('pdpQtyInput');
+  if (!input) return;
   let current = parseInt(input.value) || 1;
-  current += delta;
-  if (current < 1) current = 1;
-  input.value = current;
+  current = Math.max(1, Math.min(Number(input.max) || Infinity, current + delta));
+  input.value = String(current);
 }
 
-function showProductDetails(productId) {
+async function showProductDetails(productId) {
+  try {
+    selectedProduct = await request(`/marketplace/products/${encodeURIComponent(productId)}`);
+  } catch (err) {
+    showToast(err instanceof ApiError ? err.message : 'Could not load this product.', 'error');
+    return;
+  }
+  renderProductDetail();
   switchMarketView('productDetail');
 }
 
-function buyNowPdp(id, name, price) {
-  addToCart(id, name, price, 'HP Authorized');
-  switchMarketView('checkout');
+function renderProductDetail() {
+  const container = document.getElementById('productDetailContent');
+  if (!container || !selectedProduct) return;
+  const product = selectedProduct;
+  setHtml(container, `
+    <nav class="pdp-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="breadcrumb-list">
+        <li><button type="button" class="breadcrumb-btn" onclick="switchMarketView('browse')">Browse</button></li>
+        <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
+        <li><span class="breadcrumb-text">${esc(product.category_label || product.category)}</span></li>
+        <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
+        <li><span class="breadcrumb-text active" aria-current="page">${esc(product.title)}</span></li>
+      </ol>
+    </nav>
+    <div class="pdp-main-grid">
+      <div class="pdp-gallery-card">
+        <div class="pdp-main-img-wrapper">
+          ${product.image_url ? `<img id="pdpMainImage" src="${esc(product.image_url)}" alt="${esc(product.title)}">` : '<div class="pdp-main-img-placeholder"></div>'}
+          <button type="button" class="pdp-fav-btn ${wishlist.has(String(product.id)) ? 'active' : ''}" data-wishlist-id="${esc(product.id)}" onclick="toggleWishlist(this)" aria-label="Toggle wishlist">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+          </button>
+        </div>
+      </div>
+      <div class="pdp-buy-card">
+        <div class="pdp-seller-pill"><strong>${esc(product.seller_name)}</strong>${product.is_verified ? ' · Verified seller' : ''}</div>
+        <h1 class="pdp-title">${esc(product.title)}</h1>
+        <p class="pdp-description">${esc(product.short_description || '')}</p>
+        <div class="pdp-price-box"><div class="pdp-current-price">${formatMoney(product.price)}</div></div>
+        <p class="stock-badge ${product.in_stock ? 'in-stock' : 'out-of-stock'}">${product.in_stock ? `${Number(product.stock)} in stock` : 'Out of stock'}</p>
+        <div class="pdp-action-row">
+          <div class="cart-qty-control pdp-qty">
+            <button type="button" class="cart-qty-btn" onclick="updatePdpQty(-1)" aria-label="Decrease quantity">-</button>
+            <label for="pdpQtyInput" class="sr-only">Product quantity</label>
+            <input type="number" id="pdpQtyInput" value="1" class="cart-qty-input" min="1" max="${Math.min(Number(product.stock) || 1, 50)}" readonly>
+            <button type="button" class="cart-qty-btn" onclick="updatePdpQty(1)" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pdp-add-cart-btn" onclick="buyNowPdp()" ${product.in_stock ? '' : 'disabled'}>
+            <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span> Add to Cart
+          </button>
+          <button type="button" class="pdp-buy-now-btn" onclick="buyNowPdp(true)" ${product.in_stock ? '' : 'disabled'}>Buy Now</button>
+        </div>
+        <p>Order payments are held in escrow until delivery is confirmed.</p>
+      </div>
+    </div>
+  `);
+}
+
+function buyNowPdp(goToCheckout = false) {
+  if (!selectedProduct) return;
+  const stock = Math.min(Number(selectedProduct.stock), 50);
+  const quantity = Math.min(stock, Math.max(1, Number(document.getElementById('pdpQtyInput')?.value) || 1));
+  const existing = getItems().find((item) => String(item.id) === String(selectedProduct.id));
+  const quantityToAdd = Math.min(quantity, Math.max(0, stock - (existing?.qty || 0)));
+  if (!quantityToAdd) {
+    showToast(`Only ${stock} of ${selectedProduct.title} are in stock.`, 'info');
+    return;
+  }
+  addToCart(selectedProduct.id, selectedProduct.title, selectedProduct.price, selectedProduct.seller_name);
+  if (quantityToAdd > 1) setQty(Number(selectedProduct.id), (existing?.qty || 0) + quantityToAdd);
+  if (goToCheckout) switchMarketView('checkout');
 }
 
 function switchPdpTab(tabKey, btnEl) {
@@ -396,123 +552,151 @@ function switchPdpTab(tabKey, btnEl) {
   if (target) target.style.display = 'block';
 }
 
-function filterOrders(statusKey, btnEl) {
-  document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'));
-  btnEl.classList.add('active');
+function renderWishlist() {
+  const root = document.querySelector('#viewWishlist .wishlist-container');
+  if (!root) return;
+  const saved = products.filter((product) => wishlist.has(String(product.id)));
+  setHtml(root, `
+    <div class="wishlist-header-row">
+      <div>
+        <h2 class="cart-title" id="wishlist-heading">Saved Wishlist</h2>
+        <p class="cart-subtitle">Saved in this browser. Wishlist sync is not available yet.</p>
+      </div>
+      <button type="button" class="cart-clear-btn" onclick="clearWishlist()" ${saved.length ? '' : 'disabled'}>
+        <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span> Clear Wishlist
+      </button>
+    </div>
+    ${saved.length ? saved.map((product) => `
+      <article class="seller-cart-card">
+        <div class="cart-item-row">
+          ${product.image_url ? `<img src="${esc(product.image_url)}" class="cart-item-img" alt="${esc(product.title)}">` : ''}
+          <div class="cart-item-details">
+            <span class="cart-item-category">${esc(product.category_label || product.category)}</span>
+            <h3 class="cart-item-title">${esc(product.title)}</h3>
+            <div class="cart-item-price-mobile">${formatMoney(product.price)}</div>
+          </div>
+          <div class="cart-item-price-desktop">${formatMoney(product.price)}</div>
+          <button type="button" class="wishlist-move-cart-btn" data-add-to-cart data-id="${Number(product.id)}" data-title="${esc(product.title)}" data-price="${Number(product.price)}" data-seller="${esc(product.seller_name)}" ${product.in_stock ? '' : 'disabled'}>
+            <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span> Add to Cart
+          </button>
+          <button type="button" class="cart-remove-btn" data-wishlist-id="${Number(product.id)}" onclick="removeFromWishlist('${Number(product.id)}')" aria-label="Remove ${esc(product.title)} from wishlist">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+          </button>
+        </div>
+      </article>
+    `).join('') : '<p class="cart-subtitle">Your wishlist is empty. Use the heart on a product to save it here.</p>'}
+  `);
+}
 
-  const cards = document.querySelectorAll('.order-card');
-  cards.forEach(card => {
-    if (statusKey === 'all' || card.dataset.status === statusKey) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
+function removeFromWishlist(productId) {
+  wishlist.delete(String(productId));
+  localStorage.setItem('kapita.market.wishlist', JSON.stringify([...wishlist]));
+  document.querySelectorAll('[data-wishlist-id]').forEach((button) => {
+    button.classList.toggle('active', wishlist.has(button.dataset.wishlistId));
   });
-}
-
-function showTrackModal(orderId) {
-  alert(`📦 Live Tracking for ${orderId}:\nDriver: Express Courier Lagos\nStatus: Out for delivery in Yaba\nEstimated Arrival: Today before 5:00 PM`);
-}
-
-function openReviewModal(orderId) {
-  alert(`⭐ Leave a review for Order ${orderId}.\nYour feedback helps secure future marketplace transactions!`);
-}
-
-function removeFromWishlist(wishlistId) {
-  const itemRow = document.getElementById(`wishlist-item-${wishlistId}`);
-  if (!itemRow) return;
-
-  const sellerCard = itemRow.closest('.seller-cart-card');
-
-  itemRow.style.opacity = '0';
-  itemRow.style.transform = 'scale(0.92)';
-  itemRow.style.transition = 'all 0.2s ease';
-
-  setTimeout(() => {
-    itemRow.remove();
-
-    if (sellerCard) {
-      const remainingItems = sellerCard.querySelectorAll('.cart-item-row');
-      if (remainingItems.length === 0) {
-        sellerCard.style.opacity = '0';
-        sellerCard.style.transform = 'translateY(-8px)';
-        sellerCard.style.transition = 'all 0.2s ease';
-
-        setTimeout(() => {
-          sellerCard.remove();
-          checkEmptyWishlistState();
-        }, 200);
-      }
-    } else {
-      checkEmptyWishlistState();
-    }
-  }, 200);
-}
-
-function moveToCartFromWishlist(wishlistId, name, price, seller) {
-  addToCart(wishlistId, name, price, seller);
-  removeFromWishlist(wishlistId);
+  renderWishlist();
 }
 
 function clearWishlist() {
-  if (confirm("Are you sure you want to clear your saved wishlist?")) {
-    const wishlistContainer = document.querySelector('#viewWishlist .wishlist-container');
-    if (!wishlistContainer) return;
+  wishlist.clear();
+  localStorage.removeItem('kapita.market.wishlist');
+  document.querySelectorAll('[data-wishlist-id]').forEach((button) => button.classList.remove('active'));
+  renderWishlist();
+}
 
-    const sellerCards = wishlistContainer.querySelectorAll('.seller-cart-card');
-    sellerCards.forEach(card => {
-      card.style.opacity = '0';
-      card.style.transition = 'opacity 0.2s ease';
-      setTimeout(() => card.remove(), 200);
-    });
-
-    setTimeout(() => checkEmptyWishlistState(), 250);
+async function loadOrders() {
+  const root = document.querySelector('#viewOrders .orders-container');
+  if (!root) return;
+  setHtml(root, '<h2 class="cart-title">My Orders &amp; Tracking</h2><p class="cart-subtitle">Loading your orders…</p>');
+  try {
+    const orders = await authorizedRequest('/marketplace/orders');
+    setHtml(root, `
+      <div class="orders-header-row">
+        <div><h2 class="cart-title">My Orders &amp; Tracking</h2><p class="cart-subtitle">Orders placed using your Kapita Pay wallet.</p></div>
+      </div>
+      ${orders.length ? orders.map((order) => `
+        <article class="order-card">
+          <div class="order-card-header">
+            <div class="order-meta-left">
+              <span class="order-id">Order ${esc(order.reference)}</span>
+              <span class="order-date">${esc(new Date(order.created_at).toLocaleString())}</span>
+            </div>
+            <div class="order-status-badge">${esc(order.status_label)}</div>
+          </div>
+          <div class="order-items-list">
+            ${order.items.map((item) => `
+              <div class="order-item-row">
+                <div class="order-item-info">
+                  <h3>${esc(item.name)}</h3>
+                  <p>Qty: ${Number(item.qty)}</p>
+                  <div class="order-item-price">${formatMoney(item.unit_price)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="order-card-footer">
+            <div class="escrow-status-pill">${esc(order.status_label)}</div>
+            <div class="order-total-block"><span>Total:</span><strong>${formatMoney(order.total)}</strong></div>
+          </div>
+          ${['in_escrow', 'shipped'].includes(order.status) ? `
+            <button type="button" class="order-action-btn-sub" onclick="confirmOrder('${esc(order.reference)}')">Confirm delivery</button>
+            ${order.status === 'in_escrow' ? `<button type="button" class="order-action-btn-sub" onclick="cancelOrder('${esc(order.reference)}')">Cancel order</button>` : ''}
+          ` : ''}
+        </article>
+      `).join('') : '<p class="cart-subtitle">You have no marketplace orders yet.</p>'}
+    `);
+  } catch (err) {
+    setHtml(root, `<p class="cart-subtitle">${isUnauthorized(err) ? 'Sign in to view your marketplace orders.' : esc(err instanceof ApiError ? err.message : 'Could not load orders.')}</p>
+      <button type="button" class="filter-pill-btn" onclick="loadOrders()">Try again</button>`);
   }
 }
 
-function checkEmptyWishlistState() {
-  const wishlistContainer = document.querySelector('#viewWishlist .wishlist-container');
-  if (!wishlistContainer) return;
+function isUnauthorized(err) {
+  return err instanceof ApiError && err.status === 401;
+}
 
-  const remainingSellerCards = wishlistContainer.querySelectorAll('.seller-cart-card');
-  if (remainingSellerCards.length === 0) {
-    if (!document.getElementById('emptyWishlistState')) {
-      const emptyDiv = document.createElement('div');
-      emptyDiv.id = 'emptyWishlistState';
-      emptyDiv.style.cssText = 'text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 16px;';
-      emptyDiv.innerHTML = `
-        <span class="material-symbols-outlined" style="font-size: 48px; color: #94a3b8; margin-bottom: 12px;">favorite_border</span>
-        <h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; color: #0f172a; margin: 0 0 6px 0;">Your wishlist is empty</h3>
-        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">Save items you'd like to purchase or track for price drops.</p>
-        <button class="filter-pill-btn active" onclick="switchMarketView('browse')" style="padding: 10px 20px;">
-          <span class="material-symbols-outlined icon">storefront</span> Explore Products
-        </button>
-      `;
-      wishlistContainer.appendChild(emptyDiv);
-    }
+async function confirmOrder(reference) {
+  try {
+    await authorizedRequest(`/marketplace/orders/${encodeURIComponent(reference)}/confirm`, { method: 'POST' });
+    showToast('Delivery confirmed. Funds released to the seller.', 'success');
+    loadOrders();
+  } catch (err) {
+    showToast(err instanceof ApiError ? err.message : 'Could not confirm delivery.', 'error');
+  }
+}
+
+async function cancelOrder(reference) {
+  try {
+    await authorizedRequest(`/marketplace/orders/${encodeURIComponent(reference)}/cancel`, { method: 'POST' });
+    showToast('Order cancelled and wallet refunded.', 'success');
+    loadOrders();
+  } catch (err) {
+    showToast(err instanceof ApiError ? err.message : 'Could not cancel this order.', 'error');
   }
 }
 
 function clearCart() {
   if (!confirm('Remove all items from your cart?')) return;
   clearCartState();
-  checkEmptyCartState();
 }
 
 /* REAL NETWORK ORDER PLACEMENT WITH DISABLED BUTTON & SPINNER */
 async function placeOrder() {
   const items = getItems();
-  const btn = document.querySelector('.checkout-submit-btn');
+  const btn = document.querySelector('#viewCheckout .checkout-submit-btn');
+  const deliveryForm = document.getElementById('checkoutDelivery');
 
   if (items.length === 0) {
-    if (window.showToast) window.showToast('Your cart is empty.', 'error');
-    else alert('Your cart is empty.');
+    showToast('Your cart is empty.', 'error');
+    return;
+  }
+  if (!deliveryForm?.reportValidity()) {
     return;
   }
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<span class="btn-spinner"></span> Placing Order...`;
+    setHtml(btn, `<span class="btn-spinner"></span> Placing Order...`);
   }
 
   try {
@@ -520,9 +704,10 @@ async function placeOrder() {
     // The server re-prices everything from its own catalog; only ids and quantities are sent.
     // One key per cart state, so a retry after a lost response can't charge twice.
     checkoutKey ||= crypto.randomUUID();
+    const delivery = Object.fromEntries(new FormData(deliveryForm).entries());
     await authorizedRequest('/marketplace/orders', {
       method: 'POST',
-      body: { items: items.map((i) => ({ id: Number(i.id), qty: i.qty })) },
+      body: { items: items.map((i) => ({ id: Number(i.id), qty: i.qty })), delivery },
       headers: { 'Idempotency-Key': checkoutKey },
     });
     checkoutKey = null;
@@ -531,16 +716,14 @@ async function placeOrder() {
     else alert('Order placed! Funds secured in escrow.');
 
     clearCartState();
+    await fetchAndRenderProducts();
     switchMarketView('orders');
   } catch (err) {
     const msg = err instanceof ApiError ? err.message : 'Order creation failed. Check network connection.';
     if (window.showToast) window.showToast(msg, 'error');
     else alert(msg);
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `Confirm & Pay ₦${getTotal().toLocaleString()}.00 <span class="material-symbols-outlined">lock</span>`;
-    }
+    renderCheckoutSummary();
   }
 }
 
@@ -549,10 +732,20 @@ function openAIProductAssistant() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('marketProductsGrid')?.addEventListener('click', (e) => {
+  const handleAddToCart = (e) => {
     const btn = e.target.closest('[data-add-to-cart]');
     if (btn && !btn.disabled) addToCart(btn.dataset.id, btn.dataset.title, btn.dataset.price, btn.dataset.seller);
-  });
+  };
+  document.getElementById('marketProductsGrid')?.addEventListener('click', handleAddToCart);
+  document.getElementById('viewWishlist')?.addEventListener('click', handleAddToCart);
+  const detailContainer = document.querySelector('#viewProductDetail .product-detail-container');
+  if (detailContainer) {
+    detailContainer.id = 'productDetailContent';
+    detailContainer.replaceChildren();
+  }
+  renderCart();
+  renderWishlist();
+  if (isAuthenticated()) hydrateMarketplaceBalance();
   // Load products dynamically on page load
   fetchAndRenderProducts();
 });
@@ -576,12 +769,11 @@ window.updatePdpQty = updatePdpQty;
 window.showProductDetails = showProductDetails;
 window.buyNowPdp = buyNowPdp;
 window.switchPdpTab = switchPdpTab;
-window.filterOrders = filterOrders;
-window.showTrackModal = showTrackModal;
-window.openReviewModal = openReviewModal;
-window.moveToCartFromWishlist = moveToCartFromWishlist;
 window.removeFromWishlist = removeFromWishlist;
 window.clearWishlist = clearWishlist;
 window.clearCart = clearCart;
 window.placeOrder = placeOrder;
+window.confirmOrder = confirmOrder;
+window.cancelOrder = cancelOrder;
+window.loadOrders = loadOrders;
 window.openAIProductAssistant = openAIProductAssistant;
