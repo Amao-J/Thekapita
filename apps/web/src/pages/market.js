@@ -48,8 +48,14 @@ async function fetchAndRenderProducts() {
   `).join(''));
 
   try {
-    // Live API call with timeout & offline error catch via client.js
-    products = await request('/marketplace/products');
+    const pageSize = 100;
+    const allProducts = [];
+    for (let offset = 0; ; offset += pageSize) {
+      const page = await request(`/marketplace/products?limit=${pageSize}&offset=${offset}`);
+      allProducts.push(...page);
+      if (page.length < pageSize) break;
+    }
+    products = allProducts;
     renderProductCards(products);
   } catch (err) {
     // Real Network Error Fallback Card with Retry Button
@@ -95,7 +101,7 @@ function renderProductCards(products) {
       </div>
       <div class="product-details">
         <span class="product-meta-sub">${esc(p.category_label || p.category)}</span>
-        <h4 class="product-name"><button class="product-title-btn" onclick="showProductDetails('${esc(p.id)}')">${esc(p.title)}</button></h4>
+        <button type="button" class="product-name product-title-btn" onclick="showProductDetails('${esc(p.id)}')">${esc(p.title)}</button>
         ${p.rating ? `<div class="product-rating-row">
           <span class="material-symbols-outlined" style="font-size: 13px;">star</span> ${p.rating} <span class="review-count">(${p.review_count || 0})</span>
         </div>` : ''}

@@ -529,6 +529,16 @@ html body .wallet-container {
   overflow: hidden;
 }
 
+.product-title-btn {
+  appearance: none;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
 .product-name:hover {
   color: #059669;
 }
