@@ -1,10 +1,4 @@
-"""Presigned media for the PRIVATE Railway bucket.
 
-* signed_url(file)            - for ImageField/FileField values. django-storages presigns via .url;
-                                the result is cached for ~80% of its lifetime so the same URL is
-                                returned across requests (browsers can then cache the image).
-* generate_presigned_url(key) - for a plain string key (used by the /marketplace/presign endpoint).
-"""
 import logging
 
 import boto3
@@ -15,8 +9,7 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
-# Only keys under these prefixes may be signed through the public presign endpoint.
-PUBLIC_PREFIXES = ("marketplace/products/", "marketplace/categories/")
+PUBLIC_PREFIXES = ("marketplace/products/", "marketplace/categories/", "product_images/")
 
 
 def signed_url(fieldfile, request=None):

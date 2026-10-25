@@ -1,3 +1,4 @@
+#thekapita model
 import uuid
 
 from django.conf import settings
