@@ -36,7 +36,7 @@ def place_orders(user, items, delivery):
             raise MarketError("An item in your cart is no longer available.")
         if p.seller.user_id == user.id:
             raise MarketError("You can't buy your own product.")
-        if not p.in_stock or p.stock < qty:
+        if p.stock < qty:
             raise MarketError(f"{p.name} is out of stock." if p.stock <= 0 else f"Only {p.stock} of {p.name} left.")
         by_seller[p.seller_id].append((p, qty))
 

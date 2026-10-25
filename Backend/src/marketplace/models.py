@@ -94,8 +94,7 @@ class Product(TimeStampedModel):
             self.slug = _unique_slug(Product, self.name, self.pk)
         if not self.sku:
             self.sku = f"MKT-{uuid.uuid4().hex[:8].upper()}"
-        if self.stock <= 0:
-            self.in_stock = False
+        self.in_stock = self.stock > 0
         super().save(*args, **kwargs)
 
     @property

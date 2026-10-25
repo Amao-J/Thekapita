@@ -85,7 +85,7 @@ def _product(p, request, with_gallery=False):
         "image_url": signed_url(p.image_key, request),
         "gallery": [signed_url(g.image_key, request) for g in p.gallery_images.all()] if with_gallery else [],
         "seller_name": p.seller.store_name, "is_verified": p.seller.is_verified,
-        "in_stock": p.in_stock, "stock": p.stock, "badge": p.badge,
+        "in_stock": p.stock > 0, "stock": p.stock, "badge": p.badge,
     }
 
 
