@@ -12,6 +12,7 @@ let checkoutKey = null; // Idempotency-Key for the current cart state
 let products = [];
 let wishlist = new Set();
 let selectedProduct = null;
+let dropdownCategoryKeys = new Set();
 
 try {
   wishlist = new Set(JSON.parse(localStorage.getItem('kapita.market.wishlist') || '[]').map(String));
@@ -56,6 +57,7 @@ async function fetchAndRenderProducts() {
       if (page.length < pageSize) break;
     }
     products = allProducts;
+    renderCategoryFilters(products);
     renderProductCards(products);
   } catch (err) {
     // Real Network Error Fallback Card with Retry Button
@@ -74,6 +76,45 @@ async function fetchAndRenderProducts() {
       window.showToast(errorMsg, 'error');
     }
   }
+}
+
+function renderCategoryFilters(items) {
+  const quickFilters = document.getElementById('categoryQuickFilters');
+  const dropdownMenu = document.getElementById('categoryDropdownMenu');
+  if (!quickFilters || !dropdownMenu) return;
+
+  const categoriesBySlug = new Map();
+  items.forEach((product) => {
+    const slug = String(product.category || '');
+    if (!slug) return;
+    const category = categoriesBySlug.get(slug) || {
+      slug,
+      label: product.category_label || slug,
+      count: 0,
+    };
+    category.count += 1;
+    categoriesBySlug.set(slug, category);
+  });
+
+  const categories = [...categoriesBySlug.values()]
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  const quickCategories = categories.slice(0, 3);
+  dropdownCategoryKeys = new Set(categories.map((category) => category.slug));
+
+  setHtml(quickFilters, quickCategories.map((category) => `
+    <button type="button" class="filter-pill-btn" data-category-filter="${esc(category.slug)}"
+      onclick="filterCategory('${esc(category.slug)}', this)" aria-pressed="false">
+      ${esc(category.label)}
+    </button>
+  `).join(''));
+  setHtml(dropdownMenu, categories.map((category) => `
+    <button type="button" class="dropdown-item" data-category-filter="${esc(category.slug)}"
+      onclick="selectDropdownCategory('${esc(category.slug)}', this)"
+      role="menuitem" aria-pressed="false">
+      <span class="material-symbols-outlined icon" aria-hidden="true">category</span> ${esc(category.label)}
+    </button>
+  `).join(''));
+  updateCategoryFilterState();
 }
 
 function renderProductCards(products) {
@@ -126,9 +167,25 @@ function renderProductCards(products) {
    -------------------------------------------------------------------------- */
 function filterCategory(cat, btn) {
   currentCategory = cat;
-  document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  updateCategoryFilterState(btn);
   filterMarketProducts();
+}
+
+function updateCategoryFilterState(selectedButton) {
+  const toolbar = document.getElementById('marketCategoryFilters');
+  if (!toolbar) return;
+
+  toolbar.querySelectorAll('[data-category-filter]').forEach((button) => {
+    const active = button.dataset.categoryFilter === currentCategory;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+
+  const dropdownToggle = document.getElementById('categoryDropdownToggle');
+  dropdownToggle?.classList.toggle('active', dropdownCategoryKeys.has(currentCategory));
+  if (selectedButton?.matches('.dropdown-item')) {
+    selectedButton.closest('.filter-dropdown-wrapper')?.classList.remove('active');
+  }
 }
 
 function toggleVerifiedOnly(btn) {
@@ -221,17 +278,16 @@ function toggleCategoryDropdown(e) {
     menu.classList.add('show');
     wrapper.classList.add('active');
   }
+  e.currentTarget.setAttribute('aria-expanded', String(!isShown));
 }
 
-function selectDropdownCategory(catKey, catName, iconName, itemEl) {
-  document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-  const toggleBtn = itemEl.closest('.filter-dropdown-wrapper').querySelector('.dropdown-toggle');
-  toggleBtn.classList.add('active');
-
-  document.getElementById('categoryDropdownMenu').classList.remove('show');
-  itemEl.closest('.filter-dropdown-wrapper').classList.remove('active');
-
-  filterCategory(catKey, toggleBtn);
+function selectDropdownCategory(catKey, itemEl) {
+  const menu = document.getElementById('categoryDropdownMenu');
+  const wrapper = itemEl.closest('.filter-dropdown-wrapper');
+  menu?.classList.remove('show');
+  wrapper?.classList.remove('active');
+  document.getElementById('categoryDropdownToggle')?.setAttribute('aria-expanded', 'false');
+  filterCategory(catKey, itemEl);
 }
 
 function toggleHeaderNavMenu(e) {

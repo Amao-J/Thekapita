@@ -123,49 +123,19 @@
       </div>
 
       <!-- Category Filters -->
-      <div class="market-quick-filters" role="toolbar" aria-label="Category Filters">
-        <button type="button" class="filter-pill-btn active" onclick="filterCategory('all', this)" aria-pressed="true">
+      <div class="market-quick-filters" id="marketCategoryFilters" role="toolbar" aria-label="Category Filters">
+        <button type="button" class="filter-pill-btn active" data-category-filter="all" onclick="filterCategory('all', this)" aria-pressed="true">
           <span class="material-symbols-outlined icon" aria-hidden="true">apps</span> All Items
         </button>
-        <button type="button" class="filter-pill-btn" onclick="filterCategory('electronics', this)" aria-pressed="false">
-          <span class="material-symbols-outlined icon" aria-hidden="true">laptop</span> Computing &amp; Tech
-        </button>
-        <button type="button" class="filter-pill-btn" onclick="filterCategory('fashion', this)" aria-pressed="false">
-          <span class="material-symbols-outlined icon" aria-hidden="true">checkroom</span> Apparel &amp; Fashion
-        </button>
-        <button type="button" class="filter-pill-btn" onclick="filterCategory('home', this)" aria-pressed="false">
-          <span class="material-symbols-outlined icon" aria-hidden="true">chair</span> Home &amp; Living
-        </button>
+        <div class="category-quick-filter-slot" id="categoryQuickFilters"></div>
 
         <!-- Dropdown Pill -->
         <div class="filter-dropdown-wrapper">
-          <button type="button" class="filter-pill-btn dropdown-toggle" onclick="toggleCategoryDropdown(event)" aria-expanded="false" aria-haspopup="true" aria-controls="categoryDropdownMenu">
+          <button type="button" class="filter-pill-btn dropdown-toggle" id="categoryDropdownToggle" onclick="toggleCategoryDropdown(event)" aria-expanded="false" aria-haspopup="true" aria-controls="categoryDropdownMenu">
             <span class="material-symbols-outlined icon" aria-hidden="true">tune</span> Categories
             <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
           </button>
-          <div class="category-dropdown-menu" id="categoryDropdownMenu" role="menu">
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('electronics', 'Computing & Tech', 'laptop', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">laptop</span> Computing &amp; Tech
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('fashion', 'Apparel & Fashion', 'checkroom', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">checkroom</span> Apparel &amp; Fashion
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('home', 'Home & Living', 'chair', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">chair</span> Home &amp; Living
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('beauty', 'Beauty & Care', 'spa', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">spa</span> Beauty &amp; Care
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('gaming', 'Gaming & Consoles', 'sports_esports', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">sports_esports</span> Gaming &amp; Consoles
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('automotive', 'Automotive & Parts', 'directions_car', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">directions_car</span> Automotive &amp; Parts
-            </button>
-            <button type="button" class="dropdown-item" onclick="selectDropdownCategory('supermarket', 'Supermarket & Groceries', 'shopping_basket', this)" role="menuitem">
-              <span class="material-symbols-outlined icon" aria-hidden="true">shopping_basket</span> Supermarket &amp; Groceries
-            </button>
-          </div>
+          <div class="category-dropdown-menu" id="categoryDropdownMenu" role="menu"></div>
         </div>
       </div>
 

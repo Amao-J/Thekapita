@@ -1,4 +1,10 @@
-import { authorizedRequest, isAuthenticated } from '../state/session.js';
+import {
+  authorizedRequest,
+  getCurrentUser,
+  hydrateProfile,
+  isAuthenticated,
+  subscribe as subscribeSession,
+} from '../state/session.js';
 
 const NOTIFICATION_READ_KEY = 'kapita.notifications.read.v1';
 
@@ -111,7 +117,32 @@ function markNotificationsRead() {
   if (button) button.setAttribute('aria-label', 'Notifications');
 }
 
+function updateHomepageGreeting() {
+  const greeting = document.getElementById('heroGreeting');
+  const greetingText = document.getElementById('heroGreetingText');
+  if (!greeting || !greetingText) return;
+
+  const user = isAuthenticated() ? getCurrentUser() : null;
+  const fullName = String(user?.full_name || user?.first_name || '').trim();
+  const firstName = fullName.split(/\s+/)[0];
+  greeting.hidden = !firstName;
+  if (!firstName) return;
+
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  greetingText.textContent = `${timeGreeting}, ${firstName}.`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('heroGreeting')) {
+    subscribeSession(updateHomepageGreeting);
+    updateHomepageGreeting();
+    if (isAuthenticated()) {
+      hydrateProfile().catch((error) => {
+        console.error('Could not refresh the homepage greeting profile.', error);
+      });
+    }
+  }
   loadNotifications();
   document.querySelector('.mark-read')?.addEventListener('click', markNotificationsRead);
   document.querySelector('.notif-list')?.addEventListener('click', (event) => {
