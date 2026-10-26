@@ -6,8 +6,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { restoreSession, isAuthenticated, subscribe } from '../state/session.js';
 import { colors } from '../theme/tokens.js';
 
-import SignInScreen from '../screens/auth/SignInScreen.js';
-import SignUpScreen from '../screens/auth/SignUpScreen.js';
+import SignInScreen from '../screens/auth/SignInScreen.jsx';
 import HomeScreen from '../screens/home/HomeScreen.js';
 import WalletScreen from '../screens/wallet/WalletScreen.js';
 
@@ -18,7 +17,6 @@ function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="SignIn" component={SignInScreen} />
-      <AuthStack.Screen name="SignUp" component={SignUpScreen} />
     </AuthStack.Navigator>
   );
 }

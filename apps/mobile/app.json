@@ -4,12 +4,10 @@
     "slug": "thekapita",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "backgroundColor": "#0b1220"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.thekapita.app"
@@ -18,7 +16,12 @@
       "package": "com.thekapita.app"
     },
     "extra": {
-      "apiBaseUrl": "http://127.0.0.1:8000/api"
-    }
+      "apiBaseUrl": "http://192.168.0.182:8000/api"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "@react-native-vector-icons/ionicons",
+      "react-native-bottom-tabs"
+    ]
   }
 }

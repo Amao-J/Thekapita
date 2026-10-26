@@ -40,7 +40,7 @@ ALLOWED_HOSTS = [
     "thekapita.com",
     "www.thekapita.com",
     "localhost",
-    "127.0.0.1",
+    "127.0.0.1","*"
 ]
 railway_public_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
 if railway_public_domain:

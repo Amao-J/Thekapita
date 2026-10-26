@@ -11,3 +11,4 @@ Backend/src/staticfiles/
 .DS_Store
 DEPLOY.md
 *.md
+.expo/

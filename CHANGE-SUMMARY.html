@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>theKapita Change Summary</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #17212b;
+      background: #f3f6f8;
+    }
+
+    body {
+      max-width: 900px;
+      margin: 36px auto;
+      padding: 0 22px;
+      line-height: 1.6;
+    }
+
+    main {
+      background: #fff;
+      border: 1px solid #dce4e8;
+      border-radius: 12px;
+      padding: 42px 48px;
+      box-shadow: 0 8px 28px rgba(20, 40, 50, 0.06);
+    }
+
+    h1, h2 {
+      color: #123b32;
+      line-height: 1.25;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.2rem;
+    }
+
+    .date {
+      color: #5e6b73;
+      margin: 8px 0 24px;
+    }
+
+    .summary {
+      border-left: 4px solid #00a875;
+      background: #f1faf6;
+      padding: 14px 18px;
+      margin: 22px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border: 1px solid #dce4e8;
+      padding: 11px 12px;
+    }
+
+    th {
+      background: #f1f5f6;
+      color: #123b32;
+    }
+
+    .attention {
+      border-left: 4px solid #d98200;
+      background: #fff8eb;
+      padding: 14px 18px;
+      margin: 18px 0;
+    }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      overflow-wrap: anywhere;
+    }
+
+    footer {
+      border-top: 1px solid #dce4e8;
+      color: #5e6b73;
+      font-size: 0.9rem;
+      margin-top: 30px;
+      padding-top: 14px;
+    }
+
+    @media print {
+      :root { background: #fff; }
+      body { max-width: none; margin: 0; padding: 0; }
+      main { border: 0; border-radius: 0; box-shadow: none; padding: 18mm; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>theKapita Change Summary</h1>
+      <p class="date">Prepared 26 October 2026</p>
+    </header>
+
+    <section class="summary">
+      <strong>Executive summary</strong>
+      <p>
+        The current changes focus on strengthening theKapita's mobile app
+        foundation. They introduce a more complete service-launcher home screen,
+        combine sign-in and registration into one mobile screen, update the
+        mobile dependency set, and adjust development and backend configuration.
+        The work improves the app's structure and presentation; several service
+        destinations and search/notification functions remain at prototype
+        stage.
+      </p>
+    </section>
+
+    <h2>What changed</h2>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Area</th>
+          <th scope="col">Summary</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mobile home screen</td>
+          <td>
+            Replaced the basic module list with a branded home experience:
+            personalized greeting, rotating search prompts, quick-action
+            shortcuts, service cards, and account controls.
+          </td>
+          <td>Gives users a clearer starting point and a visible overview of the service ecosystem.</td>
+        </tr>
+        <tr>
+          <td>Navigation and account panels</td>
+          <td>
+            Added in-app panels for the app launcher, notifications, and account
+            details, with sign-out actions. The existing Wallet screen remains
+            accessible through the registered navigation route.
+          </td>
+          <td>Creates a more cohesive mobile navigation and account experience.</td>
+        </tr>
+        <tr>
+          <td>Sign-in and registration</td>
+          <td>
+            Reorganized the mobile authentication entry point so sign-in and
+            registration are handled in a single screen. Registration validates
+            the form and calls the existing account registration flow.
+          </td>
+          <td>Consolidates onboarding and reduces separate-screen navigation.</td>
+        </tr>
+        <tr>
+          <td>Mobile dependencies</td>
+          <td>
+            Updated mobile package versions and the lockfile, added animation
+            and icon packages, enabled the related Expo plugins, and added
+            workspace version overrides for React and React Native.
+          </td>
+          <td>Aligns the mobile project around the newer React Native package set and supports the updated interface.</td>
+        </tr>
+        <tr>
+          <td>Development and repository configuration</td>
+          <td>
+            Added Expo's local cache directory to <code>.gitignore</code> and
+            changed the mobile API base URL to a local-network address.
+          </td>
+          <td>Keeps generated Expo files out of source control and points local mobile development at a reachable API host.</td>
+        </tr>
+        <tr>
+          <td>Backend host configuration</td>
+          <td>
+            Added a wildcard entry to Django's <code>ALLOWED_HOSTS</code>
+            setting.
+          </td>
+          <td>Allows broader host access during development, but requires review before production deployment.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Readiness notes</h2>
+    <div class="attention">
+      <strong>Items to resolve or confirm before a production release</strong>
+      <ul>
+        <li>
+          The mobile API URL currently points to
+          <code>http://192.168.8.101:8000/api</code>, a local-network address.
+          Configure the production API URL for release builds.
+        </li>
+        <li>
+          The wildcard <code>"*"</code> in Django's
+          <code>ALLOWED_HOSTS</code> accepts requests for arbitrary host names.
+          Replace it with the intended explicit host names for production.
+        </li>
+        <li>
+          The home screen currently has a visual launcher, but only Wallet is
+          registered as a destination in the mobile navigator. Other module
+          links need their screens and routes before they can provide those
+          services in the app.
+        </li>
+        <li>
+          Search currently logs the submitted query rather than returning
+          search results, and notifications show an empty-state message. These
+          interface elements still need their service integrations.
+        </li>
+      </ul>
+    </div>
+
+    <h2>Overall assessment</h2>
+    <p>
+      The changes provide a stronger mobile interface and a consolidated
+      authentication entry point, while preparing the project for a more
+      feature-rich app. They should be treated as a mobile foundation and
+      development-stage update rather than confirmation that every advertised
+      service is available or that the app is production-ready.
+    </p>
+
+    <footer>
+      This summary was prepared from the current working-tree changes. It is a
+      management overview, not a test report or release approval.
+    </footer>
+  </main>
+</body>
+</html>
