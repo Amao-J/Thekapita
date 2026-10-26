@@ -12,8 +12,10 @@ export const ENDPOINTS = Object.freeze({
   },
   wallet: {
     balance: '/wallet/balance',
+    analytics: '/wallet/analytics',
     fund: '/wallet/fund',
     send: '/wallet/send',
     transactions: '/wallet/transactions',
+    beneficiaries: '/wallet/beneficiaries',
   },
 });
