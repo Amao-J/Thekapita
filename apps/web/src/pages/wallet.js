@@ -1,10 +1,13 @@
-/* ==========================================================================
-   THEKAPITA PAY WALLET INTERACTION ENGINE (API INTEGRATED WITH SKELETONS)
-   ========================================================================== */
-import { refreshBalance, getBalanceDisplay, fundWallet, sendMoney } from '../state/ledger.js';
-import { isAuthenticated } from '../state/session.js';
-import { authorizedRequest } from '../state/session.js';
+/* ==========================================
+   THEKAPITA PAY WALLET INTERACTION ENGINE
+   ========================================== */
+import { refreshBalance, getBalance, getBalanceDisplay, fundWallet, sendMoney, loadTransactions, loadWalletAnalytics } from '../state/ledger.js';
+import { isAuthenticated, getCurrentUser, hydrateProfile, authorizedRequest } from '../state/session.js';
+import { formatCurrency } from '@thekapita/shared/currency';
+import { renderKapitaQr } from '../ui/kapitaQr.js';
+import { BrowserQRCodeReader } from '@zxing/browser';
 import { ApiError } from '../api/client.js';
+import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { showToast } from './app.js';
 
 // Gate the page: if no token, redirect to auth
@@ -15,15 +18,10 @@ if (!isAuthenticated()) {
 let isWalletBalanceMasked = false;
 let activeCategoryFilter = 'all';
 let currentSearchQuery = '';
+let qrScannerControls = null;
+let qrReader = null;
 
-let recipientsData = [
-  { id: 'REC-1', name: 'Sarah Okoro', avatar: 'SO', type: 'internal', handle: '@sarah • Instant ₦0 Fee', meta: 'KPT-881092 • Primary Tag', isFavorite: true, isOnline: true },
-  { id: 'REC-2', name: 'John Okafor', avatar: 'JO', type: 'bank', handle: 'GTBank Guarantee Trust', meta: '•••• 4902 • Verified Name', isFavorite: false, isOnline: true },
-  { id: 'REC-3', name: 'Ella Amra', avatar: 'EA', type: 'internal', handle: '@amra • Instant ₦0 Fee', meta: 'KPT-883912 • Primary Tag', isFavorite: true, isOnline: false },
-  { id: 'REC-4', name: 'Michael Chen', avatar: 'MC', type: 'bank', handle: 'Access Bank PLC', meta: '•••• 8812 • Verified Name', isFavorite: false, isOnline: false }
-];
-
-let recentTransactions = [];
+let recipientsData = [];
 
 /* --------------------------------------------------------------------------
    0. LIVE HYDRATION ENGINE & SKELETON RENDERERS
@@ -40,140 +38,28 @@ async function hydrateBalance() {
     if (!isWalletBalanceMasked) {
       balanceEl.textContent = getBalanceDisplay();
     }
+    renderWalletLimits();
   } catch (err) {
     balanceEl.textContent = 'Unavailable';
     if (window.showToast) window.showToast('Could not load live wallet balance from backend.', 'error');
   }
 }
 
-async function hydrateTransactions() {
-  const container = document.querySelector('.activity-timeline');
-  if (!container) return;
+function renderWalletLimits() {
+  const balance = getBalance();
+  const daily = document.getElementById('dailyTransferLimit');
+  const monthly = document.getElementById('monthlyTransferLimit');
+  if (daily) daily.textContent = formatCurrency(balance.dailyLimit ?? 0);
+  if (monthly) monthly.textContent = formatCurrency(balance.monthlyLimit ?? 0);
+  const paymentBalance = document.getElementById('walletPaymentBalance');
+  if (paymentBalance) paymentBalance.textContent = getBalanceDisplay();
+}
 
-  // Render skeleton rows while fetching transactions
-  container.innerHTML = Array(3).fill(0).map(() => `
-    <div class="activity-row skeleton-card" style="padding: 12px; margin-bottom: 8px;">
-      <div style="height: 20px; width: 60%; background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
-    </div>
-  `).join('');
-
-  try {
-    const txs = await authorizedRequest('/wallet/transactions').catch(() => null);
-    if (txs && Array.isArray(txs) && txs.length > 0) {
-      recentTransactions = txs;
-      renderTransactionsList(txs);
-    } else {
-      // Fallback to static initial timeline if empty API array returned
-      restoreStaticTransactions();
-    }
-  } catch (err) {
-    restoreStaticTransactions();
+async function hydrateWalletAnalytics() {
+  for (const id of ['walletAnalyticsInflow', 'walletAnalyticsOutflow', 'walletAnalyticsNet', 'overviewWalletInflow', 'overviewWalletOutflow']) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = 'Loading';
   }
-}
-
-async function hydrateVirtualCards() {
-  const cardsTab = document.getElementById('walletTabCards');
-  if (!cardsTab) return;
-
-  try {
-    const cards = await authorizedRequest('/wallet/cards').catch(() => null);
-    if (cards && Array.isArray(cards) && cards.length > 0) {
-      renderVirtualCardData(cards[0]);
-    } else {
-      // Preserve and ensure static virtual card structure is rendered
-      ensureVirtualCardHtml();
-    }
-  } catch (err) {
-    ensureVirtualCardHtml();
-  }
-}
-
-function ensureVirtualCardHtml() {
-  const cardsTab = document.getElementById('walletTabCards');
-  if (!cardsTab || cardsTab.querySelector('.kapita-virtual-card')) return;
-
-  cardsTab.innerHTML = `
-    <section class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;" aria-labelledby="card-sec-heading">
-      <div class="card-header justify-center">
-        <h2 id="card-sec-heading" class="card-heading-md">theKapita Black Virtual Card</h2>
-      </div>
-      
-      <div class="kapita-virtual-card" aria-label="Virtual Card showing holder Ahmed Ebuka, expiring 08/29">
-        <div class="card-chip-row">
-          <span class="card-brand-logo">theKapita.</span>
-          <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
-        </div>
-        <div class="card-number-display" id="cardNumberDisplay" aria-label="Card Number masked ending in 8821">
-          •••• •••• •••• 8821
-        </div>
-        <div class="card-bottom-meta">
-          <div>
-            <span class="card-meta-label">Card Holder</span>
-            <strong>Ahmed Ebuka</strong>
-          </div>
-          <div>
-            <span class="card-meta-label">Expires</span>
-            <strong>08/29</strong>
-          </div>
-          <div>
-            <span class="card-meta-label">CVV</span>
-            <strong id="cardCvvDisplay">•••</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-controls-row">
-        <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
-        <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
-        <button type="button" class="btn-primary">Manage Limits</button>
-      </div>
-    </section>
-  `;
-}
-
-function renderVirtualCardData(card) {
-  const cardsTab = document.getElementById('walletTabCards');
-  if (!cardsTab) return;
-
-  const maskedNumber = card.card_number ? `•••• •••• •••• ${card.card_number.slice(-4)}` : '•••• •••• •••• 8821';
-  
-  cardsTab.innerHTML = `
-    <section class="kapita-card text-center" style="max-width: 680px; margin: 0 auto;" aria-labelledby="card-sec-heading">
-      <div class="card-header justify-center">
-        <h2 id="card-sec-heading" class="card-heading-md">${escapeHtml(card.title || 'theKapita Black Virtual Card')}</h2>
-      </div>
-      
-      <div class="kapita-virtual-card" aria-label="Virtual Card">
-        <div class="card-chip-row">
-          <span class="card-brand-logo">theKapita.</span>
-          <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
-        </div>
-        <div class="card-number-display" id="cardNumberDisplay">
-          ${maskedNumber}
-        </div>
-        <div class="card-bottom-meta">
-          <div>
-            <span class="card-meta-label">Card Holder</span>
-            <strong>${escapeHtml(card.holder_name || 'Ahmed Ebuka')}</strong>
-          </div>
-          <div>
-            <span class="card-meta-label">Expires</span>
-            <strong>${escapeHtml(card.expiry || '08/29')}</strong>
-          </div>
-          <div>
-            <span class="card-meta-label">CVV</span>
-            <strong id="cardCvvDisplay">•••</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-controls-row">
-        <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
-        <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">${card.is_frozen ? 'Unfreeze Card' : 'Freeze Card'}</button>
-        <button type="button" class="btn-primary">Manage Limits</button>
-      </div>
-    </section>
-  `;
 }
 
 function restoreStaticTransactions() {
@@ -307,7 +193,7 @@ function toggleWalletBalance() {
    2. MODAL ENGINE (FUNDING, SENDING, RECEIVING, WITHDRAWING)
    -------------------------------------------------------------------------- */
 
-function openWalletModal(actionType) {
+function openWalletModal(actionType, recipientId = '') {
   const modal = document.getElementById('walletActionModal');
   const title = document.getElementById('walletModalTitle');
   const subtitle = document.getElementById('walletModalSubtitle');
@@ -325,25 +211,45 @@ function openWalletModal(actionType) {
           <p>Top-ups are submitted as <em>Pending Verification</em> until final bank ledger settlement clears.</p>
         </div>
       </div>
-      <div class="form-group">
-        <label>Amount (₦)</label>
-        <input type="number" id="fundAmount" placeholder="0.00" class="form-control" style="font-size: 20px; font-weight: 700;" required />
-      </div>
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button type="button" class="btn-sm" onclick="setQuickAmount(5000)">+₦5,000</button>
-        <button type="button" class="btn-sm" onclick="setQuickAmount(10000)">+₦10,000</button>
-        <button type="button" class="btn-sm" onclick="setQuickAmount(20000)">+₦20,000</button>
-      </div>
-      <div class="form-group">
-        <label>Payment Method</label>
-        <select class="form-control" id="fundChannel">
-          <option value="bank_transfer">Instant Bank Transfer (Wema / Kapita)</option>
-          <option value="card">Debit Card (•••• 8821)</option>
-        </select>
-      </div>
-      <button class="btn-primary w-full" id="fundSubmitBtn" style="margin-top: 12px;" onclick="executeFunding()">
-        Continue to Pay
-      </button>
+      <form class="wallet-modal-form" onsubmit="executeFunding(event)">
+        <div class="form-group">
+          <label for="fundAmount">Amount (₦)</label>
+          <input type="number" id="fundAmount" name="amount" placeholder="0.00" class="form-control" min="0.01" step="0.01" inputmode="decimal" required />
+        </div>
+        <div class="wallet-quick-amounts" aria-label="Quick amounts">
+          <button type="button" class="btn-sm" onclick="setQuickAmount(5000)">₦5,000</button>
+          <button type="button" class="btn-sm" onclick="setQuickAmount(10000)">₦10,000</button>
+          <button type="button" class="btn-sm" onclick="setQuickAmount(20000)">₦20,000</button>
+        </div>
+        <div class="form-group">
+          <label for="fundChannel">Payment Method</label>
+          <select class="form-control" id="fundChannel" name="channel">
+            <option value="bank_transfer">Bank transfer</option>
+            <option value="card">Debit card</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary w-full" id="fundSubmitBtn">Continue to Pay</button>
+      </form>
+    `;
+  } else if (actionType === 'beneficiary') {
+    title.textContent = 'Add Beneficiary';
+    subtitle.textContent = 'Save a Kapita account for a future transfer';
+    content.innerHTML = `
+      <form class="wallet-modal-form" id="beneficiaryForm" onsubmit="saveBeneficiary(event)">
+        <div class="form-group">
+          <label for="beneficiaryName">Beneficiary name</label>
+          <input type="text" id="beneficiaryName" name="name" class="form-control" placeholder="Enter a name to recognize them" maxlength="80" autocomplete="name" required />
+        </div>
+        <div class="form-group">
+          <label for="beneficiaryRecipient">Kapita ID or handle</label>
+          <input type="text" id="beneficiaryRecipient" name="recipient" class="form-control" placeholder="KPT-123ABC or @handle" autocomplete="off" required />
+          <p class="wallet-form-help">We’ll verify the account and save this ID or handle for future transfers. No amount is needed.</p>
+        </div>
+        <button type="submit" class="btn-primary w-full" id="saveBeneficiaryBtn">
+          <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+          Save Beneficiary
+        </button>
+      </form>
     `;
   } else if (actionType === 'send') {
     title.textContent = 'Send Money';
@@ -356,19 +262,21 @@ function openWalletModal(actionType) {
           <p>Transfers process live against server ledger endpoint <code>/wallet/send</code>.</p>
         </div>
       </div>
-      <div class="form-group">
-        <label>Recipient ID, Email or Bank Account</label>
-        <input type="text" id="sendRecipient" placeholder="e.g. @sarah or KPT-881029" class="form-control" required />
-      </div>
-      <div class="form-group">
-        <label>Amount (₦)</label>
-        <input type="number" id="sendAmount" placeholder="0.00" class="form-control" required />
-      </div>
-      <div class="form-group">
-        <label>Note (Optional)</label>
-        <input type="text" id="sendNote" placeholder="e.g. Lunch refund" class="form-control" />
-      </div>
-      <button class="btn-primary w-full" id="sendSubmitBtn" onclick="executeSend()">Confirm & Send</button>
+      <form class="wallet-modal-form" onsubmit="executeSend(event)">
+        <div class="form-group">
+          <label for="sendRecipient">Recipient</label>
+          <input type="text" id="sendRecipient" name="recipient" placeholder="Kapita ID, @handle, or email" class="form-control" autocomplete="off" required />
+        </div>
+        <div class="form-group">
+          <label for="sendAmount">Amount (₦)</label>
+          <input type="number" id="sendAmount" name="amount" placeholder="0.00" class="form-control" min="0.01" step="0.01" inputmode="decimal" required />
+        </div>
+        <div class="form-group">
+          <label for="sendNote">Note <span class="wallet-form-optional">Optional</span></label>
+          <input type="text" id="sendNote" name="note" placeholder="What’s this transfer for?" class="form-control" />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="sendSubmitBtn">Confirm &amp; Send</button>
+      </form>
     `;
   } else if (actionType === 'receive') {
     title.textContent = 'Receive Money';
@@ -376,86 +284,106 @@ function openWalletModal(actionType) {
     content.innerHTML = `
       <div class="text-center">
         <div style="background: #ffffff; padding: 16px; border-radius: 20px; width: 180px; margin: 0 auto 16px; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-          <svg viewBox="0 0 100 100" class="qr-svg" style="width: 100%; height: auto; display: block;">
-            <rect width="100" height="100" fill="#ffffff" />
-            <rect x="6" y="6" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="11" y="11" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="15" y="15" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="66" y="6" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="71" y="11" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="75" y="15" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="6" y="66" width="28" height="28" fill="#121212" rx="4" />
-            <rect x="11" y="71" width="18" height="18" fill="#ffffff" rx="2" />
-            <rect x="15" y="75" width="10" height="10" fill="#121212" rx="1.5" />
-            <rect x="68" y="68" width="14" height="14" fill="#121212" rx="2" />
-            <rect x="71" y="71" width="8" height="8" fill="#ffffff" rx="1" />
-            <rect x="73" y="73" width="4" height="4" fill="#121212" rx="0.5" />
-            <rect x="43" y="43" width="14" height="14" rx="4" fill="#121212" />
-            <circle cx="50" cy="50" r="3" fill="#00d084" />
-          </svg>
+          <canvas class="qr-svg" data-kapita-qr aria-label="Kapita ID QR code"></canvas>
         </div>
-        <h4>KPT User</h4>
-        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">KPT-883902</p>
-        <button class="btn-secondary w-full" onclick="navigator.clipboard.writeText('KPT-883902'); if(window.showToast) window.showToast('ID Copied!', 'success'); else alert('ID Copied!');">Copy Kapita ID Tag</button>
+        <h4>${escapeHtml(getCurrentUser()?.full_name)}</h4>
+        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">${escapeHtml(getCurrentUser()?.handle ? '@' + getCurrentUser().handle + ' • ' : '')}${escapeHtml(getCurrentUser()?.kapita_id)}</p>
+        <button class="btn-secondary w-full" onclick="copyMyKapitaId()">Copy Kapita ID Tag</button>
       </div>
     `;
+    const qrCanvas = content.querySelector('[data-kapita-qr]');
+    const user = getCurrentUser();
+    if (user?.kapita_id) {
+      renderKapitaQr(qrCanvas, user.kapita_id).catch(() => {
+        if (window.showToast) window.showToast('Could not create your Kapita ID QR code.', 'error');
+      });
+    } else {
+      hydrateProfile()
+        .then((profile) => renderKapitaQr(qrCanvas, profile?.kapita_id))
+        .catch(() => {
+          if (window.showToast) window.showToast('Could not load your Kapita ID.', 'error');
+        });
+    }
   } else if (actionType === 'withdraw') {
     title.textContent = 'Withdraw Funds';
     subtitle.textContent = 'Transfer funds out to external bank account';
     content.innerHTML = `
-      <div class="form-group">
-        <label>Select Destination Bank</label>
-        <select class="form-control" id="withdrawBank">
-          <option value="gtbank">GTBank (•••• 4902)</option>
-          <option value="access">Access Bank (•••• 8812)</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Amount (₦)</label>
-        <input type="number" id="withdrawAmount" placeholder="0.00" class="form-control" required />
-      </div>
-      <button class="btn-primary w-full" id="withdrawSubmitBtn" onclick="executeWithdrawal()">Confirm Withdrawal</button>
+      <p>Bank withdrawals are unavailable until a payout provider and verified bank account are connected.</p>
     `;
   } else if (actionType === 'scan') {
     title.textContent = 'Scan & Pay QR';
-    subtitle.textContent = 'Point camera at seller or recipient QR code';
+    subtitle.textContent = 'Scan a Kapita ID to start a transfer';
     content.innerHTML = `
-      <div style="text-align: center; padding: 24px; border: 2px dashed #00d084; border-radius: 16px; background: rgba(0, 208, 132, 0.05);">
-        <span class="material-symbols-outlined" style="font-size: 64px; color: #00d084;">qr_code_scanner</span>
-        <p style="margin-top: 12px; font-weight: 600;">Camera scanner initializing...</p>
+      <div style="text-align: center;">
+        <video id="kapitaQrVideo" playsinline style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #111;"></video>
+        <p id="kapitaQrStatus" role="status" aria-live="polite" style="margin: 12px 0 0;">Starting camera...</p>
       </div>
       <button class="btn-secondary w-full" style="margin-top: 16px;" onclick="closeWalletModal()">Cancel</button>
     `;
   }
 
   modal.classList.add('active');
+  if (actionType === 'send' && recipientId) {
+    const recipientInput = content.querySelector('#sendRecipient');
+    if (recipientInput) {
+      recipientInput.value = recipientId;
+      content.querySelector('#sendAmount')?.focus();
+    }
+  }
+  if (actionType === 'scan') startKapitaQrScanner();
 }
 
 function closeWalletModal(e) {
   if (e && e.target !== e.currentTarget) return;
+  qrScannerControls?.stop();
+  qrScannerControls = null;
   const modal = document.getElementById('walletActionModal');
   if (modal) modal.classList.remove('active');
 }
 
-/* --------------------------------------------------------------------------
-   3. TRANSACTION RECEIPT VIEWER
-   -------------------------------------------------------------------------- */
+async function startKapitaQrScanner() {
+  const video = document.getElementById('kapitaQrVideo');
+  const status = document.getElementById('kapitaQrStatus');
+  if (!video || !status) return;
 
-function viewTxDetail(txId, recipient = 'theKapita Eats', type = 'Food Payment', amount = '8,500.00', date = 'Today, 1:42 PM') {
+  qrReader ||= new BrowserQRCodeReader();
+  try {
+    qrScannerControls = await qrReader.decodeFromVideoDevice(undefined, video, (result, _error, controls) => {
+      if (!result) return;
+
+      const recipientId = result.getText().trim();
+      if (!/^KPT-[A-F0-9]{6}$/i.test(recipientId)) {
+        status.textContent = 'This QR code is not a valid Kapita ID. Keep scanning or cancel.';
+        return;
+      }
+
+      controls.stop();
+      qrScannerControls = null;
+      closeWalletModal();
+      openWalletModal('send', recipientId);
+    });
+  } catch (error) {
+    status.textContent = error.name === 'NotAllowedError'
+      ? 'Camera access is blocked. Allow camera access in your browser and try again.'
+      : 'Could not start the camera. Use a secure connection and check that a camera is available.';
+  }
+}
+
+/* 4. Transaction Detail Viewer */
+function viewTxDetail(txId) {
+  const tx = transactions.find((t) => t.id === txId);
   const modal = document.getElementById('txDetailModal');
-  const amountEl = document.getElementById('txDetailAmount');
-  const recipientEl = document.getElementById('txDetailRecipient');
-  const typeEl = document.getElementById('txDetailType');
-  const dateEl = document.getElementById('txDetailDate');
-  const refEl = document.getElementById('txDetailRef');
-
-  if (amountEl) amountEl.textContent = `₦${amount}`;
-  if (recipientEl) recipientEl.textContent = recipient;
-  if (typeEl) typeEl.textContent = type;
-  if (dateEl) dateEl.textContent = date;
-  if (refEl) refEl.textContent = txId || 'KPT-88910293';
-
-  if (modal) modal.classList.add('active');
+  if (!tx || !modal) return;
+  const set = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+  set('txDetailAmount', formatCurrency(tx.amount));
+  set('txDetailRecipient', tx.counterparty);
+  set('txDetailType', tx.status === 'pending' ? 'Wallet funding pending' : tx.kind === 'credit' ? 'Money received' : 'Money sent');
+  set('txDetailDate', formatTxDate(tx.created_at));
+  set('txDetailRef', tx.id);
+  modal.classList.add('active');
 }
 
 function closeTxModal(e) {
@@ -473,7 +401,8 @@ function setQuickAmount(val) {
    4. LIVE API EXECUTIONS (FUND, SEND, WITHDRAW)
    -------------------------------------------------------------------------- */
 
-async function executeFunding() {
+async function executeFunding(event) {
+  event?.preventDefault();
   const amountInput = document.getElementById('fundAmount');
   const channelSelect = document.getElementById('fundChannel');
   const submitBtn = document.getElementById('fundSubmitBtn');
@@ -493,12 +422,12 @@ async function executeFunding() {
   try {
     await fundWallet(amount, channelSelect?.value ?? 'bank_transfer');
 
-    if (window.showToast) window.showToast('Funding request submitted! Status: PENDING VERIFICATION.', 'success');
-    else alert('Funding request submitted! Status: PENDING LEDGER VERIFICATION.');
+    if (window.showToast) window.showToast('Funding request recorded. Funds will appear after provider confirmation.', 'info');
+    else alert('Funding request recorded. Funds will appear after provider confirmation.');
 
     closeWalletModal();
-    await hydrateBalance();
-    await hydrateTransactions();
+    document.getElementById('mainWalletBalance').textContent = getBalanceDisplay();
+    hydrateTransactions();
   } catch (err) {
     const errorMsg = err instanceof ApiError ? err.message : 'Could not complete top-up request. Check server connection.';
     if (window.showToast) window.showToast(errorMsg, 'error');
@@ -511,7 +440,8 @@ async function executeFunding() {
   }
 }
 
-async function executeSend() {
+async function executeSend(event) {
+  event?.preventDefault();
   const recipientInput = document.getElementById('sendRecipient');
   const amountInput = document.getElementById('sendAmount');
   const submitBtn = document.getElementById('sendSubmitBtn');
@@ -520,8 +450,7 @@ async function executeSend() {
   const amount = parseFloat(amountInput?.value);
 
   if (!recipient) {
-    if (window.showToast) window.showToast('Enter a recipient ID, email or bank account.', 'error');
-    else alert('Enter a recipient ID, email or bank account.');
+    alert('Enter a Kapita ID, @handle or email.');
     return;
   }
   if (!amount || amount <= 0) {
@@ -557,42 +486,53 @@ async function executeSend() {
 }
 
 async function executeWithdrawal() {
-  const amountInput = document.getElementById('withdrawAmount');
-  const submitBtn = document.getElementById('withdrawSubmitBtn');
-  const amount = parseFloat(amountInput?.value);
+  if (window.showToast) window.showToast('Bank withdrawals are unavailable until a payout provider and verified bank account are connected.', 'info');
+}
 
-  if (!amount || amount <= 0) {
-    if (window.showToast) window.showToast('Enter a valid withdrawal amount.', 'error');
-    else alert('Enter a valid withdrawal amount.');
-    return;
-  }
+async function saveBeneficiary(event) {
+  event?.preventDefault();
+  const nameInput = document.getElementById('beneficiaryName');
+  const recipientInput = document.getElementById('beneficiaryRecipient');
+  const submitBtn = document.getElementById('saveBeneficiaryBtn');
+  const name = nameInput?.value.trim();
+  const recipient = recipientInput?.value.trim();
+  if (!name || !recipient) return;
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span class="btn-spinner"></span> Processing Withdrawal...`;
+    submitBtn.textContent = 'Checking account...';
   }
 
   try {
-    await authorizedRequest('/wallet/withdraw', {
+    const beneficiary = await authorizedRequest(ENDPOINTS.wallet.beneficiaries, {
       method: 'POST',
-      body: { amount }
+      body: { name, recipient },
     });
-
-    if (window.showToast) window.showToast(`Withdrawal of ₦${amount.toLocaleString()}.00 initialized!`, 'success');
-    else alert(`Withdrawal of ₦${amount.toLocaleString()}.00 initialized!`);
-
+    if (window.showToast) window.showToast(`${beneficiary.full_name} saved as a beneficiary.`, 'success');
     closeWalletModal();
-    await hydrateBalance();
-    await hydrateTransactions();
+    await hydrateBeneficiaries();
   } catch (err) {
-    const errorMsg = err instanceof ApiError ? err.message : 'Withdrawal request failed.';
-    if (window.showToast) window.showToast(errorMsg, 'error');
-    else alert(errorMsg);
+    const message = err instanceof ApiError ? err.message : 'Could not save this beneficiary.';
+    if (window.showToast) window.showToast(message, 'error');
+    else alert(message);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Confirm Withdrawal';
+      submitBtn.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">person_add</span> Save Beneficiary';
     }
+  }
+}
+
+async function removeBeneficiary(beneficiaryId) {
+  try {
+    await authorizedRequest(`${ENDPOINTS.wallet.beneficiaries}/${beneficiaryId}`, { method: 'DELETE' });
+    recipientsData = recipientsData.filter((item) => item.id !== beneficiaryId);
+    renderRecipients();
+    if (window.showToast) window.showToast('Beneficiary removed.', 'success');
+  } catch (err) {
+    const message = err instanceof ApiError ? err.message : 'Could not remove this beneficiary.';
+    if (window.showToast) window.showToast(message, 'error');
+    else alert(message);
   }
 }
 
@@ -631,10 +571,115 @@ function filterTx(type, btnElement) {
   const scope = btnElement?.closest('.filter-pills');
   scope?.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
   if (btnElement) btnElement.classList.add('active');
+  txFilter = type;
+  renderTransactions();
+}
+
+/* ---- Transactions (GET /wallet/transactions) ---- */
+let transactions = [];
+let txFilter = 'all';
+
+function formatTxDate(iso) {
+  return new Date(iso).toLocaleString('en-NG', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
+
+function renderTransactions() {
+  const list = document.querySelector('.activity-timeline');
+  if (!list) return;
+  list.replaceChildren();
+  const rows = transactions.filter(
+    (t) => txFilter === 'all' || (txFilter === 'in' ? t.kind === 'credit' : t.kind === 'debit'),
+  );
+  if (rows.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'act-time';
+    empty.style.padding = '16px';
+    empty.textContent = 'No transactions yet.';
+    list.appendChild(empty);
+    return;
+  }
+  for (const tx of rows) {
+    const credit = tx.kind === 'credit';
+    const row = document.createElement('div');
+    row.className = `activity-row tx-item ${credit ? 'in' : 'out'}`;
+    row.addEventListener('click', () => viewTxDetail(tx.id));
+
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'act-icon-wrapper';
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.textContent = credit ? 'south_west' : 'north_east';
+    iconWrap.appendChild(icon);
+
+    const details = document.createElement('div');
+    details.className = 'act-details';
+    const title = document.createElement('p');
+    title.className = 'act-title';
+    const strong = document.createElement('strong');
+    strong.textContent = credit ? 'Received from ' : 'Sent to ';
+    title.append(strong, document.createTextNode(tx.counterparty));
+    const time = document.createElement('span');
+    time.className = 'act-time';
+    time.textContent = formatTxDate(tx.created_at);
+    details.append(title, time);
+
+    const right = document.createElement('div');
+    right.className = 'act-right';
+    const amount = document.createElement('span');
+    amount.className = `act-amount ${credit ? 'positive' : 'negative'}`;
+    amount.textContent = `${credit ? '+' : '-'}${formatCurrency(tx.amount)}`;
+    const status = document.createElement('span');
+    status.className = `tx-status-pill ${tx.status === 'pending' ? 'pending' : 'success'}`;
+    status.textContent = tx.status === 'pending' ? 'Pending' : 'Successful';
+    right.append(amount, status);
+
+    row.append(iconWrap, details, right);
+    list.appendChild(row);
+  }
+}
+
+async function hydrateTransactions() {
+  const list = document.querySelector('.activity-timeline');
+  if (list) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'activity-row skeleton-card';
+    skeleton.style.cssText = 'height:48px;margin-bottom:8px;background:#f1f5f9;border-radius:8px;';
+    list.replaceChildren(skeleton);
+  }
+  try {
+    transactions = await loadTransactions();
+  } catch (err) {
+    transactions = [];
+    if (window.showToast) window.showToast('Could not load your transactions.', 'error');
+  }
+  renderTransactions();
+}
+
+async function hydrateBeneficiaries() {
+  try {
+    const beneficiaries = await authorizedRequest(ENDPOINTS.wallet.beneficiaries);
+    recipientsData = beneficiaries.map((item) => ({
+      ...item,
+      avatar: item.full_name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase(),
+    }));
+  } catch (err) {
+    recipientsData = [];
+    if (window.showToast) window.showToast('Could not load your saved beneficiaries.', 'error');
+  }
+  renderRecipients();
+}
+
+function copyMyKapitaId() {
+  const id = getCurrentUser()?.kapita_id;
+  if (!id) return;
+  navigator.clipboard.writeText(id);
+  alert('ID Copied!');
 }
 
 function openBillPay() {
-  openWalletModal('add');
+  if (window.showToast) window.showToast('Bill payments are unavailable until a biller provider is connected.', 'info');
 }
 
 function initRecipientsEngine() {
@@ -652,10 +697,7 @@ function initRecipientsEngine() {
       filterPills.forEach(p => p.classList.remove('active'));
       this.classList.add('active');
 
-      if (idx === 0) activeCategoryFilter = 'all';
-      else if (idx === 1) activeCategoryFilter = 'internal';
-      else if (idx === 2) activeCategoryFilter = 'bank';
-      else if (idx === 3) activeCategoryFilter = 'favorites';
+      activeCategoryFilter = idx === 0 ? 'all' : 'internal';
 
       renderRecipients();
     });
@@ -670,90 +712,78 @@ function renderRecipients() {
   if (!gridContainer) return;
 
   const filtered = recipientsData.filter(item => {
-    const matchesCategory =
-      activeCategoryFilter === 'all' ? true :
-      activeCategoryFilter === 'favorites' ? item.isFavorite :
-      item.type === activeCategoryFilter;
+    const matchesCategory = activeCategoryFilter === 'all' || item.type === activeCategoryFilter;
 
     const matchesSearch =
-      item.name.toLowerCase().includes(currentSearchQuery) ||
+      item.full_name.toLowerCase().includes(currentSearchQuery) ||
       item.handle.toLowerCase().includes(currentSearchQuery) ||
-      item.meta.toLowerCase().includes(currentSearchQuery);
+      item.kapita_id.toLowerCase().includes(currentSearchQuery);
 
     return matchesCategory && matchesSearch;
   });
 
   if (filtered.length === 0) {
     gridContainer.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 40px 16px; color: #718096;">
-        <span class="material-symbols-outlined" style="font-size: 48px; color: #cbd5e0;">person_search</span>
-        <p style="margin-top: 8px; font-weight: 600;">No recipients match your search or filter.</p>
+      <div class="recipient-empty-state">
+        <span class="material-symbols-outlined" aria-hidden="true">person_search</span>
+        <p>No saved beneficiaries yet.</p>
+        <button type="button" class="btn-primary" onclick="openWalletModal('beneficiary')">Add Beneficiary</button>
       </div>
     `;
   } else {
     gridContainer.innerHTML = filtered.map(item => `
-      <div class="recipient-card ${item.isFavorite ? 'favorited' : ''}" id="card-${item.id}">
+      <article class="recipient-card" id="card-${item.id}">
         <div class="rec-card-top">
-          <span class="network-badge ${item.type}">
-            <span class="material-symbols-outlined">${item.type === 'internal' ? 'bolt' : 'account_balance'}</span>
-            ${item.type === 'internal' ? 'Kapita ID' : 'Bank Account'}
+          <span class="network-badge internal">
+            <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+            Kapita Network
           </span>
-          <button class="fav-star-btn ${item.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${item.id}')" title="${item.isFavorite ? 'Remove Favorite' : 'Add Favorite'}">
-            <span class="material-symbols-outlined">star</span>
-          </button>
         </div>
-        <div class="rec-avatar-lg ${item.type === 'bank' ? 'bank-avatar' : ''}">
+        <div class="rec-avatar-lg">
           ${item.avatar}
-          ${item.type === 'internal' ? '<span class="badge-dot kapita-dot"></span>' : ''}
+          <span class="badge-dot kapita-dot" aria-hidden="true"></span>
         </div>
-        <h4>${escapeHtml(item.name)}</h4>
+        <h3>${escapeHtml(item.full_name)}</h3>
         <p class="handle">${escapeHtml(item.handle)}</p>
-        <span class="account-meta">${escapeHtml(item.meta)}</span>
+        <span class="account-meta">${escapeHtml(item.kapita_id)}</span>
         <div class="rec-card-actions">
-          <button class="${item.type === 'internal' ? 'btn-primary' : 'btn-secondary'}" onclick="quickSendTo('${escapeJs(item.name)}', '${escapeJs(item.handle)}')">
-            <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;">send</span>
-            ${item.type === 'internal' ? 'Send Money' : 'Transfer'}
+          <button type="button" class="btn-primary" onclick="quickSendTo('${escapeJs(item.handle)}')">
+            <span class="material-symbols-outlined" aria-hidden="true">send</span>
+            Send Money
+          </button>
+          <button type="button" class="recipient-remove-btn" onclick="removeBeneficiary(${Number(item.id)})" aria-label="Remove ${escapeHtml(item.full_name)}">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
           </button>
         </div>
-      </div>
+      </article>
     `).join('');
   }
 
   if (railContainer) {
-    const frequent = recipientsData.filter(r => r.isFavorite || r.isOnline);
     railContainer.innerHTML = `
-      <div class="rail-item" onclick="openWalletModal('send')">
+      <button type="button" class="rail-item" onclick="openWalletModal('beneficiary')">
         <div class="rail-avatar add-new-rail">
           <span class="material-symbols-outlined">add</span>
         </div>
         <span>New Payee</span>
-      </div>
-    ` + frequent.map(item => `
-      <div class="rail-item" onclick="quickSendTo('${escapeJs(item.name)}', '${escapeJs(item.handle)}')">
+      </button>
+    ` + recipientsData.map(item => `
+      <button type="button" class="rail-item" onclick="quickSendTo('${escapeJs(item.handle)}')">
         <div class="rail-avatar">
           ${item.avatar}
-          ${item.isOnline ? '<span class="online-indicator"></span>' : ''}
         </div>
-        <span>${escapeHtml(item.name.split(' ')[0])}</span>
-      </div>
+        <span>${escapeHtml(item.full_name.split(' ')[0])}</span>
+      </button>
     `).join('');
   }
 }
 
-function toggleFavorite(id) {
-  const recipient = recipientsData.find(r => r.id === id);
-  if (recipient) {
-    recipient.isFavorite = !recipient.isFavorite;
-    renderRecipients();
-  }
-}
-
-function quickSendTo(name, handle) {
+function quickSendTo(handle) {
   openWalletModal('send');
   setTimeout(() => {
-    const recipientInput = document.querySelector('#walletModalContent input[type="text"]');
+    const recipientInput = document.querySelector('#sendRecipient');
     if (recipientInput) {
-      recipientInput.value = handle.includes('@') ? handle.split(' ')[0] : name;
+      recipientInput.value = handle;
       recipientInput.focus();
     }
   }, 50);
@@ -762,7 +792,6 @@ function quickSendTo(name, handle) {
 document.addEventListener('DOMContentLoaded', () => {
   hydrateBalance();
   hydrateTransactions();
-  hydrateVirtualCards();
   initRecipientsEngine();
 });
 
@@ -776,10 +805,12 @@ window.closeTxModal = closeTxModal;
 window.setQuickAmount = setQuickAmount;
 window.executeFunding = executeFunding;
 window.executeSend = executeSend;
+window.saveBeneficiary = saveBeneficiary;
+window.removeBeneficiary = removeBeneficiary;
 window.executeWithdrawal = executeWithdrawal;
 window.toggleCardDetails = toggleCardDetails;
 window.toggleFreezeCard = toggleFreezeCard;
 window.filterTx = filterTx;
 window.openBillPay = openBillPay;
 window.quickSendTo = quickSendTo;
-window.toggleFavorite = toggleFavorite;
+window.copyMyKapitaId = copyMyKapitaId;

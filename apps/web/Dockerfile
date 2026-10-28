@@ -11,9 +11,7 @@ RUN npm ci --workspace=@thekapita/web --include-workspace-root
 COPY packages packages
 COPY apps/web apps/web
 
-# Baked into the JS bundle at build time. Set in Railway, e.g.
-# VITE_API_BASE_URL=https://<backend-domain>/api
-ARG VITE_API_BASE_URL
+ARG VITE_API_BASE_URL=https://api.thekapita.com/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build --workspace=@thekapita/web
 
@@ -21,3 +19,5 @@ FROM nginx:1.27-alpine
 # nginx image runs envsubst on /etc/nginx/templates/*.template at start, so ${PORT} is filled in.
 COPY apps/web/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+
+COPY --from=build /app/apps/web/src/pages/bills.js /app/apps/web/src/pages/food.js /app/apps/web/src/pages/food-vendor.js /app/apps/web/src/pages/ride.js /usr/share/nginx/html/src/pages/

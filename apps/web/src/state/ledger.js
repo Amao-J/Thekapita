@@ -34,6 +34,15 @@ export function getBalanceDisplay() {
   return balanceState.balance == null ? '—' : formatCurrency(balanceState.balance, balanceState.currency);
 }
 
+/** Newest first: [{id, kind: 'credit'|'debit', amount, counterparty, status, created_at}] */
+export async function loadTransactions(limit = 30) {
+  return authorizedRequest(`${ENDPOINTS.wallet.transactions}?limit=${limit}`);
+}
+
+export async function loadWalletAnalytics() {
+  return authorizedRequest(ENDPOINTS.wallet.analytics);
+}
+
 export async function refreshBalance() {
   const data = await authorizedRequest(ENDPOINTS.wallet.balance);
   balanceState = {

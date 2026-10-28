@@ -10,3 +10,4 @@ Backend/src/db.sqlite3
 Backend/src/staticfiles/
 .DS_Store
 DEPLOY.md
+*.md

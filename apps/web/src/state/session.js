@@ -90,7 +90,26 @@ export async function updateProfile(profile) {
   return user;
 }
 
+export async function updatePreferences(prefs) {
+  const preferences = await authorizedRequest(ENDPOINTS.profile.preferences, { method: 'PATCH', body: prefs });
+  state = { ...state, user: { ...state.user, preferences } };
+  persist();
+  return preferences;
+}
+
+export async function updateSettings(settings) {
+  const next = await authorizedRequest(ENDPOINTS.profile.settings, { method: 'PATCH', body: settings });
+  state = { ...state, user: { ...state.user, settings: next } };
+  persist();
+  return next;
+}
+
 export function logout() {
+  // Best-effort revoke of the refresh token on the server; never block sign-out on it.
+  const refreshToken = state.refreshToken;
+  if (refreshToken) {
+    request(ENDPOINTS.auth.logout, { method: 'POST', body: { refresh_token: refreshToken } }).catch(() => {});
+  }
   state = emptyState();
   persist();
 }
@@ -102,6 +121,23 @@ export function logout() {
  * silently refresh an expired access token and retry exactly once before
  * giving up and surfacing the error.
  */
+// Refresh tokens are single-use on the server, so parallel 401s must share ONE
+// refresh call; a second call with the same token would be rejected and sign the user out.
+let refreshInFlight = null;
+function refreshTokens() {
+  if (!refreshInFlight) {
+    refreshInFlight = request(ENDPOINTS.auth.refresh, {
+      method: 'POST',
+      body: { refresh_token: state.refreshToken },
+    })
+      .then(applyTokens)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 export async function authorizedRequest(path, opts = {}) {
   const attempt = () =>
     request(path, {
@@ -112,12 +148,25 @@ export async function authorizedRequest(path, opts = {}) {
   try {
     return await attempt();
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401 && state.refreshToken) {
-      const tokens = await request(ENDPOINTS.auth.refresh, {
-        method: 'POST',
-        body: { refresh_token: state.refreshToken },
-      });
-      applyTokens(tokens);
+    if (err instanceof ApiError && err.status === 401) {
+      if (!state.refreshToken) {
+        state = emptyState();
+        persist();
+        window.location.href = 'auth.html';
+        throw err;
+      }
+
+      try {
+        await refreshTokens();
+      } catch (refreshErr) {
+        // Refresh token expired/revoked: the session is over.
+        if (refreshErr instanceof ApiError && refreshErr.status === 401) {
+          state = emptyState();
+          persist();
+          window.location.href = 'auth.html';
+        }
+        throw refreshErr;
+      }
       return attempt();
     }
     throw err;

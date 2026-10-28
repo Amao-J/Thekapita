@@ -23,17 +23,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    'django-insecure-y%wjoy_7s)@%(h^7up^^xz7n=&yv22eo9rf@op7fd7!g(v^yv8h',
-)
-JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY", SECRET_KEY)
+# Safe by default: DEBUG is OFF unless DJANGO_DEBUG=1 is set (do that locally only).
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
-
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+_DEV_SECRET = "django-insecure-dev-only-key-do-not-use-in-production"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or (_DEV_SECRET if DEBUG else None)
+if not SECRET_KEY:
+    raise RuntimeError("DJANGO_SECRET_KEY must be set when DEBUG is off.")
+# Keep this a separate secret from SECRET_KEY so rotating one doesn't touch the other.
+# Every Railway service that verifies tokens must share the same value.
+JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY") or SECRET_KEY
 
 ALLOWED_HOSTS = [
     "thekapita-production.up.railway.app",
+    "api.thekapita.com",
+    "thekapita.com",
+    "www.thekapita.com",
     "localhost",
     "127.0.0.1",
 ]
@@ -58,14 +63,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'ninja',
-    'ninja_jwt',
-    'ninja_extra',
     'app',
     
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -79,7 +83,11 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",   # local static-file dev server (VS Code Live Server, `python -m http.server`, etc.) — adjust to whatever you actually use
-    "https://app.thekapita.com",  # production web origin — adjust to your real domain
+    "https://thekapita.com", 
+     "http://localhost:5173" ,
+     "https://www.thekapita.com",
+
+       # production web origin — adjust to your real domain
 ]
 
 CORS_ALLOWED_ORIGINS += [
@@ -97,6 +105,22 @@ CORS_ALLOW_CREDENTIALS = False  # bearer-token auth, not cookies — keep this F
 CORS_ALLOW_HEADERS = [
     "accept", "authorization", "content-type", "idempotency-key", "x-requested-with",
 ]
+
+# Railway terminates TLS at its proxy; trust it so request.is_secure() is correct.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = [
+    "https://thekapita.com",
+    "https://thekapita-production.up.railway.app",
+    "https://api.thekapita.com",
+    "https://www.thekapita.com",
+]
+CSRF_TRUSTED_ORIGINS += [
+    o.strip() for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+]
+
+# django-ninja throttling uses the Django cache. LocMem is per-process, which is
+# fine for one Railway instance; switch to a Redis cache before scaling out.
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 ROOT_URLCONF = 'app.urls'
 

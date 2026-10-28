@@ -28,7 +28,7 @@
     
     <div class="wallet-header-tag">
       <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon" aria-hidden="true">check_circle</span></span>
-      <span class="id-badge">ID: <strong>KPT-883902</strong></span>
+      <span class="id-badge">ID: <strong id="walletKapitaId">—</strong></span>
     </div>
   </header>
 
@@ -51,7 +51,7 @@
           <span class="balance-label" id="balance-label">Available Balance</span>
           <div class="balance-row">
             <span class="hero-currency" aria-hidden="true">₦</span>
-            <span class="hero-amount" id="mainWalletBalance" aria-labelledby="balance-label">245,500.00</span>
+            <span class="hero-amount" id="mainWalletBalance" aria-labelledby="balance-label">0.00</span>
             <button type="button" class="eye-toggle wallet-eye" onclick="toggleWalletBalance()" aria-label="Toggle balance visibility">
               <span class="material-symbols-outlined" id="balanceEyeIcon" aria-hidden="true">visibility</span>
             </button>
@@ -126,15 +126,12 @@
             <div class="van-details-grid">
               <div class="van-item">
                 <span class="label">Bank Name</span>
-                <strong>Wema Bank / Kapita</strong>
+                <strong>Not connected</strong>
               </div>
               <div class="van-item">
                 <span class="label">Account Number</span>
                 <div class="copy-num-row">
-                  <strong id="vanAccountNumber">9920188219</strong>
-                  <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText('9920188219'); alert('Account copied!');" aria-label="Copy account number 9920188219 to clipboard">
-                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
-                  </button>
+                  <strong id="vanAccountNumber">Unavailable</strong>
                 </div>
               </div>
             </div>
@@ -198,7 +195,7 @@
           <section class="kapita-card" aria-labelledby="pm-heading">
             <div class="card-header">
               <h2 id="pm-heading" class="card-heading-md">Payment Methods</h2>
-              <button type="button" class="text-btn" onclick="openWalletModal('addMethod')">+ Add New</button>
+              <span class="sec-indicator">Wallet</span>
             </div>
             
             <div class="payment-methods-list">
@@ -209,37 +206,12 @@
                   </div>
                   <div class="method-details">
                     <h3>theKapita Pay Wallet</h3>
-                    <p>Primary Ecosystem Wallet • ₦245,500.00</p>
+                    <p>Available balance • <span id="walletPaymentBalance">Loading</span></p>
                   </div>
                 </div>
                 <span class="default-pill">Default</span>
               </div>
 
-              <div class="method-item">
-                <div class="method-left">
-                  <div class="method-icon-box">
-                    <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
-                  </div>
-                  <div class="method-details">
-                    <h3>GTBank Guarantee Trust</h3>
-                    <p>Account ending in •••• 4902</p>
-                  </div>
-                </div>
-                <button type="button" class="btn-sm text-btn" aria-label="Options for GTBank Account ending in 4902">Options</button>
-              </div>
-
-              <div class="method-item">
-                <div class="method-left">
-                  <div class="method-icon-box">
-                    <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
-                  </div>
-                  <div class="method-details">
-                    <h3>Visa Corporate Card</h3>
-                    <p>Card ending in •••• 8821</p>
-                  </div>
-                </div>
-                <button type="button" class="btn-sm text-btn" aria-label="Options for Visa Corporate Card ending in 8821">Options</button>
-              </div>
             </div>
           </section>
 
@@ -250,23 +222,18 @@
           <section class="kapita-card" aria-labelledby="analytics-heading">
             <div class="card-header">
               <h2 id="analytics-heading" class="card-heading-md">Monthly Analytics</h2>
-              <span class="sec-indicator">Total: ₦185,400</span>
+              <span class="sec-indicator">This month</span>
             </div>
 
             <div class="spending-breakdown">
-              <div class="spending-bar-wrapper" role="img" aria-label="Spending Breakdown: Eats 28 percent 52,000 Naira, Ride 21 percent 38,500 Naira, Bills 24 percent 45,000 Naira, Marketplace 17 percent 31,900 Naira, Other 10 percent 18,000 Naira">
-                <div class="spending-segment eats" style="width: 28%;" title="Eats: ₦52,000"></div>
-                <div class="spending-segment ride" style="width: 21%;" title="Ride: ₦38,500"></div>
-                <div class="spending-segment bills" style="width: 24%;" title="Bills: ₦45,000"></div>
-                <div class="spending-segment market" style="width: 17%;" title="Marketplace: ₦31,900"></div>
-                <div class="spending-segment other" style="width: 10%;" title="Other: ₦18,000"></div>
+              <div class="spending-bar-wrapper" role="img" aria-label="Monthly wallet inflow and outflow">
+                <div class="spending-segment eats" style="width: 50%;" title="Money in"></div>
+                <div class="spending-segment ride" style="width: 50%;" title="Money out"></div>
               </div>
 
               <div class="insight-legend">
-                <div class="legend-item"><span class="legend-dot eats" aria-hidden="true"></span> Eats <strong>₦52,000</strong></div>
-                <div class="legend-item"><span class="legend-dot ride" aria-hidden="true"></span> Ride <strong>₦38,500</strong></div>
-                <div class="legend-item"><span class="legend-dot bills" aria-hidden="true"></span> Bills <strong>₦45,000</strong></div>
-                <div class="legend-item"><span class="legend-dot market" aria-hidden="true"></span> Market <strong>₦31,900</strong></div>
+                <div class="legend-item"><span class="legend-dot eats" aria-hidden="true"></span> Money in <strong id="overviewWalletInflow">Loading</strong></div>
+                <div class="legend-item"><span class="legend-dot ride" aria-hidden="true"></span> Money out <strong id="overviewWalletOutflow">Loading</strong></div>
               </div>
             </div>
           </section>
@@ -307,18 +274,9 @@
                 <span class="material-symbols-outlined card-icon" aria-hidden="true">stars</span>
                 <h2 id="rewards-heading" class="card-heading-md">theKapita Rewards</h2>
               </div>
-              <span class="points-badge">2,450 Points</span>
+              <span class="points-badge">Not connected</span>
             </div>
-            <p class="rewards-subtitle">Earn 1% cashback on every Eats order, Ride booking, or Bill payment.</p>
-            
-            <div class="rewards-progress-bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Progress to Platinum tier">
-              <div class="progress-fill" style="width: 65%;"></div>
-            </div>
-            <div class="rewards-tier-row">
-              <span>550 pts to Platinum</span>
-            </div>
-
-            <button type="button" class="btn-secondary w-full" style="margin-top: 16px;">Redeem Marketplace Rewards</button>
+            <p class="rewards-subtitle">Rewards are unavailable until the rewards service is connected.</p>
           </section>
 
         </div>
@@ -332,35 +290,7 @@
           <h2 id="card-sec-heading" class="card-heading-md">theKapita Black Virtual Card</h2>
         </div>
         
-        <div class="kapita-virtual-card" aria-label="Virtual Card showing holder Ahmed Ebuka, expiring 08/29">
-          <div class="card-chip-row">
-            <span class="card-brand-logo">theKapita.</span>
-            <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
-          </div>
-          <div class="card-number-display" id="cardNumberDisplay" aria-label="Card Number masked ending in 8821">
-            •••• •••• •••• 8821
-          </div>
-          <div class="card-bottom-meta">
-            <div>
-              <span class="card-meta-label">Card Holder</span>
-              <strong>Ahmed Ebuka</strong>
-            </div>
-            <div>
-              <span class="card-meta-label">Expires</span>
-              <strong>08/29</strong>
-            </div>
-            <div>
-              <span class="card-meta-label">CVV</span>
-              <strong id="cardCvvDisplay">•••</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-controls-row">
-          <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
-          <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
-          <button type="button" class="btn-primary">Manage Limits</button>
-        </div>
+        <p>Virtual cards are unavailable until a card issuer is connected to this wallet.</p>
       </section>
     </div>
 
@@ -448,9 +378,9 @@
         <div class="card-header">
           <div>
             <h2 id="recipients-heading" class="card-heading-md">Saved Recipients &amp; Directory</h2>
-            <p class="tab-subtitle">Manage frequent payees for instant 0-fee Kapita tags or external bank transfers</p>
+            <p class="tab-subtitle">Save people to make future Kapita transfers faster</p>
           </div>
-          <button type="button" class="btn-primary" onclick="openWalletModal('send')">
+          <button type="button" class="btn-primary" onclick="openWalletModal('beneficiary')">
             <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;" aria-hidden="true">person_add</span> Add New Recipient
           </button>
         </div>
@@ -462,132 +392,24 @@
             <input type="text" id="recipientSearchInput" placeholder="Search by name, @username, or account number..." class="form-control">
           </div>
           <div class="filter-pills" role="group" aria-label="Filter recipients">
-            <button type="button" class="pill active" aria-pressed="true">All (8)</button>
+            <button type="button" class="pill active" aria-pressed="true">All</button>
             <button type="button" class="pill" aria-pressed="false">Kapita Network</button>
-            <button type="button" class="pill" aria-pressed="false">Bank Accounts</button>
-            <button type="button" class="pill" aria-pressed="false">Favorites</button>
           </div>
         </div>
 
         <div class="quick-send-rail-container">
           <span class="rail-label" id="frequent-rail-label">Frequent Transfers</span>
           <div class="quick-send-rail" role="region" aria-labelledby="frequent-rail-label">
-            <button type="button" class="rail-item" onclick="openWalletModal('send')">
+            <button type="button" class="rail-item" onclick="openWalletModal('beneficiary')">
               <span class="rail-avatar add-new-rail">
                 <span class="material-symbols-outlined" aria-hidden="true">add</span>
               </span>
               <span>New Payee</span>
             </button>
-            <button type="button" class="rail-item" onclick="openWalletModal('send')">
-              <span class="rail-avatar">SO<span class="online-indicator" aria-label="Online"></span></span>
-              <span>Sarah</span>
-            </button>
-            <button type="button" class="rail-item" onclick="openWalletModal('send')">
-              <span class="rail-avatar">JO<span class="online-indicator" aria-label="Online"></span></span>
-              <span>John</span>
-            </button>
-            <button type="button" class="rail-item" onclick="openWalletModal('send')">
-              <span class="rail-avatar">EA</span>
-              <span>Ella</span>
-            </button>
-            <button type="button" class="rail-item" onclick="openWalletModal('send')">
-              <span class="rail-avatar">MC</span>
-              <span>Michael</span>
-            </button>
           </div>
         </div>
 
-        <div class="recipients-grid">
-          <article class="recipient-card favorited">
-            <div class="rec-card-top">
-              <span class="network-badge internal">
-                <span class="material-symbols-outlined" aria-hidden="true">bolt</span> Kapita ID
-              </span>
-              <button type="button" class="fav-star-btn active" aria-label="Remove Sarah Okoro from Favorites">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span>
-              </button>
-            </div>
-            <div class="rec-avatar-lg">
-              SO
-              <span class="badge-dot kapita-dot" aria-hidden="true"></span>
-            </div>
-            <h3>Sarah Okoro</h3>
-            <p class="handle">@sarah • Instant ₦0 Fee</p>
-            <span class="account-meta">KPT-881092 • Primary Tag</span>
-            <div class="rec-card-actions">
-              <button type="button" class="btn-primary" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Send Money
-              </button>
-            </div>
-          </article>
-
-          <article class="recipient-card">
-            <div class="rec-card-top">
-              <span class="network-badge bank">
-                <span class="material-symbols-outlined" aria-hidden="true">account_balance</span> Bank Account
-              </span>
-              <button type="button" class="fav-star-btn" aria-label="Add John Okafor to Favorites">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span>
-              </button>
-            </div>
-            <div class="rec-avatar-lg bank-avatar">
-              JO
-            </div>
-            <h3>John Okafor</h3>
-            <p class="handle">GTBank Guarantee Trust</p>
-            <span class="account-meta">•••• 4902 • Verified Name</span>
-            <div class="rec-card-actions">
-              <button type="button" class="btn-secondary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Transfer
-              </button>
-            </div>
-          </article>
-
-          <article class="recipient-card">
-            <div class="rec-card-top">
-              <span class="network-badge internal">
-                <span class="material-symbols-outlined" aria-hidden="true">bolt</span> Kapita ID
-              </span>
-              <button type="button" class="fav-star-btn active" aria-label="Remove Ella Amra from Favorites">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span>
-              </button>
-            </div>
-            <div class="rec-avatar-lg">
-              EA
-              <span class="badge-dot kapita-dot" aria-hidden="true"></span>
-            </div>
-            <h3>Ella Amra</h3>
-            <p class="handle">@amra • Instant ₦0 Fee</p>
-            <span class="account-meta">KPT-883912 • Primary Tag</span>
-            <div class="rec-card-actions">
-              <button type="button" class="btn-primary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Send Money
-              </button>
-            </div>
-          </article>
-
-          <article class="recipient-card">
-            <div class="rec-card-top">
-              <span class="network-badge bank">
-                <span class="material-symbols-outlined" aria-hidden="true">account_balance</span> Bank Account
-              </span>
-              <button type="button" class="fav-star-btn" aria-label="Add Michael Chen to Favorites">
-                <span class="material-symbols-outlined" aria-hidden="true">star</span>
-              </button>
-            </div>
-            <div class="rec-avatar-lg bank-avatar">
-              MC
-            </div>
-            <h3>Michael Chen</h3>
-            <p class="handle">Access Bank PLC</p>
-            <span class="account-meta">•••• 8812 • Verified Name</span>
-            <div class="rec-card-actions">
-              <button type="button" class="btn-secondary w-full" onclick="openWalletModal('send')">
-                <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px;" aria-hidden="true">send</span> Transfer
-              </button>
-            </div>
-          </article>
-        </div>
+        <div class="recipients-grid" aria-live="polite"></div>
       </section>
     </div>
 
@@ -598,11 +420,7 @@
             <h2 id="cashflow-heading" class="card-heading-md">Ecosystem Cashflow Analytics</h2>
             <p class="tab-subtitle">Visualizing month-over-month cashflow across theKapita network</p>
           </div>
-          <div class="analytics-timeframe-picker" role="group" aria-label="Select timeframe">
-            <button type="button" class="pill active" aria-pressed="true">August 2026</button>
-            <button type="button" class="pill" aria-pressed="false">Q3 2026</button>
-            <button type="button" class="pill" aria-pressed="false">Yearly</button>
-          </div>
+          <span class="sec-indicator">Last six months</span>
         </div>
 
         <div class="analytics-kpi-grid">
@@ -613,10 +431,8 @@
                 <span class="material-symbols-outlined" aria-hidden="true">south_west</span>
               </span>
             </div>
-            <div class="kpi-value">₦475,000.00</div>
-            <span class="kpi-trend positive">
-              <span class="material-symbols-outlined" aria-hidden="true">trending_up</span> +14.2% vs last month
-            </span>
+            <div class="kpi-value" id="walletAnalyticsInflow">Loading</div>
+            <span class="kpi-trend">Current calendar month</span>
           </div>
 
           <div class="kpi-card">
@@ -626,23 +442,19 @@
                 <span class="material-symbols-outlined" aria-hidden="true">north_east</span>
               </span>
             </div>
-            <div class="kpi-value">₦185,400.00</div>
-            <span class="kpi-trend negative">
-              <span class="material-symbols-outlined" aria-hidden="true">trending_down</span> -3.5% vs last month
-            </span>
+            <div class="kpi-value" id="walletAnalyticsOutflow">Loading</div>
+            <span class="kpi-trend">Current calendar month</span>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="label">Net Savings Rate</span>
+              <span class="label">Net Flow</span>
               <span class="kpi-icon accent">
                 <span class="material-symbols-outlined" aria-hidden="true">savings</span>
               </span>
             </div>
-            <div class="kpi-value">60.9%</div>
-            <span class="kpi-trend positive">
-              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span> Healthy Cashflow Ratio
-            </span>
+            <div class="kpi-value" id="walletAnalyticsNet">Loading</div>
+            <span class="kpi-trend">Inflow minus outflow</span>
           </div>
         </div>
 
@@ -655,7 +467,7 @@
             </div>
           </div>
 
-          <div class="bar-chart-container" role="img" aria-label="6-Month Bar Chart from March to August showing higher monthly inflows than outflows">
+          <div class="bar-chart-container" id="walletAnalyticsChart" role="img" aria-label="Six month wallet inflow and outflow">
             <div class="bar-group">
               <div class="bar-wrapper">
                 <div class="bar inflow" style="height: 60%;" title="Inflow: ₦300,000"></div>
@@ -764,9 +576,7 @@
         </div>
 
         <div class="analytics-footer-action">
-          <button type="button" class="btn-secondary" onclick="alert('Exporting statement PDF...');">
-            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 6px;" aria-hidden="true">download</span> Download Full Financial Statement (PDF)
-          </button>
+          <p>Totals are calculated from posted wallet ledger entries.</p>
         </div>
 
       </section>
@@ -794,7 +604,7 @@
                   <span>Daily Transfer Limit</span>
                   <small>Maximum outbound transfers per 24h</small>
                 </div>
-                <strong>₦500,000.00</strong>
+                <strong id="dailyTransferLimit">Loading</strong>
               </div>
 
               <div class="detail-row">
@@ -802,18 +612,11 @@
                   <span>Monthly Transfer Limit</span>
                   <small>Cumulative transfer ceiling for current month</small>
                 </div>
-                <strong>₦5,000,000.00</strong>
+                <strong id="monthlyTransferLimit">Loading</strong>
               </div>
 
-              <div class="detail-row">
-                <div class="row-label-group">
-                  <span>Available Balance Today</span>
-                  <small>Remaining transferable limit</small>
-                </div>
-                <strong class="limit-avail-text">₦350,000.00</strong>
-              </div>
             </div>
-            <button type="button" class="btn-secondary w-full" style="margin-top: 16px;">Request Limit Increase</button>
+            <p class="tab-subtitle">Transfer limits are configured by the wallet service.</p>
           </div>
 
           <div class="security-panel-box">
@@ -878,7 +681,7 @@
         <div class="detail-row"><span>Recipient:</span> <strong id="txDetailRecipient">theKapita Eats</strong></div>
         <div class="detail-row"><span>Transaction Type:</span> <strong id="txDetailType">Food Payment</strong></div>
         <div class="detail-row"><span>Date &amp; Time:</span> <strong id="txDetailDate">27 Aug 2026, 1:42 PM</strong></div>
-        <div class="detail-row"><span>Reference ID:</span> <strong id="txDetailRef">KPT-88910293</strong></div>
+        <div class="detail-row"><span>Reference ID:</span> <strong id="txDetailRef">—</strong></div>
         <div class="detail-row"><span>Payment Method:</span> <strong>theKapita Pay Wallet</strong></div>
       </div>
       <div class="tx-modal-actions">
