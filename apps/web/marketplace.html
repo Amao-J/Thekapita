@@ -23,49 +23,56 @@
 
   <!-- Desktop Header -->
   <header class="desktop-header profile-back-header">
-    <a href="index.html" class="header-back-action" aria-label="Return to theKapita Homepage">
+    <div class="header-back-action" onclick="window.location.href='index.html'">
       <div class="back-btn-circle">
-        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        <span class="material-symbols-outlined">arrow_back</span>
       </div>
-      <span class="header-brand-title">theKapita <span class="accent-text">Marketplace</span></span>
-    </a>
+      <span style="font-weight: 700; font-size: 16px;"><span style="color: #00d084;">Marketplace</span></span>
+    </div>
 
     <div class="wallet-header-tag">
       <!-- Cart Button -->
-      <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart">
+      <!-- <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart">
         <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
         <span id="cartCountBadge" class="cart-badge">0</span>
+      </button> -->
+
+      <!-- Separated Cart Button -->
+      <button class="text-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart" style="position: relative; margin-right: 8px;">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
+        <span id="cartCountBadge" class="cart-badge" style="position: absolute; top: -6px; right: -8px; background: #00d084; color: #121212; font-weight: 800; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
       </button>
 
       <!-- Desktop Header Menu Dropdown -->
       <div class="header-nav-dropdown-wrapper">
-        <button type="button" class="header-menu-pill-btn" onclick="toggleHeaderNavMenu(event)" aria-expanded="false" aria-haspopup="true" aria-controls="headerNavDropdownMenu" aria-label="Account and Wallet Navigation Menu">
+        <button class="header-menu-pill-btn" aria-expanded="false" aria-haspopup="true" aria-controls="headerNavDropdownMenu" aria-label="Account and Wallet Navigation Menu" onclick="toggleHeaderNavMenu(event)">
           <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          
           <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
         </button>
 
-        <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu" role="menu">
-          <!-- Balance Summary Card -->
-          <a href="wallet.html" class="dropdown-balance-card" role="menuitem">
+        <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu">
+          <!-- Balance Summary Card Inside Dropdown -->
+          <div class="dropdown-balance-card" role="menuitem" onclick="window.location.href='wallet.html'">
             <div class="balance-card-sub">Available Wallet Balance</div>
             <div class="balance-card-val" id="marketWalletBalance">—</div>
-          </a>
+          </div>
 
-          <div class="dropdown-divider" role="separator"></div>
+          <div class="dropdown-divider"></div>
 
           <!-- Navigation Links -->
-          <button type="button" class="header-dropdown-item" onclick="switchMarketView('browse')" role="menuitem">
+          <div class="header-dropdown-item" role="menuitem" onclick="switchMarketView('browse')">
             <span class="material-symbols-outlined icon" aria-hidden="true">storefront</span> Browse Market
-          </button>
-          <button type="button" class="header-dropdown-item" onclick="switchMarketView('orders')" role="menuitem">
-            <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> My Orders &amp; Tracking
-          </button>
-          <button type="button" class="header-dropdown-item" onclick="switchMarketView('wishlist')" role="menuitem">
+          </div>
+          <div class="header-dropdown-item" role="menuitem" onclick="switchMarketView('orders')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">local_shipping</span> My Orders
+          </div>
+          <div class="header-dropdown-item" role="menuitem" onclick="switchMarketView('wishlist')">
             <span class="material-symbols-outlined icon" aria-hidden="true">favorite</span> Saved Wishlist
-          </button>
-          <a href="seller-dashboard.html" class="header-dropdown-item" role="menuitem">
+          </div>
+          <div class="header-dropdown-item" role="menuitem" onclick="window.location.href='seller-dashboard.html'">
             <span class="material-symbols-outlined icon" aria-hidden="true">store</span> Seller Center
-          </a>
+          </div>
         </div>
       </div>
 
@@ -100,10 +107,10 @@
         <span class="nav-text">Wishlist</span>
       </button>
 
-      <a href="seller-dashboard.html" class="market-nav-btn" aria-label="Open Seller Dashboard">
+      <button class="market-nav-btn" onclick="window.location.href='seller-dashboard.html'">
         <span class="material-symbols-outlined nav-icon" aria-hidden="true">store</span>
         <span class="nav-text">Seller Hub</span>
-      </a>
+      </button>
     </nav>
 
     <!-- BROWSE VIEW -->

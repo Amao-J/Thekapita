@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita Care - Health Access & Emergency</title>
+
+  <!-- Fonts: Bricolage Grotesque & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/care.css">
+</head>
+<body class="care-page-body">
+
+  <!-- Accessibility Skip Link -->
+  <a href="#main-care-content" class="skip-link">Skip to main content</a>
+
+  <!-- 0. Header Navigation -->
+  <header class="profile-back-header">
+    <div class="header-back-action">
+      <a href="index.html" class="back-btn-circle" aria-label="Return to Kapita Home">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </a>
+      <div class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span class="brand-sub">Care</span>
+      </div>
+    </div>
+
+    <div class="header-right-actions">
+      <!-- Location Pill -->
+      <div class="location-pill" onclick="triggerAddressChange()" role="button" tabindex="0" aria-label="Change current location">
+        <span class="material-symbols-outlined loc-icon" aria-hidden="true">location_on</span>
+        <span id="headerLocationText">Victoria Island, Lagos</span>
+        <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">expand_more</span>
+      </div>
+
+      <!-- Account & Menu Navigation Pill -->
+      <div class="header-nav-dropdown-wrapper">
+        <button type="button" class="header-menu-pill-btn" onclick="toggleDropdown()" aria-expanded="false" aria-label="Account and Health Wallet Menu">
+          <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">account_circle</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">arrow_drop_down</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="header-nav-dropdown-menu" id="navDropdown">
+          <a href="wallet.html" class="dropdown-balance-card" title="Health HSA Wallet">
+            <div class="balance-card-sub">Health Savings Wallet</div>
+            <div class="balance-card-val" id="escrowWalletVal">₦125,500.00</div>
+          </a>
+          <div class="dropdown-divider"></div>
+
+          <button type="button" class="header-dropdown-item" onclick="openModal('appointmentModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">calendar_add_on</span>
+            <span>Book Appointment</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" onclick="openAppointmentsListModal()">
+            <span class="material-symbols-outlined icon" aria-hidden="true">medical_services</span>
+            <span>My Consultations</span>
+          </button>
+
+          <!-- Triage Assistant (AI) -->
+          <button type="button" class="header-dropdown-item" onclick="openModal('triageModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">psychology</span>
+            <span>AI Symptom Triage</span>
+          </button>
+
+          <!-- Emergency SOS -->
+          <button type="button" class="header-dropdown-item" style="color: #ef4444;" onclick="openModal('sosModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">ambulance</span>
+            <span>Emergency SOS</span>
+          </button>
+
+          <button type="button" class="header-dropdown-item" onclick="openModal('historyModal')">
+            <span class="material-symbols-outlined icon" aria-hidden="true">folder_shared</span>
+            <span>Medical History & Rx</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container View -->
+  <main id="main-care-content" class="care-main-container" tabindex="-1">
+    <div class="care-content-wrapper">
+
+      <!-- 1. Dual Service Switcher Bar -->
+      <div class="service-mode-toggle" role="tablist" aria-label="Care Categories">
+        <button type="button" class="mode-btn active" id="tab-all" role="tab" aria-selected="true" onclick="switchProviderCategory('all', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">health_and_safety</span>
+          <span>All Services</span>
+        </button>
+        <button type="button" class="mode-btn" id="tab-telemed" role="tab" aria-selected="false" onclick="switchProviderCategory('telemed', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">video_camera_front</span>
+          <span>Telemedicine</span>
+        </button>
+        <button type="button" class="mode-btn" id="tab-pharmacy" role="tab" aria-selected="false" onclick="switchProviderCategory('pharmacy', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">local_pharmacy</span>
+          <span>Pharmacies</span>
+        </button>
+      </div>
+
+      <!-- Floating AI Assistant Widget (Medicine Reminder) -->
+      <div class="ai-floating-widget" id="aiFloatingWidget">
+        <div class="ai-expanded-card">
+          <div class="ai-card-header-row">
+            <div class="ai-badge-title">
+              <span class="material-symbols-outlined" style="font-size: 14px; color: var(--emerald);" aria-hidden="true">auto_awesome</span>
+              <span>theKapita Assistant</span>
+            </div>
+            <button type="button" class="ai-close-icon-btn" onclick="toggleAiWidget()" aria-label="Close AI recommendation">
+              <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">close</span>
+            </button>
+          </div>
+
+          <div class="ai-card-body" onclick="quickMarkTaken()" role="button" tabindex="0">
+            <div class="ai-pill-text">
+              Time for your <strong>Amoxicillin 500mg</strong> dose. Have you taken it?
+            </div>
+            <div class="ai-pill-action">
+              <span>Log</span>
+              <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="ai-float-trigger-btn" onclick="toggleAiWidget()" aria-label="Open Kapita AI Reminder">
+          <span class="material-symbols-outlined" aria-hidden="true">alarm</span>
+          <span class="ai-pulse-ring"></span>
+        </button>
+      </div>
+
+      <!-- 3. Unified Search & Location Bar with Dropdown Filter -->
+      <section class="care-search-container">
+        <div class="search-bar-inner">
+          <!-- Location Picker Trigger (Left) -->
+          <button type="button" class="search-location-trigger" onclick="triggerAddressChange()" aria-label="Change current location">
+            <span class="material-symbols-outlined loc-pin" aria-hidden="true">location_on</span>
+            <span class="loc-text" id="deliveryLocationText">Victoria Island</span>
+            <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+          </button>
+
+          <div class="search-divider"></div>
+
+          <!-- Search Input Row (Middle) -->
+          <div class="search-input-group">
+            <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+            <input type="search" id="careSearchInput" placeholder="Search doctors, pharmacies, medications..." aria-label="Search healthcare providers" onkeyup="handleFilterSearch()">
+          </div>
+
+          <div class="search-divider"></div>
+
+          <!-- Dropdown Filter Wrapper (Right) -->
+          <div class="care-filter-dropdown-wrapper" id="careFilterDropdown">
+            <button type="button" class="filter-dropdown-trigger" onclick="toggleCareFilterDropdown()" aria-expanded="false" aria-label="Filter healthcare network">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--emerald-dark);">tune</span>
+              <span id="selectedFilterLabel">All Network</span>
+              <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+            </button>
+
+            <!-- Dropdown Menu Options -->
+            <div class="care-filter-dropdown-menu" role="region" aria-label="Care Filter Categories">
+              <button type="button" class="filter-option-item active" onclick="selectCareFilter('all', 'All Network', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">grid_view</span> All Network
+              </button>
+              <button type="button" class="filter-option-item" onclick="selectCareFilter('hospital', 'Hospitals & Clinics', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">local_hospital</span> Hospitals & Clinics
+              </button>
+              <button type="button" class="filter-option-item" onclick="selectCareFilter('pharmacy', 'Pharmacies', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">pill</span> Pharmacies
+              </button>
+              <button type="button" class="filter-option-item" onclick="selectCareFilter('specialist', 'Specialist Doctors', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">stethoscope</span> Specialist Doctors
+              </button>
+              <button type="button" class="filter-option-item" onclick="selectCareFilter('lab', 'Diagnostics & Labs', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">science</span> Diagnostics & Labs
+              </button>
+              <button type="button" class="filter-option-item" onclick="selectCareFilter('wellness', 'Wellness & Articles', this)">
+                <span class="material-symbols-outlined" style="font-size: 16px;">spa</span> Wellness & Articles
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-innovative-banner" onclick="openModal('providerRegisterModal')">
+        <div class="innovative-left">
+          <span class="material-symbols-outlined icon" aria-hidden="true">stethoscope</span>
+          <div>
+            <h4>Are you a Healthcare Provider?</h4>
+            <p>Join our network of trusted clinics, pharmacies & doctors.</p>
+          </div>
+        </div>
+        <span class="badge-new">Partner Up</span>
+      </section>
+
+      <!-- 5. Provider List -->
+      <section class="bills-section-title">
+        <div>
+          <h3>Trusted Care Providers</h3>
+          <p>Verified hospitals, doctors, and pharmacies near you</p>
+        </div>
+        <span class="count-tag" id="merchantCountTag">6 Providers Active</span>
+      </section>
+
+      <div class="restaurant-card-list" id="providerCardList">
+
+        <!-- Provider 1: St. Nicholas Hospital -->
+        <article class="restaurant-option-card" data-category="hospital" data-cuisine="hospital specialist">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80" alt="Hospital building" class="vendor-banner-img">
+            <span class="vendor-type-tag hospital-tag">Hospital</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>St. Nicholas Hospital</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.8 <span class="rating-count">(320+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item"><span class="material-symbols-outlined" style="font-size: 14px;">location_on</span> 2.4 km away</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item er-badge">24/7 ER Available</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openHospitalServiceModal('General Checkup', 15000, 'St. Nicholas Hospital', 'https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=400&q=80', 'Comprehensive physical evaluation and vital signs screening.')">
+                <span>General Checkup</span>
+                <span class="dish-price">₦15,000</span>
+              </div>
+              <div class="popular-dish-pill" onclick="openHospitalServiceModal('Emergency ER Visit', 25000, 'St. Nicholas Hospital', 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=400&q=80', 'Immediate trauma care and stabilization by emergency physicians.')">
+                <span>Emergency ER Visit</span>
+                <span class="dish-price">₦25,000</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openHospitalCatalog('St. Nicholas Hospital')">
+                <span>View Hospital Services & Doctors</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Provider 2: HealthPlus Pharmacy -->
+        <article class="restaurant-option-card" data-category="pharmacy" data-cuisine="pharmacy wellness">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&w=600&q=80" alt="Pharmacy shelves" class="vendor-banner-img">
+            <span class="vendor-type-tag pharmacy-tag">Pharmacy</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>HealthPlus Pharmacy</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.9 <span class="rating-count">(180+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item"><span class="material-symbols-outlined" style="font-size: 14px;">location_on</span> 0.8 km away</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item delivery-tag">₦500 Dispatch</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openPharmacyMedModal('Malaria Treatment Kit', 4500, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80', 'Complete anti-malaria course with rapid antigen test strip.')">
+                <span>Malaria Treatment Kit</span>
+                <span class="dish-price">₦4,500</span>
+              </div>
+              <div class="popular-dish-pill" onclick="openPharmacyMedModal('Vitamin C & Zinc', 2500, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1550572017-edb7fd9062cb?auto=format&fit=crop&w=400&q=80', 'Daily immunity support capsules (100 tablets).')">
+                <span>Vitamin C & Zinc</span>
+                <span class="dish-price">₦2,500</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openPharmacyCatalog('HealthPlus Pharmacy')">
+                <span>Order Medications & Rx</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Provider 3: Dr. Rita Okon (Updated Image) -->
+        <article class="restaurant-option-card" data-category="specialist" data-cuisine="specialist telemed">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Doctor profile" class="vendor-banner-img">
+            <span class="vendor-type-tag telemed-tag">Specialist</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>Dr. Rita Okon</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.9 <span class="rating-count">(410+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item">General Practitioner</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item online-tag">Online Now</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openDoctorProfile('Dr. Rita Okon', 'General Practitioner', 5000, 'https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D', 'MDCN: 42198 • 12 Years Exp • English, Yoruba')">
+                <span>Standard Video Consult</span>
+                <span class="dish-price">₦5,000</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openDoctorProfile('Dr. Rita Okon', 'General Practitioner', 5000, 'https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D', 'MDCN: 42198 • 12 Years Exp • English, Yoruba')">
+                <span>View Profile & Schedule Consult</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Provider 4: Kapita Diagnostics Lab -->
+        <article class="restaurant-option-card" data-category="lab" data-cuisine="lab">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=600&q=80" alt="Diagnostic laboratory" class="vendor-banner-img">
+            <span class="vendor-type-tag hospital-tag">Lab</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>Kapita Diagnostics Lab</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.7 <span class="rating-count">(215+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item"><span class="material-symbols-outlined" style="font-size: 14px;">location_on</span> 1.5 km away</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item delivery-tag">Home Sample Pickup</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openLabTestModal('Comprehensive Lipid Panel', 12500, 'Kapita Diagnostics Lab', 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80', 'Requires 8-12 hours fasting before sample collection.')">
+                <span>Lipid Panel Test</span>
+                <span class="dish-price">₦12,500</span>
+              </div>
+              <div class="popular-dish-pill" onclick="openLabTestModal('Full Malaria & Widal Test', 8000, 'Kapita Diagnostics Lab', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80', 'No fasting required. Results delivered in 4 hours.')">
+                <span>Malaria & Widal</span>
+                <span class="dish-price">₦8,000</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openLabCatalog('Kapita Diagnostics Lab')">
+                <span>View Lab Test Menu</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Provider 5: Evercare Hospital Lekki -->
+        <article class="restaurant-option-card" data-category="hospital" data-cuisine="hospital">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=600&q=80" alt="Modern hospital facility" class="vendor-banner-img">
+            <span class="vendor-type-tag hospital-tag">Hospital</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>Evercare Hospital Lekki</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.9 <span class="rating-count">(530+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item"><span class="material-symbols-outlined" style="font-size: 14px;">location_on</span> 4.1 km away</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item er-badge">Multi-Specialty Care</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openHospitalServiceModal('Cardiology Consultation', 30000, 'Evercare Hospital Lekki', 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=400&q=80', 'Specialized heart health evaluation with ECG review.')">
+                <span>Cardiology Consult</span>
+                <span class="dish-price">₦30,000</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openHospitalCatalog('Evercare Hospital Lekki')">
+                <span>View Hospital Services</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Provider 6: Zen Wellness Hub -->
+        <article class="restaurant-option-card" data-category="wellness" data-cuisine="wellness">
+          <div class="card-media-banner">
+            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80" alt="Wellness and yoga" class="vendor-banner-img">
+            <span class="vendor-type-tag telemed-tag">Wellness</span>
+          </div>
+
+          <div class="card-content-body">
+            <div class="vendor-title-row">
+              <h4>Zen Wellness & Nutrition</h4>
+              <span class="vendor-rating">
+                <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.8 <span class="rating-count">(140+)</span>
+              </span>
+            </div>
+
+            <div class="vendor-meta-row">
+              <span class="meta-item">Holistic Care & Coaching</span>
+              <span class="meta-dot">•</span>
+              <span class="meta-item online-tag">Virtual / In-Person</span>
+            </div>
+
+            <div class="vendor-popular-items desktop-only">
+              <div class="popular-dish-pill" onclick="openWellnessProgramModal('Dietary & Nutrition Plan', 10000, 'Zen Wellness Hub', 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=400&q=80', 'Custom 4-week meal plan crafted by clinical dietitians.')">
+                <span>Nutrition Plan</span>
+                <span class="dish-price">₦10,000</span>
+              </div>
+            </div>
+
+            <div class="vendor-card-actions">
+              <button type="button" class="btn-see-menu" onclick="openWellnessCatalog('Zen Wellness Hub')">
+                <span>Explore Wellness Programs</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Action Bar: Content-Based Active Dispatch Toggle & Book Appointment -->
+      <div class="care-action-bar">
+        <button type="button" class="dispatch-toggle-btn" id="dispatchToggleBtn" onclick="toggleActiveDispatch()" aria-expanded="false" aria-controls="activeShipmentCard">
+          <div class="toggle-btn-left">
+            <span class="material-symbols-outlined live-pulse-icon">local_shipping</span>
+            <span>Active Dispatch</span>
+            <span class="dispatch-badge-count">1</span>
+          </div>
+          <span class="material-symbols-outlined toggle-chevron" id="dispatchChevron">expand_more</span>
+        </button>
+
+        <button type="button" class="confirm-service-btn" onclick="openModal('appointmentModal')">
+          <span>Book New Appointment</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">calendar_add_on</span>
+        </button>
+      </div>
+
+      <!-- Collapsible Active Dispatch & Deliveries Section -->
+      <div class="active-shipment-collapse-wrapper" id="activeShipmentCollapse">
+        <div class="active-shipment-card" id="activeShipmentCard">
+          <div class="shipment-status-header">
+            <div class="status-badge live">
+              <div class="pulse-dot"></div>
+              <span>RIDER EN ROUTE</span>
+            </div>
+            <span class="tracking-code">Order #MED-8842</span>
+          </div>
+
+          <div class="tracking-progress-timeline">
+            <div class="timeline-step completed">
+              <div class="step-circle">✓</div>
+              <span>Verified</span>
+            </div>
+            <div class="timeline-step completed">
+              <div class="step-circle">✓</div>
+              <span>Packed</span>
+            </div>
+            <div class="timeline-step active">
+              <div class="step-circle">
+                <span class="material-symbols-outlined" style="font-size: 16px;">two_wheeler</span>
+              </div>
+              <span>On the Way</span>
+            </div>
+            <div class="timeline-step">
+              <div class="step-circle">•</div>
+              <span>Delivered</span>
+            </div>
+          </div>
+
+          <div class="courier-driver-box">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Rider Sani Ibrahim" class="driver-img">
+            <div class="driver-details">
+              <h4>Sani Ibrahim</h4>
+              <p>Pharmacy Dispatch Rider • MedPlus Logistics</p>
+            </div>
+            <button type="button" class="driver-call-btn" aria-label="Call Rider" onclick="alert('Calling Dispatch Rider: Sani Ibrahim (+234-800-KAPITA)...')">
+              <span class="material-symbols-outlined" aria-hidden="true">call</span>
+            </button>
+          </div>
+
+          <div class="proof-of-delivery-box">
+            <span class="material-symbols-outlined icon" aria-hidden="true">key</span>
+            <div>Give Secure Health PIN to Rider: <span class="otp-code">5924</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Featured Services & Wellness (Horizontal Scrollable Row) -->
+      <section class="bills-section-title">
+        <div>
+          <h3 id="healthArticlesSection">Featured Services & Wellness</h3>
+          <p>Direct bookings and essential health kits</p>
+        </div>
+        <span class="count-tag">6 Items Available</span>
+      </section>
+
+      <div class="wellness-scroll-row">
+        <!-- Item 1: Lipid Panel -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80" alt="Lab Test" class="wellness-img">
+            <span class="wellness-tag">Lab Test</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Comprehensive Lipid Panel</h4>
+              <p>Full cholesterol and glucose blood test at your home.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦12,500</span>
+              <button type="button" class="wellness-add-btn" aria-label="Book Lab Test" onclick="openLabTestModal('Comprehensive Lipid Panel', 12500, 'Kapita Diagnostics', 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80', 'Requires 8-12 hours fasting before sample collection.')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 2: First-Aid Kit -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80" alt="First Aid Kit" class="wellness-img">
+            <span class="wellness-tag">Emergency</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Emergency First-Aid Kit</h4>
+              <p>Essential trauma, wound care, and burn treatments.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦8,800</span>
+              <button type="button" class="wellness-add-btn" aria-label="Buy First Aid Kit" onclick="openPharmacyMedModal('Emergency First-Aid Kit', 8800, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80', 'Home medical kit containing sterile gauze, antiseptics, and bandages.')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 3: Malaria Treatment Kit -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80" alt="Malaria Kit" class="wellness-img">
+            <span class="wellness-tag">Pharmacy</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Malaria Treatment Kit</h4>
+              <p>Complete anti-malaria course with rapid test strip.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦4,500</span>
+              <button type="button" class="wellness-add-btn" aria-label="Buy Malaria Kit" onclick="openPharmacyMedModal('Malaria Treatment Kit', 4500, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80', 'Complete anti-malaria course with rapid antigen test strip.')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 4: Telemedicine Quick Consult (Updated Image for Dr. Rita Okon) -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Telemed Consult" class="wellness-img">
+            <span class="wellness-tag">Telemed</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Standard Video Consult</h4>
+              <p>Instant video check-in with verified general practitioners.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦5,000</span>
+              <button type="button" class="wellness-add-btn" aria-label="Book Consult" onclick="openDoctorProfile('Dr. Rita Okon', 'General Practitioner', 5000, 'https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D', 'MDCN: 42198 • 12 Years Exp • English, Yoruba')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 5: Vitamin C & Immunity Kit -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1550572017-edb7fd9062cb?auto=format&fit=crop&w=400&q=80" alt="Vitamins" class="wellness-img">
+            <span class="wellness-tag">Wellness</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Vitamin C & Zinc Immunity Pack</h4>
+              <p>Daily dietary supplements to boost immune response.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦2,500</span>
+              <button type="button" class="wellness-add-btn" aria-label="Buy Immunity Pack" onclick="openPharmacyMedModal('Vitamin C & Zinc', 2500, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1550572017-edb7fd9062cb?auto=format&fit=crop&w=400&q=80', 'Daily immunity support capsules (100 tablets).')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 6: Nutrition & Diet Plan -->
+        <article class="wellness-item-card">
+          <div class="wellness-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=400&q=80" alt="Nutrition Plan" class="wellness-img">
+            <span class="wellness-tag">Nutrition</span>
+          </div>
+          <div class="wellness-card-body">
+            <div class="wellness-info">
+              <h4>Personalized Diet Consultation</h4>
+              <p>Custom meal planning with certified clinical dietitians.</p>
+            </div>
+            <div class="wellness-footer">
+              <span class="wellness-price">₦10,000</span>
+              <button type="button" class="wellness-add-btn" aria-label="Book Dietitian" onclick="openWellnessProgramModal('Dietary & Nutrition Plan', 10000, 'Zen Wellness Hub', 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=400&q=80', 'Custom 4-week meal plan crafted by clinical dietitians.')">
+                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 8. Mobile Bottom Navigation Dock -->
+  <nav class="market-nav-bar" aria-label="Mobile Bottom Dock">
+    <button type="button" class="market-nav-btn active" onclick="switchDockTab('explore', this)">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">health_and_safety</span>
+      <span class="nav-text">Care</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="focusSearchInput(this)">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">search</span>
+      <span class="nav-text">Search</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="openModal('sosModal')" style="color: #ef4444;">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">ambulance</span>
+      <span class="nav-text" style="color: #ef4444; font-weight: bold;">SOS</span>
+    </button>
+    <button type="button" class="market-nav-btn" onclick="openAppointmentsListModal()">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">medical_services</span>
+      <span class="nav-text">Bookings</span>
+    </button>
+  </nav>
+
+  <!-- ==========================================
+      MODAL DIALOG OVERLAYS (UNIFIED STYLING)
+      ========================================== -->
+
+  <!-- MODAL: Appointment Booking -->
+  <div class="wallet-modal-overlay" id="appointmentModal" role="dialog" aria-modal="true" aria-labelledby="resModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="resModalTitle">Book Consultation</h3>
+          <p class="modal-sub">Schedule an in-person visit or telemedicine call.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('appointmentModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form onsubmit="handleAppointmentSubmit(event)">
+        <!-- Custom Styled Dropdown Wrapper for Doctor / Hospital -->
+        <div class="form-group">
+          <label>Select Doctor / Hospital</label>
+          <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalProviderDropdown">
+            <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalProviderDropdown')" aria-expanded="false">
+              <span id="selectedModalProviderLabel">Dr. Rita Okon (Video Consult) - ₦5,000</span>
+              <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="care-filter-dropdown-menu" role="region">
+              <button type="button" class="filter-option-item active" onclick="selectModalProvider('Dr. Rita Okon (Video Consult)', 'Dr. Rita Okon (Video Consult) - ₦5,000', this)">Dr. Rita Okon (Video Consult) - ₦5,000</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProvider('St. Nicholas Hospital (In-Person)', 'St. Nicholas Hospital (In-Person) - ₦15,000', this)">St. Nicholas Hospital (In-Person) - ₦15,000</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProvider('Evercare Hospital Lekki (Cardiology)', 'Evercare Hospital Lekki (Cardiology) - ₦30,000', this)">Evercare Hospital Lekki (Cardiology) - ₦30,000</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProvider('Kapita Diagnostics Lab (Home Visit)', 'Kapita Diagnostics Lab (Home Visit) - ₦12,500', this)">Kapita Diagnostics Lab (Home Visit) - ₦12,500</button>
+            </div>
+            <input type="hidden" id="resProviderSelect" value="Dr. Rita Okon (Video Consult)">
+          </div>
+        </div>
+
+        <div class="reservation-grid">
+          <div class="form-group">
+            <label for="resDate">Preferred Date</label>
+            <input type="date" id="resDate" class="form-control" value="2026-10-25" required>
+          </div>
+          <div class="form-group">
+            <label for="resTime">Preferred Time</label>
+            <input type="time" id="resTime" class="form-control" value="10:00" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="resReason">Reason for Visit / Symptoms</label>
+          <input type="text" id="resReason" class="form-control" placeholder="e.g. Routine checkup, severe headache" required>
+        </div>
+
+        <div class="fare-calculation-summary">
+          <div class="summary-row">
+            <span>Consultation Fee</span>
+            <strong id="appointmentFeeDisplay">₦5,000.00</strong>
+          </div>
+          <div class="summary-row">
+            <span>Insurance Match</span>
+            <strong style="color: var(--emerald-dark);">HMO Eligible</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full">Confirm Consultation Booking</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Doctor Profile & Day/Time Scheduling -->
+  <div class="wallet-modal-overlay" id="doctorProfileModal" role="dialog" aria-modal="true" aria-labelledby="docProfileName">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="docProfileName">Doctor Profile</h3>
+          <p class="modal-sub" id="docProfileSpecialty">Specialist Consultation & Schedule</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('doctorProfileModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
+        <img src="" id="docProfileImg" alt="Doctor" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--emerald);">
+        <div>
+          <h4 id="docProfileTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark);">Dr. Name</h4>
+          <p id="docProfileMeta" style="font-size: 12px; color: var(--text-muted);">MDCN & Credentials</p>
+          <span style="display: inline-block; background: #e6fdf4; color: var(--emerald-dark); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-top: 4px;">Verified Specialist</span>
+        </div>
+      </div>
+
+      <div style="background: var(--surface-gray); padding: 12px; border-radius: 10px; margin-bottom: 14px; font-size: 12px; color: var(--text-dark); line-height: 1.4;">
+        <strong>Clinical Focus:</strong> Primary care diagnostics, telemedicine consultations, chronic illness management, and preventative health counselling.
+      </div>
+
+      <!-- Schedule Consultation Form -->
+      <form onsubmit="confirmDoctorBooking(event)">
+        <div class="reservation-grid" style="margin-bottom: 12px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="docScheduleDate" style="font-size: 12px; font-weight: 700;">Select Date</label>
+            <input type="date" id="docScheduleDate" class="form-control" value="2026-10-25" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="docScheduleTime" style="font-size: 12px; font-weight: 700;">Select Time Slot</label>
+            <input type="time" id="docScheduleTime" class="form-control" value="11:00" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label>Consultation Mode</label>
+          <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalConsultDropdown">
+            <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalConsultDropdown')" aria-expanded="false">
+              <span id="selectedModalConsultLabel">Video Call (Secure HD)</span>
+              <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="care-filter-dropdown-menu" role="region">
+              <button type="button" class="filter-option-item active" onclick="selectModalConsult('Video Call', 'Video Call (Secure HD)', this)">Video Call (Secure HD)</button>
+              <button type="button" class="filter-option-item" onclick="selectModalConsult('Audio Call', 'Audio Call (Phone Check-in)', this)">Audio Call (Phone Check-in)</button>
+              <button type="button" class="filter-option-item" onclick="selectModalConsult('In-Person Visit', 'In-Person Visit (Clinic)', this)">In-Person Visit (Clinic)</button>
+            </div>
+            <input type="hidden" id="docConsultType" value="Video Call">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--surface-gray); padding: 10px 12px; border-radius: 10px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-muted);">Consultation Fee</div>
+            <div id="docProfilePrice" style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--emerald-dark);">₦5,000.00</div>
+          </div>
+          <span style="font-size: 11px; font-weight: 700; color: var(--emerald-dark);">HMO Covered</span>
+        </div>
+
+        <button type="submit" class="btn-primary w-full">
+          Confirm Scheduled Consultation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Pharmacy Medication Order -->
+  <div class="wallet-modal-overlay" id="pharmacyMedModal" role="dialog" aria-modal="true" aria-labelledby="medModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="medProviderTitle">Pharmacy Order</h3>
+          <p class="modal-sub">Secure Medication Checkout & Prescription Verification</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('pharmacyMedModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <img src="" id="medModalImg" alt="Medication" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
+      <h4 id="medModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Medication Name</h4>
+      <p id="medModalDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+      
+      <div id="medModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="rxUploadInput" style="font-size: 12px; font-weight: 700;">Upload Doctor's Prescription (Optional for OTC)</label>
+        <input type="file" id="rxUploadInput" class="form-control" style="font-size: 12px; padding: 6px;">
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: inline-flex; align-items: center; background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
+          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" onclick="adjustMedQty(-1)">-</button>
+          <span id="medModalQty" style="width: 36px; text-align: center; font-weight: 800; font-size: 14px;">1</span>
+          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" onclick="adjustMedQty(1)">+</button>
+        </div>
+        <span style="font-size: 11px; color: var(--text-muted);">Standard Delivery: 30-45 mins</span>
+      </div>
+
+      <button type="button" class="btn-primary w-full" onclick="confirmPharmacyOrder()">
+        Order Medication via Health Wallet
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Lab Test Booking -->
+  <div class="wallet-modal-overlay" id="labTestModal" role="dialog" aria-modal="true" aria-labelledby="labModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="labModalProvider">Diagnostics Lab</h3>
+          <p class="modal-sub">Home Sample Collection & Lab Test Booking</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('labTestModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <img src="" id="labModalImg" alt="Lab Test" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
+      <h4 id="labModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Test Name</h4>
+      <p id="labModalInstructions" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; background: #e6fdf4; padding: 8px; border-radius: 8px; color: var(--emerald-dark); font-weight: 600;"></p>
+
+      <div id="labModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+
+      <!-- Custom Styled Dropdown for Sample Collection -->
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label>Sample Collection Preference</label>
+        <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalLabDropdown">
+          <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalLabDropdown')" aria-expanded="false">
+            <span id="selectedModalLabLabel">Home Sample Pickup (Free Phlebotomist Visit)</span>
+            <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+          </button>
+          <div class="care-filter-dropdown-menu" role="region">
+            <button type="button" class="filter-option-item active" onclick="selectModalLab('Home Sample Pickup (Free Phlebotomist Visit)', 'Home Sample Pickup (Free Phlebotomist Visit)', this)">Home Sample Pickup (Free Phlebotomist Visit)</button>
+            <button type="button" class="filter-option-item" onclick="selectModalLab('Walk-in Lab Appointment', 'Walk-in Lab Appointment (Priority Queue)', this)">Walk-in Lab Appointment (Priority Queue)</button>
+          </div>
+          <input type="hidden" id="sampleCollectionType" value="Home Sample Pickup (Free Phlebotomist Visit)">
+        </div>
+      </div>
+
+      <button type="button" class="btn-primary w-full" onclick="confirmLabBooking()">
+        Book Lab Test & Phlebotomist
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Wellness Program & Nutrition -->
+  <div class="wallet-modal-overlay" id="wellnessProgramModal" role="dialog" aria-modal="true" aria-labelledby="wellnessModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="wellnessModalProvider">Zen Wellness Hub</h3>
+          <p class="modal-sub">Holistic Care & Clinical Nutrition Coaching</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('wellnessProgramModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <img src="" id="wellnessModalImg" alt="Wellness" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
+      <h4 id="wellnessModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Program Name</h4>
+      <p id="wellnessModalDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+
+      <div id="wellnessModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="wellnessGoalInput" style="font-size: 12px; font-weight: 700;">Primary Health Goal / Dietary Restrictions</label>
+        <input type="text" id="wellnessGoalInput" class="form-control" placeholder="e.g. Weight management, hypertension diet, stress relief" style="font-size: 12px;">
+      </div>
+
+      <button type="button" class="btn-primary w-full" onclick="confirmWellnessBooking()">
+        Enroll in Wellness Program
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Provider Registration -->
+  <div class="wallet-modal-overlay" id="providerRegisterModal" role="dialog" aria-modal="true" aria-labelledby="vendorRegTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="vendorRegTitle">Join Kapita Care Network</h3>
+          <p class="modal-sub">List your clinic, pharmacy or specialist services.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('providerRegisterModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form onsubmit="handleProviderRegistration(event)">
+        <div class="form-group">
+          <label for="vendorStoreName">Facility / Practitioner Name</label>
+          <input type="text" id="vendorStoreName" class="form-control" placeholder="e.g. Dr. John Doe or City Pharmacy" required>
+        </div>
+
+        <!-- Custom Styled Dropdown for Provider Type -->
+        <div class="form-group">
+          <label>Provider Type</label>
+          <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalProviderTypeDropdown">
+            <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalProviderTypeDropdown')" aria-expanded="false">
+              <span id="selectedModalProviderTypeLabel">Hospital / Clinic</span>
+              <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="care-filter-dropdown-menu" role="region">
+              <button type="button" class="filter-option-item active" onclick="selectModalProviderType('hospital', 'Hospital / Clinic', this)">Hospital / Clinic</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProviderType('pharmacy', 'Pharmacy', this)">Pharmacy</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProviderType('specialist', 'Specialist / Telemed Doctor', this)">Specialist / Telemed Doctor</button>
+              <button type="button" class="filter-option-item" onclick="selectModalProviderType('lab', 'Diagnostic Center', this)">Diagnostic Center</button>
+            </div>
+            <input type="hidden" id="vendorCategorySelect" value="hospital">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorAddress">Location / Address</label>
+          <input type="text" id="vendorAddress" class="form-control" placeholder="e.g. 14 Herbert Macaulay Way, Yaba" required>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorPhone">MDCN / License Number</label>
+          <input type="text" id="vendorPhone" class="form-control" placeholder="Verification ID" required>
+        </div>
+
+        <div class="fare-calculation-summary">
+          <div class="summary-row">
+            <span>Network Setup</span>
+            <strong>Free</strong>
+          </div>
+          <div class="summary-row">
+            <span>Verification Process</span>
+            <strong style="color: var(--emerald-dark);">Required</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full" style="margin-top: 16px;">Submit Application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AI Symptom Checker Triage -->
+  <div class="wallet-modal-overlay" id="triageModal" role="dialog" aria-modal="true" aria-labelledby="triageTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="triageTitle">AI Symptom Assistant</h3>
+          <p class="modal-sub">Non-diagnostic triage to guide you to the right care.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('triageModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form onsubmit="handleTriageAnalysis(event)">
+        <div class="form-group">
+          <label for="triageTemp">Current Body Temperature (Optional)</label>
+          <input type="text" id="triageTemp" class="form-control" placeholder="e.g. 38.5 °C">
+        </div>
+
+        <div class="form-group">
+          <label>Primary Symptom</label>
+          <div class="custom-select-wrapper" id="triageCustomSelect">
+            <div class="custom-select-trigger" onclick="toggleCustomDropdown(event)">
+              <span id="selectedTriageLabel">Describe Symptoms...</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+            </div>
+
+            <div class="custom-options-menu" id="triageOptionsMenu">
+              <div class="custom-option-item selected" onclick="selectTriageOption('fever', 'Fever & Chills')">Fever & Chills</div>
+              <div class="custom-option-item" onclick="selectTriageOption('headache', 'Severe Headache')">Severe Headache</div>
+              <div class="custom-option-item" onclick="selectTriageOption('stomach', 'Stomach Pain & Nausea')">Stomach Pain & Nausea</div>
+              <div class="custom-option-item" onclick="selectTriageOption('cough', 'Persistent Cough')">Persistent Cough</div>
+            </div>
+
+            <input type="hidden" id="triageSymptomValue" value="fever">
+          </div>
+        </div>
+
+        <div id="triageResultBox" style="display: none; background: var(--surface-gray); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px dashed var(--emerald);">
+          <h4 id="triageResultTitle" style="font-size: 14px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 2px;">Recommendation</h4>
+          <p id="triageResultDetails" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+          <button type="button" class="btn-primary w-full" style="font-size: 12px; padding: 10px;" onclick="proceedTriageBooking()">Book Recommended Consult</button>
+        </div>
+
+        <button type="submit" id="triageAnalyzeBtn" class="btn-primary w-full">Analyze Symptoms</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Emergency SOS Dispatch -->
+  <div class="wallet-modal-overlay" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosTitle">
+    <div class="wallet-modal-card" style="border-top: 6px solid #ef4444;">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="sosTitle" style="color: #ef4444;">Emergency SOS Dispatch</h3>
+          <p class="modal-sub">Dispatch the nearest active ambulance to your location.</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('sosModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="fare-calculation-summary" style="margin-bottom: 16px;">
+        <h4 style="font-size: 14px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Live Paramedic Matcher</h4>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">We found <strong>Ambulance Unit 4</strong> (St. Nicholas Hospital) 1.2km away from your GPS location.</p>
+        <div style="font-size: 12px; color: #ef4444; font-weight: 700;">ETA: 4 Minutes</div>
+      </div>
+
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; text-align: center;">
+        Warning: False emergency requests may result in account penalties.
+      </p>
+
+      <button type="button" class="btn-primary w-full" style="background: #ef4444; color: white;" onclick="confirmSOSDispatch()">
+        Confirm Immediate Dispatch
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Medical History -->
+  <div class="wallet-modal-overlay" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="historyModalTitle">Medical & Rx History</h3>
+          <p class="modal-sub">Your recent orders and consultation history</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('historyModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="history-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
+        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
+            <span>HealthPlus Pharmacy</span>
+            <span style="color: var(--emerald-dark);">₦4,500.00</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Malaria Treatment Kit • Delivered Oct 6, 2026</p>
+          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderService('Malaria Treatment Kit', 4500)">
+            Reorder Rx
+          </button>
+        </div>
+
+        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
+            <span>Dr. Rita Okon</span>
+            <span style="color: var(--emerald-dark);">₦5,000.00</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Video Consultation • Completed Oct 2, 2026</p>
+          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderService('Standard Video Consult', 5000)">
+            Book Follow-up
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: My Appointments List -->
+  <div class="wallet-modal-overlay" id="appointmentsListModal" role="dialog" aria-modal="true" aria-labelledby="appointmentsListTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="appointmentsListTitle">My Consultations</h3>
+          <p class="modal-sub">Manage your upcoming doctor visits</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('appointmentsListModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div id="appointmentsListContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Full Provider Catalog -->
+  <div class="wallet-modal-overlay" id="fullCatalogModal" role="dialog" aria-modal="true" aria-labelledby="fullCatalogProviderName">
+    <div class="wallet-modal-card" style="padding: 20px 16px;">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="fullCatalogProviderName">Provider Catalog</h3>
+          <p class="modal-sub" id="fullCatalogSub">Select services or medications</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('fullCatalogModal')" aria-label="Close modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <div class="full-menu-list" id="fullCatalogList"></div>
+    </div>
+  </div>
+
+  <!-- JavaScript State & Action Controller -->
+  <script src="src/pages/care.js"></script>
+
+  <div id="toastNotificationContainer"></div>
+</body>
+</html>
