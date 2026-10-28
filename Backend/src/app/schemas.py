@@ -1,8 +1,4 @@
-"""
-Request/response schemas for the endpoints js/api.js calls.
-`ninja.Schema` is a thin wrapper over Pydantic — anything Pydantic can do
-(validators, computed fields) works here.
-"""
+
 import re
 from datetime import date
 from decimal import Decimal
@@ -41,6 +37,10 @@ class TokenOut(Schema):
 
 class RefreshIn(Schema):
     refresh_token: str
+
+
+class GoogleLoginIn(Schema):
+    credential: str  # Google ID token JWT from the browser
 
 
 # ---- profile ------------------------------------------------------------

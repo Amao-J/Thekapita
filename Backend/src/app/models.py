@@ -77,6 +77,9 @@ class LedgerEntry(models.Model):
         TRANSFER_OUT = "transfer_out"
         TRANSFER_IN = "transfer_in"
         FUNDING = "funding"
+        ESCROW_HOLD = "escrow_hold"        # buyer -> escrow wallet at checkout
+        ESCROW_RELEASE = "escrow_release"  # escrow -> seller on delivery
+        ESCROW_REFUND = "escrow_refund"    # escrow -> buyer on cancellation
 
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="entries")
     amount = models.DecimalField(max_digits=14, decimal_places=2)
@@ -135,3 +138,17 @@ class UserSettings(models.Model):
     messages = models.BooleanField(default=True)
     updates = models.BooleanField(default=True)
     offers = models.BooleanField(default=False)
+
+
+class SocialAccount(models.Model):
+    """Links a user to an external identity by the provider's stable identifier."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="social_accounts")
+    provider = models.CharField(max_length=20, default="google")
+    uid = models.CharField(max_length=255)
+    email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["provider", "uid"], name="uniq_social_uid")
+        ]
