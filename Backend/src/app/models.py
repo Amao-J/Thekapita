@@ -80,6 +80,8 @@ class LedgerEntry(models.Model):
         ESCROW_HOLD = "escrow_hold"        # buyer -> escrow wallet at checkout
         ESCROW_RELEASE = "escrow_release"  # escrow -> seller on delivery
         ESCROW_REFUND = "escrow_refund"    # escrow -> buyer on cancellation
+        RIDE_CHARGE = "ride_charge"
+        RIDE_REFUND = "ride_refund"
 
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="entries")
     amount = models.DecimalField(max_digits=14, decimal_places=2)
@@ -152,3 +154,68 @@ class SocialAccount(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["provider", "uid"], name="uniq_social_uid")
         ]
+
+
+class RideBooking(models.Model):
+    class RideType(models.TextChoices):
+        GO = "kapita_go", "Kapita Go"
+        COMFORT = "kapita_comfort", "Kapita Comfort"
+        KEKE_EXPRESS = "kapita_keke_express", "Kapita Keke Express"
+        EXECUTIVE = "kapita_executive", "Kapita Executive"
+
+    class Status(models.TextChoices):
+        REQUESTED = "requested", "Requested"
+        ASSIGNED = "assigned", "Driver Assigned"
+        CANCELLED = "cancelled", "Cancelled"
+        COMPLETED = "completed", "Completed"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="ride_bookings"
+    )
+    reference = models.CharField(max_length=32, unique=True)
+    ride_type = models.CharField(max_length=32, choices=RideType.choices)
+    pickup = models.CharField(max_length=255)
+    destination = models.CharField(max_length=255)
+    fare = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.REQUESTED)
+    driver = models.ForeignKey(
+        "RideDriver", null=True, blank=True, on_delete=models.PROTECT, related_name="rides"
+    )
+    assigned_at = models.DateTimeField(null=True, blank=True)
+    charged_at = models.DateTimeField(null=True, blank=True)
+    refunded_at = models.DateTimeField(null=True, blank=True)
+    idempotency_key = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "idempotency_key"], name="uniq_ride_user_idem")
+        ]
+
+
+class RideDriver(models.Model):
+    name = models.CharField(max_length=120)
+    phone = models.CharField(max_length=20)
+    vehicle = models.CharField(max_length=100)
+    plate_number = models.CharField(max_length=20, unique=True)
+    ride_types = models.JSONField(default=list)
+    is_active = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        super().clean()
+        allowed_types = set(RideBooking.RideType.values)
+        if (
+            not isinstance(self.ride_types, list)
+            or any(not isinstance(ride_type, str) for ride_type in self.ride_types)
+            or not set(self.ride_types).issubset(allowed_types)
+        ):
+            from django.core.exceptions import ValidationError
+
+            raise ValidationError({"ride_types": "Choose only supported ride types."})
+
+    def __str__(self):
+        return f"{self.name} ({self.plate_number})"

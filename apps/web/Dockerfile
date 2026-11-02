@@ -22,4 +22,4 @@ FROM nginx:1.27-alpine
 COPY apps/web/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 
-COPY --from=build /app/apps/web/src/pages/bills.js /app/apps/web/src/pages/food.js /app/apps/web/src/pages/food-vendor.js /app/apps/web/src/pages/ride.js /usr/share/nginx/html/src/pages/
+COPY --from=build /app/apps/web/src/pages/bills.js /app/apps/web/src/pages/food.js /app/apps/web/src/pages/food-vendor.js /app/apps/web/src/pages/ride.js /app/apps/web/src/pages/care.js /app/apps/web/src/pages/care-provider.js /usr/share/nginx/html/src/pages/

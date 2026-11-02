@@ -22,32 +22,34 @@
       <div class="back-btn-circle"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></div>
       <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #008a57;">Live Ride</span></span>
     </div>
-    <div class="status-badge live" role="status" aria-live="polite"><span class="pulse-dot" aria-hidden="true"></span> DRIVER ARRIVING</div>
+    <div id="rideStatusBadge" class="status-badge live" role="status" aria-live="polite"><span class="pulse-dot" aria-hidden="true"></span> REQUEST SUBMITTED</div>
   </header>
 
   <main id="main-content" class="ride-main-container" tabindex="-1">
     <div class="ride-content-wrapper">
 
-      <!-- Simulated Live GPS Radar Screen -->
-      <div class="gps-map-container" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; height: 260px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid #334155;" role="img" aria-label="Live GPS Map showing vehicle approaching">
-        <div class="radar-pulse-ring" style="position: absolute; width: 180px; height: 180px; border: 2px dashed rgba(0,208,132,0.3); border-radius: 50%;"></div>
+      <!-- Driver tracking becomes available after a driver is assigned. -->
+      <div class="gps-map-container" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; height: 260px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid #334155;" role="img" aria-label="Ride request status">
         <div class="radar-center-marker" style="z-index: 2; text-align: center; color: #ffffff;">
-          <span class="material-symbols-outlined" style="font-size: 36px; color: #00d084;" aria-hidden="true">directions_car</span>
-          <p style="font-size: 12px; margin-top: 4px; font-weight: 600;">Toyota Corolla (KJA-482-AB) • 2 Mins Away</p>
+          <span class="material-symbols-outlined" style="font-size: 36px; color: #00d084;" aria-hidden="true">near_me</span>
+          <p id="rideRequestStatus" style="font-size: 12px; margin-top: 4px; font-weight: 600;">Loading ride request…</p>
         </div>
       </div>
 
-      <!-- Driver & Vehicle Profile Details -->
+      <!-- Driver details appear after a driver has accepted the request. -->
       <div class="active-shipment-card" style="margin-bottom: 20px;">
         <div class="courier-driver-box" style="margin-bottom: 0;">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=60" alt="Emeka Okafor Driver Photo" class="driver-img" />
           <div class="driver-details">
-            <h2>Emeka Okafor <span class="rating" aria-label="4.92 stars rating">★ 4.92</span></h2>
-            <p>Kapita Go • Silver Toyota Corolla</p>
+            <h2 id="rideType">Ride</h2>
+            <p>Reference: <span id="rideRequestReference"></span></p>
           </div>
-          <button type="button" class="driver-call-btn" aria-label="Call Emeka Okafor" onclick="alert('Calling Emeka Okafor (+234 803 111 2233)...')">
-            <span class="material-symbols-outlined" aria-hidden="true">call</span>
-          </button>
+          <div id="rideDriverDetails" class="driver-details" hidden>
+            <p><strong id="rideDriverName"></strong></p>
+            <p id="rideDriverVehicle"></p>
+            <a id="rideDriverPhone" class="driver-call-btn" aria-label="Call assigned driver">
+              <span class="material-symbols-outlined" aria-hidden="true">call</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -60,10 +62,10 @@
         </div>
         <div class="inputs-column">
           <div class="input-row" style="background: transparent; border: none; padding: 0;">
-            <div style="font-size: 12px; color: #475569;">Pickup: <strong>12 Lekki Phase 1, Lagos</strong></div>
+            <div style="font-size: 12px; color: #475569;">Pickup: <strong id="ridePickup"></strong></div>
           </div>
           <div class="input-row" style="background: transparent; border: none; padding: 0;">
-            <div style="font-size: 12px; color: #0f172a;">Dropoff: <strong>Victoria Island Tech Hub</strong></div>
+            <div style="font-size: 12px; color: #0f172a;">Dropoff: <strong id="rideDestination"></strong></div>
           </div>
         </div>
       </div>
@@ -71,21 +73,21 @@
       <!-- Payment & Fare Breakdown -->
       <div class="fare-calculation-summary" style="margin-bottom: 20px;">
         <div class="summary-row">
-          <span>Payment Method:</span>
-          <strong>Kapita Pay Wallet (₦245,500.00)</strong>
+          <span>Status:</span>
+          <strong id="rideFareStatus">Charged when a driver is assigned</strong>
         </div>
         <div class="summary-row highlight">
           <span>Total Fare:</span>
-          <strong style="color: #008a57;">₦2,200.00</strong>
+          <strong id="rideFare" style="color: #008a57;"></strong>
         </div>
       </div>
 
-      <!-- Complete Trip Trigger -->
-      <button type="button" class="confirm-service-btn" onclick="window.location.href='ride-rating.html'">
-        Simulate Arrive & Complete Trip
+      <button type="button" id="cancelRideRequestBtn" class="confirm-service-btn" onclick="cancelActiveRideRequest()">
+        Cancel Ride Request
       </button>
 
     </div>
   </main>
+  <script src="src/pages/ride.js"></script>
 </body>
 </html>

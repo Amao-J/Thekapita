@@ -3,9 +3,19 @@
    ========================================== */
 
 const API_CONFIG = {
-  baseUrl: window.KAPITA_API_BASE_URL || 'https://api.thekapita.com/v1',
+  baseUrl: window.KAPITA_API_BASE_URL || (
+    ['localhost', '127.0.0.1'].includes(window.location.hostname)
+      ? 'http://127.0.0.1:8000/api'
+      : 'https://api.thekapita.com/api'
+  ),
   timeoutMs: 10000,
-  authToken: localStorage.getItem('kapita_token') || 'demo_bearer_token'
+  authToken: (() => {
+    try {
+      return JSON.parse(localStorage.getItem('kapita.session.v1') || '{}').accessToken;
+    } catch {
+      return null;
+    }
+  })()
 };
 
 let currentMainService = 'ride';
@@ -17,6 +27,7 @@ let deliverySpeedTier = 'standard';
 let splitCoRidersCount = 1;
 let isOnline = navigator.onLine;
 let lastFailedAction = null;
+let rideRequestKey = null;
 
 // Leaflet Map Global Handles
 let trackingMap = null;
@@ -25,9 +36,111 @@ let routePolyline = null;
 
 document.addEventListener('DOMContentLoaded', function () {
   initNetworkListeners();
-  fetchWalletBalance();
-  setupCoRiderButtons();
+  if (document.getElementById('rideOriginInput')) {
+    fetchWalletBalance();
+    setupCoRiderButtons();
+  } else {
+    renderActiveRideRequest();
+  }
 });
+
+function renderActiveRideRequest() {
+  const status = document.getElementById('rideRequestStatus');
+  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
+  if (!booking) {
+    if (status) status.textContent = 'No ride request was found. Return to Ride to book one.';
+    const cancelButton = document.getElementById('cancelRideRequestBtn');
+    if (cancelButton) cancelButton.disabled = true;
+    return;
+  }
+
+  document.getElementById('rideRequestReference').textContent = booking.reference;
+  document.getElementById('ridePickup').textContent = booking.pickup;
+  document.getElementById('rideDestination').textContent = booking.destination;
+  document.getElementById('rideType').textContent = booking.ride_type.replaceAll('_', ' ');
+  document.getElementById('rideFare').textContent = `₦${Number(booking.fare).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+  if (status) {
+    status.textContent = ({
+      requested: 'Your request is queued until a compatible driver is available.',
+      assigned: 'A driver accepted your request. Your wallet has been charged.',
+      cancelled: booking.refunded_at ? 'Ride cancelled. The fare has been refunded to your wallet.' : 'Ride request cancelled.',
+      completed: 'This ride has been completed.',
+    })[booking.status] || 'Ride status updated.';
+  }
+  const badge = document.getElementById('rideStatusBadge');
+  const statuses = {
+    requested: 'WAITING FOR DRIVER',
+    assigned: 'DRIVER ASSIGNED',
+    cancelled: 'CANCELLED',
+    completed: 'COMPLETED',
+  };
+  if (badge) {
+    badge.textContent = statuses[booking.status] || booking.status.toUpperCase();
+    badge.classList.toggle('live', booking.status === 'assigned');
+  }
+  const driverDetails = document.getElementById('rideDriverDetails');
+  if (driverDetails) {
+    driverDetails.hidden = !booking.driver;
+    if (booking.driver) {
+      document.getElementById('rideDriverName').textContent = booking.driver.name;
+      document.getElementById('rideDriverVehicle').textContent =
+        `${booking.driver.vehicle} · ${booking.driver.plate_number}`;
+      document.getElementById('rideDriverPhone').href = `tel:${booking.driver.phone}`;
+    }
+  }
+  const fareStatus = document.getElementById('rideFareStatus');
+  if (fareStatus) {
+    fareStatus.textContent = booking.charged
+      ? 'Charged to Kapita Pay Wallet'
+      : 'Charged when a driver is assigned';
+  }
+  const cancelButton = document.getElementById('cancelRideRequestBtn');
+  if (cancelButton) cancelButton.disabled = !['requested', 'assigned'].includes(booking.status);
+}
+
+async function refreshActiveRideRequest() {
+  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
+  if (!booking || !API_CONFIG.authToken || !['requested', 'assigned'].includes(booking.status)) return;
+  try {
+    const response = await fetchWithTimeout(
+      `${API_CONFIG.baseUrl}/rides/${encodeURIComponent(booking.reference)}`,
+      { headers: { Authorization: `Bearer ${API_CONFIG.authToken}` } }
+    );
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.detail || 'Ride status could not be refreshed.');
+    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(result));
+    renderActiveRideRequest();
+  } catch (error) {
+    console.warn('[Ride App] Could not refresh ride status.', error);
+  }
+}
+
+async function cancelActiveRideRequest() {
+  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
+  if (!booking || !API_CONFIG.authToken) return;
+  const button = document.getElementById('cancelRideRequestBtn');
+  const status = document.getElementById('rideRequestStatus');
+  if (button) button.disabled = true;
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_CONFIG.baseUrl}/rides/${encodeURIComponent(booking.reference)}/cancel`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${API_CONFIG.authToken}` },
+      }
+    );
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.detail || 'Ride request could not be cancelled.');
+    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(result));
+    renderActiveRideRequest();
+    refreshActiveRideRequest();
+    window.setInterval(refreshActiveRideRequest, 10000);
+  } catch (error) {
+    if (status) status.textContent = error.message || 'Ride request could not be cancelled.';
+    if (button) button.disabled = false;
+  }
+}
 
 /* 1. Network & Offline State Handlers */
 function initNetworkListeners() {
@@ -195,12 +308,19 @@ function selectRideType(element, rideName, price) {
 
 async function confirmRideBooking() {
   hideErrorNotice();
+  if (!API_CONFIG.authToken) {
+    showErrorNotice('Sign in to your theKapita account before requesting a ride.');
+    return;
+  }
+  const pickupInput = document.getElementById('rideOriginInput');
   const destInput = document.getElementById('rideDestinationInput');
+  const pickup = pickupInput ? pickupInput.value.trim() : '';
   const dest = destInput ? destInput.value.trim() : '';
 
-  if (!dest) {
-    alert('Please enter a destination address.');
-    if (destInput) destInput.focus();
+  if (!pickup || !dest) {
+    showErrorNotice('Enter both pickup and destination locations.');
+    if (!pickup && pickupInput) pickupInput.focus();
+    else if (destInput) destInput.focus();
     return;
   }
 
@@ -213,28 +333,36 @@ async function confirmRideBooking() {
   announceAccessibilityMessage(`Searching for nearby ${selectedRideType} drivers...`);
 
   try {
+    rideRequestKey ||= crypto.randomUUID();
+    const rideTypes = {
+      'Kapita Go': 'kapita_go',
+      'Kapita Comfort': 'kapita_comfort',
+      'Kapita Keke Express': 'kapita_keke_express',
+      'Kapita Executive': 'kapita_executive',
+    };
     const response = await fetchWithTimeout(`${API_CONFIG.baseUrl}/rides/book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Idempotency-Key': rideRequestKey,
         'Authorization': `Bearer ${API_CONFIG.authToken}`
       },
       body: JSON.stringify({
-        rideType: selectedRideType,
+        ride_type: rideTypes[selectedRideType],
+        pickup,
         destination: dest,
-        amount: selectedRidePrice
       })
     });
 
-    if (!response.ok) throw new Error("Dispatch server unavailable");
+    const booking = await response.json();
+    if (!response.ok) throw new Error(booking.detail || 'Ride request could not be submitted.');
+    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(booking));
+    rideRequestKey = null;
     window.location.href = 'ride-active.html';
   } catch (err) {
-    console.warn("[Ride App] Real-time server fallback:", err);
     lastFailedAction = () => confirmRideBooking();
-    
-    setTimeout(() => {
-      switchMainService('tracking');
-    }, 1200);
+    showErrorNotice(err.message || 'Ride request failed. Check your connection and try again.');
+    announceAccessibilityMessage('Ride request could not be submitted.');
   } finally {
     if (btn) btn.disabled = false;
   }
