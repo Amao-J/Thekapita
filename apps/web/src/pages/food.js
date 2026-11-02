@@ -161,6 +161,117 @@ function renderVendorCards(vendors) {
         </button>
       </div>
     </article>
+    <!-- External Vendor 1 -->
+    <article class="restaurant-option-card" data-category="external" data-cuisine="fine all">
+      <div class="vendor-card-header">
+        <img src="https://images.unsplash.com/photo-1579684947550-22e945225d9a?auto=format&fit=crop&w=200&q=80" alt="Terra Kulture" class="vendor-thumb-box">
+        <div class="vendor-info">
+          <div class="vendor-title-row">
+            <h4>Terra Kulture</h4>
+            <span class="vendor-type-tag external">Discovery</span>
+          </div>
+          <div class="vendor-meta-row">
+            <span class="vendor-rating" style="color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">info</span> Cultural Dining
+            </span>
+            <span>• Victoria Island</span>
+          </div>
+        </div>
+      </div>
+      <div class="vendor-card-actions">
+        <span class="vendor-dispatch-tag" style="color: var(--text-muted);">
+          <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">storefront</span> Local Spot
+        </span>
+        <button type="button" class="btn-see-menu btn-outline-action" onclick="openExternalDetails('Terra Kulture', '1376 Tiamiyu Savage St, Victoria Island, Lagos', 'A leading cultural, arts, and dining center serving premium Nigerian dishes. Renowned for its artistic ambiance and traditional recipes.', 'https://images.unsplash.com/photo-1579684947550-22e945225d9a?auto=format&fit=crop&w=600&q=80')">
+          <span>View Details</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">visibility</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- External Vendor 2 -->
+    <article class="restaurant-option-card" data-category="external" data-cuisine="pastry all">
+      <div class="vendor-card-header">
+        <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=200&q=80" alt="Mega Chicken" class="vendor-thumb-box">
+        <div class="vendor-info">
+          <div class="vendor-title-row">
+            <h4>Mega Chicken</h4>
+            <span class="vendor-type-tag external">Discovery</span>
+          </div>
+          <div class="vendor-meta-row">
+            <span class="vendor-rating" style="color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">info</span> Fast Food
+            </span>
+            <span>• Ikeja</span>
+          </div>
+        </div>
+      </div>
+      <div class="vendor-card-actions">
+        <span class="vendor-dispatch-tag" style="color: var(--text-muted);">
+          <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">storefront</span> Local Spot
+        </span>
+        <button type="button" class="btn-see-menu btn-outline-action" onclick="openExternalDetails('Mega Chicken', 'Agidingbi Road, Ikeja, Lagos', 'A staple fast-food restaurant offering a wide variety of continental dishes, local meals, and freshly baked pastries.', 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=600&q=80')">
+          <span>View Details</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">visibility</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- External Vendor 3 -->
+    <article class="restaurant-option-card" data-category="external" data-cuisine="buka all">
+      <div class="vendor-card-header">
+        <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=200&q=80" alt="The Place" class="vendor-thumb-box">
+        <div class="vendor-info">
+          <div class="vendor-title-row">
+            <h4>The Place Restaurant</h4>
+            <span class="vendor-type-tag external">Discovery</span>
+          </div>
+          <div class="vendor-meta-row">
+            <span class="vendor-rating" style="color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">info</span> Mixed Cuisine
+            </span>
+            <span>• Lekki Phase 1</span>
+          </div>
+        </div>
+      </div>
+      <div class="vendor-card-actions">
+        <span class="vendor-dispatch-tag" style="color: var(--text-muted);">
+          <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">storefront</span> Local Spot
+        </span>
+        <button type="button" class="btn-see-menu btn-outline-action" onclick="openExternalDetails('The Place Restaurant', 'Admiralty Way, Lekki Phase 1, Lagos', 'Known for affordable and highly tasty Nigerian dishes in a modern cafeteria-style setting. Famous for their signature Asun and Fried Rice.', 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=600&q=80')">
+          <span>View Details</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">visibility</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- External Vendor 4 -->
+    <article class="restaurant-option-card" data-category="external" data-cuisine="fine all">
+      <div class="vendor-card-header">
+        <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=200&q=80" alt="Shiro" class="vendor-thumb-box">
+        <div class="vendor-info">
+          <div class="vendor-title-row">
+            <h4>Shiro Pan-Asian</h4>
+            <span class="vendor-type-tag external">Discovery</span>
+          </div>
+          <div class="vendor-meta-row">
+            <span class="vendor-rating" style="color: var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size: 14px;" aria-hidden="true">info</span> Asian Fusion
+            </span>
+            <span>• Oniru</span>
+          </div>
+        </div>
+      </div>
+      <div class="vendor-card-actions">
+        <span class="vendor-dispatch-tag" style="color: var(--text-muted);">
+          <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">storefront</span> Local Spot
+        </span>
+        <button type="button" class="btn-see-menu btn-outline-action" onclick="openExternalDetails('Shiro Pan-Asian', 'Water Corporation Road, Oniru, Lagos', 'High-end Asian fusion restaurant featuring stunning architecture, sushi, teppanyaki, and premium cocktails overlooking the ocean.', 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=600&q=80')">
+          <span>View Details</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">visibility</span>
+        </button>
+      </div>
+    </article>
   `;
 
   container.innerHTML = mockCardsHTML;
@@ -181,6 +292,14 @@ function openModal(modalId) {
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.remove('active');
+}
+
+function openExternalDetails(name, address, desc, imgUrl) {
+  document.getElementById('extSpotTitle').textContent = name;
+  document.getElementById('extSpotAddress').textContent = address;
+  document.getElementById('extSpotDesc').textContent = desc;
+  document.getElementById('extSpotImg').src = imgUrl;
+  openModal('externalSpotModal');
 }
 
 /* Keyboard Navigation Global Listener */
@@ -410,3 +529,4 @@ function openDishFromFullMenu(title, price, vendor, img) {
 document.addEventListener('DOMContentLoaded', () => {
   fetchRealVendorData();
 });
+

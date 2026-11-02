@@ -92,6 +92,7 @@
     <div class="food-content-wrapper">
 
       <!-- 1. Dual Service Switcher Bar -->
+      <!-- 1. Dual Service Switcher Bar -->
       <div class="service-mode-toggle" role="tablist" aria-label="Food Categories">
         <button type="button" class="mode-btn active" id="tab-all" role="tab" aria-selected="true" aria-controls="restaurantCardList" onclick="switchVendorCategory('all', this)">
           <span class="material-symbols-outlined" aria-hidden="true">restaurant</span>
@@ -104,6 +105,10 @@
         <button type="button" class="mode-btn" id="tab-fine" role="tab" aria-selected="false" aria-controls="restaurantCardList" onclick="switchVendorCategory('fine', this)">
           <span class="material-symbols-outlined" aria-hidden="true">wine_bar</span>
           <span>Fine Dining</span>
+        </button>
+        <button type="button" class="mode-btn" id="tab-external" role="tab" aria-selected="false" aria-controls="restaurantCardList" onclick="switchVendorCategory('external', this)">
+          <span class="material-symbols-outlined" aria-hidden="true">map</span>
+          <span>Local Spots</span>
         </button>
       </div>
 
@@ -587,6 +592,37 @@
       </div>
 
       <div class="full-menu-list" id="fullMenuList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: External Spot Details -->
+  <div class="wallet-modal-overlay" id="externalSpotModal" role="dialog" aria-modal="true" aria-labelledby="extSpotTitle">
+    <div class="wallet-modal-card">
+      <div class="wallet-modal-header">
+        <div>
+          <h3 id="extSpotTitle">Restaurant Details</h3>
+          <p class="modal-sub">Neighborhood Spot (Not on Kapita Escrow)</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('externalSpotModal')" aria-label="Close details modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      
+      <img id="extSpotImg" src="" alt="Restaurant View" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 16px;">
+      
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label>Location & Address</label>
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-dark); background: var(--surface-gray); padding: 12px; border-radius: 10px; border: 1px dashed var(--border-color);" id="extSpotAddress">
+          --
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label>Cuisine & Vibe</label>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;" id="extSpotDesc">
+          --
+        </div>
+      </div>
     </div>
   </div>
 

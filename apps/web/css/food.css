@@ -1712,3 +1712,31 @@ html, body.food-page-body {
     display: none !important;
   }
 }
+
+
+/* Update service-mode-toggle to handle 4 tabs smoothly */
+.service-mode-toggle {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.service-mode-toggle::-webkit-scrollbar {
+  display: none;
+}
+.mode-btn {
+  min-width: fit-content;
+}
+
+/* External Vendor Specific Utility Styles */
+.vendor-type-tag.external {
+  background: var(--surface-gray);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+.btn-outline-action {
+  background: var(--surface-gray);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+}
+.btn-outline-action:hover {
+  background: var(--border-color);
+}
