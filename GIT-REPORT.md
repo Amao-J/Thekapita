@@ -1,47 +1,51 @@
 # Git Change Report
 
-**Reporting period:** October 19-26, 2026  
-**Commits:** 14  
-**Changed files:** 66  
-**Change volume:** 12,762 insertions and 4,941 deletions
+**Reporting period:** October 26, 2026 06:52 through November 2, 2026 06:52 (UTC+01:00)  
+**Commits:** 5 total (3 feature commits and 2 merge commits)  
+**Changed files:** 29  
+**Change volume:** 6,414 insertions and 153 deletions
 
-This report summarizes committed changes in the period. `DEPLOY.md` is excluded
-from the report as requested.
+This report summarizes committed changes in the reporting window. The change
+volume is the net Git diff from the first in-window commit's parent to the
+latest commit, including merged changes.
 
 ## Highlights
 
-- **Marketplace:** Added marketplace backend models, APIs, services, migrations,
-  administration, product import tooling, media support, and product data.
-  Updated the web marketplace experience, page routing, and styling.
-- **Wallet and ledger:** Expanded wallet and ledger APIs, models, schemas, and
-  migrations, including wallet funding requests and beneficiaries. Updated the
-  wallet UI and client-side ledger/session state.
-- **Accounts and profiles:** Updated authentication, profile, and social-account
-  backend behavior and schemas; revised web auth/profile flows and session tests.
-- **Web, mobile, and tooling:** Updated app navigation, API client and shared
-  endpoints, web build/deployment configuration, mobile package configuration,
-  and the dependency lockfile.
+- **Care experience:** Added patient-facing care pages and a provider dashboard,
+  with service and provider views, appointment booking/cancellation interactions,
+  role-specific queues, catalogs, staff rosters, and onboarding UI. Added care
+  styling, navigation, and build-time page asset copying.
+- **Ride booking:** Added ride and driver data models and migrations, authenticated
+  booking/list/detail/cancel endpoints, server-calculated fares, driver dispatch,
+  idempotent booking, and wallet charge/refund ledger entries. Ride lifecycle
+  handling covers queued requests, assignment, cancellation, completion, refunds,
+  and driver availability.
+- **Ride web flow and tests:** Expanded ride booking and active-ride screens to
+  support the backend flow. Added tests for fares, authentication, ownership,
+  idempotency, driver assignment, insufficient funds, cancellation/refunds, and
+  driver release.
+- **Wallet and marketplace polish:** Added shared wallet endpoint constants for
+  analytics and beneficiaries, revised wallet transaction rendering and static
+  transaction fallback, and updated marketplace navigation/product detail UI.
+  Updated Vite configuration and the web Docker image's page asset list.
+
+## Validation finding
+
+The latest commit leaves a Python syntax error in
+`Backend/src/marketplace/media.py`: the `expiration` parameter annotation contains
+an extra `None` token. An AST syntax check fails at that function definition, so
+the module cannot be imported until corrected. This report records the finding;
+application code was not changed as part of this reporting task.
+
+`git diff --check` also reports trailing whitespace in several newly added care,
+marketplace, ride, and wallet files.
 
 ## Commits
 
 | Date | Commit | Message |
 |---|---|---|
-| 2026-10-26 | `73ab913` | seinfield |
-| 2026-10-26 | `1ee02da` | efw |
-| 2026-10-26 | `45fc5fa` | Added marketplace model and media support for private Railway bucket |
-| 2026-10-26 | `97a86ef` | product transfer |
-| 2026-10-25 | `7be94c2` | updated import |
-| 2026-10-25 | `4422572` | sfdaf |
-| 2026-10-25 | `b1d9274` | sfefe |
-| 2026-10-25 | `bd38536` | sfad |
-| 2026-10-25 | `57db84f` | sfa |
-| 2026-10-23 | `c31af26` | updated marketplace |
-| 2026-10-19 | `8099e2b` | wallet |
-| 2026-10-19 | `6808f9c` | ww z |
-| 2026-10-19 | `3199ccb` | kkk |
-| 2026-10-19 | `388345c` | first working version |
-
-## Ignore rules
-
-`DEPLOY.md` remains ignored. Markdown files are ignored by default, with
-`GIT-REPORT.md` explicitly unignored so this report can be tracked.
+| 2026-10-26 | `260d7ae` | endpoints change |
+| 2026-10-28 | `f847077` | Merge branch `main` |
+| 2026-10-28 | `d72ceb9` | Merge branch `main` |
+| 2026-10-28 | `8fe42e3` | hnew |
+| 2026-11-02 | `dec8790` | tuesday |
