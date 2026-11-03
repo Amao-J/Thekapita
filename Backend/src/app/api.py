@@ -17,8 +17,9 @@ from ninja.throttling import AnonRateThrottle
 from .auth import JWTAuth, decode_token, issue_token_pair
 from .idempotency import IdempotencyConflict, get_or_create_idempotent_response
 from . import ledger
-from .models import LedgerEntry, Profile, ServicePreference, UsedRefreshToken, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest
+from .models import LedgerEntry, Profile, ServicePreference, SocialAccount, UsedRefreshToken, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest
 from .schemas import (
+    GoogleLoginIn,
     PreferencesIn,
     PreferencesOut,
     SettingsIn,
@@ -127,6 +128,50 @@ def refresh(request, payload: RefreshIn):
             UsedRefreshToken.objects.create(jti=data["jti"], user=user)
     except IntegrityError:
         raise HttpError(401, "Refresh token is invalid or expired.")
+    return issue_token_pair(user)
+
+
+@auth_router.post("/google", response=TokenOut, throttle=[login_throttle])
+@transaction.atomic
+def google_login(request, payload: GoogleLoginIn):
+    """Sign in or sign up with a server-verified Google ID token."""
+    from django.conf import settings
+    from google.auth.exceptions import GoogleAuthError
+    from google.auth.transport import requests as g_requests
+    from google.oauth2 import id_token as g_id_token
+
+    if not settings.GOOGLE_CLIENT_IDS:
+        raise HttpError(503, "Google sign-in is not configured.")
+    try:
+        info = g_id_token.verify_oauth2_token(
+            payload.credential, g_requests.Request(), audience=settings.GOOGLE_CLIENT_IDS
+        )
+    except (ValueError, GoogleAuthError):
+        raise HttpError(401, "Google sign-in failed. Please try again.")
+    if not info.get("email_verified"):
+        raise HttpError(401, "Your Google email address is not verified.")
+
+    sub = info.get("sub")
+    email = info.get("email", "").strip().lower()
+    if not sub or not email:
+        raise HttpError(401, "Google sign-in failed. Please try again.")
+
+    link = SocialAccount.objects.select_related("user").filter(provider="google", uid=sub).first()
+    if link:
+        user = link.user
+        if not user.is_active:
+            raise HttpError(401, "This account is disabled.")
+    else:
+        # Do not link an existing password account based only on the email address.
+        if User.objects.filter(email__iexact=email).exists():
+            raise HttpError(409, "An account with this email already exists. Sign in with your password instead.")
+        user = User.objects.create_user(
+            username=email, email=email, first_name=(info.get("name") or email.split("@")[0])[:150]
+        )
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+        SocialAccount.objects.create(user=user, provider="google", uid=sub, email=email)
+        _profile(user)
     return issue_token_pair(user)
 
 
@@ -357,7 +402,7 @@ def add_beneficiary(request, payload: WalletBeneficiaryIn):
     return _wallet_beneficiary_out(record)
 
 
-@wallet_router.delete("/beneficiaries/{beneficiary_id}")
+@wallet_router.delete("/beneficiaries/{beneficiary_id}", auth=JWTAuth())
 def remove_beneficiary(request, beneficiary_id: int):
     _profile(request.auth)
     deleted, _ = WalletBeneficiary.objects.filter(owner=request.auth, pk=beneficiary_id).delete()
@@ -461,3 +506,8 @@ api.add_router("/wallet/", wallet_router)
 #
 # Swagger/OpenAPI UI then appears for free at /api/docs — worth bookmarking,
 # it's the fastest way to check a request shape without reading this file.
+
+# Subapps
+from marketplace.api import router as marketplace_router  # noqa: E402
+
+api.add_router("/marketplace/", marketplace_router)

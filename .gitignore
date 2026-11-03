@@ -9,6 +9,6 @@ __pycache__/
 Backend/src/db.sqlite3
 Backend/src/staticfiles/
 .DS_Store
+*.md
 DEPLOY.md
 *.md
-.expo/

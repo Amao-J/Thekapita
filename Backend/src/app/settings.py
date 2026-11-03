@@ -12,26 +12,20 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 import os
 from pathlib import Path
-from decouple import AutoConfig, config
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Safe by default: DEBUG is OFF unless DJANGO_DEBUG=1 is set (do that locally only).
 DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
 _DEV_SECRET = "django-insecure-dev-only-key-do-not-use-in-production"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or (_DEV_SECRET if DEBUG else None)
 if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY must be set when DEBUG is off.")
-# Keep this a separate secret from SECRET_KEY so rotating one doesn't touch the other.
-# Every Railway service that verifies tokens must share the same value.
+
 JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY") or SECRET_KEY
 
 ALLOWED_HOSTS = [
@@ -63,7 +57,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'ninja',
+    'storages',
     'app',
+    'marketplace'
+ 
     
 ]
 
@@ -163,12 +160,12 @@ else:
     }
 
 
-GOOGLE_OAUTH_CLIENT_ID     = config('GOOGLE_OAUTH_CLIENT_ID', default='')
-GOOGLE_OAUTH_CLIENT_SECRET = config('GOOGLE_OAUTH_CLIENT_SECRET', default='')
-GOOGLE_OAUTH_REDIRECT_URI  = config(
-    'GOOGLE_OAUTH_REDIRECT_URI',
-    default='http://127.0.0.1:8000/auth/google/callback/'
-)
+# Comma-separated OAuth client IDs accepted as the token audience (web now, iOS/Android later).
+GOOGLE_CLIENT_IDS = [
+    client_id.strip()
+    for client_id in os.environ.get("GOOGLE_CLIENT_IDS", os.environ.get("GOOGLE_CLIENT_ID", "")).split(",")
+    if client_id.strip()
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -206,6 +203,53 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# ---- Media: Railway Bucket (S3-compatible, PRIVATE) --------------------------
+# The bucket has no public URLs; every image URL the API returns is a presigned,
+# expiring link produced by django-storages (querystring_auth=True). In Railway,
+# add the bucket's credentials to this service (Variables > Add reference / "Credentials" tab).
+def _env(*names, default=None):
+    for n in names:
+        if os.environ.get(n):
+            return os.environ[n]
+    return default
+
+AWS_STORAGE_BUCKET_NAME = _env("AWS_S3_BUCKET_NAME", "AWS_STORAGE_BUCKET_NAME", "BUCKET")
+AWS_S3_ENDPOINT_URL = _env("AWS_ENDPOINT_URL", "AWS_S3_ENDPOINT_URL", "ENDPOINT", default="https://storage.railway.app")
+AWS_S3_REGION_NAME = _env("AWS_DEFAULT_REGION", "AWS_S3_REGION_NAME", "REGION", default="auto")
+AWS_ACCESS_KEY_ID = _env("AWS_ACCESS_KEY_ID", "ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = _env("AWS_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY")
+# New Railway buckets use virtual-hosted style; buckets created before that change need "path".
+AWS_S3_ADDRESSING_STYLE = _env("AWS_S3_ADDRESSING_STYLE", default="virtual")
+AWS_QUERYSTRING_EXPIRE = int(_env("AWS_QUERYSTRING_EXPIRE", default="3600"))  # seconds a presigned link stays valid
+
+if AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    _default_storage = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "endpoint_url": AWS_S3_ENDPOINT_URL,
+            "region_name": AWS_S3_REGION_NAME,
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "addressing_style": AWS_S3_ADDRESSING_STYLE,
+            "signature_version": "s3v4",
+            "querystring_auth": True,
+            "querystring_expire": AWS_QUERYSTRING_EXPIRE,
+            "file_overwrite": False,
+            "default_acl": None,
+        },
+    }
+else:
+    # Local dev without a bucket: files land in ./media and are served by runserver.
+    _default_storage = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
+
+STORAGES = {
+    "default": _default_storage,
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 
 
 # Email

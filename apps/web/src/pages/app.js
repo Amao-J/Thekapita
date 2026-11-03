@@ -1,19 +1,163 @@
-import { isAuthenticated } from '../state/session.js';
+import {
+  authorizedRequest,
+  getCurrentUser,
+  hydrateProfile,
+  isAuthenticated,
+  subscribe as subscribeSession,
+} from '../state/session.js';
 
-if (!isAuthenticated()) {
-  const notificationBadge = document.querySelector('.notif-badge');
-  const notificationList = document.querySelector('.notif-list');
-  const markRead = document.querySelector('.mark-read');
+const NOTIFICATION_READ_KEY = 'kapita.notifications.read.v1';
 
-  if (notificationBadge) notificationBadge.textContent = '0';
-  if (notificationList) {
-    const emptyState = document.createElement('p');
-    emptyState.className = 'notif-empty';
-    emptyState.textContent = 'Sign in to view your notifications.';
-    notificationList.replaceChildren(emptyState);
-  }
-  if (markRead) markRead.hidden = true;
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char]));
 }
+
+function setHtml(element, markup) {
+  // eslint-disable-next-line no-restricted-properties -- Notification fields are escaped before rendering.
+  element.innerHTML = markup;
+}
+
+function getReadNotificationIds() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY) || '[]'));
+  } catch {
+    return new Set();
+  }
+}
+
+function relativeTime(value) {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return '';
+  const minutes = Math.round((timestamp - Date.now()) / 60000);
+  const unit = Math.abs(minutes) < 60 ? 'minute' : 'hour';
+  const amount = unit === 'minute' ? minutes : Math.round(minutes / 60);
+  return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(amount, unit);
+}
+
+function updateNotificationBadge(notifications) {
+  const unreadCount = notifications.filter((item) => !getReadNotificationIds().has(item.id)).length;
+  const badge = document.querySelector('.notif-badge');
+  const button = document.getElementById('notifBtn');
+  if (badge) {
+    badge.textContent = String(unreadCount);
+    badge.hidden = unreadCount === 0;
+  }
+  if (button) button.setAttribute('aria-label', unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications');
+}
+
+function renderNotifications(notifications, error = '') {
+  const list = document.querySelector('.notif-list');
+  const markRead = document.querySelector('.mark-read');
+  if (!list) return;
+  const readIds = getReadNotificationIds();
+  if (markRead) markRead.hidden = notifications.length === 0;
+  setHtml(list, notifications.length ? notifications.map((item) => `
+    <a class="notif-item ${readIds.has(item.id) ? '' : 'unread'}" data-notification-id="${escapeHtml(item.id)}" href="${item.href}">
+      <div class="notif-icon-circle ${item.kind === 'order' ? 'eats-icon' : 'pay-icon'}" aria-hidden="true">${item.kind === 'order' ? '🛍️' : '💳'}</div>
+      <div class="notif-content">
+        <p class="notif-title"><strong>${escapeHtml(item.title)}</strong></p>
+        <p class="notif-body">${escapeHtml(item.message)}</p>
+        <span class="notif-time">${escapeHtml(relativeTime(item.createdAt))}</span>
+      </div>
+    </a>
+  `).join('') : `<p class="notif-empty">${escapeHtml(error || (isAuthenticated() ? 'No recent activity.' : 'Sign in to view your notifications.'))}</p>`);
+  updateNotificationBadge(notifications);
+}
+
+async function loadNotifications() {
+  const list = document.querySelector('.notif-list');
+  if (!list) return;
+  if (!isAuthenticated()) {
+    renderNotifications([]);
+    return;
+  }
+
+  const [transactionsResult, ordersResult] = await Promise.allSettled([
+    authorizedRequest('/wallet/transactions?limit=10'),
+    authorizedRequest('/marketplace/orders?limit=10'),
+  ]);
+  const notifications = [];
+  if (transactionsResult.status === 'fulfilled') {
+    transactionsResult.value.forEach((transaction) => notifications.push({
+      id: `transaction:${transaction.id}`,
+      kind: 'transaction',
+      title: 'theKapita Pay',
+      message: `${transaction.kind === 'credit' ? 'Received' : 'Sent'} ₦${Number(transaction.amount).toLocaleString()}${transaction.counterparty ? ` · ${transaction.counterparty}` : ''}`,
+      createdAt: transaction.created_at,
+      href: 'wallet.html',
+    }));
+  }
+  if (ordersResult.status === 'fulfilled') {
+    ordersResult.value.forEach((order) => notifications.push({
+      id: `order:${order.reference}`,
+      kind: 'order',
+      title: 'Marketplace order',
+      message: `${order.reference} · ${order.status_label}`,
+      createdAt: order.created_at,
+      href: 'marketplace.html',
+    }));
+  }
+  notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const hasError = transactionsResult.status === 'rejected' || ordersResult.status === 'rejected';
+  renderNotifications(notifications.slice(0, 10), hasError ? 'Could not load recent activity.' : '');
+}
+
+function markNotificationsRead() {
+  const ids = new Set([
+    ...getReadNotificationIds(),
+    ...Array.from(document.querySelectorAll('.notif-item[data-notification-id]'), (item) => item.dataset.notificationId),
+  ]);
+  localStorage.setItem(NOTIFICATION_READ_KEY, JSON.stringify([...ids]));
+  document.querySelectorAll('.notif-item.unread').forEach((item) => item.classList.remove('unread'));
+  const badge = document.querySelector('.notif-badge');
+  const button = document.getElementById('notifBtn');
+  if (badge) badge.hidden = true;
+  if (button) button.setAttribute('aria-label', 'Notifications');
+}
+
+function updateHomepageGreeting() {
+  const greeting = document.getElementById('heroGreeting');
+  const greetingText = document.getElementById('heroGreetingText');
+  if (!greeting || !greetingText) return;
+
+  const user = isAuthenticated() ? getCurrentUser() : null;
+  const fullName = String(user?.full_name || user?.first_name || '').trim();
+  const firstName = fullName.split(/\s+/)[0];
+  greeting.hidden = !firstName;
+  if (!firstName) return;
+
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  greetingText.textContent = `${timeGreeting}, ${firstName}.`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('heroGreeting')) {
+    subscribeSession(updateHomepageGreeting);
+    updateHomepageGreeting();
+    if (isAuthenticated()) {
+      hydrateProfile().catch((error) => {
+        console.error('Could not refresh the homepage greeting profile.', error);
+      });
+    }
+  }
+  loadNotifications();
+  document.querySelector('.mark-read')?.addEventListener('click', markNotificationsRead);
+  document.querySelector('.notif-list')?.addEventListener('click', (event) => {
+    const item = event.target.closest('.notif-item[data-notification-id]');
+    if (!item) return;
+    const ids = getReadNotificationIds();
+    ids.add(item.dataset.notificationId);
+    localStorage.setItem(NOTIFICATION_READ_KEY, JSON.stringify([...ids]));
+    item.classList.remove('unread');
+    const notifications = Array.from(document.querySelectorAll('.notif-item[data-notification-id]'), (node) => ({
+      id: node.dataset.notificationId,
+    }));
+    updateNotificationBadge(notifications);
+  });
+});
 
 function openApp(appName) {
   // Prototype trigger for routing between internal services
@@ -55,10 +199,6 @@ if (searchInput) {
 let draggedItem = null;
 
 // Helper: Re-render element HTML depending on whether it sits in Top Pills or Main Grid
-// eslint-disable-next-line no-restricted-properties -- title/desc/icon come
-// from this page's own data-title/data-desc/data-icon attributes (developer-
-// authored markup), never from user input, so this is not the injection
-// pattern the rule exists to catch (contrast with the old seller.js bug).
 function buildElementHTML(id, title, desc, icon, isPill) {
   if (isPill) {
     return `${icon} ${title}`;
@@ -249,10 +389,14 @@ export function showToast(message, type = 'error', duration = 4000) {
     animation: slideIn 0.2s ease-out;
   `;
 
-  toast.innerHTML = `
-    <span>${message}</span>
-    <button style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; margin-left:12px;" onclick="this.parentElement.remove()">✕</button>
-  `;
+  const messageElement = document.createElement('span');
+  messageElement.textContent = message;
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.textContent = '✕';
+  closeButton.style.cssText = 'background:none; border:none; color:inherit; cursor:pointer; font-weight:bold; margin-left:12px;';
+  closeButton.addEventListener('click', () => toast.remove());
+  toast.replaceChildren(messageElement, closeButton);
 
   toastContainer.appendChild(toast);
 

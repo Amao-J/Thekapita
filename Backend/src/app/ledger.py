@@ -66,3 +66,54 @@ def credit(user, amount: Decimal, reference: str, kind=LedgerEntry.Kind.FUNDING)
         wallet.balance += amount
         wallet.save(update_fields=["balance"])
     return wallet.balance
+
+
+# ---- Escrow (used by the marketplace) ---------------------------------------
+# Money a buyer pays at checkout moves to a system "escrow" wallet, then on to the
+# seller when the buyer confirms delivery, or back to the buyer if the order is
+# cancelled. Every leg is a pair of LedgerEntry rows, so the books always balance.
+
+ESCROW_USERNAME = "system-escrow"
+
+
+def escrow_user():
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    user, created = User.objects.get_or_create(
+        username=ESCROW_USERNAME,
+        defaults={"first_name": "theKapita Escrow", "email": "", "is_active": False},
+    )
+    if created:
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+    Wallet.objects.get_or_create(user=user)
+    return user
+
+
+@transaction.atomic
+def _move(src_user, dst_user, amount: Decimal, kind, reference: str):
+    """Internal move with no daily/monthly limits (those apply to peer transfers only)."""
+    locked = {w.user_id: w for w in
+              Wallet.objects.select_for_update().filter(user__in=[src_user, dst_user]).order_by("pk")}
+    src, dst = locked[src_user.pk], locked[dst_user.pk]
+    if src.balance < amount:
+        raise LedgerError("Insufficient balance.")
+    LedgerEntry.objects.create(wallet=src, amount=-amount, kind=kind, counterparty=dst_user, reference=reference)
+    LedgerEntry.objects.create(wallet=dst, amount=amount, kind=kind, counterparty=src_user, reference=reference)
+    src.balance -= amount
+    dst.balance += amount
+    src.save(update_fields=["balance"])
+    dst.save(update_fields=["balance"])
+    return src.balance
+
+
+def escrow_hold(buyer, amount: Decimal, reference: str):
+    return _move(buyer, escrow_user(), amount, LedgerEntry.Kind.ESCROW_HOLD, reference)
+
+
+def escrow_release(seller, amount: Decimal, reference: str):
+    return _move(escrow_user(), seller, amount, LedgerEntry.Kind.ESCROW_RELEASE, reference)
+
+
+def escrow_refund(buyer, amount: Decimal, reference: str):
+    return _move(escrow_user(), buyer, amount, LedgerEntry.Kind.ESCROW_REFUND, reference)

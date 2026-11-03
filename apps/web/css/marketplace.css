@@ -295,7 +295,12 @@ html body .wallet-container {
   z-index: 100;
 }
 
+.category-quick-filter-slot {
+  display: contents;
+}
+
 .filter-pill-btn {
+  appearance: none;
   background: #f8f9fa;
   border: 1px solid #e2e8f0;
   color: #334155;
@@ -310,6 +315,8 @@ html body .wallet-container {
   align-items: center;
   gap: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+  line-height: 1.25;
 }
 
 .filter-pill-btn .icon {
@@ -376,6 +383,10 @@ html body .wallet-container {
 }
 
 .dropdown-item {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -386,6 +397,8 @@ html body .wallet-container {
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+  text-align: left;
 }
 
 .dropdown-item .icon {
@@ -527,6 +540,16 @@ html body .wallet-container {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.product-title-btn {
+  appearance: none;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
 }
 
 .product-name:hover {
@@ -797,8 +820,8 @@ html body .wallet-container {
     display: none;
   }
 
-  .market-quick-filters > .filter-pill-btn:not(:first-child) {
-    display: none !important;
+  .category-quick-filter-slot {
+    display: none;
   }
 
   .market-quick-filters {
@@ -1199,6 +1222,21 @@ html body .wallet-container {
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
+}
+
+.checkout-field {
+  display: block;
+  margin: 12px 0 6px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#checkoutDelivery .promo-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  font-size: 14px;
 }
 
 .checkout-section-header {

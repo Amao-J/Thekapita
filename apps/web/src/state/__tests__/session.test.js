@@ -24,6 +24,14 @@ vi.mock('../../api/client.js', async (importOriginal) => {
 
 import { request } from '../../api/client.js';
 
+function accessTokenWithExpiry(exp) {
+  const payload = btoa(JSON.stringify({ exp }))
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+  return `header.${payload}.signature`;
+}
+
 describe('session state & retry logic', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', {
@@ -163,6 +171,25 @@ describe('session state & retry logic', () => {
 
       expect(res).toEqual({ balance: 245500 });
       expect(getAccessToken()).toBe('new_fresh_token');
+    });
+
+    it('refreshes a near-expiry JWT before making a protected request', async () => {
+      request.mockResolvedValueOnce({
+        access_token: accessTokenWithExpiry(Math.floor(Date.now() / 1000) + 5),
+        refresh_token: 'valid_refresh',
+      });
+      request.mockResolvedValueOnce({ id: 'u1' });
+      await login('user', 'pass');
+      request.mockResolvedValueOnce({ access_token: 'fresh_token', refresh_token: 'fresh_refresh' });
+      request.mockResolvedValueOnce({ balance: 100 });
+
+      const result = await authorizedRequest('/wallet/balance');
+
+      expect(result).toEqual({ balance: 100 });
+      expect(request).toHaveBeenNthCalledWith(3, '/auth/refresh', {
+        method: 'POST',
+        body: { refresh_token: 'valid_refresh' },
+      });
     });
 
     it('clears an access-only legacy session when a protected request returns 401', async () => {
