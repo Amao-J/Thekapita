@@ -16,12 +16,14 @@
       "package": "com.thekapita.app"
     },
     "extra": {
-      "apiBaseUrl": "http://192.168.0.182:8000/api"
+      "apiBaseUrl": "https://api.thekapita.com/api"
     },
     "plugins": [
       "expo-secure-store",
       "@react-native-vector-icons/ionicons",
-      "react-native-bottom-tabs"
+      "react-native-bottom-tabs",
+      "expo-router",
+      "expo-status-bar"
     ]
   }
 }

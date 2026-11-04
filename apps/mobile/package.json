@@ -2,7 +2,7 @@
   "name": "@thekapita/mobile",
   "version": "0.1.0",
   "private": true,
-  "main": "expo/AppEntry.js",
+ "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -17,6 +17,8 @@
     "@react-navigation/native-stack": "^7.0.0",
     "@thekapita/shared": "*",
     "expo-constants": "~57.0.22",
+    "expo-linking": "~57.0.13",
+    "expo-router": "~57.0.29",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

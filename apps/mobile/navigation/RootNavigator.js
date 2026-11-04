@@ -6,9 +6,9 @@ import { View, ActivityIndicator } from 'react-native';
 import { restoreSession, isAuthenticated, subscribe } from '../state/session.js';
 import { colors } from '../theme/tokens.js';
 
-import SignInScreen from '../screens/auth/SignInScreen.jsx';
-import HomeScreen from '../screens/home/HomeScreen.js';
-import WalletScreen from '../screens/wallet/WalletScreen.js';
+import SignInScreen from '../app/(auth)/SignInScreen.jsx';
+import HomeScreen from '../app/(tabs)/HomeScreen.js';
+import WalletScreen from '../app/screens/wallet/WalletScreen.js';
 
 const AuthStack = createNativeStackNavigator();
 const MainStack = createNativeStackNavigator();
@@ -43,6 +43,8 @@ export default function RootNavigator() {
     // logout or silent token refresh anywhere in the app flips this
     // automatically, without any screen needing to call navigation.reset()
     // itself.
+
+    console.log("logged in")
     restoreSession().then(() => {
       setAuthed(isAuthenticated());
       setBooting(false);
@@ -58,6 +60,7 @@ export default function RootNavigator() {
       </View>
     );
   }
+  
 
   return (
     <NavigationContainer>

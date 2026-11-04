@@ -77,6 +77,7 @@
 
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -107,15 +108,15 @@ const PLACEHOLDERS = [
 
 const QUICK_ACTIONS = [
   { id: 'wallet', title: 'Kapita Pay', icon: '💳' },
-  { id: 'bills', title: 'Pay Bills', icon: '⚡' },
-  { id: 'ride', title: 'Book Ride', icon: '🚗' },
+  // { id: 'bills', title: 'Pay Bills', icon: '⚡' },
+  { id: 'rides', title: 'Book Ride', icon: '🚗' },
   { id: 'eats', title: 'Order Chow', icon: '🍔' },
   { id: 'market', title: 'Marketplace', icon: '🛍️' },
 ];
 
 const MODULES = [
   {
-    id: 'ride',
+    id: 'rides',
     title: 'Rides',
     desc: 'Ride & Logistics',
     icon: '🚗',
@@ -201,11 +202,9 @@ const MODULES = [
 ];
 
 const APP_LINKS = {
-  wallet: 'Wallet',
-  market: 'Marketplace',
-  bills: 'Bills',
-  ride: 'Ride',
-  eats: 'Eats',
+  wallet: '/(tabs)/WalletScreen',
+  rides:"/(tabs)/Rides",
+  eats:"/(tabs)/Food"
 };
 
 function IconButton({ icon, label, onPress, badge }) {
@@ -229,7 +228,8 @@ function IconButton({ icon, label, onPress, badge }) {
   );
 }
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen() {
+  const router = useRouter();
   const user = getCurrentUser();
   const firstName = user?.full_name?.trim().split(/\s+/)[0];
 
@@ -250,8 +250,8 @@ export default function HomeScreen({ navigation }) {
 
     const route = APP_LINKS[id];
 
-    if (route && navigation.getState().routeNames.includes(route)) {
-      navigation.navigate(route);
+    if (route) {
+      router.push(route);
       return;
     }
 
@@ -293,7 +293,7 @@ export default function HomeScreen({ navigation }) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="theKapita home"
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => router.replace('/(tabs)/HomeScreen')}
           >
             <Text style={styles.brand}>
               <Text style={styles.brandPrefix}>the</Text>
@@ -319,15 +319,7 @@ export default function HomeScreen({ navigation }) {
               accessibilityRole="button"
               accessibilityLabel="Account settings"
               style={styles.avatar}
-              onPress={() => {
-                if (
-                  navigation.getState().routeNames.includes('Profile')
-                ) {
-                  navigation.navigate('Profile');
-                } else {
-                  setActiveMenu('account');
-                }
-              }}
+              onPress={() => setActiveMenu('account')}
             >
               <Text style={styles.avatarText}>
                 {firstName?.charAt(0)?.toUpperCase() || 'U'}
@@ -505,11 +497,11 @@ export default function HomeScreen({ navigation }) {
             {activeMenu === 'apps' ? (
               <View style={styles.launcherGrid}>
                 {[
-                  { id: 'wallet', title: 'Pay', icon: '💳' },
-                  { id: 'bills', title: 'Bills', icon: '🧾' },
-                  { id: 'ride', title: 'Ride', icon: '🚗' },
-                  { id: 'eats', title: 'Eats', icon: '🍔' },
-                  { id: 'market', title: 'Market', icon: '🛍️' },
+                  { id: 'wallet', title: 'PayS', icon: '' },
+                  { id: 'bills', title: 'Bills', icon: '' },
+                  { id: 'ride', title: 'Ride', icon: '' },
+                  { id: 'eats', title: 'Eats', icon: '' },
+                  { id: 'market', title: 'Market', icon: '' },
                   { id: 'all', title: 'All Apps', icon: '＋' },
                 ].map((item) => (
                   <Pressable
@@ -562,13 +554,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white || '#FFFFFF',
-    paddingTop:"8%"
+    //  paddingTop:"8%"
   },
 
   scrollContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 36,
+    paddingBottom:90,
   },
 
   header: {
@@ -577,6 +569,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 52,
     marginBottom: spacing.xl,
+    marginTop:spacing.xl
   },
 
   brand: {
