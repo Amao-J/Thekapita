@@ -68,6 +68,44 @@ def credit(user, amount: Decimal, reference: str, kind=LedgerEntry.Kind.FUNDING)
     return wallet.balance
 
 
+@transaction.atomic
+def charge_ride(user, amount: Decimal, reference: str):
+    wallet = Wallet.objects.select_for_update().get(user=user)
+    if wallet.balance < amount:
+        raise LedgerError("Insufficient wallet balance for this ride.")
+    entry, created = LedgerEntry.objects.get_or_create(
+        wallet=wallet,
+        reference=reference,
+        kind=LedgerEntry.Kind.RIDE_CHARGE,
+        defaults={"amount": -amount},
+    )
+    if not created:
+        if entry.amount != -amount:
+            raise LedgerError("Ride charge reference already exists with a different amount.")
+        return wallet.balance
+    wallet.balance -= amount
+    wallet.save(update_fields=["balance"])
+    return wallet.balance
+
+
+@transaction.atomic
+def refund_ride(user, amount: Decimal, reference: str):
+    wallet = Wallet.objects.select_for_update().get(user=user)
+    entry, created = LedgerEntry.objects.get_or_create(
+        wallet=wallet,
+        reference=reference,
+        kind=LedgerEntry.Kind.RIDE_REFUND,
+        defaults={"amount": amount},
+    )
+    if not created:
+        if entry.amount != amount:
+            raise LedgerError("Ride refund reference already exists with a different amount.")
+        return wallet.balance
+    wallet.balance += amount
+    wallet.save(update_fields=["balance"])
+    return wallet.balance
+
+
 # ---- Escrow (used by the marketplace) ---------------------------------------
 # Money a buyer pays at checkout moves to a system "escrow" wallet, then on to the
 # seller when the buyer confirms delivery, or back to the buyer if the order is

@@ -14,6 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
+  <!-- Leaflet CSS for Real Map Integration -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
   <!-- Stylesheet Imports -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ride.css">
@@ -127,7 +130,6 @@
       <!-- ========================================== -->
       <section id="viewRideModule" class="service-view-pane active" aria-labelledby="rideHeading">
 
-        <!-- Live GPS Routing Input Box -->
         <div class="location-picker-card">
           <div class="route-line-connector" aria-hidden="true">
             <span class="dot origin"></span>
@@ -151,7 +153,6 @@
           </button>
         </div>
 
-        <!-- Innovative Feature: Fare Splitter & Co-Rider Toggle -->
         <div class="feature-innovative-banner" tabindex="0" role="button" aria-label="Split fare and pool trip with nearby Kapita users" onclick="toggleFareSplitModal()" onkeydown="if(event.key==='Enter'||event.key===' ') toggleFareSplitModal()">
           <div class="innovative-left">
             <span class="material-symbols-outlined icon" aria-hidden="true">group_add</span>
@@ -163,7 +164,6 @@
           <span class="badge-new">SAVE 40%</span>
         </div>
 
-        <!-- Ride Category Selector List -->
         <div class="ride-category-list" role="radiogroup" aria-label="Select Ride Type">
           <div class="ride-option-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectRideType(this, 'Kapita Go', 2200)" onkeydown="if(event.key==='Enter'||event.key===' ') selectRideType(this, 'Kapita Go', 2200)">
             <div class="ride-type-left">
@@ -230,7 +230,6 @@
           </div>
         </div>
 
-        <!-- Action Button -->
         <button type="button" class="confirm-service-btn" id="requestRideBtn" onclick="confirmRideBooking()">
           Request Kapita Go • ₦2,200
         </button>
@@ -247,7 +246,6 @@
           <p>Instant bike, van, and freight courier delivery across the city</p>
         </div>
 
-        <!-- Sender & Receiver Address Form -->
         <div class="location-picker-card">
           <div class="route-line-connector" aria-hidden="true">
             <span class="dot origin"></span>
@@ -268,7 +266,6 @@
           </div>
         </div>
 
-        <!-- Package Category Presets -->
         <div class="bills-section-title" style="margin-top: 20px;">
           <h3>Select Package Type & Weight</h3>
         </div>
@@ -296,7 +293,6 @@
           </div>
         </div>
 
-        <!-- Delivery Speed Options -->
         <fieldset class="delivery-tier-selector">
           <legend class="sr-only">Delivery Speed Tier</legend>
           <label class="tier-option active" onclick="setDeliverySpeed('standard')">
@@ -318,7 +314,6 @@
           </label>
         </fieldset>
 
-        <!-- Business Logistics Banner Callout -->
         <div class="business-logistics-card">
           <div class="biz-left">
             <span class="material-symbols-outlined icon" aria-hidden="true">storefront</span>
@@ -344,6 +339,28 @@
         <div class="bills-section-title">
           <h2 id="trackingHeading">Real-Time Shipment & Courier Radar</h2>
           <p>Live GPS tracking & proof-of-delivery confirmation</p>
+        </div>
+
+        <!-- Real Interactive Leaflet Map Tracking Widget -->
+        <div class="map-tracking-widget-card">
+          <div class="map-widget-header">
+            <div class="map-target-selector">
+              <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+              <select id="trackingWaypointSelect" class="waypoint-dropdown" onchange="changeTrackingWaypoint(this.value)" aria-label="Select active trip waypoint">
+                <option value="waypoint1">Waybill #KPT-LOG-99201 (Musa Ibrahim - Victoria Island)</option>
+                <option value="waypoint2">Ride #KPT-RIDE-44012 (Kapita Go - Lekki Phase 1)</option>
+              </select>
+            </div>
+            <span class="live-radar-tag"><span class="pulse-dot"></span> LIVE GPS</span>
+          </div>
+
+          <!-- Real OpenStreetMap / Leaflet Map Container -->
+          <div class="interactive-map-canvas" id="liveTrackingMap" role="region" aria-label="Live GPS Map Tracker"></div>
+          
+          <div class="map-footer-status">
+            <span>🟢 Driver connected via secure WebSockets</span>
+            <span id="mapEtaDisplay">ETA: 6 mins (2.4 km away)</span>
+          </div>
         </div>
 
         <!-- Live Delivery Status Card -->
@@ -455,6 +472,8 @@
   <!-- Screen Reader Polite Announcer -->
   <div id="ariaLiveAnnouncer" class="sr-only" role="status" aria-live="polite"></div>
 
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- JavaScript Modules -->
   <script type="module" src="src/pages/app.js"></script>
   <script src="src/pages/ride.js"></script>

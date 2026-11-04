@@ -548,15 +548,13 @@ function renderProductDetail() {
   if (!container || !selectedProduct) return;
   const product = selectedProduct;
   setHtml(container, `
-    <nav class="pdp-breadcrumbs" aria-label="Breadcrumb">
-      <ol class="breadcrumb-list">
-        <li><button type="button" class="breadcrumb-btn" onclick="switchMarketView('browse')">Browse</button></li>
-        <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
-        <li><span class="breadcrumb-text">${esc(product.category_label || product.category)}</span></li>
-        <li><span class="material-symbols-outlined icon" aria-hidden="true">chevron_right</span></li>
-        <li><span class="breadcrumb-text active" aria-current="page">${esc(product.title)}</span></li>
-      </ol>
-    </nav>
+    <div class="pdp-breadcrumbs" aria-label="Breadcrumb">
+    <span onclick="switchMarketView('browse')">Browse</span>
+    <span class="material-symbols-outlined icon">chevron_right</span>
+    <span>${esc(product.category_label || product.category)}</span>
+    <span class="material-symbols-outlined icon">chevron_right</span>
+    <span class="active">${esc(product.title)}</span>
+    </div>
     <div class="pdp-main-grid">
       <div class="pdp-gallery-card">
         <div class="pdp-main-img-wrapper">
@@ -579,9 +577,7 @@ function renderProductDetail() {
             <input type="number" id="pdpQtyInput" value="1" class="cart-qty-input" min="1" max="${Math.min(Number(product.stock) || 1, 50)}" readonly>
             <button type="button" class="cart-qty-btn" onclick="updatePdpQty(1)" aria-label="Increase quantity">+</button>
           </div>
-          <button type="button" class="pdp-add-cart-btn" onclick="buyNowPdp()" ${product.in_stock ? '' : 'disabled'}>
-            <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span> Add to Cart
-          </button>
+          <button type="button" class="pdp-add-cart-btn" onclick="buyNowPdp()" ${product.in_stock ? '' : 'disabled'}>Add to Cart</button>
           <button type="button" class="pdp-buy-now-btn" onclick="buyNowPdp(true)" ${product.in_stock ? '' : 'disabled'}>Buy Now</button>
         </div>
         <p>Order payments are held in escrow until delivery is confirmed.</p>

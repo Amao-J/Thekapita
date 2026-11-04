@@ -211,6 +211,55 @@ class TransactionOut(Schema):
     created_at: str
 
 
+class RideBookingIn(Schema):
+    pickup: str = Field(min_length=1, max_length=255)
+    destination: str = Field(min_length=1, max_length=255)
+    ride_type: str
+
+    @field_validator("pickup", "destination")
+    @classmethod
+    def location_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Enter both pickup and destination locations.")
+        return value
+
+    @field_validator("ride_type")
+    @classmethod
+    def ride_type_supported(cls, value: str) -> str:
+        ride_types = {
+            "kapita_go",
+            "kapita_comfort",
+            "kapita_keke_express",
+            "kapita_executive",
+        }
+        if value not in ride_types:
+            raise ValueError("Choose a supported ride type.")
+        return value
+
+
+class RideDriverOut(Schema):
+    name: str
+    phone: str
+    vehicle: str
+    plate_number: str
+
+
+class RideBookingOut(Schema):
+    id: int
+    reference: str
+    ride_type: str
+    pickup: str
+    destination: str
+    fare: Decimal
+    currency: str = "NGN"
+    status: str
+    driver: "RideDriverOut | None" = None
+    charged: bool
+    wallet_balance: Decimal
+    created_at: str
+
+
 BLOOD_GROUPS = {"", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}
 
 

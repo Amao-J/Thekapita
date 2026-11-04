@@ -11,8 +11,10 @@ from django.db import transaction
 from django.db.models import Sum
 
 from . import ledger
+from .ride_service import RideServiceError, complete_ride, dispatch_requested_ride
 from .models import (
-    LedgerEntry, Profile, ServicePreference, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest,
+    LedgerEntry, Profile, RideBooking, RideDriver, ServicePreference, UserSettings, Wallet,
+    WalletBeneficiary, WalletFundingRequest,
 )
 
 admin.site.site_header = "theKapita admin"
@@ -120,3 +122,60 @@ class WalletBeneficiaryAdmin(_ReadOnly):
 
 admin.site.register(ServicePreference)
 admin.site.register(UserSettings)
+
+
+@admin.register(RideBooking)
+class RideBookingAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "reference", "user", "ride_type", "fare", "status")
+    list_filter = ("status", "ride_type", "created_at")
+    search_fields = ("reference", "user__email", "pickup", "destination")
+    readonly_fields = (
+        "user", "reference", "ride_type", "pickup", "destination", "fare", "status",
+        "driver", "assigned_at", "charged_at", "refunded_at", "idempotency_key",
+        "created_at", "updated_at",
+    )
+    actions = ["dispatch_rides", "complete_rides"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.action(description="Dispatch selected requests to available drivers and charge riders")
+    def dispatch_rides(self, request, queryset):
+        assigned, unavailable, failed = 0, 0, 0
+        for booking in queryset.filter(status=RideBooking.Status.REQUESTED):
+            try:
+                updated = dispatch_requested_ride(booking.pk)
+            except RideServiceError as exc:
+                failed += 1
+                self.message_user(request, f"{booking.reference}: {exc}", messages.ERROR)
+                continue
+            if updated.status == RideBooking.Status.ASSIGNED:
+                assigned += 1
+            else:
+                unavailable += 1
+        self.message_user(
+            request,
+            f"Assigned {assigned} ride(s); {unavailable} remain queued without an available driver; {failed} failed.",
+        )
+
+    @admin.action(description="Complete selected assigned rides and release drivers")
+    def complete_rides(self, request, queryset):
+        completed = 0
+        for booking in queryset.filter(status=RideBooking.Status.ASSIGNED):
+            complete_ride(booking.pk)
+            completed += 1
+        self.message_user(request, f"Completed {completed} ride(s) and released their drivers.")
+
+
+@admin.register(RideDriver)
+class RideDriverAdmin(admin.ModelAdmin):
+    list_display = ("name", "phone", "vehicle", "plate_number", "is_active", "is_available")
+    list_filter = ("is_active", "is_available")
+    search_fields = ("name", "phone", "plate_number")
+    fieldsets = (
+        (None, {"fields": ("name", "phone", "vehicle", "plate_number")}),
+        ("Dispatch", {"fields": ("ride_types", "is_active", "is_available")}),
+    )

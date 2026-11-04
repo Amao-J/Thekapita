@@ -118,99 +118,212 @@
       <section id="viewServices" class="bills-view-pane active" aria-labelledby="servicesHeading">
 
         <!-- Categories Header -->
+        <!-- Categories Header -->
         <div class="bills-section-title">
           <h2 id="servicesHeading">Utility & Payment Services</h2>
           <p>Zero-fee instant processing protected by Kapita Security</p>
         </div>
 
+        <!-- NEW: Search Bar -->
+        <div class="bills-search-container" style="margin-bottom: 20px;">
+          <input type="text" id="billSearchInput" class="form-control" placeholder="Search for a service or biller..." onkeyup="filterBillServices()" aria-label="Search bills and services">
+        </div>
+
         <!-- Services Grid -->
-        <div class="bills-category-grid" role="list">
+        <div class="bills-category-grid" role="list" id="billsCategoryGrid">
 
           <!-- Airtime & Data -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('airtime')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('airtime')">
-            <div class="bill-icon-wrapper bg-emerald">
-              <span class="material-symbols-outlined" aria-hidden="true">smartphone</span>
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('airtime')">
+            <div class="bill-icon-wrapper bg-purple">
+              <span class="material-symbols-outlined" aria-hidden="true">cell_tower</span>
             </div>
             <div class="bill-service-info">
-              <h3>Airtime & Data</h3>
+              <h3>Buy Airtime & Data</h3>
               <p>MTN, Airtel, Glo, 9mobile</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
 
-          <!-- Electricity -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('electricity')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('electricity')">
+          <!-- Electricity & Water -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('utilities')">
             <div class="bill-icon-wrapper bg-blue">
-              <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
-            </div>
-            <div class="bill-service-info">
-              <h3>Electricity Token</h3>
-              <p>Prepaid & Postpaid DisCo Tokens</p>
-            </div>
-            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
-          </div>
-
-          <!-- Cable TV -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('cable')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('cable')">
-            <div class="bill-icon-wrapper bg-purple">
-              <span class="material-symbols-outlined" aria-hidden="true">tv</span>
-            </div>
-            <div class="bill-service-info">
-              <h3>Cable & TV Sub</h3>
-              <p>DStv, GOtv, Startimes, Showmax</p>
-            </div>
-            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
-          </div>
-
-          <!-- Internet Broadband -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('internet')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('internet')">
-            <div class="bill-icon-wrapper bg-amber">
-              <span class="material-symbols-outlined" aria-hidden="true">wifi</span>
-            </div>
-            <div class="bill-service-info">
-              <h3>Internet Broadband</h3>
-              <p>Spectranet, Smile, FiberOne, Starlink</p>
-            </div>
-            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
-          </div>
-
-          <!-- School & Tuition Fees -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('school')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('school')">
-            <div class="bill-icon-wrapper bg-indigo">
-              <span class="material-symbols-outlined" aria-hidden="true">school</span>
-            </div>
-            <div class="bill-service-info">
-              <h3>School & Tuition Fees</h3>
-              <p>Universities, High Schools & Institutes</p>
-            </div>
-            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
-          </div>
-
-          <!-- Water & Utilities -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('water')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('water')">
-            <div class="bill-icon-wrapper bg-teal">
               <span class="material-symbols-outlined" aria-hidden="true">water_drop</span>
             </div>
             <div class="bill-service-info">
-              <h3>Water & Sanitation</h3>
-              <p>State Water Board utility bills</p>
+              <h3>Electricity & Water</h3>
+              <p>DisCo Tokens & State Water</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
 
-          <!-- Government Payments -->
-          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('government')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('government')">
-            <div class="bill-icon-wrapper bg-rose">
+          <!-- Internet Subscription -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('internet')">
+            <div class="bill-icon-wrapper bg-indigo">
+              <span class="material-symbols-outlined" aria-hidden="true">router</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Internet Subscription</h3>
+              <p>Spectranet, Smile, FiberOne</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Cable TV & Entertainment -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('cable')">
+            <div class="bill-icon-wrapper bg-teal">
+              <span class="material-symbols-outlined" aria-hidden="true">tv</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Cable TV & Entertainment</h3>
+              <p>DStv, GOtv, Showmax, Event Tickets</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Airlines & Travels -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('travel')">
+            <div class="bill-icon-wrapper bg-cyan">
+              <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Airlines, Travels & Logistics</h3>
+              <p>Flight Tickets & Shipping Lines</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Government Taxes & Levies -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('government')">
+            <div class="bill-icon-wrapper bg-orange">
               <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
             </div>
             <div class="bill-service-info">
-              <h3>Government & Taxes</h3>
-              <p>LIRS, Remita, Tenders & Revenue levies</p>
+              <h3>Government & Remita</h3>
+              <p>Taxes, Levies, VISA Fees</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
 
-          <!-- Household Bill Splitter -->
+          <!-- Schools & Professional Bodies -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('school')">
+            <div class="bill-icon-wrapper bg-rose">
+              <span class="material-symbols-outlined" aria-hidden="true">school</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Schools & Professionals</h3>
+              <p>Tuition & Institute Dues</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Estates & Associations -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('estate')">
+            <div class="bill-icon-wrapper bg-dark">
+              <span class="material-symbols-outlined" aria-hidden="true">holiday_village</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Estates & Associations</h3>
+              <p>Estate Dues & Resident Levies</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Toll Fees - LCC -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('toll')">
+            <div class="bill-icon-wrapper bg-pink">
+              <span class="material-symbols-outlined" aria-hidden="true">toll</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Toll Fees - LCC</h3>
+              <p>LCC eTag & Toll Top-ups</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Sports & Gaming -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('gaming')">
+            <div class="bill-icon-wrapper bg-emerald">
+              <span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Sports and Gaming</h3>
+              <p>Wallet Top-ups & Betting</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Religious & NGO -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('religious')">
+            <div class="bill-icon-wrapper bg-amber">
+              <span class="material-symbols-outlined" aria-hidden="true">diversity_1</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Religious & NGOs</h3>
+              <p>Tithes, Offerings & Donations</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Insurance & HMO -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('insurance')">
+            <div class="bill-icon-wrapper bg-teal">
+              <span class="material-symbols-outlined" aria-hidden="true">health_and_safety</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Insurance & HMO</h3>
+              <p>Health & Vehicle Policies</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Capital Market & Investments -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('investments')">
+            <div class="bill-icon-wrapper bg-indigo">
+              <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Capital Market & Investments</h3>
+              <p>Stocks, Bonds & Portfolios</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Distributors & Agent Payments -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('distributors')">
+            <div class="bill-icon-wrapper bg-rose">
+              <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Distributors & Agent Payments</h3>
+              <p>Supply Chain & Agency Networks</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Financial Institutions -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('financial')">
+            <div class="bill-icon-wrapper bg-blue">
+              <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Financial Institutions</h3>
+              <p>Microfinance, Mortgages & Loans</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
+          <!-- Infotechs & Other Services -->
+          <div class="bill-service-card" role="listitem" tabindex="0" onclick="openBillModal('infotech')">
+            <div class="bill-icon-wrapper bg-dark">
+              <span class="material-symbols-outlined" aria-hidden="true">computer</span>
+            </div>
+            <div class="bill-service-info">
+              <h3>Infotechs & Other Services</h3>
+              <p>Software Subscriptions & Cloud</p>
+            </div>
+            <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
+          </div>
+
           <div class="bill-service-card feature-highlight" role="listitem" tabindex="0" onclick="openBillModal('split')" onkeydown="if(event.key==='Enter'||event.key===' ') openBillModal('split')">
             <div class="bill-icon-wrapper bg-dark">
               <span class="material-symbols-outlined" aria-hidden="true">call_split</span>
@@ -221,6 +334,7 @@
             </div>
             <span class="badge-new">NEW</span>
           </div>
+
 
         </div>
 

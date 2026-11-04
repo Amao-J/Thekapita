@@ -165,6 +165,7 @@ function switchBillsTab(tabKey, btnElement) {
 }
 
 /* 4. Dynamic Form & Accessibility Pass */
+/* 4. Dynamic Form & Accessibility Pass */
 function openBillModal(serviceType, defaultAccount = '', defaultProvider = '') {
   const modal = document.getElementById('billActionModal');
   const title = document.getElementById('billModalTitle');
@@ -178,77 +179,350 @@ function openBillModal(serviceType, defaultAccount = '', defaultProvider = '') {
     title.textContent = 'Airtime & Mobile Data';
     subtitle.textContent = 'Instant zero-fee recharge for all major networks';
     content.innerHTML = `
-      <form onsubmit="handleBillSubmit(event, 'Airtime & Data Top-Up')">
+      <form onsubmit="handleBillSubmit(event, 'Airtime/Data')">
         <div class="form-group">
-          <label for="airtimeNetwork">Network Provider</label>
-          <select class="form-control" id="airtimeNetwork" required>
-            <option ${defaultProvider.includes('MTN') ? 'selected' : ''}>MTN Nigeria</option>
-            <option ${defaultProvider.includes('Airtel') ? 'selected' : ''}>Airtel Nigeria</option>
-            <option>Glo Mobile</option>
-            <option>9mobile</option>
+          <label>Network Provider</label>
+          <select class="form-control" required>
+            <option>MTN Nigeria</option><option>Airtel Nigeria</option><option>Glo Mobile</option><option>9mobile</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="airtimePhone">Phone Number</label>
-          <input type="tel" id="airtimePhone" value="${escapeHtml(defaultAccount)}" placeholder="e.g. 08123456789" class="form-control" required aria-required="true" />
+          <label>Phone Number</label>
+          <input type="tel" value="${escapeHtml(defaultAccount)}" placeholder="08123456789" class="form-control" required />
         </div>
         <div class="form-group">
-          <label for="serviceTypeSelect">Service Type</label>
-          <select class="form-control" id="serviceTypeSelect" onchange="toggleAirtimeDataFields(this)">
-            <option value="airtime">Airtime Recharge</option>
-            <option value="data">Mobile Data Bundle</option>
+          <label>Service Type</label>
+          <select class="form-control" onchange="toggleAirtimeDataFields(this)">
+            <option value="airtime">Airtime Recharge</option><option value="data">Data Bundle</option>
           </select>
         </div>
         <div class="form-group" id="dataPlanGroup" style="display: none;">
-          <label for="dataPlanSelect">Data Plan Package</label>
-          <select class="form-control" id="dataPlanSelect">
-            <option value="500">1.5GB Daily Plan — ₦500</option>
-            <option value="1000">3.5GB 2-Day Plan — ₦1,000</option>
-            <option value="4500" selected>10GB Monthly Data — ₦4,500</option>
-            <option value="7500">20GB Monthly Data — ₦7,500</option>
+          <label>Data Plan</label>
+          <select class="form-control">
+            <option>1.5GB Daily — ₦500</option><option>10GB Monthly — ₦4,500</option>
           </select>
         </div>
         <div class="form-group" id="airtimeAmountGroup">
-          <label for="billAmountInput">Recharge Amount (₦)</label>
-          <input type="number" id="billAmountInput" placeholder="0.00" value="2000" class="form-control" style="font-size: 20px; font-weight: 700;" min="100" required />
+          <label>Amount (₦)</label>
+          <input type="number" placeholder="0.00" class="form-control" style="font-size: 20px; font-weight: 700;" required />
         </div>
-        <button type="submit" class="btn-primary w-full" style="margin-top: 12px;" id="btnSubmitBill">
-          <span>Confirm & Recharge</span>
-        </button>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Recharge Now</button>
       </form>
     `;
-  } else if (serviceType === 'electricity') {
-    title.textContent = 'Electricity Token & Utility';
-    subtitle.textContent = 'Instant meter token generated & sent via SMS/Email';
+  } else if (serviceType === 'utilities') {
+    title.textContent = 'Electricity & Water';
+    subtitle.textContent = 'Pay DisCo Tokens & State Water Bills';
     content.innerHTML = `
-      <form onsubmit="handleBillSubmit(event, 'Electricity Token')">
+      <form onsubmit="handleBillSubmit(event, 'Utilities')">
         <div class="form-group">
-          <label for="discoSelect">Distribution Company (DisCo)</label>
-          <select class="form-control" id="discoSelect" required>
-            <option ${defaultProvider.includes('IKEDC') || defaultProvider.includes('Ikeja') ? 'selected' : ''}>Ikeja Electric (IKEDC)</option>
-            <option>Eko Electricity (EKEDC)</option>
-            <option>Abuja Electricity (AEDC)</option>
-            <option>Kano Electricity (KEDCO)</option>
+          <label>Utility Provider</label>
+          <select class="form-control" required>
+            <option>Ikeja Electric (IKEDC)</option><option>Eko Electric (EKEDC)</option><option>Lagos Water Corp</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="meterTypeSelect">Meter Category</label>
-          <select class="form-control" id="meterTypeSelect">
-            <option>Prepaid (Generates Token Code)</option>
-            <option>Postpaid (Clear Outstanding Bill)</option>
+          <label>Meter / Account Number</label>
+          <input type="text" placeholder="e.g. 4509-2819-0012" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Utility Bill</button>
+      </form>
+    `;
+  } else if (serviceType === 'cable') {
+    title.textContent = 'Cable TV & Entertainment';
+    subtitle.textContent = 'Reactivate your decoder instantly';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Cable TV')">
+        <div class="form-group">
+          <label>Service Provider</label>
+          <select class="form-control" required>
+            <option>DStv</option><option>GOtv</option><option>Startimes</option><option>Showmax</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="meterNumber">Meter Number</label>
-          <input type="text" id="meterNumber" value="${escapeHtml(defaultAccount)}" placeholder="e.g. 4509-2819-0012" class="form-control" required />
+          <label>Smartcard Number</label>
+          <input type="text" placeholder="Enter Smartcard ID" class="form-control" required />
         </div>
         <div class="form-group">
-          <label for="electricityAmount">Purchase Amount (₦)</label>
-          <input type="number" id="electricityAmount" value="15000" class="form-control" style="font-size: 20px; font-weight: 700;" min="1000" required />
+          <label>Subscription Package</label>
+          <select class="form-control" required>
+            <option>Compact Plus - ₦25,000</option><option>Premium - ₦37,000</option>
+          </select>
         </div>
-        <button type="submit" class="btn-primary w-full" style="margin-top: 12px;" id="btnSubmitBill">
-          <span>Generate Meter Token</span>
-        </button>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Renew Subscription</button>
+      </form>
+    `;
+  } else if (serviceType === 'internet') {
+    title.textContent = 'Internet Subscription';
+    subtitle.textContent = 'Keep your broadband active';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Internet Sub')">
+        <div class="form-group">
+          <label>ISP / Provider</label>
+          <select class="form-control" required>
+            <option>Spectranet</option><option>Smile Communications</option><option>FiberOne</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Account / User ID</label>
+          <input type="text" placeholder="Enter Internet Account ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Internet Bill</button>
+      </form>
+    `;
+  } else if (serviceType === 'travel') {
+    title.textContent = 'Airlines, Travels & Logistics';
+    subtitle.textContent = 'Pay for flights, bus bookings & shipping';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Travel & Logistics')">
+        <div class="form-group">
+          <label>Booking Type</label>
+          <select class="form-control" required>
+            <option>Airline / Flight</option><option>Bus Transit</option><option>Shipping Line Payment</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Booking Reference (PNR) / Tracking ID</label>
+          <input type="text" placeholder="e.g. XYZ123" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Confirm Booking Payment</button>
+      </form>
+    `;
+  } else if (serviceType === 'government') {
+    title.textContent = 'Government Taxes, Levies & Remita';
+    subtitle.textContent = 'Settle FIRS, LIRS, VISA fees & eBillsPay';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Government Taxes')">
+        <div class="form-group">
+          <label>Biller / Agency</label>
+          <select class="form-control" required>
+            <option>Remita (RRR)</option><option>NIBSS eBillsPay</option><option>VISA Fee Payment</option><option>PAYDIRECT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>RRR / Reference Number</label>
+          <input type="text" placeholder="Enter Reference Code" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Process Payment</button>
+      </form>
+    `;
+  } else if (serviceType === 'school') {
+    title.textContent = 'Schools & Professional Bodies';
+    subtitle.textContent = 'Pay tuition, alumni dues & professional fees';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'School & Pro Fees')">
+        <div class="form-group">
+          <label>Institution / Body</label>
+          <input type="text" placeholder="e.g. UNILAG, ICAN, NBA" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Matric / Registration Number</label>
+          <input type="text" placeholder="Enter Student ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Fees</button>
+      </form>
+    `;
+  } else if (serviceType === 'estate') {
+    title.textContent = 'Estates & Associations';
+    subtitle.textContent = 'Pay estate resident dues & association levies';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Estate Dues')">
+        <div class="form-group">
+          <label>Estate / Association Name</label>
+          <input type="text" placeholder="Search Estate Name..." class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>House / Flat Number</label>
+          <input type="text" placeholder="e.g. Block 4, Flat B" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Dues</button>
+      </form>
+    `;
+  } else if (serviceType === 'toll') {
+    title.textContent = 'Toll Fees - LCC';
+    subtitle.textContent = 'Top-up your eTag balance instantly';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Toll Fees')">
+        <div class="form-group">
+          <label>Toll Operator</label>
+          <select class="form-control" disabled><option>Lekki Concession Company (LCC)</option></select>
+        </div>
+        <div class="form-group">
+          <label>eTag / Account Number</label>
+          <input type="text" placeholder="Enter LCC eTag" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Top-up Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Top-up eTag</button>
+      </form>
+    `;
+  } else if (serviceType === 'gaming') {
+    title.textContent = 'Sports and Gaming';
+    subtitle.textContent = 'Fund your betting or gaming wallets safely';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Sports & Gaming')">
+        <div class="form-group">
+          <label>Gaming Platform</label>
+          <select class="form-control" required>
+            <option>Bet9ja</option><option>SportyBet</option><option>Nairabet</option><option>1xBet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>User ID / Account Number</label>
+          <input type="text" placeholder="Enter Platform User ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Deposit Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Fund Wallet</button>
+      </form>
+    `;
+  } else if (serviceType === 'religious') {
+    title.textContent = 'Religious Institutions & NGO';
+    subtitle.textContent = 'Seamlessly send tithes, offerings, and donations';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Religious & NGO')">
+        <div class="form-group">
+          <label>Institution / NGO Name</label>
+          <input type="text" placeholder="Search Church, Mosque or NGO..." class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Giving Type</label>
+          <select class="form-control" required>
+            <option>Tithe</option><option>Offering</option><option>Zakat</option><option>Charity Donation</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Complete Donation</button>
+      </form>
+    `;
+  } else if (serviceType === 'insurance') {
+    title.textContent = 'Insurance & HMO';
+    subtitle.textContent = 'Pay for life, vehicle & health insurance policies';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Insurance & HMO')">
+        <div class="form-group">
+          <label>Insurance Provider</label>
+          <input type="text" placeholder="e.g. Leadway, AXA Mansard, Reliance HMO" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Policy Number / Enrollee ID</label>
+          <input type="text" placeholder="Enter Policy ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Premium Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Premium</button>
+      </form>
+    `;
+  } else if (serviceType === 'investments') {
+    title.textContent = 'Capital Market & Investments';
+    subtitle.textContent = 'Fund your investment portfolios & trading accounts';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Investments')">
+        <div class="form-group">
+          <label>Investment Platform / Broker</label>
+          <input type="text" placeholder="e.g. Bamboo, Trove, ARM" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Account ID / CSCS Number</label>
+          <input type="text" placeholder="Enter Account ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Fund Account</button>
+      </form>
+    `;
+  } else if (serviceType === 'distributors') {
+    title.textContent = 'Distributors & Agent Payments';
+    subtitle.textContent = 'Settle bulk purchases and agency fees';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Distributors')">
+        <div class="form-group">
+          <label>Company / Principal</label>
+          <input type="text" placeholder="e.g. FMCG Corp, Brewery" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Agent / Distributor ID</label>
+          <input type="text" placeholder="Enter Agent ID" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Process Payment</button>
+      </form>
+    `;
+  } else if (serviceType === 'financial') {
+    title.textContent = 'Financial Institutions';
+    subtitle.textContent = 'Loan repayments and microfinance deposits';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Financial Institutions')">
+        <div class="form-group">
+          <label>Institution Name</label>
+          <input type="text" placeholder="e.g. LAPO, Renmoney, Mutual Trust" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Loan / Account Number</label>
+          <input type="text" placeholder="Enter Account Number" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Make Payment</button>
+      </form>
+    `;
+  } else if (serviceType === 'infotech') {
+    title.textContent = 'Infotechs & Other Services';
+    subtitle.textContent = 'Pay for tech services, hosting, and cloud tools';
+    content.innerHTML = `
+      <form onsubmit="handleBillSubmit(event, 'Infotechs')">
+        <div class="form-group">
+          <label>Service Provider</label>
+          <input type="text" placeholder="e.g. Web Host, SaaS Platform" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Invoice / Reference Number</label>
+          <input type="text" placeholder="Enter Reference" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" class="form-control" style="font-size: 20px; font-weight: 700;" required />
+        </div>
+        <button type="submit" class="btn-primary w-full" id="btnSubmitBill">Pay Invoice</button>
       </form>
     `;
   } else if (serviceType === 'split') {
@@ -277,7 +551,7 @@ function openBillModal(serviceType, defaultAccount = '', defaultProvider = '') {
         </button>
       </form>
     `;
-  } else {
+} else {
     // Default Fallback Form
     title.textContent = 'Pay Utility Bill';
     subtitle.textContent = 'Secure single-tap payment';
@@ -297,6 +571,7 @@ function openBillModal(serviceType, defaultAccount = '', defaultProvider = '') {
       </form>
     `;
   }
+
 
   modal.classList.add('active');
   const firstInput = content.querySelector('input, select');
@@ -477,4 +752,32 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/* 6. Search Filter for Services */
+/* 6. Search Filter for Services */
+function filterBillServices() {
+  const input = document.getElementById('billSearchInput');
+  const filter = input.value.toLowerCase();
+  const grid = document.getElementById('billsCategoryGrid');
+  const cards = grid.getElementsByClassName('bill-service-card');
+
+  let visibleCount = 0;
+
+  for (let i = 0; i < cards.length; i++) {
+    const title = cards[i].querySelector('h3').textContent.toLowerCase();
+    const description = cards[i].querySelector('p').textContent.toLowerCase();
+    
+    if (title.indexOf(filter) > -1 || description.indexOf(filter) > -1) {
+      // Force display to flex with !important
+      cards[i].style.setProperty('display', 'flex', 'important');
+      visibleCount++;
+    } else {
+      // Force display to none with !important to override the CSS class
+      cards[i].style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  // Optional: Accessibility announcement for screen readers
+  announceAccessibilityMessage(`Showing ${visibleCount} matching services.`);
 }

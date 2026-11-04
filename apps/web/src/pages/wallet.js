@@ -60,71 +60,81 @@ async function hydrateWalletAnalytics() {
     const element = document.getElementById(id);
     if (element) element.textContent = 'Loading';
   }
-  document.getElementById('walletAnalyticsChart')?.replaceChildren();
-  document.querySelector('.service-analytics-section')?.remove();
-
-  try {
-    renderWalletAnalytics(await loadWalletAnalytics());
-  } catch {
-    const chart = document.getElementById('walletAnalyticsChart');
-    if (chart) chart.textContent = 'Could not load wallet analytics.';
-  }
 }
 
-function renderWalletAnalytics(analytics) {
-  const inflow = Number(analytics.current_month_inflow);
-  const outflow = Number(analytics.current_month_outflow);
-  const net = inflow - outflow;
-  const setText = (id, value) => {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-  };
+function restoreStaticTransactions() {
+  const container = document.querySelector('.activity-timeline');
+  if (!container) return;
 
-  setText('walletAnalyticsInflow', formatCurrency(inflow));
-  setText('walletAnalyticsOutflow', formatCurrency(outflow));
-  setText('walletAnalyticsNet', formatCurrency(net));
-  setText('overviewWalletInflow', formatCurrency(inflow));
-  setText('overviewWalletOutflow', formatCurrency(outflow));
-  const total = inflow + outflow;
-  const inflowBar = document.getElementById('overviewInflowBar');
-  const outflowBar = document.getElementById('overviewOutflowBar');
-  if (inflowBar) inflowBar.style.width = `${total ? inflow / total * 100 : 0}%`;
-  if (outflowBar) outflowBar.style.width = `${total ? outflow / total * 100 : 0}%`;
+  container.innerHTML = `
+    <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990812', 'theKapita Eats', 'Food Payment', '8,500.00', 'Today, 1:42 PM')">
+      <div class="act-icon-wrapper eats">
+        <span class="material-symbols-outlined">restaurant</span>
+      </div>
+      <div class="act-details">
+        <p class="act-title"><strong>theKapita Eats:</strong> Bukka Hut Lunch</p>
+        <span class="act-time">Today, 1:42 PM • Food Payment</span>
+      </div>
+      <div class="act-right">
+        <span class="act-amount negative">-₦8,500</span>
+        <span class="tx-status-pill success">Successful</span>
+      </div>
+    </div>
 
-  const chart = document.getElementById('walletAnalyticsChart');
-  if (!chart) return;
-  const months = analytics.months || [];
-  const maxValue = Math.max(1, ...months.flatMap((item) => [Number(item.inflow), Number(item.outflow)]));
-  chart.replaceChildren(...months.map((item) => {
-    const group = document.createElement('div');
-    group.className = 'bar-group';
-    const wrapper = document.createElement('div');
-    wrapper.className = 'bar-wrapper';
-    for (const [kind, amount] of [['inflow', Number(item.inflow)], ['outflow', Number(item.outflow)]]) {
-      const bar = document.createElement('div');
-      bar.className = `bar ${kind}`;
-      bar.style.height = `${amount ? Math.max(2, amount / maxValue * 100) : 0}%`;
-      bar.title = `${kind === 'inflow' ? 'Inflow' : 'Outflow'}: ${formatCurrency(amount)}`;
-      wrapper.appendChild(bar);
-    }
-    const label = document.createElement('span');
-    label.className = 'bar-label';
-    label.textContent = new Date(`${item.month}-01T00:00:00`).toLocaleDateString('en', { month: 'short' });
-    group.append(wrapper, label);
-    return group;
-  }));
+    <div class="activity-row tx-item in" onclick="viewTxDetail('TX-990811', 'Tech Firm Ltd', 'Bank Transfer', '850,000.00', 'Today, 9:15 AM')">
+      <div class="act-icon-wrapper pay">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
+      <div class="act-details">
+        <p class="act-title"><strong>Salary Deposit:</strong> Tech Firm Ltd</p>
+        <span class="act-time">Today, 9:15 AM • Bank Transfer</span>
+      </div>
+      <div class="act-right">
+        <span class="act-amount positive">+₦850,000</span>
+        <span class="tx-status-pill success">Successful</span>
+      </div>
+    </div>
+
+    <div class="activity-row tx-item out" onclick="viewTxDetail('TX-990810', 'John Okafor', 'Peer Transfer', '20,000.00', 'Yesterday')">
+      <div class="act-icon-wrapper ride">
+        <span class="material-symbols-outlined">directions_car</span>
+      </div>
+      <div class="act-details">
+        <p class="act-title"><strong>Transfer to:</strong> John Okafor (@john)</p>
+        <span class="act-time">Yesterday • Peer Transfer</span>
+      </div>
+      <div class="act-right">
+        <span class="act-amount negative">-₦20,000</span>
+        <span class="tx-status-pill success">Successful</span>
+      </div>
+    </div>
+  `;
 }
 
-async function hydrateWalletIdentity() {
-  const idEl = document.getElementById('walletKapitaId');
-  if (!idEl) return;
+function renderTransactionsList(txs) {
+  const container = document.querySelector('.activity-timeline');
+  if (!container) return;
 
-  try {
-    const user = getCurrentUser()?.kapita_id ? getCurrentUser() : await hydrateProfile();
-    idEl.textContent = user?.kapita_id || '—';
-  } catch {
-    idEl.textContent = '—';
-  }
+  container.innerHTML = txs.map(tx => {
+    const isPositive = tx.amount > 0;
+    const formattedAmount = Math.abs(tx.amount).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+    
+    return `
+      <div class="activity-row tx-item ${isPositive ? 'in' : 'out'}" onclick="viewTxDetail('${tx.id}', '${escapeJs(tx.description || tx.recipient)}', '${escapeJs(tx.category || 'Transfer')}', '${formattedAmount}', '${tx.created_at || 'Just Now'}')">
+        <div class="act-icon-wrapper ${isPositive ? 'pay' : 'eats'}">
+          <span class="material-symbols-outlined">${isPositive ? 'payments' : 'north_east'}</span>
+        </div>
+        <div class="act-details">
+          <p class="act-title"><strong>${isPositive ? 'Received:' : 'Paid:'}</strong> ${escapeHtml(tx.description || tx.recipient)}</p>
+          <span class="act-time">${tx.created_at || 'Recently'} • ${escapeHtml(tx.category || 'Wallet Transfer')}</span>
+        </div>
+        <div class="act-right">
+          <span class="act-amount ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : '-'}₦${formattedAmount}</span>
+          <span class="tx-status-pill success">${tx.status || 'Successful'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function escapeHtml(str) {
@@ -537,8 +547,8 @@ function toggleCardDetails() {
 
   const revealed = !num.textContent.includes('••••');
   if (!revealed) {
-    num.textContent = 'Full number in secure card view';
-    cvv.textContent = '···';
+    num.textContent = '5399 4102 8812 8821';
+    cvv.textContent = '842';
   } else {
     num.textContent = '•••• •••• •••• 8821';
     cvv.textContent = '•••';
@@ -782,9 +792,6 @@ function quickSendTo(handle) {
 document.addEventListener('DOMContentLoaded', () => {
   hydrateBalance();
   hydrateTransactions();
-  hydrateWalletIdentity();
-  hydrateWalletAnalytics();
-  hydrateBeneficiaries();
   initRecipientsEngine();
 });
 

@@ -17,11 +17,14 @@ from ninja.throttling import AnonRateThrottle
 from .auth import JWTAuth, decode_token, issue_token_pair
 from .idempotency import IdempotencyConflict, get_or_create_idempotent_response
 from . import ledger
-from .models import LedgerEntry, Profile, ServicePreference, SocialAccount, UsedRefreshToken, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest
+from .models import LedgerEntry, Profile, RideBooking, RideDriver, ServicePreference, SocialAccount, UsedRefreshToken, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest
+from .ride_service import RideServiceError, cancel_ride as cancel_ride_request, dispatch_requested_ride
 from .schemas import (
     GoogleLoginIn,
     PreferencesIn,
     PreferencesOut,
+    RideBookingIn,
+    RideBookingOut,
     SettingsIn,
     SettingsOut,
     TransactionOut,
@@ -41,6 +44,14 @@ register_throttle = AnonRateThrottle("5/m")
 auth_router = Router()
 profile_router = Router()
 wallet_router = Router()
+ride_router = Router()
+
+RIDE_FARES = {
+    RideBooking.RideType.GO: Decimal("2200.00"),
+    RideBooking.RideType.COMFORT: Decimal("3500.00"),
+    RideBooking.RideType.KEKE_EXPRESS: Decimal("1200.00"),
+    RideBooking.RideType.EXECUTIVE: Decimal("6500.00"),
+}
 
 
 def new_handle(seed: str) -> str:
@@ -495,9 +506,100 @@ def send_money(request, payload: SendMoneyIn):
     return api.create_response(request, body, status=status_code)
 
 
+# ---- rides (requires auth) -------------------------------------------------
+
+def _ride_booking_out(booking):
+    return {
+        "id": booking.pk,
+        "reference": booking.reference,
+        "ride_type": booking.ride_type,
+        "pickup": booking.pickup,
+        "destination": booking.destination,
+        "fare": booking.fare,
+        "status": booking.status,
+        "driver": {
+            "name": booking.driver.name,
+            "phone": booking.driver.phone,
+            "vehicle": booking.driver.vehicle,
+            "plate_number": booking.driver.plate_number,
+        } if booking.driver_id else None,
+        "charged": booking.charged_at is not None and booking.refunded_at is None,
+        "wallet_balance": Wallet.objects.get(user_id=booking.user_id).balance,
+        "created_at": booking.created_at.isoformat(),
+    }
+
+
+@ride_router.post("/book", response={201: RideBookingOut, 200: RideBookingOut}, auth=JWTAuth())
+@transaction.atomic
+def book_ride(request, payload: RideBookingIn):
+    idempotency_key = request.headers.get("Idempotency-Key", "").strip()
+    if not idempotency_key:
+        raise HttpError(400, "Idempotency-Key header is required for this endpoint.")
+    if len(idempotency_key) > 64:
+        raise HttpError(400, "Idempotency-Key must be 64 characters or fewer.")
+
+    fare = RIDE_FARES[payload.ride_type]
+    Wallet.objects.get_or_create(user=request.auth)
+    booking, created = RideBooking.objects.get_or_create(
+        user=request.auth,
+        idempotency_key=idempotency_key,
+        defaults={
+            "reference": f"RID-{uuid.uuid4().hex[:12].upper()}",
+            "ride_type": payload.ride_type,
+            "pickup": payload.pickup,
+            "destination": payload.destination,
+            "fare": fare,
+        },
+    )
+    if not created and (
+        booking.ride_type != payload.ride_type
+        or booking.pickup != payload.pickup
+        or booking.destination != payload.destination
+    ):
+        raise HttpError(409, "This Idempotency-Key was already used for a different ride request.")
+    try:
+        booking = dispatch_requested_ride(booking.pk)
+    except RideServiceError as exc:
+        raise HttpError(402, str(exc))
+
+    return (201 if created else 200), _ride_booking_out(booking)
+
+
+@ride_router.get("", response=list[RideBookingOut], auth=JWTAuth())
+def list_rides(request, limit: int = 20, offset: int = 0):
+    limit = max(1, min(limit, 100))
+    offset = max(0, offset)
+    bookings = RideBooking.objects.filter(user=request.auth).select_related("driver")[offset:offset + limit]
+    return [_ride_booking_out(booking) for booking in bookings]
+
+
+@ride_router.get("/{reference}", response=RideBookingOut, auth=JWTAuth())
+def get_ride(request, reference: str):
+    try:
+        booking = RideBooking.objects.select_related("driver").get(user=request.auth, reference=reference)
+    except RideBooking.DoesNotExist:
+        raise HttpError(404, "Ride request not found.")
+    return _ride_booking_out(booking)
+
+
+@ride_router.post("/{reference}/cancel", response=RideBookingOut, auth=JWTAuth())
+def cancel_ride(request, reference: str):
+    try:
+        booking = RideBooking.objects.get(user=request.auth, reference=reference)
+    except RideBooking.DoesNotExist:
+        raise HttpError(404, "Ride request not found.")
+    try:
+        booking = cancel_ride_request(booking.pk, request.auth)
+    except RideServiceError as exc:
+        raise HttpError(409, str(exc))
+    booking = RideBooking.objects.select_related("driver").get(pk=booking.pk)
+    return _ride_booking_out(booking)
+
+
 api.add_router("/auth/", auth_router)
 api.add_router("/profile/", profile_router)
 api.add_router("/wallet/", wallet_router)
+api.add_router("/rides/", ride_router)
 
 # urls.py:
 #   from django.urls import path
