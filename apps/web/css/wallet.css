@@ -218,17 +218,22 @@
 }
 
 /* NAVIGATION TABS */
+/* NAVIGATION TABS */
 .wallet-tabs {
   display: flex;
   gap: 8px;
   border-bottom: 2px solid var(--border-color, #e2e8f0);
   margin-bottom: 24px;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  box-sizing: border-box;
 }
 
 .wallet-tabs::-webkit-scrollbar {
