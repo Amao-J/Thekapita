@@ -27,6 +27,7 @@ export default defineConfig({
         rideRating: resolve(__dirname, 'ride-rating.html'),
         care: resolve(__dirname, 'care.html'),
         careProvider: resolve(__dirname, 'care-provider.html'),
+        driver: resolve(__dirname, 'driver.html'),
       },
     },
   },
