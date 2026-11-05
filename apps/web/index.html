@@ -66,6 +66,8 @@
             <div class="launcher-item" tabindex="0" role="button" aria-label="Ride app" onclick="window.location.href='ride.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🚗</div><span>Ride</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Eats app" onclick="window.location.href='food.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🍔</div><span>Eats</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Marketplace app" onclick="window.location.href='marketplace.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🛍️</div><span>Market</span></div>
+            <!-- Added Directory to App Launcher Menu -->
+            <div class="launcher-item" tabindex="0" role="button" aria-label="Directory app" onclick="window.location.href='directories.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">📂</div><span>Directory</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Haven app" onclick="openApp('Haven')"><div class="launcher-icon" aria-hidden="true">🏠</div><span>Haven</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Care app" onclick="window.location.href='care.html'" style="cursor: pointer;"><div class="launcher-icon" aria-hidden="true">🩺</div><span>Care</span></div>
             <div class="launcher-item" tabindex="0" role="button" aria-label="Counsel app" onclick="openApp('Counsel')"><div class="launcher-icon" aria-hidden="true">⚖️</div><span>Counsel</span></div>
@@ -115,6 +117,8 @@
         <button class="pill" draggable="true" data-id="Driver" data-title="Driver Portal" data-desc="Drive & Deliver" data-icon="🚕" onclick="window.location.href='driver.html'" style="cursor: pointer;">🚕 Drive with theKapita</button>
         <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" data-icon="🍔" onclick="window.location.href='food.html'" style="cursor: pointer;">🍔 Order Chow</button>
         <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" data-icon="🛍️" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">🛍️ Marketplace</button>
+        <!-- Added Directory Quick Pill -->
+        <button class="pill" draggable="true" data-id="Directories" data-title="Directory" data-desc="Verified Public & Businesses" data-icon="📂" onclick="window.location.href='directories.html'" style="cursor: pointer;">📂 Directory</button>
       </div>
     </section>
 
@@ -160,6 +164,15 @@
           <div class="app-info">
             <h3>Eats</h3>
             <p>Food & Bukka</p>
+          </div>
+        </div>
+
+        <!-- Added Directory Superapp Card Linked to directories.html -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Directory Service" draggable="true" data-id="Directories" data-title="Directory" data-desc="Verified Public & Businesses" data-icon="📂" onclick="window.location.href='directories.html'" style="cursor: pointer;">
+          <div class="icon-circle" aria-hidden="true" style="background: rgba(0, 208, 132, 0.1); color: #008755;">📂</div>
+          <div class="app-info">
+            <h3>Directory</h3>
+            <p>Verified Listings</p>
           </div>
         </div>
 
