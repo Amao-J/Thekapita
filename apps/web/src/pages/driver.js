@@ -179,3 +179,19 @@
       event.preventDefault(); // Prevents page reload
       alert('Profile details have been updated and securely saved.');
     }
+
+    Object.assign(window, {
+      toggleOnlineState,
+      openModal,
+      closeModal,
+      triggerSimulatedRequest,
+      declineRequest,
+      acceptRequest,
+      advanceTripState,
+      verifyOTP,
+      finishTripWorkflow,
+      processCashout,
+      switchTab,
+      recenterMap,
+      saveProfileSettings,
+    });
