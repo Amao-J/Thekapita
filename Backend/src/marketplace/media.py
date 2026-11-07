@@ -26,7 +26,7 @@ def signed_url(fieldfile, request=None):
     return url
 
 
-def generate_presigned_url(s3_key: str, expiration: int | None  None) -> str | None:
+def generate_presigned_url(s3_key: str, expiration: int | None = None) -> str | None:
     if not getattr(settings, "AWS_STORAGE_BUCKET_NAME", None) or not settings.AWS_ACCESS_KEY_ID:
         return None
     expiration = expiration or getattr(settings, "AWS_QUERYSTRING_EXPIRE", 3600)

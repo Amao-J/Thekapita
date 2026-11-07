@@ -19,7 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+_DJANGO_DEBUG = os.environ.get("DJANGO_DEBUG")
+if _DJANGO_DEBUG is not None:
+    DEBUG = _DJANGO_DEBUG == "1"
+else:
+    # Local development should not require Railway's production-only secret.
+    DEBUG = not bool(os.environ.get("RAILWAY_ENVIRONMENT"))
 
 _DEV_SECRET = "django-insecure-dev-only-key-do-not-use-in-production"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or (_DEV_SECRET if DEBUG else None)
