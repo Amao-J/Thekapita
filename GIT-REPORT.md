@@ -1,51 +1,70 @@
-# Git Change Report
+# Thekapita Weekly Progress Report
 
-**Reporting period:** October 26, 2026 06:52 through November 2, 2026 06:52 (UTC+01:00)  
-**Commits:** 5 total (3 feature commits and 2 merge commits)  
-**Changed files:** 29  
-**Change volume:** 6,414 insertions and 153 deletions
+| Reporting detail | Value |
+|---|---|
+| Prepared | 9 November 2026 |
+| Reporting period | 2-8 November 2026 (UTC+01:00) |
+| Commits | 13 |
+| Changed files | 51 |
+| Change volume | 23,677 insertions and 11,711 deletions |
 
-This report summarizes committed changes in the reporting window. The change
-volume is the net Git diff from the first in-window commit's parent to the
-latest commit, including merged changes.
+The change volume is the net Git diff from the previous report's ending commit
+(`dec8790`) to the latest commit in this reporting period (`5478d17`). It
+includes all tracked file types, not only source code.
 
-## Highlights
+## Executive summary
 
-- **Care experience:** Added patient-facing care pages and a provider dashboard,
-  with service and provider views, appointment booking/cancellation interactions,
-  role-specific queues, catalogs, staff rosters, and onboarding UI. Added care
-  styling, navigation, and build-time page asset copying.
-- **Ride booking:** Added ride and driver data models and migrations, authenticated
-  booking/list/detail/cancel endpoints, server-calculated fares, driver dispatch,
-  idempotent booking, and wallet charge/refund ledger entries. Ride lifecycle
-  handling covers queued requests, assignment, cancellation, completion, refunds,
-  and driver availability.
-- **Ride web flow and tests:** Expanded ride booking and active-ride screens to
-  support the backend flow. Added tests for fares, authentication, ownership,
-  idempotency, driver assignment, insufficient funds, cancellation/refunds, and
-  driver release.
-- **Wallet and marketplace polish:** Added shared wallet endpoint constants for
-  analytics and beneficiaries, revised wallet transaction rendering and static
-  transaction fallback, and updated marketplace navigation/product detail UI.
-  Updated Vite configuration and the web Docker image's page asset list.
+Work this week broadened theKapita's ride, food, directory, bills, marketplace,
+and mobile experiences. The backend gained a ride-booking lifecycle integrated
+with the wallet ledger, while web and mobile interfaces added or expanded the
+corresponding service flows. The mobile app also moved further into an Expo
+Router-based structure. Backend ride tests were added, and backend development
+configuration and a marketplace media function were corrected.
 
-## Validation finding
+## Key work completed
 
-The latest commit leaves a Python syntax error in
-`Backend/src/marketplace/media.py`: the `expiration` parameter annotation contains
-an extra `None` token. An AST syntax check fails at that function definition, so
-the module cannot be imported until corrected. This report records the finding;
-application code was not changed as part of this reporting task.
+- **Ride booking and wallet integration:** Added ride booking and driver data
+  models, migrations, authenticated API operations, server-calculated fares,
+  idempotent booking, and driver assignment. Assignment charges the wallet;
+  eligible cancellations refund it and release the driver, and ride completion
+  also makes the driver available again. Added tests for booking, retries,
+  driver assignment, insufficient balance, cancellation/refunds, and queued
+  requests.
+- **Web service experiences:** Added driver and directory pages and styling,
+  expanded food ordering, and substantially revised bills interactions. Ride
+  pages and supporting navigation/build configuration were also updated.
+- **Mobile app structure and screens:** Migrated the app toward Expo Router,
+  reorganized authentication and navigation, and added or expanded Home,
+  Explore, Food, Marketplace, Rides, and Wallet screens. Updated the Expo
+  configuration and mobile package metadata alongside the screen changes.
+- **Marketplace and account foundations:** Added marketplace backend models,
+  APIs, services, administration, migrations, and product import support, with
+  corresponding marketplace web and session/auth updates.
+- **Configuration fixes:** Adjusted Django's debug-mode fallback for local
+  development versus Railway environments and corrected the marketplace
+  presigned-URL function's default argument annotation.
 
-`git diff --check` also reports trailing whitespace in several newly added care,
-marketplace, ride, and wallet files.
+## Validation and follow-up
+
+The repository changes include backend ride tests, but tests were not run while
+preparing this report. The repository currently has a separate uncommitted
+change to the root `package-lock.json`; it is not included in the commit-based
+report totals above.
 
 ## Commits
 
 | Date | Commit | Message |
 |---|---|---|
-| 2026-10-26 | `260d7ae` | endpoints change |
-| 2026-10-28 | `f847077` | Merge branch `main` |
-| 2026-10-28 | `d72ceb9` | Merge branch `main` |
-| 2026-10-28 | `8fe42e3` | hnew |
-| 2026-11-02 | `dec8790` | tuesday |
+| 2026-11-02 | `a012d9d` | gdf |
+| 2026-11-02 | `ce8c17b` | hey |
+| 2026-11-02 | `10699d5` | Merge branch `main` |
+| 2026-11-02 | `d359f01` | yoo |
+| 2026-11-03 | `2ddf983` | olisas changes? |
+| 2026-11-03 | `012b2c4` | sharp |
+| 2026-11-04 | `f9389d1` | cocmmit please |
+| 2026-11-04 | `ce0531f` | Merge branch `main` |
+| 2026-11-05 | `88cd00f` | newpages added |
+| 2026-11-05 | `37b5528` | okp |
+| 2026-11-05 | `4bb3bf2` | yoeee |
+| 2026-11-05 | `1fbc747` | ue |
+| 2026-11-07 | `5478d17` | singer |
