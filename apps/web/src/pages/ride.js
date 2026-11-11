@@ -5,7 +5,8 @@
 import { authorizedRequest, isAuthenticated } from '../state/session.js';
 import { ApiError, newIdempotencyKey } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
-import { createMap, geocode, hasCoords, pin, upsertMarker } from '../ui/map.js';
+import { createMap, currentPosition, geocode, hasCoords, locationAlreadyGranted, pin, reverseGeocode, upsertMarker } from '../ui/map.js';
+import { pickLocation } from '../ui/picker.js';
 
 const ACTIVE_KEY = 'kapita.ride.active.v1';
 const TERMINAL_STATUSES = ['cancelled', 'completed'];
@@ -22,6 +23,10 @@ let isOnline = navigator.onLine;
 let lastFailedAction = null;
 let rideRequestKey = null;
 
+// Coordinates behind the pickup / destination text boxes. Set by the map picker or GPS; cleared as soon as
+// the person edits the text by hand (then we fall back to looking the typed address up when booking).
+const picks = { pickup: null, destination: null };
+
 // Leaflet Map Global Handles
 let trackingMap = null;
 let driverMarker = null;
@@ -32,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('rideOriginInput')) {
     fetchWalletBalance();
     setupCoRiderButtons();
+    initRidePlanner();
   } else {
     initActiveRidePage();
   }
@@ -358,8 +364,76 @@ function swapLocations() {
     const tempVal = originInput.value;
     originInput.value = destinationInput.value;
     destinationInput.value = tempVal;
+    [picks.pickup, picks.destination] = [picks.destination, picks.pickup];
+    updateRouteSummary();
     announceAccessibilityMessage("Pickup and destination addresses swapped.");
   }
+}
+
+function rideInputs() {
+  return {
+    pickup: document.getElementById('rideOriginInput'),
+    destination: document.getElementById('rideDestinationInput'),
+  };
+}
+
+function initRidePlanner() {
+  const inputs = rideInputs();
+  for (const key of ['pickup', 'destination']) {
+    inputs[key].addEventListener('input', () => {
+      picks[key] = null; // typed by hand: any earlier map point no longer matches the text
+      updateRouteSummary();
+    });
+  }
+  prefillPickupFromGps();
+}
+
+/** Fill the pickup with where the person really is, but only if the browser already allows it (no surprise prompt). */
+async function prefillPickupFromGps() {
+  const input = rideInputs().pickup;
+  if (input.value.trim() || !(await locationAlreadyGranted())) return;
+  const here = await currentPosition();
+  if (!here || input.value.trim()) return;
+  const label = await reverseGeocode(here.lat, here.lng);
+  if (input.value.trim()) return; // they started typing while we looked it up
+  picks.pickup = here;
+  input.value = label || 'My current location';
+  updateRouteSummary();
+}
+
+async function pickRideLocation(which) {
+  const input = rideInputs()[which];
+  const other = which === 'pickup' ? 'destination' : 'pickup';
+  const spot = await pickLocation({
+    title: which === 'pickup' ? 'Choose pickup point' : 'Choose destination',
+    initial: picks[which],
+    near: picks[other],
+    emoji: which === 'pickup' ? '\u25CF' : '\u2691',
+    color: which === 'pickup' ? '#008a57' : '#dc2626',
+  });
+  if (!spot) return;
+  picks[which] = { lat: spot.lat, lng: spot.lng };
+  input.value = spot.address;
+  updateRouteSummary();
+  announceAccessibilityMessage(`${which === 'pickup' ? 'Pickup' : 'Destination'} set to ${spot.address}.`);
+  input.focus();
+}
+
+// Straight-line distance between the two points; road distance is typically ~30% longer, at ~30 km/h in town.
+const ROAD_FACTOR = 1.3;
+const CITY_SPEED_KMH = 30;
+
+function updateRouteSummary() {
+  const box = document.getElementById('rideRouteSummary');
+  if (!box) return;
+  if (!picks.pickup || !picks.destination) {
+    box.hidden = true;
+    return;
+  }
+  const km = distanceKm(picks.pickup, picks.destination);
+  const mins = Math.max(1, Math.round(((km * ROAD_FACTOR) / CITY_SPEED_KMH) * 60));
+  box.textContent = `${km.toFixed(1)} km apart in a straight line \u2022 roughly ${mins} min by road`;
+  box.hidden = false;
 }
 
 function selectRideType(element, rideName, price) {
@@ -419,8 +493,16 @@ async function confirmRideBooking() {
       'Kapita Keke Express': 'kapita_keke_express',
       'Kapita Executive': 'kapita_executive',
     };
-    // Best effort: coordinates let the driver and the live map find the addresses. A failed lookup never blocks booking.
-    const [from, to] = await Promise.all([geocode(pickup), geocode(dest)]);
+    // Points chosen on the map / by GPS are exact. Typed addresses are looked up (best effort) so the driver and the
+    // live map can find them; a failed lookup never blocks booking.
+    const [from, to] = await Promise.all([
+      picks.pickup ?? geocode(pickup),
+      picks.destination ?? geocode(dest),
+    ]);
+    if (from && to && distanceKm(from, to) < 0.05) {
+      showErrorNotice('Pickup and destination look like the same place. Choose a different destination.');
+      return;
+    }
     const booking = await authorizedRequest(ENDPOINTS.rides.book, {
       method: 'POST',
       headers: { 'Idempotency-Key': rideRequestKey },
@@ -714,5 +796,5 @@ Object.assign(window, {
   switchMainService, toggleHeaderNavMenu, swapLocations, selectRideType, confirmRideBooking,
   selectPackageCategory, setDeliverySpeed, prefillExpressDelivery, confirmParcelDispatch,
   toggleFareSplitModal, closeFareSplitModal, retryLastRideAction, changeTrackingWaypoint,
-  cancelActiveRideRequest,
+  cancelActiveRideRequest, pickRideLocation,
 });

@@ -140,18 +140,21 @@
             <div class="input-row">
               <span class="material-symbols-outlined icon" aria-hidden="true">my_location</span>
               <label for="rideOriginInput" class="sr-only">Pickup Location</label>
-              <input type="text" id="rideOriginInput" placeholder="Pickup Location" value="Current Location (Victoria Island, Lagos)" required />
+              <input type="text" id="rideOriginInput" placeholder="Pickup location" autocomplete="off" required />
+              <button type="button" class="pick-map-btn" onclick="pickRideLocation('pickup')" aria-label="Choose pickup on the map"><span class="material-symbols-outlined" aria-hidden="true">map</span></button>
             </div>
             <div class="input-row">
               <span class="material-symbols-outlined icon" aria-hidden="true">location_on</span>
               <label for="rideDestinationInput" class="sr-only">Destination Address</label>
-              <input type="text" id="rideDestinationInput" placeholder="Where are you going?" required />
+              <input type="text" id="rideDestinationInput" placeholder="Where are you going?" autocomplete="off" required />
+              <button type="button" class="pick-map-btn" onclick="pickRideLocation('destination')" aria-label="Choose destination on the map"><span class="material-symbols-outlined" aria-hidden="true">map</span></button>
             </div>
           </div>
           <button type="button" class="swap-locations-btn" aria-label="Swap pickup and destination addresses" onclick="swapLocations()">
             <span class="material-symbols-outlined" aria-hidden="true">swap_vert</span>
           </button>
         </div>
+        <p id="rideRouteSummary" class="route-summary" aria-live="polite" hidden></p>
 
         <div class="feature-innovative-banner" tabindex="0" role="button" aria-label="Split fare and pool trip with nearby Kapita users" onclick="toggleFareSplitModal()" onkeydown="if(event.key==='Enter'||event.key===' ') toggleFareSplitModal()">
           <div class="innovative-left">
