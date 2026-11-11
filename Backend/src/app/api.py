@@ -1,5 +1,6 @@
 
 import re
+import secrets
 import uuid
 from datetime import datetime, time, timedelta
 from decimal import Decimal
@@ -12,9 +13,9 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from ninja import NinjaAPI, Router
 from ninja.errors import HttpError
-from ninja.throttling import AnonRateThrottle
 
 from .auth import JWTAuth, decode_token, issue_token_pair
+from .throttles import anon_throttle
 from .idempotency import IdempotencyConflict, get_or_create_idempotent_response
 from . import ledger
 from .models import LedgerEntry, Profile, RideBooking, RideDriver, ServicePreference, SocialAccount, UsedRefreshToken, UserSettings, Wallet, WalletBeneficiary, WalletFundingRequest
@@ -38,13 +39,15 @@ User = get_user_model()
 api = NinjaAPI(title="theKapita API", version="1.0.0")
 
 # Brute-force / spam-signup protection (per client IP).
-login_throttle = AnonRateThrottle("10/m")
-register_throttle = AnonRateThrottle("5/m")
+login_throttle = anon_throttle("login", "10/m")
+register_throttle = anon_throttle("register", "5/m")
 
 auth_router = Router()
 profile_router = Router()
 wallet_router = Router()
 ride_router = Router()
+
+LIVE_PRE_TRIP = {RideBooking.Status.REQUESTED, RideBooking.Status.ASSIGNED, RideBooking.Status.ARRIVED}
 
 RIDE_FARES = {
     RideBooking.RideType.GO: Decimal("2200.00"),
@@ -522,10 +525,20 @@ def _ride_booking_out(booking):
             "phone": booking.driver.phone,
             "vehicle": booking.driver.vehicle,
             "plate_number": booking.driver.plate_number,
+            "latitude": booking.driver.latitude,
+            "longitude": booking.driver.longitude,
+            "location_updated_at": (
+                booking.driver.location_updated_at.isoformat() if booking.driver.location_updated_at else None
+            ),
         } if booking.driver_id else None,
         "charged": booking.charged_at is not None and booking.refunded_at is None,
         "wallet_balance": Wallet.objects.get(user_id=booking.user_id).balance,
         "created_at": booking.created_at.isoformat(),
+        "pickup_lat": booking.pickup_lat,
+        "pickup_lng": booking.pickup_lng,
+        "destination_lat": booking.dest_lat,
+        "destination_lng": booking.dest_lng,
+        "pickup_otp": booking.pickup_otp if booking.status in LIVE_PRE_TRIP else None,
     }
 
 
@@ -549,6 +562,11 @@ def book_ride(request, payload: RideBookingIn):
             "pickup": payload.pickup,
             "destination": payload.destination,
             "fare": fare,
+            "pickup_lat": payload.pickup_lat,
+            "pickup_lng": payload.pickup_lng,
+            "dest_lat": payload.destination_lat,
+            "dest_lng": payload.destination_lng,
+            "pickup_otp": f"{secrets.randbelow(10000):04d}",
         },
     )
     if not created and (
@@ -611,5 +629,11 @@ api.add_router("/rides/", ride_router)
 
 # Subapps
 from marketplace.api import router as marketplace_router  # noqa: E402
+from food.api import router as food_router  # noqa: E402
+from directory.api import router as directory_router  # noqa: E402
+from .driver_api import driver_router  # noqa: E402
 
 api.add_router("/marketplace/", marketplace_router)
+api.add_router("/driver/", driver_router)
+api.add_router("/food/", food_router)
+api.add_router("/directory/", directory_router)

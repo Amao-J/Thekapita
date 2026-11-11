@@ -243,14 +243,14 @@
       </div>
 
       <!-- 7. Live Logistics Tracking Card -->
-      <section class="bills-section-title">
+      <section class="bills-section-title" id="activeOrderTitle" style="display:none;">
         <div>
           <h3>Active Food Dispatch</h3>
-          <p>Track your delivery rider in real time</p>
+          <p>Your order, held safely in escrow until you confirm it arrived</p>
         </div>
       </section>
 
-      <div class="active-shipment-card">
+      <div class="active-shipment-card" id="activeOrderCard" style="display:none;">
         <div class="shipment-status-header">
           <div class="status-badge live">
             <div class="pulse-dot"></div>
@@ -358,7 +358,7 @@
         <div class="reservation-grid">
           <div class="form-group">
             <label for="resDate">Date</label>
-            <input type="date" id="resDate" class="form-control" value="2026-10-20" required>
+            <input type="date" id="resDate" class="form-control" required>
           </div>
           <div class="form-group">
             <label for="resTime">Time</label>
@@ -532,17 +532,9 @@
         </button>
       </div>
 
-      <div class="history-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
-        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
-            <span>Iya Basira Local Buka</span>
-            <span style="color: var(--emerald-dark);">₦3,800.00</span>
-          </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Abula Combo • Delivered Oct 6, 2026</p>
-          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderItem('Abula Combo', 3800)">
-            Reorder Dish
-          </button>
-        </div>
+      <div class="history-list" id="historyList" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
+        <p style="font-size:13px;color:var(--text-muted);">Loading...</p>
+      </div>
       </div>
     </div>
   </div>
@@ -562,7 +554,9 @@
 
       <img src="" id="modalDishImg" alt="Dish Preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
       <h4 id="modalDishTitle" style="font-size: 17px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Dish Name</h4>
-      <div id="modalDishPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 16px;">₦0.00</div>
+      <div id="modalDishPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 12px;">₦0.00</div>
+      <label for="dishAddress" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Delivery address</label>
+      <input type="text" id="dishAddress" class="form-control" maxlength="255" placeholder="Where should we deliver?" autocomplete="street-address" style="margin-bottom: 16px;">
 
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: inline-flex; align-items: center; background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
@@ -629,6 +623,6 @@
   <div id="toastNotificationContainer" aria-live="polite"></div>
 
   <!-- JavaScript State & Action Controller -->
-  <script src="src/pages/food.js"></script>
+  <script type="module" src="src/pages/food.js"></script>
 </body>
 </html>

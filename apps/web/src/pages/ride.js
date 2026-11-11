@@ -2,21 +2,14 @@
    THEKAPITA RIDE & LOGISTICS ENGINE (LIVE API + ACCESSIBILITY + LEAFLET MAP)
    ========================================== */
 
-const API_CONFIG = {
-  baseUrl: window.KAPITA_API_BASE_URL || (
-    ['localhost', '127.0.0.1'].includes(window.location.hostname)
-      ? 'http://127.0.0.1:8000/api'
-      : 'https://api.thekapita.com/api'
-  ),
-  timeoutMs: 10000,
-  authToken: (() => {
-    try {
-      return JSON.parse(localStorage.getItem('kapita.session.v1') || '{}').accessToken;
-    } catch {
-      return null;
-    }
-  })()
-};
+import { authorizedRequest, isAuthenticated } from '../state/session.js';
+import { ApiError, newIdempotencyKey } from '../api/client.js';
+import { ENDPOINTS } from '@thekapita/shared/endpoints';
+import { createMap, geocode, hasCoords, pin, upsertMarker } from '../ui/map.js';
+
+const ACTIVE_KEY = 'kapita.ride.active.v1';
+const TERMINAL_STATUSES = ['cancelled', 'completed'];
+const RIDE_POLL_MS = 5000;
 
 let currentMainService = 'ride';
 let selectedRideType = 'Kapita Go';
@@ -40,16 +33,69 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchWalletBalance();
     setupCoRiderButtons();
   } else {
-    renderActiveRideRequest();
+    initActiveRidePage();
   }
 });
 
+/* ==========================================================================
+   ACTIVE RIDE PAGE (ride-active.html): live status + driver tracking
+   ========================================================================== */
+let activeBooking = null;
+let ridePollTimer = null;
+let rideMap = null;
+const rideMarkers = { pickup: null, drop: null, driver: null };
+let fittedToDriver = false;
+
+function readStoredBooking() {
+  try {
+    return JSON.parse(localStorage.getItem(ACTIVE_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function storeBooking(booking) {
+  activeBooking = booking;
+  localStorage.setItem(ACTIVE_KEY, JSON.stringify(booking));
+}
+
+function initActiveRidePage() {
+  rideMap = createMap('rideMap');
+  renderActiveRideRequest();
+  if (!isAuthenticated()) {
+    window.location.replace('auth.html?next=ride-active.html');
+    return;
+  }
+  refreshActiveRideRequest();
+  clearInterval(ridePollTimer);
+  ridePollTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') refreshActiveRideRequest();
+  }, RIDE_POLL_MS);
+}
+
+function distanceKm(a, b) {
+  const rad = (d) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(x));
+}
+
+const RIDE_COPY = {
+  requested: ['WAITING FOR DRIVER', 'Your request is queued until a compatible driver is available.'],
+  assigned: ['DRIVER ASSIGNED', 'A driver accepted your request and is on the way. Your wallet has been charged.'],
+  arrived: ['DRIVER HAS ARRIVED', 'Your driver is at the pickup point. Share your PIN to start the trip.'],
+  in_progress: ['TRIP IN PROGRESS', 'Enjoy your ride. We will let you know when you arrive.'],
+  cancelled: ['CANCELLED', 'Ride request cancelled.'],
+  completed: ['COMPLETED', 'This ride has been completed. Thanks for riding with theKapita!'],
+};
+
 function renderActiveRideRequest() {
   const status = document.getElementById('rideRequestStatus');
-  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
+  const booking = activeBooking || readStoredBooking();
+  const cancelButton = document.getElementById('cancelRideRequestBtn');
   if (!booking) {
     if (status) status.textContent = 'No ride request was found. Return to Ride to book one.';
-    const cancelButton = document.getElementById('cancelRideRequestBtn');
     if (cancelButton) cancelButton.disabled = true;
     return;
   }
@@ -59,25 +105,26 @@ function renderActiveRideRequest() {
   document.getElementById('rideDestination').textContent = booking.destination;
   document.getElementById('rideType').textContent = booking.ride_type.replaceAll('_', ' ');
   document.getElementById('rideFare').textContent = `₦${Number(booking.fare).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-  if (status) {
-    status.textContent = ({
-      requested: 'Your request is queued until a compatible driver is available.',
-      assigned: 'A driver accepted your request. Your wallet has been charged.',
-      cancelled: booking.refunded_at ? 'Ride cancelled. The fare has been refunded to your wallet.' : 'Ride request cancelled.',
-      completed: 'This ride has been completed.',
-    })[booking.status] || 'Ride status updated.';
+
+  const [badgeText, message] = RIDE_COPY[booking.status] || ['UPDATED', 'Ride status updated.'];
+  let line = booking.status === 'cancelled' && booking.charged === false && booking.driver
+    ? 'Ride cancelled. The fare has been refunded to your wallet.'
+    : message;
+  const driverPos = booking.driver && hasCoords(booking.driver.latitude, booking.driver.longitude)
+    ? { lat: booking.driver.latitude, lng: booking.driver.longitude } : null;
+  const pickupPos = hasCoords(booking.pickup_lat, booking.pickup_lng)
+    ? { lat: booking.pickup_lat, lng: booking.pickup_lng } : null;
+  if (driverPos && pickupPos && booking.status === 'assigned') {
+    line = `Your driver is about ${distanceKm(driverPos, pickupPos).toFixed(1)} km away.`;
   }
+  if (status) status.textContent = line;
+
   const badge = document.getElementById('rideStatusBadge');
-  const statuses = {
-    requested: 'WAITING FOR DRIVER',
-    assigned: 'DRIVER ASSIGNED',
-    cancelled: 'CANCELLED',
-    completed: 'COMPLETED',
-  };
   if (badge) {
-    badge.textContent = statuses[booking.status] || booking.status.toUpperCase();
-    badge.classList.toggle('live', booking.status === 'assigned');
+    badge.textContent = badgeText;
+    badge.classList.toggle('live', ['assigned', 'arrived', 'in_progress'].includes(booking.status));
   }
+
   const driverDetails = document.getElementById('rideDriverDetails');
   if (driverDetails) {
     driverDetails.hidden = !booking.driver;
@@ -88,57 +135,84 @@ function renderActiveRideRequest() {
       document.getElementById('rideDriverPhone').href = `tel:${booking.driver.phone}`;
     }
   }
+
+  const otpBox = document.getElementById('rideOtpBox');
+  if (otpBox) {
+    otpBox.hidden = !(booking.pickup_otp && booking.driver && ['assigned', 'arrived'].includes(booking.status));
+    const otp = document.getElementById('rideOtp');
+    if (otp) otp.textContent = booking.pickup_otp || '----';
+  }
+
   const fareStatus = document.getElementById('rideFareStatus');
   if (fareStatus) {
     fareStatus.textContent = booking.charged
       ? 'Charged to Kapita Pay Wallet'
       : 'Charged when a driver is assigned';
   }
-  const cancelButton = document.getElementById('cancelRideRequestBtn');
-  if (cancelButton) cancelButton.disabled = !['requested', 'assigned'].includes(booking.status);
+  if (cancelButton) cancelButton.disabled = !['requested', 'assigned', 'arrived'].includes(booking.status);
+  updateRideMap(booking, driverPos, pickupPos);
+}
+
+async function updateRideMap(booking, driverPos, pickupPos) {
+  if (!rideMap) return;
+  const L = window.L;
+  const destPos = hasCoords(booking.destination_lat, booking.destination_lng)
+    ? { lat: booking.destination_lat, lng: booking.destination_lng } : null;
+  // Older rides (or a failed geocode at booking time) have no coordinates: look the address up once.
+  const pickup = pickupPos || await geocode(booking.pickup);
+  const drop = destPos || await geocode(booking.destination);
+  if (pickup) rideMarkers.pickup = upsertMarker(rideMap, rideMarkers.pickup, [pickup.lat, pickup.lng], { icon: pin('\uD83D\uDCCD') });
+  if (drop) rideMarkers.drop = upsertMarker(rideMap, rideMarkers.drop, [drop.lat, drop.lng], { icon: pin('\uD83C\uDFC1', '#ef4444') });
+  if (driverPos && !TERMINAL_STATUSES.includes(booking.status)) {
+    rideMarkers.driver = upsertMarker(rideMap, rideMarkers.driver, [driverPos.lat, driverPos.lng], { icon: pin('\uD83D\uDE97', '#0f172a') });
+  } else if (rideMarkers.driver) {
+    rideMarkers.driver.remove();
+    rideMarkers.driver = null;
+  }
+  const points = [driverPos, pickup, drop].filter(Boolean).map((p) => [p.lat, p.lng]);
+  if (points.length && (!fittedToDriver || (driverPos && !fittedToDriver))) {
+    rideMap.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 16 });
+    fittedToDriver = Boolean(driverPos);
+  }
 }
 
 async function refreshActiveRideRequest() {
-  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
-  if (!booking || !API_CONFIG.authToken || !['requested', 'assigned'].includes(booking.status)) return;
+  const stored = activeBooking || readStoredBooking();
+  if (!stored) return;
   try {
-    const response = await fetchWithTimeout(
-      `${API_CONFIG.baseUrl}/rides/${encodeURIComponent(booking.reference)}`,
-      { headers: { Authorization: `Bearer ${API_CONFIG.authToken}` } }
-    );
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.detail || 'Ride status could not be refreshed.');
-    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(result));
+    const result = await authorizedRequest(ENDPOINTS.rides.detail(stored.reference));
+    storeBooking(result);
     renderActiveRideRequest();
+    if (TERMINAL_STATUSES.includes(result.status)) clearInterval(ridePollTimer);
   } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      // The cached ride belongs to someone else or no longer exists: forget it.
+      localStorage.removeItem(ACTIVE_KEY);
+      activeBooking = null;
+      clearInterval(ridePollTimer);
+      renderActiveRideRequest();
+      return;
+    }
     console.warn('[Ride App] Could not refresh ride status.', error);
   }
 }
 
 async function cancelActiveRideRequest() {
-  const booking = JSON.parse(localStorage.getItem('kapita.ride.active.v1') || 'null');
-  if (!booking || !API_CONFIG.authToken) return;
+  const booking = activeBooking || readStoredBooking();
+  if (!booking) return;
   const button = document.getElementById('cancelRideRequestBtn');
   const status = document.getElementById('rideRequestStatus');
   if (button) button.disabled = true;
 
   try {
-    const response = await fetchWithTimeout(
-      `${API_CONFIG.baseUrl}/rides/${encodeURIComponent(booking.reference)}/cancel`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${API_CONFIG.authToken}` },
-      }
-    );
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.detail || 'Ride request could not be cancelled.');
-    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(result));
+    const result = await authorizedRequest(ENDPOINTS.rides.cancel(booking.reference), { method: 'POST' });
+    storeBooking(result);
     renderActiveRideRequest();
-    refreshActiveRideRequest();
-    window.setInterval(refreshActiveRideRequest, 10000);
+    clearInterval(ridePollTimer);
   } catch (error) {
     if (status) status.textContent = error.message || 'Ride request could not be cancelled.';
     if (button) button.disabled = false;
+    refreshActiveRideRequest();
   }
 }
 
@@ -178,19 +252,15 @@ function announceAccessibilityMessage(msg) {
 
 /* 2. Live API Wallet Fetch */
 async function fetchWalletBalance() {
+  if (!isAuthenticated()) return;
   try {
-    const response = await fetchWithTimeout(`${API_CONFIG.baseUrl}/wallet/balance`, {
-      headers: { 'Authorization': `Bearer ${API_CONFIG.authToken}` }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const display = document.getElementById('headerWalletDisplay');
-      if (display && data.balance !== undefined) {
-        display.textContent = `₦${parseFloat(data.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      }
+    const data = await authorizedRequest(ENDPOINTS.wallet.balance);
+    const display = document.getElementById('headerWalletDisplay');
+    if (display && data.balance !== undefined) {
+      display.textContent = `₦${parseFloat(data.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     }
-  } catch (err) {
-    console.warn("[Ride App] Offline balance fallback active.");
+  } catch {
+    console.warn('[Ride App] Offline balance fallback active.');
   }
 }
 
@@ -204,6 +274,15 @@ function switchMainService(serviceKey) {
 
   if (ridePane) ridePane.style.display = serviceKey === 'ride' ? 'block' : 'none';
   if (logisticsPane) logisticsPane.style.display = serviceKey === 'logistics' ? 'block' : 'none';
+  if (serviceKey === 'tracking') {
+    // A real ride in progress has a real tracker on its own page; the radar below is still a parcel demo.
+    const live = readStoredBooking();
+    if (live && !TERMINAL_STATUSES.includes(live.status)) {
+      window.location.href = 'ride-active.html';
+      return;
+    }
+  }
+
   if (trackingPane) {
     trackingPane.style.display = serviceKey === 'tracking' ? 'block' : 'none';
     if (serviceKey === 'tracking') {
@@ -308,8 +387,8 @@ function selectRideType(element, rideName, price) {
 
 async function confirmRideBooking() {
   hideErrorNotice();
-  if (!API_CONFIG.authToken) {
-    showErrorNotice('Sign in to your theKapita account before requesting a ride.');
+  if (!isAuthenticated()) {
+    window.location.href = 'auth.html?next=ride.html';
     return;
   }
   const pickupInput = document.getElementById('rideOriginInput');
@@ -333,33 +412,34 @@ async function confirmRideBooking() {
   announceAccessibilityMessage(`Searching for nearby ${selectedRideType} drivers...`);
 
   try {
-    rideRequestKey ||= crypto.randomUUID();
+    rideRequestKey ||= newIdempotencyKey();
     const rideTypes = {
       'Kapita Go': 'kapita_go',
       'Kapita Comfort': 'kapita_comfort',
       'Kapita Keke Express': 'kapita_keke_express',
       'Kapita Executive': 'kapita_executive',
     };
-    const response = await fetchWithTimeout(`${API_CONFIG.baseUrl}/rides/book`, {
+    // Best effort: coordinates let the driver and the live map find the addresses. A failed lookup never blocks booking.
+    const [from, to] = await Promise.all([geocode(pickup), geocode(dest)]);
+    const booking = await authorizedRequest(ENDPOINTS.rides.book, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Idempotency-Key': rideRequestKey,
-        'Authorization': `Bearer ${API_CONFIG.authToken}`
-      },
-      body: JSON.stringify({
+      headers: { 'Idempotency-Key': rideRequestKey },
+      body: {
         ride_type: rideTypes[selectedRideType],
         pickup,
         destination: dest,
-      })
+        pickup_lat: from?.lat ?? null,
+        pickup_lng: from?.lng ?? null,
+        destination_lat: to?.lat ?? null,
+        destination_lng: to?.lng ?? null,
+      },
     });
-
-    const booking = await response.json();
-    if (!response.ok) throw new Error(booking.detail || 'Ride request could not be submitted.');
-    localStorage.setItem('kapita.ride.active.v1', JSON.stringify(booking));
+    storeBooking(booking);
     rideRequestKey = null;
     window.location.href = 'ride-active.html';
   } catch (err) {
+    // A 409 means the key was already spent on a different trip: the next attempt needs a fresh one.
+    if (err instanceof ApiError && err.status === 409) rideRequestKey = null;
     lastFailedAction = () => confirmRideBooking();
     showErrorNotice(err.message || 'Ride request failed. Check your connection and try again.');
     announceAccessibilityMessage('Ride request could not be submitted.');
@@ -443,20 +523,11 @@ async function confirmParcelDispatch() {
   let finalPrice = selectedPackagePrice + (deliverySpeedTier === 'express' ? 1000 : 0);
 
   try {
-    const res = await fetchWithTimeout(`${API_CONFIG.baseUrl}/logistics/dispatch`, {
+    // NOTE: /logistics/dispatch does not exist on the backend yet, so this always falls through to the demo radar.
+    await authorizedRequest('/logistics/dispatch', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_CONFIG.authToken}`
-      },
-      body: JSON.stringify({
-        packageType: selectedPackageType,
-        dropoff: dropoff,
-        amount: finalPrice
-      })
+      body: { packageType: selectedPackageType, dropoff: dropoff, amount: finalPrice },
     });
-
-    if (!res.ok) throw new Error("Dispatch server unavailable");
     switchMainService('tracking');
   } catch (err) {
     console.warn("[Logistics] Falling back to radar view:", err);
@@ -553,28 +624,11 @@ function retryLastRideAction() {
   if (lastFailedAction) lastFailedAction();
 }
 
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeoutMs = API_CONFIG.timeoutMs } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal
-    });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-}
-
 /* ==========================================
    8. REAL LEAFLET MAP LIVE TRACKING INTEGRATION
    ========================================== */
 function initLiveTrackingMap() {
+  const L = window.L; // Leaflet is loaded by a <script> tag in ride.html
   const mapContainer = document.getElementById('liveTrackingMap');
   if (!mapContainer) return;
 
@@ -590,19 +644,8 @@ function initLiveTrackingMap() {
   const dropoffDest = [6.4530, 3.4450];
 
   // Initialize Leaflet Map
-  trackingMap = L.map('liveTrackingMap', {
-    zoomControl: false,
-    attributionControl: false
-  }).setView(userPickup, 14);
-
-  // Use Wikimedia Maps or Stamen Toner / OpenStreetMap via public free proxy mirror (No usage policy blocking)
-  L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18,
-    attribution: '&copy; Wikimedia contributors'
-  }).addTo(trackingMap);
-
-  // Add Zoom control to top-right
-  L.control.zoom({ position: 'topright' }).addTo(trackingMap);
+  // Shared helper: one place to configure the tile provider (see src/ui/map.js).
+  trackingMap = createMap('liveTrackingMap', { center: userPickup, zoom: 14 });
 
   // Pickup Pin (User Location)
   const pickupIcon = L.divIcon({
@@ -666,3 +709,10 @@ function changeTrackingWaypoint(waypointId) {
     if (etaDisplay) etaDisplay.innerText = 'ETA: 6 mins (2.4 km away)';
   }
 }
+/* The pages call these from inline onclick="..." attributes, so they must be on window now that this is a module. */
+Object.assign(window, {
+  switchMainService, toggleHeaderNavMenu, swapLocations, selectRideType, confirmRideBooking,
+  selectPackageCategory, setDeliverySpeed, prefillExpressDelivery, confirmParcelDispatch,
+  toggleFareSplitModal, closeFareSplitModal, retryLastRideAction, changeTrackingWaypoint,
+  cancelActiveRideRequest,
+});

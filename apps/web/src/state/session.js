@@ -116,6 +116,7 @@ export function logout() {
   if (refreshToken) {
     request(ENDPOINTS.auth.logout, { method: 'POST', body: { refresh_token: refreshToken } }).catch(() => {});
   }
+  localStorage.removeItem('kapita.ride.active.v1');
   state = emptyState();
   persist();
 }

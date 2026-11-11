@@ -28,6 +28,8 @@ export default defineConfig({
         care: resolve(__dirname, 'care.html'),
         careProvider: resolve(__dirname, 'care-provider.html'),
         driver: resolve(__dirname, 'driver.html'),
+        driverSignup: resolve(__dirname, 'driver-signup.html'),
+        directories: resolve(__dirname, 'directories.html'),
       },
     },
   },

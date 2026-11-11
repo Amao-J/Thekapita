@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ride.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body class="ride-page-body">
 
@@ -28,11 +29,12 @@
   <main id="main-content" class="ride-main-container" tabindex="-1">
     <div class="ride-content-wrapper">
 
-      <!-- Driver tracking becomes available after a driver is assigned. -->
-      <div class="gps-map-container" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; height: 260px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid #334155;" role="img" aria-label="Ride request status">
-        <div class="radar-center-marker" style="z-index: 2; text-align: center; color: #ffffff;">
-          <span class="material-symbols-outlined" style="font-size: 36px; color: #00d084;" aria-hidden="true">near_me</span>
-          <p id="rideRequestStatus" style="font-size: 12px; margin-top: 4px; font-weight: 600;">Loading ride request…</p>
+      <!-- Live map: shows pickup, destination and (once assigned) the driver's position -->
+      <div class="gps-map-container" style="border-radius: 20px; height: 300px; position: relative; overflow: hidden; margin-bottom: 20px; border: 1px solid #334155;" role="region" aria-label="Live ride map">
+        <div id="rideMap" style="position:absolute; inset:0;"></div>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; z-index:500; background:rgba(15,23,42,.88); color:#fff; border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size: 22px; color: #00d084;" aria-hidden="true">near_me</span>
+          <p id="rideRequestStatus" style="font-size: 12px; font-weight: 600; margin:0;">Loading ride request…</p>
         </div>
       </div>
 
@@ -51,6 +53,12 @@
             </a>
           </div>
         </div>
+      </div>
+
+      <!-- Rider PIN: the driver must type this to start the trip -->
+      <div id="rideOtpBox" class="active-shipment-card" style="margin-bottom: 20px; text-align:center;" hidden>
+        <p style="font-size: 12px; color: #475569; margin-bottom: 4px;">Share this PIN with your driver to start the trip</p>
+        <strong id="rideOtp" style="font-size: 30px; letter-spacing: 8px; color:#0f172a;">----</strong>
       </div>
 
       <!-- Route Details Card -->
@@ -88,6 +96,7 @@
 
     </div>
   </main>
-  <script src="src/pages/ride.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script type="module" src="src/pages/ride.js"></script>
 </body>
 </html>

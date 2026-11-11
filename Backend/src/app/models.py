@@ -82,6 +82,7 @@ class LedgerEntry(models.Model):
         ESCROW_REFUND = "escrow_refund"    # escrow -> buyer on cancellation
         RIDE_CHARGE = "ride_charge"
         RIDE_REFUND = "ride_refund"
+        RIDE_PAYOUT = "ride_payout"        # rider fare (minus platform fee) -> driver
 
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="entries")
     amount = models.DecimalField(max_digits=14, decimal_places=2)
@@ -166,6 +167,8 @@ class RideBooking(models.Model):
     class Status(models.TextChoices):
         REQUESTED = "requested", "Requested"
         ASSIGNED = "assigned", "Driver Assigned"
+        ARRIVED = "arrived", "Driver Arrived"
+        IN_PROGRESS = "in_progress", "Trip In Progress"
         CANCELLED = "cancelled", "Cancelled"
         COMPLETED = "completed", "Completed"
 
@@ -178,10 +181,19 @@ class RideBooking(models.Model):
     destination = models.CharField(max_length=255)
     fare = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.REQUESTED)
+    # Optional coordinates (from the browser/geocoder). Text addresses stay the source of truth.
+    pickup_lat = models.FloatField(null=True, blank=True)
+    pickup_lng = models.FloatField(null=True, blank=True)
+    dest_lat = models.FloatField(null=True, blank=True)
+    dest_lng = models.FloatField(null=True, blank=True)
+    pickup_otp = models.CharField(max_length=4, blank=True, default="")  # rider tells the driver to start the trip
     driver = models.ForeignKey(
         "RideDriver", null=True, blank=True, on_delete=models.PROTECT, related_name="rides"
     )
     assigned_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    driver_payout = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     charged_at = models.DateTimeField(null=True, blank=True)
     refunded_at = models.DateTimeField(null=True, blank=True)
     idempotency_key = models.CharField(max_length=64)
@@ -196,13 +208,21 @@ class RideBooking(models.Model):
 
 
 class RideDriver(models.Model):
+    # Null for drivers created by staff in the admin; set when a user registers as a driver.
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="driver_profile"
+    )
     name = models.CharField(max_length=120)
     phone = models.CharField(max_length=20)
     vehicle = models.CharField(max_length=100)
     plate_number = models.CharField(max_length=20, unique=True)
     ride_types = models.JSONField(default=list)
-    is_active = models.BooleanField(default=True)
-    is_available = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)      # approved by staff
+    is_online = models.BooleanField(default=True)      # driver toggled "Online" in the portal
+    is_available = models.BooleanField(default=True)   # not currently on a trip
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    location_updated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):

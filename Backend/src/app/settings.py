@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     'ninja',
     'storages',
     'app',
-    'marketplace'
+    'marketplace',
+    'food',
+    'directory',
  
     
 ]
@@ -164,6 +166,16 @@ else:
         }
     }
 
+
+# Ride/driver rules. New drivers can go online immediately in development; in production
+# staff must tick "Is active" on the driver in the admin unless DRIVER_AUTO_APPROVE=1.
+DRIVER_AUTO_APPROVE = os.environ.get("DRIVER_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
+RIDE_PLATFORM_FEE_PERCENT = os.environ.get("RIDE_PLATFORM_FEE_PERCENT", "12.5")
+
+# New restaurants / directory listings are visible straight away in development; in
+# production staff approve them in the admin unless these are set to 1.
+FOOD_AUTO_APPROVE = os.environ.get("FOOD_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
+DIRECTORY_AUTO_APPROVE = os.environ.get("DIRECTORY_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
 
 # Comma-separated OAuth client IDs accepted as the token audience (web now, iOS/Android later).
 GOOGLE_CLIENT_IDS = [

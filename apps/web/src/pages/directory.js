@@ -1,685 +1,418 @@
-function openModal(id) {
-      document.getElementById(id).classList.add("active");
+/* ==========================================================================
+   DIRECTORY
+   Public browsing needs no account. Reviews, bookmarks, reports, submitting a listing and "My Biz"
+   need sign-in (we send people to auth.html?next=directories.html and bring them back).
+   Notifications and billing are still UI-only: there is no backend for them yet.
+   ========================================================================== */
+import { authorizedRequest, isAuthenticated } from '../state/session.js';
+import { ApiError, request } from '../api/client.js';
+import { ENDPOINTS } from '@thekapita/shared/endpoints';
+import { $, closeModal, errorMessage, h, openModal, setText, toast } from '../ui/dom.js';
+import { currentPosition, geocode, hasCoords } from '../ui/map.js';
+
+const state = {
+  category: 'All',        // 'All' | 'Businesses' | 'Government' | 'Schools' | 'Hospitals' (labels the page already uses)
+  view: 'grid',
+  mode: 'explore',        // explore | bookmarks | dashboard
+  listings: [],
+  bookmarks: new Set(),
+  pos: null,              // {lat, lng}
+  query: '',
+  selected: null,         // listing open in the detail modal
+  rating: 0,
+  transit: 'drive',
+  route: null,
+  searchTimer: null,
+  loadToken: 0,
+};
+
+const SPEED_KMH = { drive: 30, transit: 20, walk: 5 }; // rough city averages for a straight-line estimate
+
+function requireLogin() {
+  if (isAuthenticated()) return true;
+  window.location.href = 'auth.html?next=directories.html';
+  return false;
+}
+
+function initials(name) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+}
+
+/* ---------- loading & rendering ---------- */
+
+async function loadListings() {
+  const token = ++state.loadToken; // ignore answers that arrive after a newer request
+  const grid = $('directoryGrid');
+  grid.replaceChildren(h('p', { style: 'padding:24px;color:#64748b;font-size:13px;' }, 'Loading listings...'));
+  try {
+    let rows;
+    if (state.mode === 'bookmarks') {
+      if (!requireLogin()) return;
+      rows = await authorizedRequest(ENDPOINTS.directory.bookmarks);
+    } else {
+      const params = new URLSearchParams();
+      if (state.category !== 'All') params.set('category', state.category.toLowerCase());
+      if (state.query) params.set('q', state.query);
+      if (state.pos) { params.set('lat', state.pos.lat); params.set('lng', state.pos.lng); }
+      rows = await request(`${ENDPOINTS.directory.listings}?${params}`);
     }
+    if (token !== state.loadToken) return;
+    state.listings = rows;
+    renderGrid();
+    fillReportSelect();
+  } catch (err) {
+    if (token !== state.loadToken) return;
+    grid.replaceChildren(h('p', { role: 'alert', style: 'padding:24px;color:#b91c1c;font-size:13px;' }, errorMessage(err, 'Could not load the directory.')));
+  }
+}
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove("active");
-    }
+function renderGrid(rows = state.listings) {
+  const grid = $('directoryGrid');
+  grid.classList.toggle('list-view', state.view === 'list');
+  if (!rows.length) {
+    grid.replaceChildren(h('p', { style: 'padding:24px;color:#64748b;font-size:13px;' },
+      state.mode === 'bookmarks' ? 'You have not saved any listings yet.' : 'No listings match yet.'));
+    return;
+  }
+  grid.replaceChildren(...rows.map(card));
+}
 
-    // Helper to generate initials (max 2 letters) and a consistent color per category
-    function getInitials(name) {
-      const parts = name.replace(/[^a-zA-Z0-9 ]/g, "").split(" ");
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-      }
-      return name.substring(0, 2).toUpperCase();
-    }
+function card(l) {
+  const saved = state.bookmarks.has(l.id);
+  return h('article', { class: 'directory-card entity-card' + (l.tier === 'sponsored' ? ' sponsored' : '') },
+    h('div', { class: 'entity-header' },
+      h('div', { class: 'entity-logo-box' }, initials(l.name)),
+      h('div', {},
+        h('h3', { class: 'entity-name' }, l.name, l.is_verified ? h('span', { class: 'material-symbols-outlined', title: 'Verified', style: 'font-size:16px;color:#008a57;vertical-align:middle;margin-left:4px;' }, 'verified') : null),
+        h('span', { class: 'entity-category' }, l.category_label),
+      ),
+    ),
+    h('p', { class: 'entity-address' }, l.address),
+    h('p', { class: 'entity-meta', style: 'font-size:12px;color:#64748b;' },
+      l.rating !== null ? `\u2605 ${l.rating} (${l.review_count})` : 'No reviews yet',
+      l.distance_km !== null ? ` \u2022 ${l.distance_km} km away` : '',
+      l.tier === 'sponsored' ? ' \u2022 Sponsored' : '',
+    ),
+    h('div', { class: 'entity-actions', style: 'display:flex;gap:8px;margin-top:10px;' },
+      h('button', { type: 'button', class: 'btn-submit-primary', onclick: () => openDetail(l.id) }, 'Details'),
+      h('button', { type: 'button', class: 'btn-submit-primary', style: 'background:transparent;border:2px solid var(--border-color);color:var(--black);', onclick: () => openRoute(l) }, 'Directions'),
+      h('button', {
+        type: 'button', class: 'icon-btn', 'aria-label': saved ? `Remove ${l.name} from saved` : `Save ${l.name}`, 'aria-pressed': String(saved),
+        onclick: () => toggleBookmark(l),
+      }, h('span', { class: 'material-symbols-outlined', style: saved ? "font-variation-settings:'FILL' 1;" : '' }, 'bookmark')),
+    ),
+  );
+}
 
-    function getCategoryColor(category) {
-      switch(category) {
-        case 'Hospitals': return '#008755'; // Deep emerald
-        case 'Government': return '#267691'; // Blue-grey
-        case 'Schools': return '#d97706'; // Warm amber
-        default: return '#FF6A00'; // Brand orange
-      }
-    }
+/* ---------- filters, search ---------- */
 
-    let userCurrentLocation = "Lagos, NG";
+function setCategoryFilter(category, btn) {
+  state.category = category;
+  document.querySelectorAll('.cat-pill').forEach((b) => b.classList.toggle('active', b === btn));
+  setText('aiParsedText', '');
+  $('aiParsedFeedback').style.display = 'none';
+  loadListings();
+}
 
-    function detectUserLocation() {
-      if (navigator.geolocation) {
-        document.getElementById("currentLocationLabel").textContent = "Locating...";
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            // Simulated reverse geocoding approximation for demonstration
-            userCurrentLocation = "Lagos, NG (GPS Active)";
-            document.getElementById("currentLocationLabel").textContent = userCurrentLocation;
-            document.getElementById("routeCurrentLocDisplay").textContent = userCurrentLocation;
-            alert("Current GPS location acquired successfully!");
-          },
-          (error) => {
-            userCurrentLocation = "Lagos, NG";
-            document.getElementById("currentLocationLabel").textContent = userCurrentLocation;
-            alert("Geolocation permission denied or unavailable. Defaulting to Lagos, NG.");
-          },
-          { timeout: 10000 }
-        );
-      } else {
-        alert("Geolocation is not supported by your browser.");
-      }
-    }
+function setDirectoryView(view) {
+  state.view = view;
+  $('gridViewBtn').classList.toggle('active', view === 'grid');
+  $('listViewBtn').classList.toggle('active', view === 'list');
+  renderGrid();
+}
 
-    let directoryListings = [
-      {
-        id: 1,
-        name: "St. Nicholas Hospital",
-        category: "Hospitals",
-        categoryLabel: "Hospital & Maternity Care",
-        verified: true,
-        sponsored: true,
-        rating: 4.8,
-        reviewCount: 142,
-        phone: "+234 1 280 0600",
-        address: "57 Campbell Street, Lagos Island, Lagos",
-        distance: "1.2 km",
-        timeEst: "6 mins drive",
-        isOpen: true,
-        hours: "Open 24 Hours",
-        services: ["Maternity Care", "Emergency ER", "Pediatrics", "Surgery"],
-        bookmarked: false,
-        reviews: [
-          { author: "Dr. Funke Akindele", stars: 5, text: "Excellent maternity ward services and prompt emergency response." }
-        ],
-        turns: [
-          "Head south on Campbell Street towards Catholic Mission Street (400m)",
-          "Turn right at the junction onto Broad Street (600m)",
-          "Destination will be on your left"
-        ]
-      },
-      {
-        id: 2,
-        name: "Federal Internal Revenue Service (FIRS)",
-        category: "Government",
-        categoryLabel: "Government Tax Office",
-        verified: true,
-        sponsored: false,
-        rating: 4.2,
-        reviewCount: 89,
-        phone: "+234 9 460 2000",
-        address: "17B Awolowo Road, Ikoyi, Lagos",
-        distance: "2.5 km",
-        timeEst: "11 mins drive",
-        isOpen: true,
-        hours: "Mon - Fri: 8:00 AM - 4:00 PM",
-        services: ["Tax Filing", "TIN Generation", "Corporate Compliance"],
-        bookmarked: false,
-        reviews: [
-          { author: "Efe Money Ltd", stars: 4, text: "Quick tax clearance processing via verified online portal." }
-        ],
-        turns: [
-          "Take Falomo Bridge towards Awolowo Road (1.2 km)",
-          "Continue straight past Ikoyi Club (800m)",
-          "FIRS Building is on the right"
-        ]
-      },
-      {
-        id: 3,
-        name: "Lagos State University Teaching Hospital (LASUTH)",
-        category: "Hospitals",
-        categoryLabel: "Tertiary Healthcare & Research",
-        verified: true,
-        sponsored: true,
-        rating: 4.6,
-        reviewCount: 230,
-        phone: "+234 802 314 9198",
-        address: "1 Oba Akinjobi Way, Ikeja, Lagos",
-        distance: "4.1 km",
-        timeEst: "14 mins drive",
-        isOpen: true,
-        hours: "Open 24 Hours",
-        services: ["Maternity ER", "Cardiology", "Diagnostics"],
-        bookmarked: false,
-        reviews: [
-          { author: "Bisi Adebayo", stars: 5, text: "Top-tier emergency doctors available 24/7." }
-        ],
-        turns: [
-          "Take Mobolaji Bank Anthony Way towards Ikeja (2.8 km)",
-          "Turn left onto Oba Akinjobi Way (1.3 km)",
-          "LASUTH Main Gate is ahead"
-        ]
-      },
-      {
-        id: 4,
-        name: "Yaba College of Technology (YABATECH)",
-        category: "Schools",
-        categoryLabel: "Higher Education & Tech Institute",
-        verified: true,
-        sponsored: false,
-        rating: 4.5,
-        reviewCount: 310,
-        phone: "+234 1 212 1234",
-        address: "Herbert Macaulay Way, Yaba, Lagos",
-        distance: "3.0 km",
-        timeEst: "9 mins drive",
-        isOpen: true,
-        hours: "Mon - Fri: 8:00 AM - 5:00 PM",
-        services: ["Computer Science", "Engineering", "Short Tech Courses"],
-        bookmarked: false,
-        reviews: [],
-        turns: [
-          "Head North on Herbert Macaulay Way (2.2 km)",
-          "Turn right at Yaba Bus Stop roundabout (800m)",
-          "Arrive at YABATECH Campus Gate"
-        ]
-      },
-      {
-        id: 5,
-        name: "Medplus 24/7 Pharmacy",
-        category: "Businesses",
-        categoryLabel: "Pharmacy & Wellness Center",
-        verified: true,
-        sponsored: false,
-        rating: 4.9,
-        reviewCount: 95,
-        phone: "+234 809 111 2233",
-        address: "Adetokunbo Ademola St, Victoria Island",
-        distance: "0.8 km",
-        timeEst: "3 mins drive",
-        isOpen: true,
-        hours: "Open 24 Hours",
-        services: ["Prescriptions", "Health Checks", "Vaccinations"],
-        bookmarked: false,
-        reviews: [],
-        turns: [
-          "Head east on Ahmadu Bello Way (500m)",
-          "Turn left onto Adetokunbo Ademola Street (300m)",
-          "Medplus is located beside Eko Hotel"
-        ]
-      },
-      {
-        id: 6,
-        name: "Apex Innovation & Tech Hub",
-        category: "Businesses",
-        categoryLabel: "Co-Working Space & Incubator",
-        verified: true,
-        sponsored: true,
-        rating: 4.7,
-        reviewCount: 68,
-        phone: "+234 812 345 6789",
-        address: "22 Commercial Avenue, Sabo, Yaba, Lagos",
-        distance: "1.5 km",
-        timeEst: "5 mins drive",
-        isOpen: true,
-        hours: "Mon - Sat: 8:00 AM - 9:00 PM",
-        services: ["High-speed Fiber WiFi", "Private Offices", "Meeting Rooms"],
-        bookmarked: false,
-        reviews: [
-          { author: "Tunde Ednut", stars: 5, text: "Great tech ecosystem with reliable power and fiber internet." }
-        ],
-        turns: [
-          "Drive along Commercial Avenue (1.0 km)",
-          "Pass Sabo Market junction (500m)",
-          "Apex Hub is on the 3rd floor of the Glass Building"
-        ]
-      },
-      {
-        id: 7,
-        name: "National Identity Management Commission",
-        category: "Government",
-        categoryLabel: "National ID Enrollment Center",
-        verified: true,
-        sponsored: false,
-        rating: 4.0,
-        reviewCount: 112,
-        phone: "+234 1 271 6234",
-        address: "Plot 1, Obafemi Awolowo Way, Ikeja, Lagos",
-        distance: "5.2 km",
-        timeEst: "18 mins drive",
-        isOpen: false,
-        hours: "Mon - Fri: 8:00 AM - 3:30 PM",
-        services: ["NIN Slip Printing", "Biometric Modification", "Identity Verification"],
-        bookmarked: false,
-        reviews: [],
-        turns: [
-          "Take Ikeja Along Expressway (3.5 km)",
-          "Turn onto Obafemi Awolowo Way (1.7 km)",
-          "NIMC State Headquarters is on the left"
-        ]
-      },
-      {
-        id: 8,
-        name: "Corona Schools Trust Council",
-        category: "Schools",
-        categoryLabel: "Primary & Secondary Education",
-        verified: true,
-        sponsored: false,
-        rating: 4.9,
-        reviewCount: 76,
-        phone: "+234 1 270 3101",
-        address: "6 Mekunwen Road, Ikoyi, Lagos",
-        distance: "3.8 km",
-        timeEst: "12 mins drive",
-        isOpen: true,
-        hours: "Mon - Fri: 7:30 AM - 4:00 PM",
-        services: ["British Curriculum", "STEM Education", "Sports Facility"],
-        bookmarked: false,
-        reviews: [],
-        turns: [
-          "Head south towards Ikoyi Crescent (2.0 km)",
-          "Turn right onto Mekunwen Road (1.8 km)",
-          "School entrance on the right"
-        ]
-      }
-    ];
+function handleSearchKeyup(event) {
+  if (event.key === 'Enter') return executeAISearch();
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(() => {
+    state.query = $('directorySearchInput').value.trim();
+    $('aiParsedFeedback').style.display = 'none';
+    loadListings();
+  }, 300);
+}
 
-    let activeCategory = 'All';
-    let currentNavMode = 'explore';
-    let currentDirectoryView = 'grid'; // 'grid' or 'list'
-    let currentSelectedRating = 4;
-    let activeDetailListing = null;
-    let activeRouteListing = null;
+/** "AI Search" is a keyword parser on the server today (category words + free text), not an LLM. */
+async function executeAISearch() {
+  const q = $('directorySearchInput').value.trim();
+  if (!q) return toast('Type what you are looking for, e.g. "hospital in Ikeja".');
+  clearTimeout(state.searchTimer);
+  try {
+    const params = new URLSearchParams({ q });
+    if (state.pos) { params.set('lat', state.pos.lat); params.set('lng', state.pos.lng); }
+    const res = await request(`${ENDPOINTS.directory.search}?${params}`);
+    state.mode = 'explore';
+    state.listings = res.results;
+    const bits = [];
+    if (res.intent.category) bits.push(`category: ${res.intent.category}`);
+    if (res.intent.keywords.length) bits.push(`keywords: ${res.intent.keywords.join(', ')}`);
+    setText('aiParsedText', `Understood ${bits.join(' \u2022 ') || 'your search as plain text'}`);
+    $('aiParsedFeedback').style.display = '';
+    renderGrid();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
 
-    document.addEventListener("DOMContentLoaded", () => {
-      renderDirectoryGrid(directoryListings);
-      populateReportDropdown();
+async function detectUserLocation() {
+  setText('currentLocationLabel', 'Locating...');
+  const pos = await currentPosition();
+  if (!pos) {
+    setText('currentLocationLabel', 'Location unavailable');
+    return toast('Could not get your location. Check browser permissions.', 'error');
+  }
+  state.pos = pos;
+  setText('currentLocationLabel', 'Near you');
+  loadListings(); // server sorts sponsored first, then nearest
+}
+
+/* ---------- detail, reviews, bookmarks ---------- */
+
+async function openDetail(id) {
+  try {
+    const l = await request(ENDPOINTS.directory.listing(id));
+    state.selected = l;
+    state.rating = 0;
+    setText('modalLogo', initials(l.name));
+    setText('modalTitle', l.name);
+    setText('modalCategory', l.category_label);
+    setText('modalAddress', l.address);
+    setText('modalPhone', l.phone);
+    setText('modalHours', l.hours || 'Hours not provided');
+    $('modalServices').replaceChildren(...l.services.map((s) => h('span', { class: 'stat-badge badge-emerald' }, s)));
+    $('reviewCommentInput').value = '';
+    paintStars(0);
+    $('modalReviewsList').replaceChildren(...(l.reviews.length
+      ? l.reviews.map((r) => h('div', { class: 'review-item', style: 'padding:8px 0;border-bottom:1px solid var(--border-color);' },
+        h('strong', {}, r.author), ` \u2014 ${'\u2605'.repeat(r.rating)}${'\u2606'.repeat(5 - r.rating)}`,
+        r.comment ? h('p', { style: 'font-size:12px;color:#475569;margin-top:2px;' }, r.comment) : null))
+      : [h('p', { style: 'font-size:12px;color:#64748b;' }, 'No reviews yet. Be the first.')]));
+    openModal('detailModal');
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
+
+function paintStars(n) {
+  document.querySelectorAll('#starRatingRow .material-symbols-outlined').forEach((star, i) => {
+    star.classList.toggle('selected', i < n);
+  });
+}
+
+function setRating(n) {
+  state.rating = n;
+  paintStars(n);
+}
+
+async function submitReview() {
+  if (!requireLogin() || !state.selected) return;
+  if (!state.rating) return toast('Tap the stars to choose a rating first.', 'error');
+  try {
+    await authorizedRequest(ENDPOINTS.directory.reviews(state.selected.id), {
+      method: 'POST',
+      body: { rating: state.rating, comment: $('reviewCommentInput').value.trim() },
     });
+    toast('Review posted. Thank you!', 'success');
+    await openDetail(state.selected.id);
+    loadListings();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
 
-    function setDirectoryView(viewMode) {
-      currentDirectoryView = viewMode;
-      const gridEl = document.getElementById("directoryGrid");
-      const gridBtn = document.getElementById("gridViewBtn");
-      const listBtn = document.getElementById("listViewBtn");
+async function loadBookmarks() {
+  if (!isAuthenticated()) return;
+  try {
+    const rows = await authorizedRequest(ENDPOINTS.directory.bookmarks);
+    state.bookmarks = new Set(rows.map((r) => r.id));
+    renderGrid();
+  } catch { /* bookmarks are a nicety; the page works without them */ }
+}
 
-      if (viewMode === 'grid') {
-        gridEl.classList.remove('list-view');
-        gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
-      } else {
-        gridEl.classList.add('list-view');
-        listBtn.classList.add('active');
-        gridBtn.classList.remove('active');
-      }
-    }
+async function toggleBookmark(listing) {
+  if (!requireLogin()) return;
+  try {
+    const { bookmarked } = await authorizedRequest(ENDPOINTS.directory.bookmark(listing.id), { method: 'POST' });
+    if (bookmarked) state.bookmarks.add(listing.id); else state.bookmarks.delete(listing.id);
+    if (state.mode === 'bookmarks' && !bookmarked) state.listings = state.listings.filter((l) => l.id !== listing.id);
+    renderGrid();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
 
-    function renderDirectoryGrid(listings) {
-      const grid = document.getElementById("directoryGrid");
-      grid.innerHTML = "";
+/* ---------- directions (straight-line estimate + hand-off to a maps app) ---------- */
 
-      if (listings.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
-            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 8px;">search_off</span>
-            <p>No verified listings found matching criteria.</p>
-          </div>
-        `;
-        return;
-      }
+function haversineKm(a, b) {
+  const rad = (d) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(x));
+}
 
-      listings.forEach(item => {
-        const card = document.createElement("div");
-        card.className = `directory-card ${item.sponsored ? 'sponsored' : ''}`;
-        const initials = getInitials(item.name);
-        const logoColor = getCategoryColor(item.category);
-        
-        card.innerHTML = `
-          ${item.sponsored ? '<span class="sponsored-badge">⭐</span>' : ''}
-          <div class="card-top-row" onclick="openDetailModal(${item.id})">
-            <div class="entity-logo-box" style="background-color: ${logoColor};">
-              ${initials}
-            </div>
-            <div class="entity-details-col">
-              <h3 class="entity-name">
-                ${item.name}
-                ${item.verified ? '<span class="material-symbols-outlined verified-icon" title="Verified Record">verified</span>' : ''}
-              </h3>
-              <span class="entity-category">${item.categoryLabel}</span>
-              <div class="rating-row">
-                <span class="stars-fill">★ ${item.rating}</span>
-                <span class="review-count">(${item.reviewCount} reviews)</span>
-              </div>
-            </div>
-          </div>
+async function openRoute(listing) {
+  state.route = listing;
+  setText('routeModalTitle', `Directions to ${listing.name}`);
+  setText('routeCurrentLocDisplay', state.pos ? 'Your current location' : 'Location not shared');
+  openModal('routeModal');
+  if (!state.pos) state.pos = await currentPosition();
+  setText('routeCurrentLocDisplay', state.pos ? 'Your current location' : 'Location not shared');
+  paintRoute();
+}
 
-          <div class="info-list" onclick="openDetailModal(${item.id})">
-            <div class="info-item">
-              <span class="material-symbols-outlined icon">location_on</span>
-              <span>${item.address} • <strong>${item.distance}</strong></span>
-            </div>
-            <div class="info-item">
-              <span class="material-symbols-outlined icon">schedule</span>
-              <span class="${item.isOpen ? 'status-open' : 'status-closed'}">
-                ${item.isOpen ? '● Open Now' : '● Closed'}
-              </span>
-              <span style="color: #64748b; font-size: 11px;">(${item.hours})</span>
-            </div>
-          </div>
+function setTransitMode(mode) {
+  state.transit = mode;
+  paintRoute();
+}
 
-          <div class="card-actions-bar">
-            <a href="tel:${item.phone}" class="btn-card-action" onclick="event.stopPropagation();">
-              <span class="material-symbols-outlined" style="font-size: 16px;">call</span>
-              Call
-            </a>
-            <button class="btn-card-action" style="background: var(--black); color: var(--emerald); border-color: var(--black);" onclick="event.stopPropagation(); openRouteModal(${item.id});">
-              <span class="material-symbols-outlined" style="font-size: 16px;">directions</span>
-              Route
-            </button>
-            <button class="btn-card-action" onclick="event.stopPropagation(); openDetailModal(${item.id});">
-              <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
-              Details
-            </button>
-            <button class="btn-bookmark ${item.bookmarked ? 'bookmarked' : ''}" onclick="event.stopPropagation(); toggleBookmark(${item.id});" title="Bookmark Listing">
-              <span class="material-symbols-outlined" style="font-size: 18px;">bookmark</span>
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
+function paintRoute() {
+  for (const [id, mode] of [['modeDrive', 'drive'], ['modeTransit', 'transit'], ['modeWalk', 'walk']]) {
+    $(id)?.classList.toggle('active', state.transit === mode);
+  }
+  const l = state.route;
+  if (!l) return;
+  const dest = hasCoords(l.latitude, l.longitude) ? { lat: l.latitude, lng: l.longitude } : null;
+  if (state.pos && dest) {
+    const km = haversineKm(state.pos, dest);
+    const mins = Math.max(1, Math.round((km / SPEED_KMH[state.transit]) * 60));
+    setText('routeDistanceTime', `~${mins} min (${km.toFixed(1)} km straight line)`);
+  } else {
+    setText('routeDistanceTime', dest ? 'Share your location for an estimate' : 'No map position for this listing yet');
+  }
+  $('turnByTurnList').replaceChildren(h('div', {}, `Head to ${l.address}. Tap "Open in Maps" for turn-by-turn road directions.`));
+}
 
-    function switchNavMode(mode, buttonEl) {
-      currentNavMode = mode;
-      document.querySelectorAll('.market-nav-btn').forEach(b => b.classList.remove('active'));
-      if(buttonEl) buttonEl.classList.add('active');
+function launchExternalMaps() {
+  const l = state.route;
+  if (!l) return;
+  const destination = hasCoords(l.latitude, l.longitude) ? `${l.latitude},${l.longitude}` : `${l.name}, ${l.address}`;
+  const url = new URL('https://www.google.com/maps/dir/');
+  url.searchParams.set('api', '1');
+  url.searchParams.set('destination', destination);
+  url.searchParams.set('travelmode', { drive: 'driving', transit: 'transit', walk: 'walking' }[state.transit]);
+  window.open(url, '_blank', 'noopener');
+}
 
-      const exploreSec = document.getElementById('exploreSection');
-      const dashSec = document.getElementById('dashboardSection');
+/* ---------- submit a listing / report ---------- */
 
-      if (mode === 'explore' || mode === 'bookmarks') {
-        exploreSec.classList.remove('hidden');
-        dashSec.classList.add('hidden');
-        filterAndRenderListings();
-      } else if (mode === 'dashboard') {
-        exploreSec.classList.add('hidden');
-        dashSec.classList.remove('hidden');
-      }
-    }
+async function handleBusinessSubmit(event) {
+  event.preventDefault();
+  if (!requireLogin()) return;
+  const button = event.target.querySelector('button[type="submit"]');
+  if (button) button.disabled = true;
+  try {
+    const address = $('newAddress').value.trim();
+    const where = await geocode(address); // best effort: lets listings sort by distance
+    const listing = await authorizedRequest(ENDPOINTS.directory.listings, {
+      method: 'POST',
+      body: {
+        name: $('newEntityName').value.trim(),
+        category: $('newCategory').value.toLowerCase(),
+        phone: $('newPhone').value.trim(),
+        address,
+        tier: $('newTier').value,
+        latitude: where?.lat ?? null,
+        longitude: where?.lng ?? null,
+      },
+    });
+    closeModal('addBusinessModal');
+    event.target.reset();
+    toast(listing.status === 'approved' ? 'Your listing is live.' : 'Submitted! Your listing will appear once our team reviews it.', 'success');
+    if (listing.status === 'approved') loadListings();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
 
-    function setCategoryFilter(category, buttonEl) {
-      activeCategory = category;
-      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
-      buttonEl.classList.add('active');
-      filterAndRenderListings();
-    }
+function fillReportSelect() {
+  const select = $('reportEntitySelect');
+  if (!select) return;
+  select.replaceChildren(...state.listings.map((l) => h('option', { value: String(l.id) }, l.name)));
+}
 
-    function filterAndRenderListings() {
-      const searchTerm = document.getElementById("directorySearchInput").value.toLowerCase();
+async function submitReport() {
+  if (!requireLogin()) return;
+  const listingId = Number($('reportEntitySelect').value);
+  if (!listingId) return toast('Pick the listing you want to report.', 'error');
+  try {
+    await authorizedRequest(ENDPOINTS.directory.reports, {
+      method: 'POST',
+      body: { listing_id: listingId, issue_type: $('reportIssueType').value, notes: $('reportNotes').value.trim() },
+    });
+    closeModal('reportModal');
+    $('reportNotes').value = '';
+    toast('Report received. Thanks for helping keep the directory accurate.', 'success');
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
 
-      let filtered = directoryListings.filter(item => {
-        const matchesCategory = (activeCategory === 'All') || (item.category === activeCategory);
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm) ||
-                              item.categoryLabel.toLowerCase().includes(searchTerm) ||
-                              item.services.some(s => s.toLowerCase().includes(searchTerm));
-        const matchesNav = (currentNavMode === 'bookmarks') ? item.bookmarked : true;
+/* ---------- tabs / My Biz ---------- */
 
-        return matchesCategory && matchesSearch && matchesNav;
-      });
+async function switchNavMode(mode, btn) {
+  state.mode = mode;
+  document.querySelectorAll('.market-nav-btn').forEach((b) => b.classList.toggle('active', b === btn));
+  $('exploreSection').classList.toggle('hidden', mode === 'dashboard');
+  $('dashboardSection').classList.toggle('hidden', mode !== 'dashboard');
+  if (mode === 'dashboard') return loadMyListings();
+  loadListings();
+}
 
-      filtered.sort((a, b) => {
-        if (a.sponsored && !b.sponsored) return -1;
-        if (!a.sponsored && b.sponsored) return 1;
-        return 0;
-      });
+async function loadMyListings() {
+  const body = $('myListingsBody');
+  if (!isAuthenticated()) {
+    body.textContent = 'Sign in to see the listings you submitted.';
+    return;
+  }
+  try {
+    const rows = await authorizedRequest(ENDPOINTS.directory.mine);
+    body.replaceChildren(...(rows.length
+      ? rows.map((l) => h('div', { style: 'display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-color);' },
+        h('span', {}, h('strong', {}, l.name), ` \u2022 ${l.category_label}`),
+        h('span', {}, `${l.status_label} \u2022 ${l.review_count} review${l.review_count === 1 ? '' : 's'} \u2022 ${l.bookmark_count} saved`)))
+      : [h('span', {}, 'You have not submitted a listing yet. Use "Add Listing" at the top.')]));
+  } catch (err) {
+    body.textContent = err instanceof ApiError ? err.message : 'Could not load your listings.';
+  }
+}
 
-      renderDirectoryGrid(filtered);
-    }
+/* ---------- UI-only pieces (no backend yet) ---------- */
 
-    function executeAISearch() {
-      const query = document.getElementById("directorySearchInput").value.toLowerCase();
-      const feedbackBanner = document.getElementById("aiParsedFeedback");
-      const feedbackText = document.getElementById("aiParsedText");
+function toggleNotifDropdown() {
+  $('notifDropdown').classList.toggle('active');
+}
 
-      if (!query.trim()) {
-        feedbackBanner.classList.remove("active");
-        filterAndRenderListings();
-        return;
-      }
+function refreshNotifBadge() {
+  const unread = document.querySelectorAll('#notifDropdown .notif-item:not(.read)').length;
+  const badge = $('notifBadge');
+  badge.textContent = String(unread);
+  badge.style.display = unread ? '' : 'none';
+}
 
-      feedbackBanner.classList.add("active");
-      currentNavMode = 'explore';
-      document.querySelectorAll('.market-nav-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('.market-nav-btn:first-child').classList.add('active');
-      document.getElementById('exploreSection').classList.remove('hidden');
-      document.getElementById('dashboardSection').classList.add('hidden');
+function markNotificationRead(id) {
+  $(id)?.classList.add('read');
+  refreshNotifBadge();
+}
 
-      if (query.includes("maternity") || query.includes("hospital") || query.includes("doctor")) {
-        activeCategory = 'Hospitals';
-        feedbackText.textContent = `AI Parsed Intent (near ${userCurrentLocation}): Filtered for Medical, Hospitals & Emergency facilities open now.`;
-        updateCategoryPillsUI('Hospitals');
-      } else if (query.includes("school") || query.includes("tech") || query.includes("institute")) {
-        activeCategory = 'Schools';
-        feedbackText.textContent = `AI Parsed Intent (near ${userCurrentLocation}): Filtered for Educational Institutes & Certified Academies.`;
-        updateCategoryPillsUI('Schools');
-      } else if (query.includes("tax") || query.includes("government") || query.includes("firs")) {
-        activeCategory = 'Government';
-        feedbackText.textContent = `AI Parsed Intent (near ${userCurrentLocation}): Filtered for Official Public Service & Government Agencies.`;
-        updateCategoryPillsUI('Government');
-      } else {
-        feedbackText.textContent = `AI Parsed Intent (near ${userCurrentLocation}): Performing semantic entity lookup for "${query}"`;
-      }
+function markAllNotificationsRead() {
+  document.querySelectorAll('#notifDropdown .notif-item').forEach((n) => n.classList.add('read'));
+  refreshNotifBadge();
+}
 
-      filterAndRenderListings();
-    }
+function saveBillingSettings() {
+  closeModal('billingModal');
+  toast('Billing is not live yet, so nothing was changed.');
+}
 
-    function handleSearchKeyup(event) {
-      if (event.key === "Enter") {
-        executeAISearch();
-      } else {
-        filterAndRenderListings();
-      }
-    }
+Object.assign(window, {
+  openModal, closeModal, setCategoryFilter, setDirectoryView, handleSearchKeyup, executeAISearch,
+  detectUserLocation, setRating, submitReview, setTransitMode, launchExternalMaps,
+  handleBusinessSubmit, submitReport, switchNavMode, toggleNotifDropdown,
+  markNotificationRead, markAllNotificationsRead, saveBillingSettings,
+});
 
-    function updateCategoryPillsUI(catName) {
-      document.querySelectorAll('.cat-pill').forEach(b => {
-        if (b.textContent.includes(catName) || (catName === 'All' && b.textContent.includes('All'))) {
-          b.classList.add('active');
-        } else {
-          b.classList.remove('active');
-        }
-      });
-    }
-
-    function toggleBookmark(id) {
-      const item = directoryListings.find(l => l.id === id);
-      if (item) {
-        item.bookmarked = !item.bookmarked;
-        filterAndRenderListings();
-      }
-    }
-
-    function openDetailModal(id) {
-      const item = directoryListings.find(l => l.id === id);
-      if (!item) return;
-
-      activeDetailListing = item;
-      const initials = getInitials(item.name);
-      const logoColor = getCategoryColor(item.category);
-
-      const logoBox = document.getElementById("modalLogo");
-      logoBox.textContent = initials;
-      logoBox.style.backgroundColor = logoColor;
-
-      document.getElementById("modalTitle").textContent = item.name;
-      document.getElementById("modalCategory").textContent = item.categoryLabel;
-      document.getElementById("modalAddress").textContent = item.address;
-      document.getElementById("modalPhone").textContent = item.phone;
-      document.getElementById("modalHours").textContent = item.hours;
-
-      const servicesBox = document.getElementById("modalServices");
-      servicesBox.innerHTML = item.services.map(s => `
-        <span style="font-size: 11px; background: var(--surface-gray); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 8px; font-weight: 600;">${s}</span>
-      `).join('');
-
-      renderModalReviews(item);
-      openModal("detailModal");
-    }
-
-    function openRouteModal(id) {
-      const item = directoryListings.find(l => l.id === id);
-      if (!item) return;
-
-      activeRouteListing = item;
-      document.getElementById("routeModalTitle").textContent = `Route to ${item.name}`;
-      document.getElementById("routeModalSub").textContent = item.address;
-      document.getElementById("routeDistanceTime").textContent = `${item.timeEst} (${item.distance})`;
-
-      const turnList = document.getElementById("turnByTurnList");
-      if (item.turns && item.turns.length > 0) {
-        turnList.innerHTML = item.turns.map((step, idx) => `
-          <div style="display: flex; gap: 10px; align-items: flex-start; background: var(--surface-gray); padding: 8px 12px; border-radius: 8px;">
-            <span style="background: var(--black); color: var(--emerald); font-weight: 800; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0;">${idx + 1}</span>
-            <span>${step}</span>
-          </div>
-        `).join('');
-      } else {
-        turnList.innerHTML = `<p style="color: #64748b;">Turn-by-turn guidance available upon launching GPS.</p>`;
-      }
-
-      openModal("routeModal");
-    }
-
-    function setTransitMode(mode) {
-      document.querySelectorAll('#routeModal .transit-mode-btn').forEach(b => b.classList.remove('active'));
-      if (mode === 'drive') document.getElementById('modeDrive').classList.add('active');
-      if (mode === 'transit') document.getElementById('modeTransit').classList.add('active');
-      if (mode === 'walk') document.getElementById('modeWalk').classList.add('active');
-
-      if (activeRouteListing) {
-        let factor = mode === 'walk' ? 4 : mode === 'transit' ? 1.5 : 1;
-        let mins = Math.round(parseInt(activeRouteListing.timeEst) * factor);
-        document.getElementById("routeDistanceTime").textContent = `${mins} mins (${activeRouteListing.distance})`;
-      }
-    }
-
-    function launchExternalMaps() {
-      if (activeRouteListing) {
-        const query = encodeURIComponent(`${activeRouteListing.name}, ${activeRouteListing.address}`);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-      }
-    }
-
-    function saveBillingSettings() {
-      const cycle = document.getElementById("billingCycleSelect").value;
-      alert(`Billing preferences updated successfully! Current Plan set to: ${cycle.toUpperCase()}`);
-      closeModal('billingModal');
-    }
-
-    function renderModalReviews(item) {
-      const reviewsList = document.getElementById("modalReviewsList");
-      if (!item.reviews || item.reviews.length === 0) {
-        reviewsList.innerHTML = `<p style="font-size: 11px; color: #64748b;">No reviews submitted yet. Be the first to leave a review!</p>`;
-        return;
-      }
-
-      reviewsList.innerHTML = item.reviews.map(r => `
-        <div class="review-card">
-          <div class="review-author">
-            <span>${r.author}</span>
-            <span style="color: #f59e0b;">★ ${r.stars}</span>
-          </div>
-          <p style="color: #475569;">${r.text}</p>
-        </div>
-      `).join('');
-    }
-
-    function setRating(stars) {
-      currentSelectedRating = stars;
-      const starEls = document.querySelectorAll("#starRatingRow span");
-      starEls.forEach((el, index) => {
-        if (index < stars) {
-          el.classList.add("selected");
-        } else {
-          el.classList.remove("selected");
-        }
-      });
-    }
-
-    function submitReview() {
-      const text = document.getElementById("reviewCommentInput").value;
-      if (!text.trim()) {
-        alert("Please enter review feedback before posting.");
-        return;
-      }
-
-      if (activeDetailListing) {
-        activeDetailListing.reviews.unshift({
-          author: "Verified Resident",
-          stars: currentSelectedRating,
-          text: text
-        });
-        activeDetailListing.reviewCount += 1;
-        document.getElementById("reviewCommentInput").value = "";
-        renderModalReviews(activeDetailListing);
-        filterAndRenderListings();
-        alert("Review submitted successfully!");
-      }
-    }
-
-    function handleBusinessSubmit(e) {
-      e.preventDefault();
-
-      const name = document.getElementById("newEntityName").value;
-      const category = document.getElementById("newCategory").value;
-      const phone = document.getElementById("newPhone").value;
-      const address = document.getElementById("newAddress").value;
-      const tier = document.getElementById("newTier").value;
-
-      const newListing = {
-        id: Date.now(),
-        name: name,
-        category: category,
-        categoryLabel: `${category} & Verified Service`,
-        verified: true,
-        sponsored: tier === 'sponsored',
-        rating: 5.0,
-        reviewCount: 1,
-        phone: phone,
-        address: address,
-        distance: "0.5 km",
-        timeEst: "3 mins drive",
-        isOpen: true,
-        hours: "Mon - Sat: 8:00 AM - 6:00 PM",
-        services: ["General Service", "Verified Partner"],
-        bookmarked: false,
-        reviews: [
-          { author: "Kapita Verification Team", stars: 5, text: "Official business profile registration verified." }
-        ],
-        turns: [
-          "Drive along main access road (300m)",
-          "Arrive at destination on the right"
-        ]
-      };
-
-      directoryListings.unshift(newListing);
-      filterAndRenderListings();
-      populateReportDropdown();
-      closeModal("addBusinessModal");
-      document.getElementById("addBusinessForm").reset();
-
-      alert(`Success! '${name}' has been added to the Kapita Verified Directory.`);
-    }
-
-    function populateReportDropdown() {
-      const select = document.getElementById("reportEntitySelect");
-      select.innerHTML = directoryListings.map(item => `
-        <option value="${item.name}">${item.name}</option>
-      `).join('');
-    }
-
-    function submitReport() {
-      const selected = document.getElementById("reportEntitySelect").value;
-      const notes = document.getElementById("reportNotes").value;
-
-      if (!notes.trim()) {
-        alert("Please provide the corrected information before submitting.");
-        return;
-      }
-
-      alert(`Report submitted successfully for '${selected}'. The AI Scanner and validation team will verify and update this record shortly.`);
-      closeModal("reportModal");
-      document.getElementById("reportNotes").value = "";
-    }
-
-    function toggleNotifDropdown() {
-      document.getElementById("notifDropdown").classList.toggle("active");
-    }
-
-    function markNotificationRead(id) {
-      document.getElementById(id).classList.add("read");
-      updateNotifBadge();
-    }
-
-    function markAllNotificationsRead() {
-      document.querySelectorAll(".notif-item").forEach(el => el.classList.add("read"));
-      updateNotifBadge();
-    }
-
-    function updateNotifBadge() {
-      const unreadCount = document.querySelectorAll(".notif-item:not(.read)").length;
-      const badge = document.getElementById("notifBadge");
-      badge.textContent = unreadCount;
-      if (unreadCount === 0) {
-        badge.style.display = "none";
-      } else {
-        badge.style.display = "flex";
-      }
-    }
+$('aiParsedFeedback').style.display = 'none';
+loadListings();
+loadBookmarks();

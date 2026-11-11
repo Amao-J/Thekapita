@@ -131,8 +131,9 @@ class RideBookingAdmin(admin.ModelAdmin):
     search_fields = ("reference", "user__email", "pickup", "destination")
     readonly_fields = (
         "user", "reference", "ride_type", "pickup", "destination", "fare", "status",
-        "driver", "assigned_at", "charged_at", "refunded_at", "idempotency_key",
-        "created_at", "updated_at",
+        "driver", "assigned_at", "started_at", "completed_at", "charged_at", "refunded_at",
+        "driver_payout", "pickup_lat", "pickup_lng", "dest_lat", "dest_lng", "pickup_otp",
+        "idempotency_key", "created_at", "updated_at",
     )
     actions = ["dispatch_rides", "complete_rides"]
 
@@ -164,7 +165,8 @@ class RideBookingAdmin(admin.ModelAdmin):
     @admin.action(description="Complete selected assigned rides and release drivers")
     def complete_rides(self, request, queryset):
         completed = 0
-        for booking in queryset.filter(status=RideBooking.Status.ASSIGNED):
+        live = [RideBooking.Status.ASSIGNED, RideBooking.Status.ARRIVED, RideBooking.Status.IN_PROGRESS]
+        for booking in queryset.filter(status__in=live):
             complete_ride(booking.pk)
             completed += 1
         self.message_user(request, f"Completed {completed} ride(s) and released their drivers.")
@@ -172,10 +174,13 @@ class RideBookingAdmin(admin.ModelAdmin):
 
 @admin.register(RideDriver)
 class RideDriverAdmin(admin.ModelAdmin):
-    list_display = ("name", "phone", "vehicle", "plate_number", "is_active", "is_available")
-    list_filter = ("is_active", "is_available")
-    search_fields = ("name", "phone", "plate_number")
+    list_display = ("name", "phone", "vehicle", "plate_number", "user", "is_active", "is_online", "is_available")
+    list_filter = ("is_active", "is_online", "is_available")
+    search_fields = ("name", "phone", "plate_number", "user__email")
+    readonly_fields = ("latitude", "longitude", "location_updated_at")
+    raw_id_fields = ("user",)
     fieldsets = (
-        (None, {"fields": ("name", "phone", "vehicle", "plate_number")}),
-        ("Dispatch", {"fields": ("ride_types", "is_active", "is_available")}),
+        (None, {"fields": ("user", "name", "phone", "vehicle", "plate_number")}),
+        ("Dispatch", {"fields": ("ride_types", "is_active", "is_online", "is_available")}),
+        ("Last known location", {"fields": ("latitude", "longitude", "location_updated_at")}),
     )

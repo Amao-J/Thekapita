@@ -4,8 +4,15 @@ import { ApiError } from '../api/client.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+// Where to go after signing in: ?next=driver.html returns people to the page that sent them here.
+// Only a bare file name like "driver.html" is accepted, so this can't be turned into an open redirect.
+function afterAuthUrl() {
+  const next = new URLSearchParams(window.location.search).get('next') || '';
+  return /^[a-z0-9-]+\.html$/i.test(next) ? next : 'profile.html';
+}
+
 if (isAuthenticated()) {
-  window.location.href = 'profile.html';
+  window.location.href = afterAuthUrl();
 }
 
 function showError(el, message) {
@@ -48,7 +55,7 @@ function wireSignIn() {
     setBusy(form, true, 'Signing in...');
     try {
       await login(identifier, password);
-      window.location.href = 'profile.html';
+      window.location.href = afterAuthUrl();
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Could not reach theKapita API server. Check your connection.';
       showError(errorEl, message);
@@ -83,7 +90,7 @@ function wireSignUp() {
     setBusy(form, true, 'Creating Account...');
     try {
       await register(fields);
-      window.location.href = 'profile.html';
+      window.location.href = afterAuthUrl();
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Could not reach theKapita API server. Check your connection.';
       showError(errorEl, message);
@@ -152,7 +159,7 @@ async function onGoogleCredential({ credential }) {
   const errorEl = document.getElementById('signInError') || document.getElementById('signUpError');
   try {
     await loginWithGoogle(credential);
-    window.location.href = 'profile.html';
+    window.location.href = afterAuthUrl();
   } catch (err) {
     showError(errorEl, err instanceof ApiError ? err.message : 'Could not reach theKapita API server.');
   }

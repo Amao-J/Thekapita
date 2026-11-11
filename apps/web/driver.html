@@ -13,6 +13,7 @@
   <!-- Material Symbols & Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <link rel="stylesheet" href="css/driver.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body>
 
@@ -38,7 +39,7 @@
       <!-- Notifications -->
       <button class="icon-btn" aria-label="Notifications" onclick="openModal('notificationsModal')">
         <span class="material-symbols-outlined">notifications</span>
-        <span class="notif-badge">3</span>
+
       </button>
 
       <!-- Profile Avatar -->
@@ -60,19 +61,9 @@
           <div id="statusPulseDot" class="status-pulse-dot"></div>
           <div>
             <h2 id="statusBannerTitle" class="banner-title">You are Online & Visible</h2>
-            <p id="statusBannerSub" class="banner-subtitle">Ready to receive nearby ride & package dispatch requests</p>
+            <p id="statusBannerSub" class="banner-subtitle">Ready to receive nearby ride requests</p>
           </div>
         </div>
-        <button onclick="triggerSimulatedRequest()" class="btn-action-primary">
-          <span class="material-symbols-outlined">alt_route</span>
-          Simulate Ride Alert
-        </button>
-      </div>
-
-      <!-- Surge Heatmap Alert -->
-      <div class="surge-notice-pill">
-        <span class="material-symbols-outlined">local_fire_department</span>
-        <span>High Demand Area Active: 1.5x Surge in Victoria Island & Lekki Phase 1 Hub</span>
       </div>
 
       <!-- Quick Stats Grid Cards -->
@@ -82,52 +73,52 @@
             <span>Today's Earnings</span>
             <span class="material-symbols-outlined">payments</span>
           </div>
-          <div class="stat-value">₦38,500</div>
+          <div class="stat-value" id="statEarnings">&mdash;</div>
           <div class="stat-footer">
-            <span class="stat-badge badge-emerald">+14% vs yesterday</span>
-            <button onclick="openModal('payoutModal')" class="link-action-btn">Cash Out</button>
+            <span class="stat-badge badge-emerald" id="statFeeNote">After platform fee</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-header">
-            <span>Completed Trips</span>
+            <span>Completed Today</span>
             <span class="material-symbols-outlined">local_taxi</span>
           </div>
-          <div class="stat-value">12</div>
+          <div class="stat-value" id="statTripsToday">&mdash;</div>
           <div class="stat-footer">
-            <span class="stat-badge badge-blue">8 Rides • 4 Parcels</span>
+            <span class="stat-badge badge-blue" id="statTripsTotal">&nbsp;</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-header">
-            <span>Acceptance Rate</span>
-            <span class="material-symbols-outlined">check_circle</span>
+            <span>Wallet Balance</span>
+            <span class="material-symbols-outlined">account_balance_wallet</span>
           </div>
-          <div class="stat-value">98.2%</div>
+          <div class="stat-value" id="statBalance">&mdash;</div>
           <div class="stat-footer">
-            <span class="stat-badge badge-amber">High Demand Zone</span>
+            <span class="stat-badge badge-gray">Kapita Pay Wallet</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-header">
-            <span>Driver Rating</span>
-            <span class="material-symbols-outlined">star</span>
+            <span>Vehicle</span>
+            <span class="material-symbols-outlined">directions_car</span>
           </div>
-          <div class="stat-value">4.95 ★</div>
+          <div class="stat-value" id="statPlate" style="font-size:18px;">&mdash;</div>
           <div class="stat-footer">
-            <span class="stat-badge badge-gray">Top Partner</span>
+            <span class="stat-badge badge-gray" id="statVehicle">&nbsp;</span>
           </div>
         </div>
       </div>
+
 
       <!-- ACTIVE TRIP WORKFLOW STEP CONTAINER -->
       <div id="activeTripCard" class="active-trip-card">
         <div class="trip-step-header">
           <span class="step-pill" id="activeTripTypePill">NAVIGATING TO PICKUP</span>
-          <span class="trip-fare-display" id="activeTripFare">₦3,800.00</span>
+          <span class="trip-fare-display" id="activeTripFare">&mdash;</span>
         </div>
 
         <!-- Rider / Customer Profile -->
@@ -136,16 +127,13 @@
             <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" class="customer-avatar-img" alt="Passenger Profile">
             <div>
               <h4 class="customer-name" id="customerName">Oluwaseun Adebayo</h4>
-              <p class="customer-meta">⭐ 4.9 Rating • Cash Payment</p>
+              <p class="customer-meta" id="customerMeta">Paid via Kapita Wallet</p>
             </div>
           </div>
           <div class="action-circle-btns">
-            <a href="tel:0800000000" class="circle-icon-btn" title="Call Customer">
+            <a href="#" id="customerCall" class="circle-icon-btn" title="Call Customer">
               <span class="material-symbols-outlined">call</span>
             </a>
-            <button onclick="alert('Opening secure chat with customer...')" class="circle-icon-btn" title="Message Customer">
-              <span class="material-symbols-outlined">chat</span>
-            </button>
           </div>
         </div>
 
@@ -175,7 +163,7 @@
             Enter 4-Digit Rider PIN Code:
           </label>
           <div class="otp-input-row">
-            <input type="text" id="otpCodeInput" placeholder="e.g. 4829" maxlength="4" class="otp-input-field">
+            <input type="text" id="otpCodeInput" placeholder="e.g. 4829" maxlength="4" inputmode="numeric" autocomplete="one-time-code" class="otp-input-field">
             <button onclick="verifyOTP()" class="btn-verify-otp">Verify</button>
           </div>
         </div>
@@ -187,22 +175,12 @@
         </button>
       </div>
 
-      <!-- Interactive Mock Map Canvas -->
+      <!-- Live map (Leaflet) -->
       <div class="map-container-box">
-        <img class="map-svg-bg" src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1000&auto=format&fit=crop&q=80" alt="Map Grid Preview">
-        
-        <!-- Animated Driver Vehicle Icon Marker -->
-        <div class="driver-marker" id="driverMapMarker">
-          <span class="material-symbols-outlined">directions_car</span>
-        </div>
-
-        <!-- Floating Map Controls -->
-        <div class="map-controls-floating">
-          <button class="map-btn" title="Center Location" onclick="recenterMap()">
+        <div id="driverMap" style="position:absolute; inset:0; border-radius:inherit;"></div>
+        <div class="map-controls-floating" style="z-index:500;">
+          <button class="map-btn" title="Center on me" onclick="recenterMap()">
             <span class="material-symbols-outlined">my_location</span>
-          </button>
-          <button class="map-btn" title="Toggle Heatmap" onclick="alert('Heatmap: High Demand in Lekki (+₦800 surge)')">
-            <span class="material-symbols-outlined">local_fire_department</span>
           </button>
         </div>
       </div>
@@ -215,38 +193,8 @@
         <span class="stat-badge badge-gray">Today</span>
       </div>
 
-      <div class="logs-list">
-        <div class="log-item">
-          <div class="log-item-left">
-            <div class="log-icon-box">
-              <span class="material-symbols-outlined">electric_car</span>
-            </div>
-            <div>
-              <h4 class="log-title">Standard Ride • Completed</h4>
-              <p class="log-sub">Ikeja City Mall ➔ Maryland Station • 14 mins</p>
-            </div>
-          </div>
-          <div>
-            <p class="log-price">₦2,450</p>
-            <p class="log-status">Paid via Wallet</p>
-          </div>
-        </div>
-
-        <div class="log-item">
-          <div class="log-item-left">
-            <div class="log-icon-box">
-              <span class="material-symbols-outlined">package_2</span>
-            </div>
-            <div>
-              <h4 class="log-title">Express Parcel Delivery</h4>
-              <p class="log-sub">Ikoyi Club ➔ Lekki Phase 1 • Medium Package</p>
-            </div>
-          </div>
-          <div>
-            <p class="log-price">₦4,200</p>
-            <p class="log-status">Tip: ₦500 included</p>
-          </div>
-        </div>
+      <div class="logs-list" id="tripHistoryList">
+        <p class="log-sub" id="tripHistoryEmpty">No trips yet. Go online to start receiving requests.</p>
       </div>
     </div>
 
@@ -255,15 +203,15 @@
       <div class="wallet-card-dark">
         <div>
           <span class="balance-title">Available Partner Balance</span>
-          <h2 class="balance-amount">₦128,450.00</h2>
+          <h2 class="balance-amount" id="earnBalance">&mdash;</h2>
         </div>
         <div class="modal-actions-dual" style="margin-top: 0;">
           <button onclick="openModal('payoutModal')" class="btn-emerald-accept">
             <span class="material-symbols-outlined">arrow_outward</span>
             Instant Cash Out
           </button>
-          <button onclick="alert('Generating Direct Deposit Statement...')" class="btn-secondary" style="background: #262626; color: #fff; border-color: #404040;">
-            Statements
+          <button class="btn-secondary" disabled title="Statements are coming soon" style="background: #262626; color: #fff; border-color: #404040; opacity:.6;">
+            Statements (soon)
           </button>
         </div>
       </div>
@@ -271,35 +219,7 @@
       <!-- Pure CSS Weekly Bar Chart -->
       <div class="chart-box">
         <h3 class="banner-title">Weekly Earnings Summary</h3>
-        <div class="css-bar-chart">
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 45%;"></div>
-            <span class="bar-label">Mon</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 60%;"></div>
-            <span class="bar-label">Tue</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 35%;"></div>
-            <span class="bar-label">Wed</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 80%;"></div>
-            <span class="bar-label">Thu</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 95%;"></div>
-            <span class="bar-label">Fri</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill active" style="height: 100%;"></div>
-            <span class="bar-label">Sat</span>
-          </div>
-          <div class="chart-bar-group">
-            <div class="bar-pill" style="height: 50%;"></div>
-            <span class="bar-label">Sun</span>
-          </div>
+        <div class="css-bar-chart" id="weeklyChart"></div>
         </div>
       </div>
     </div>
@@ -313,9 +233,9 @@
         <div class="profile-info-wrap">
           <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" class="profile-avatar-large" alt="Driver Profile">
           <div class="profile-names">
-            <h3>Babajide Ogundele</h3>
+            <h3 id="profileName">Driver</h3>
             <span class="stat-badge badge-emerald" style="display:inline-flex; align-items:center; gap:4px;">
-              <span class="material-symbols-outlined" style="font-size:12px;">verified</span> Verified Partner
+              <span class="material-symbols-outlined" style="font-size:12px;">verified</span> <span id="profileApproval">Partner</span>
             </span>
           </div>
         </div>
@@ -327,38 +247,32 @@
         <form onsubmit="saveProfileSettings(event)">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Full Name</label>
-              <input type="text" class="form-input" value="Babajide Ogundele" required>
+              <label class="form-label" for="pfName">Full Name</label>
+              <input type="text" id="pfName" class="form-input" readonly title="Change your name on your theKapita profile">
             </div>
             <div class="form-group">
-              <label class="form-label">Phone Number</label>
-              <input type="tel" class="form-input" value="+234 812 345 6789" required>
+              <label class="form-label" for="pfPhone">Phone Number</label>
+              <input type="tel" id="pfPhone" class="form-input" required>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" class="form-input" value="babajide.o@example.com" required>
+            <label class="form-label" for="pfEmail">Email Address</label>
+            <input type="email" id="pfEmail" class="form-input" readonly>
           </div>
 
           <h3 class="section-title" style="margin-top: 16px;">Vehicle Information</h3>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Vehicle Make & Model</label>
-              <input type="text" class="form-input" value="Toyota Corolla (2020)" required>
+              <label class="form-label" for="pfVehicle">Vehicle Make & Model</label>
+              <input type="text" id="pfVehicle" class="form-input" required>
             </div>
             <div class="form-group">
-              <label class="form-label">License Plate</label>
-              <input type="text" class="form-input" value="ABC 123 XY" style="text-transform: uppercase;" required>
+              <label class="form-label" for="pfPlate">License Plate</label>
+              <input type="text" id="pfPlate" class="form-input" readonly title="Contact support to change your plate number" style="text-transform: uppercase;">
             </div>
           </div>
 
-          <h3 class="section-title" style="margin-top: 16px;">Bank & Payout</h3>
-          <div class="form-group">
-            <label class="form-label">Payout Bank Account</label>
-            <input type="text" class="form-input" value="0012345678 - GTBank" required>
-          </div>
-
-          <button type="submit" class="btn-primary-large" style="margin-top: 24px;">
+          <button type="submit" id="pfSave" class="btn-primary-large" style="margin-top: 24px;">
             <span class="material-symbols-outlined">save</span>
             Save Profile Changes
           </button>
@@ -381,68 +295,32 @@
       </div>
 
       <div class="notifications-list">
-        <div class="notif-item unread">
-          <div class="notif-icon bg-amber">
-            <span class="material-symbols-outlined">local_fire_department</span>
-          </div>
-          <div class="notif-text">
-            <strong>Surge Pricing Active</strong>
-            <p>High demand! 1.5x surge pricing is currently active in Victoria Island and Lekki Phase 1.</p>
-            <span class="notif-time">2 mins ago</span>
-          </div>
-        </div>
-
-        <div class="notif-item unread">
-          <div class="notif-icon bg-emerald">
-            <span class="material-symbols-outlined">workspace_premium</span>
-          </div>
-          <div class="notif-text">
-            <strong>Top Partner Bonus</strong>
-            <p>Congratulations! You hit your weekly goal and earned a ₦5,000 bonus.</p>
-            <span class="notif-time">1 hr ago</span>
-          </div>
-        </div>
-
         <div class="notif-item">
-          <div class="notif-icon bg-blue">
-            <span class="material-symbols-outlined">account_balance</span>
-          </div>
           <div class="notif-text">
-            <strong>Payout Successful</strong>
-            <p>Your instant cash out of ₦24,500 has been sent to your GTBank account.</p>
-            <span class="notif-time">Yesterday at 4:30 PM</span>
+            <strong>You&rsquo;re all caught up</strong>
+            <p>Ride requests appear here and on your dashboard the moment they&rsquo;re assigned to you.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- INCOMING DISPATCH RIDE REQUEST MODAL -->
+  <!-- NEW RIDE ASSIGNED MODAL -->
   <div id="incomingRequestModal" class="modal-overlay">
     <div class="modal-card">
-      
-      <!-- Accept Countdown Progress Bar -->
-      <div class="timer-progress-bar">
-        <div id="timerProgressFill" class="timer-progress-fill"></div>
-      </div>
-
       <div class="modal-header">
         <div>
-          <span class="stat-badge badge-emerald">NEW RIDE DISPATCH</span>
-          <h2 class="modal-title" style="margin-top: 4px; font-size: 22px;">₦3,800.00</h2>
-        </div>
-        <div style="text-align: right;">
-          <span style="font-size: 11px; color: #64748b; font-weight: 700;">Est. Distance</span>
-          <p style="font-size: 12px; color: var(--emerald-dark); font-weight: 800;">4.2 km (12 mins)</p>
+          <span class="stat-badge badge-emerald">NEW RIDE ASSIGNED</span>
+          <h2 class="modal-title" id="incomingFare" style="margin-top: 4px; font-size: 22px;">&mdash;</h2>
+          <p style="font-size: 11px; color: #64748b;" id="incomingPayoutNote"></p>
         </div>
       </div>
 
       <div class="customer-profile-bar" style="margin-bottom: 16px;">
         <div class="customer-info-left">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" class="customer-avatar-img" alt="Passenger">
           <div>
-            <h4 class="customer-name">Oluwaseun Adebayo</h4>
-            <p class="customer-meta">⭐ 4.9 Rating • Cash Payment</p>
+            <h4 class="customer-name" id="incomingRider">Rider</h4>
+            <p class="customer-meta" id="incomingType"></p>
           </div>
         </div>
       </div>
@@ -455,51 +333,42 @@
         </div>
         <div class="route-text-column">
           <div>
-            <p class="location-label">Pickup Location (1.2 km away)</p>
-            <p class="location-val">Victoria Island, Cyber Tower</p>
+            <p class="location-label">Pickup</p>
+            <p class="location-val" id="incomingPickup"></p>
           </div>
           <div>
             <p class="location-label">Destination</p>
-            <p class="location-val">Lekki Phase 1, Freedom Way</p>
+            <p class="location-val" id="incomingDrop"></p>
           </div>
         </div>
       </div>
 
       <div class="modal-actions-dual">
-        <button onclick="declineRequest()" class="btn-secondary">Decline</button>
-        <button onclick="acceptRequest()" class="btn-emerald-accept">
+        <button onclick="acceptRequest()" class="btn-emerald-accept" style="flex:1;">
           <span class="material-symbols-outlined">check_circle</span>
-          Accept Trip (<span id="countdownSecs">15</span>s)
+          Start Navigating to Pickup
         </button>
       </div>
     </div>
   </div>
+
 
   <!-- CASH OUT MODAL -->
   <div id="payoutModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Instant Cash Out</h3>
+        <h3 class="modal-title">Cash Out</h3>
         <button onclick="closeModal('payoutModal')" class="close-modal-btn">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Destination Bank Account</label>
-        <input type="text" readonly value="GTBank ••••• 4821 (Babajide Ogundele)" class="form-input" style="background: var(--surface-gray);">
-      </div>
-
-      <div class="form-group">
-        <label for="payoutAmountInput" class="form-label">Enter Payout Amount (₦)</label>
-        <input type="number" id="payoutAmountInput" value="38500" class="form-input">
-      </div>
-
-      <button onclick="processCashout()" class="btn-primary-large" style="margin-top: 12px;">
-        Confirm Payout
-      </button>
+      <p style="font-size:13px; color:#475569; line-height:1.5;">
+        Bank payouts are coming soon. Your earnings are already in your Kapita Pay Wallet &mdash; you can send them to anyone on theKapita or spend them across the app right now.
+      </p>
+      <a href="wallet.html" class="btn-primary-large" style="margin-top: 16px; text-align:center; text-decoration:none; display:block;">Open My Wallet</a>
     </div>
   </div>
+
 
   <!-- TRIP SUMMARY & FARE BREAKDOWN MODAL -->
   <div id="tripSummaryModal" class="modal-overlay">
@@ -512,20 +381,16 @@
 
       <div style="background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 20px; text-align: left;" class="route-text-column">
         <div style="display: flex; justify-content: space-between;">
-          <span style="color: #64748b;">Gross Trip Fare</span>
-          <strong style="color: var(--black);">₦3,800.00</strong>
+          <span style="color: #64748b;">Trip Fare</span>
+          <strong style="color: var(--black);" id="sumGross">&mdash;</strong>
         </div>
         <div style="display: flex; justify-content: space-between;">
-          <span style="color: #64748b;">Rider Tip</span>
-          <strong style="color: var(--emerald-dark);">+₦500.00</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-          <span style="color: #64748b;">Platform Fee (12.5%)</span>
-          <strong style="color: #e11d48;">-₦475.00</strong>
+          <span style="color: #64748b;" id="sumFeeLabel">Platform Fee</span>
+          <strong style="color: #e11d48;" id="sumFee">&mdash;</strong>
         </div>
         <div style="border-top: 1px solid var(--border-color); padding-top: 8px; display: flex; justify-content: space-between; font-size: 14px;">
-          <strong>Net Driver Credit</strong>
-          <strong style="color: var(--emerald-dark);">₦3,825.00</strong>
+          <strong>Credited to your wallet</strong>
+          <strong style="color: var(--emerald-dark);" id="sumNet">&mdash;</strong>
         </div>
       </div>
 
@@ -556,6 +421,7 @@
   </nav>
 
   <!-- VANILLA JAVASCRIPT LOGIC CONTROLLER -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script type="module" src="src/pages/driver.js"></script>
 </body>
 </html>

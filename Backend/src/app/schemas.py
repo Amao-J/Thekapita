@@ -215,6 +215,11 @@ class RideBookingIn(Schema):
     pickup: str = Field(min_length=1, max_length=255)
     destination: str = Field(min_length=1, max_length=255)
     ride_type: str
+    # Optional map coordinates; the text addresses above stay authoritative.
+    pickup_lat: float | None = Field(None, ge=-90, le=90)
+    pickup_lng: float | None = Field(None, ge=-180, le=180)
+    destination_lat: float | None = Field(None, ge=-90, le=90)
+    destination_lng: float | None = Field(None, ge=-180, le=180)
 
     @field_validator("pickup", "destination")
     @classmethod
@@ -243,6 +248,9 @@ class RideDriverOut(Schema):
     phone: str
     vehicle: str
     plate_number: str
+    latitude: float | None = None
+    longitude: float | None = None
+    location_updated_at: str | None = None
 
 
 class RideBookingOut(Schema):
@@ -258,6 +266,11 @@ class RideBookingOut(Schema):
     charged: bool
     wallet_balance: Decimal
     created_at: str
+    pickup_lat: float | None = None
+    pickup_lng: float | None = None
+    destination_lat: float | None = None
+    destination_lng: float | None = None
+    pickup_otp: str | None = None  # shown to the rider until the trip starts
 
 
 BLOOD_GROUPS = {"", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}

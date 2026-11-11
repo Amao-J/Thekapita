@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>theKapita - Become a Driver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/driver.css">
+  <style>
+    .signup-wrap { max-width: 460px; margin: 0 auto; padding: 24px 16px 48px; }
+    .signup-wrap h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; margin: 8px 0; }
+    .signup-wrap p.lead { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+    .signup-error { display: none; background: #fef2f2; color: #b91c1c; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+    .ride-type-grid { display: grid; gap: 8px; margin-top: 6px; }
+    .ride-type-grid label { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main class="signup-wrap">
+    <a href="index.html" style="font-size:13px;color:#008a57;text-decoration:none;">&larr; Back to theKapita</a>
+    <h1>Drive with theKapita</h1>
+    <p class="lead">Tell us about your vehicle. You&rsquo;ll be able to go online as soon as your account is approved, and fares are paid straight into your Kapita wallet.</p>
+
+    <div id="signupError" class="signup-error" role="alert"></div>
+
+    <form id="driverSignupForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="dsPhone">Phone number</label>
+        <input id="dsPhone" class="form-input" type="tel" autocomplete="tel" placeholder="08012345678" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="dsVehicle">Vehicle make &amp; model</label>
+        <input id="dsVehicle" class="form-input" type="text" placeholder="Toyota Corolla (2020)" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="dsPlate">License plate</label>
+        <input id="dsPlate" class="form-input" type="text" placeholder="ABC 123 XY" style="text-transform: uppercase;" required>
+      </div>
+      <fieldset class="form-group" style="border:0;padding:0;margin:0 0 16px;">
+        <legend class="form-label">Ride types you can take</legend>
+        <div class="ride-type-grid">
+          <label><input type="checkbox" name="rideTypes" value="kapita_go" checked> Kapita Go</label>
+          <label><input type="checkbox" name="rideTypes" value="kapita_comfort"> Kapita Comfort</label>
+          <label><input type="checkbox" name="rideTypes" value="kapita_keke_express"> Kapita Keke Express</label>
+          <label><input type="checkbox" name="rideTypes" value="kapita_executive"> Kapita Executive</label>
+        </div>
+      </fieldset>
+      <button id="dsSubmit" type="submit" class="btn-primary-large">Register as a driver</button>
+    </form>
+  </main>
+  <script type="module" src="src/pages/driver-signup.js"></script>
+</body>
+</html>

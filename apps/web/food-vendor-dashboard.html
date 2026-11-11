@@ -85,15 +85,15 @@
       <div class="metrics-grid">
         <div class="metric-card highlight">
           <div class="metric-title">Today's Escrow Sales</div>
-          <div class="metric-value">₦145,500</div>
+          <div class="metric-value" id="mSales">&mdash;</div>
         </div>
         <div class="metric-card">
           <div class="metric-title">Active Orders</div>
-          <div class="metric-value">4</div>
+          <div class="metric-value" id="mActive">&mdash;</div>
         </div>
         <div class="metric-card">
           <div class="metric-title">Completed Today</div>
-          <div class="metric-value">32</div>
+          <div class="metric-value" id="mDone">&mdash;</div>
         </div>
       </div>
 
@@ -141,7 +141,7 @@
     <section id="view-wallet" class="view-section" aria-label="Escrow Wallet Information">
       <div class="metric-card highlight" style="margin-bottom: 24px;">
         <div class="metric-title" style="color: var(--emerald);">Cleared Escrow Balance</div>
-        <div class="metric-value">₦342,850.00</div>
+        <div class="metric-value" id="walletBalance">&mdash;</div>
         <button type="button" class="btn-action btn-accept" style="margin-top: 16px;" onclick="openModal('withdrawModal')">Withdraw to Bank</button>
       </div>
 
@@ -297,8 +297,8 @@
 
         <div class="form-group">
           <label for="withdrawAmount">Amount to Withdraw (₦)</label>
-          <input type="number" id="withdrawAmount" class="form-control" value="342850" max="342850" min="1000" required>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Available Balance: ₦342,850.00</p>
+          <input type="number" id="withdrawAmount" class="form-control" min="1000" required>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Available Balance: <span id="withdrawAvailable">&mdash;</span></p>
         </div>
 
         <button type="submit" id="withdrawSubmitBtn" class="btn-action btn-accept" style="width: 100%; padding: 14px; font-size: 14px;">Authorize Payout</button>
@@ -306,6 +306,6 @@
     </div>
   </div>
 
-  <script src="src/pages/food-vendor.js"></script>
+  <script type="module" src="src/pages/food-vendor.js"></script>
 </body>
 </html>
