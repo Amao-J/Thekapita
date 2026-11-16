@@ -2,69 +2,65 @@
 
 | Reporting detail | Value |
 |---|---|
-| Prepared | 9 November 2026 |
-| Reporting period | 2-8 November 2026 (UTC+01:00) |
-| Commits | 13 |
-| Changed files | 51 |
-| Change volume | 23,677 insertions and 11,711 deletions |
+| Prepared | 16 November 2026 |
+| Reporting period | 9-16 November 2026 (UTC+01:00; trailing seven days) |
+| Commits | 7 (including 1 merge commit) |
+| Changed files | 63 |
+| Net text diff | 6,201 insertions and 1,779 deletions |
 
-The change volume is the net Git diff from the previous report's ending commit
-(`dec8790`) to the latest commit in this reporting period (`5478d17`). It
-includes all tracked file types, not only source code.
+The change totals compare the repository at the start of the reporting window
+(the parent of `2e5f690`) with `971bb72`. Text-line totals exclude binary file
+contents.
 
 ## Executive summary
 
-Work this week broadened theKapita's ride, food, directory, bills, marketplace,
-and mobile experiences. The backend gained a ride-booking lifecycle integrated
-with the wallet ledger, while web and mobile interfaces added or expanded the
-corresponding service flows. The mobile app also moved further into an Expo
-Router-based structure. Backend ride tests were added, and backend development
-configuration and a marketplace media function were corrected.
+This week added backend and web foundations for driver rides, food ordering,
+and business directories, and improved the ride-booking location experience.
+The backend now includes dedicated driver, food, and directory APIs and their
+supporting data models, migrations, administration, and tests. On the web,
+users can choose ride locations on an interactive map, while driver, food,
+vendor, and directory pages were expanded to use the corresponding service
+flows.
 
 ## Key work completed
 
-- **Ride booking and wallet integration:** Added ride booking and driver data
-  models, migrations, authenticated API operations, server-calculated fares,
-  idempotent booking, and driver assignment. Assignment charges the wallet;
-  eligible cancellations refund it and release the driver, and ride completion
-  also makes the driver available again. Added tests for booking, retries,
-  driver assignment, insufficient balance, cancellation/refunds, and queued
-  requests.
-- **Web service experiences:** Added driver and directory pages and styling,
-  expanded food ordering, and substantially revised bills interactions. Ride
-  pages and supporting navigation/build configuration were also updated.
-- **Mobile app structure and screens:** Migrated the app toward Expo Router,
-  reorganized authentication and navigation, and added or expanded Home,
-  Explore, Food, Marketplace, Rides, and Wallet screens. Updated the Expo
-  configuration and mobile package metadata alongside the screen changes.
-- **Marketplace and account foundations:** Added marketplace backend models,
-  APIs, services, administration, migrations, and product import support, with
-  corresponding marketplace web and session/auth updates.
-- **Configuration fixes:** Adjusted Django's debug-mode fallback for local
-  development versus Railway environments and corrected the marketplace
-  presigned-URL function's default argument annotation.
+- **Driver and ride services:** Added driver registration and profile/status
+  operations, location updates, active-trip and ride actions, and a trip data
+  model with a migration. Ride service and API behavior were extended, with
+  throttling, admin support, and driver-focused backend tests.
+- **Food ordering and vendor tools:** Added restaurant discovery and detail,
+  authenticated ordering and reservations, order confirmation/cancellation,
+  and vendor management for stores, menus, and order status. Added backend
+  models, services, administration, seed data, migrations, and tests; updated
+  the customer and vendor web pages.
+- **Business directory:** Added listing discovery and search, listing details
+  and submissions, reviews, bookmarks, and reports, supported by new backend
+  models, administration, seed data, migrations, and tests. Updated the
+  directory web experience.
+- **Ride map and location picker:** Added an interactive location chooser with
+  map pins, drag adjustment, place search, GPS selection, reverse-geocoded
+  labels, and coordinate fallback. Ride planning now carries selected
+  coordinates through booking, supports swapping pickup and destination,
+  avoids booking a ride to the same point, and has focused UI tests.
+- **Integration and repository maintenance:** Added shared endpoint constants
+  for ride, driver, food, and directory APIs; adjusted web build/configuration
+  files and ignored generated or temporary repository artifacts. Updated
+  dependency lock data.
 
 ## Validation and follow-up
 
-The repository changes include backend ride tests, but tests were not run while
-preparing this report. The repository currently has a separate uncommitted
-change to the root `package-lock.json`; it is not included in the commit-based
-report totals above.
+Tests were added for driver, food, directory, map, picker, and ride-planner
+behavior. They were not run while preparing this report, so this report does
+not claim a passing test suite or production readiness.
 
 ## Commits
 
 | Date | Commit | Message |
 |---|---|---|
-| 2026-11-02 | `a012d9d` | gdf |
-| 2026-11-02 | `ce8c17b` | hey |
-| 2026-11-02 | `10699d5` | Merge branch `main` |
-| 2026-11-02 | `d359f01` | yoo |
-| 2026-11-03 | `2ddf983` | olisas changes? |
-| 2026-11-03 | `012b2c4` | sharp |
-| 2026-11-04 | `f9389d1` | cocmmit please |
-| 2026-11-04 | `ce0531f` | Merge branch `main` |
-| 2026-11-05 | `88cd00f` | newpages added |
-| 2026-11-05 | `37b5528` | okp |
-| 2026-11-05 | `4bb3bf2` | yoeee |
-| 2026-11-05 | `1fbc747` | ue |
-| 2026-11-07 | `5478d17` | singer |
+| 2026-11-09 | `2e5f690` | hjn |
+| 2026-11-09 | `eb37d3b` | tjj |
+| 2026-11-09 | `8ba32c8` | yor |
+| 2026-11-11 | `8d0836c` | updated |
+| 2026-11-11 | `68581f1` | Merge branch `main` |
+| 2026-11-11 | `c5c0fed` | fs |
+| 2026-11-11 | `971bb72` | patched |
