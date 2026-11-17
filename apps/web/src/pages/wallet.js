@@ -789,10 +789,21 @@ function quickSendTo(handle) {
   }, 50);
 }
 
+// Add this small helper to hydrate the cardholder's name dynamically from user session profile
+function updateCardholderName() {
+  const user = getCurrentUser();
+  const nameEl = document.getElementById('cardHolderNameDisplay');
+  if (nameEl && user?.full_name) {
+    nameEl.textContent = user.full_name;
+  }
+}
+
+// Inside your existing DOMContentLoaded or initialization function, make sure it triggers:
 document.addEventListener('DOMContentLoaded', () => {
   hydrateBalance();
   hydrateTransactions();
   initRecipientsEngine();
+  updateCardholderName();
 });
 
 // Window Bridge Bindings
