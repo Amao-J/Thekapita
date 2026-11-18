@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>theKapita Real Estate - Verified Property Marketplace</title>
+
+    <!-- Typography & Material Symbols Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Montserrat:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+
+    <link rel="stylesheet" type="text/css" href="css/haven.css">
+  </head>
+  <body>
+    <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+    <!-- TOP HEADER NAVBAR WITH INTEGRATED NAVIGATION PANEL -->
+    <header class="app-header">
+      <div class="logo-container">
+        <!-- 1. BACK ARROW ADDED -->
+        <a href="index.html" class="back-to-home" title="Back to theKapita Home" aria-label="Go back to Home">
+          <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span>
+        </a>
+        
+        <a href="#" class="brand-title" onclick="showAllProperties(); return false;" style="text-decoration: none;">
+          <span class="prefix">the</span>Kapita<span class="dot">.</span>
+          <span class="module-badge">HAVEN</span>
+        </a>
+      </div>
+
+      <!-- Right Navigation Panel (Desktop & Mobile Actions) -->
+      <div class="header-right-panel">
+        <nav class="desktop-nav-panel">
+          <button onclick="showAllProperties()" class="nav-link-btn active" id="navAllBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px;">travel_explore</span>
+            <span>Explore</span>
+          </button>
+
+          <button onclick="showBookmarkedProperties()" class="nav-link-btn" id="navBookmarksBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px;">bookmark</span>
+            <span>Saved</span>
+            <span id="bookmarkCount" class="badge-count">0</span>
+          </button>
+
+          <button onclick="openModal('valuationModal')" class="nav-link-btn">
+            <span class="material-symbols-outlined" style="font-size: 18px;">calculate</span>
+            <span>AI Valuation</span>
+          </button>
+
+          <button onclick="openModal('legalCheckModal')" class="nav-link-btn">
+            <span class="material-symbols-outlined" style="font-size: 18px;">gavel</span>
+            <span>Legal Check</span>
+          </button>
+        </nav>
+
+        <button onclick="openModal('vendorDashboardModal')" class="btn-add-property">
+          <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span>
+        </button>
+
+        <button id="notifBellBtn" class="icon-btn" onclick="toggleNotifDropdown()" aria-label="Notifications">
+          <span class="material-symbols-outlined">notifications</span>
+          <span id="notifBadge" class="notif-badge">2</span>
+        </button>
+
+        <!-- Notification Dropdown -->
+        <div id="notifDropdown" class="notif-dropdown">
+          <div class="notif-header">
+            <span>Property & Verification Alerts</span>
+            <button onclick="markAllNotificationsRead()" style="background:none; border:none; color: var(--emerald-dark); font-weight:700; cursor:pointer; font-size:11px;">Mark read</button>
+          </div>
+          <div class="notif-item" id="notif1" onclick="markNotificationRead('notif1')">
+            <span class="material-symbols-outlined" style="color: var(--emerald-dark);">verified</span>
+            <div>
+              <strong>C of O Title Verified!</strong>
+              Lekki Phase 1 Luxury Duplex title audit approved by Land Registry.
+            </div>
+          </div>
+          <div class="notif-item" id="notif2" onclick="markNotificationRead('notif2')">
+            <span class="material-symbols-outlined" style="color: #2563eb;">event</span>
+            <div>
+              <strong>Inspection Scheduled</strong>
+              Agent Johnson confirmed viewing for tomorrow at 2:00 PM.
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN PORTAL CONTAINER -->
+    <main id="mainContent" class="portal-container">
+      
+      <!-- HERO & REDESIGNED SEARCH CONSOLE -->
+      <section class="search-hero-section">
+        <p class="hero-subtitle">Discover property sales, rentals, and commercial spaces.</p>
+
+        <!-- Rent vs Buy Intent Switcher -->
+        <div class="property-intent-switcher">
+          <button class="intent-btn active" onclick="setIntent('all', this)">All</button>
+          <button class="intent-btn" onclick="setIntent('buy', this)">Buy Sale</button>
+          <button class="intent-btn" onclick="setIntent('rent', this)">Rent & Lease</button>
+          <button class="intent-btn" onclick="setIntent('shortlet', this)">Short-Let</button>
+        </div>
+
+        <!-- REDESIGNED DUAL-TIER SEARCH CONSOLE -->
+        <div class="search-console-wrapper">
+          <div class="console-input-group">
+            <span class="material-symbols-outlined" style="color: #64748b;">search</span>
+            <div class="console-field-box">
+              <label>Location / Keyword</label>
+              <input type="text" id="propertySearchInput" placeholder="Location, estate, or keywords..." onkeyup="handleSearchKeyup(event)">
+            </div>
+          </div>
+
+          <div class="console-divider"></div>
+
+          <div class="console-input-group">
+            <span class="material-symbols-outlined" style="color: #64748b;">payments</span>
+            <div class="console-field-box">
+              <label>Max Budget (₦)</label>
+              <input type="number" id="budgetSearchInput" placeholder="Any Price" onkeyup="handleSearchKeyup(event)">
+            </div>
+          </div>
+
+          <button onclick="executeAISearch()" class="console-btn-search">
+            <span>Search</span>
+          </button>
+        </div>
+
+        <!-- FUNCTIONAL QUICK FILTER TAB PILLS -->
+        <div class="quick-pills-row">
+          <button onclick="togglePillFilter(this, 'Certificate of Occupancy')" class="pill-btn">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--emerald-dark);">verified</span>
+            Verified Title (C of O)
+          </button>
+          <button onclick="togglePillFilter(this, '360 Tour')" class="pill-btn">
+            <span class="material-symbols-outlined" style="font-size: 16px;">360</span>
+            360° Virtual Tour
+          </button>
+          <button onclick="togglePillFilter(this, 'Short-Let')" class="pill-btn">
+            <span class="material-symbols-outlined" style="font-size: 16px;">hotel</span>
+            Short-Let Serviced
+          </button>
+          <button onclick="togglePillFilter(this, 'Commercial')" class="pill-btn">
+            <span class="material-symbols-outlined" style="font-size: 16px;">domain</span>
+            Commercial Space
+          </button>
+        </div>
+
+        <!-- AI Parser Feedback Banner -->
+        <div id="aiParsedBanner" class="ai-parsed-banner">
+          <span class="material-symbols-outlined" style="font-size: 18px;">smart_toy</span>
+          <span id="aiParsedText">AI Intent Parsed: Filtering properties with verified title documents in prime location.</span>
+        </div>
+      </section>
+
+      <!-- PROPERTY LISTINGS GRID SECTION -->
+      <div class="section-header-bar">
+        <h2 class="section-title" id="gridHeaderTitle">Available Verified Listings</h2>
+        <span id="propertyCountTag" style="font-size: 12px; background: rgba(0, 135, 85, 0.1); color: var(--emerald-dark); padding: 4px 10px; border-radius: 10px; font-weight: 700;">6 Listings Found</span>
+      </div>
+
+      <div id="propertyGrid" class="property-grid">
+        <!-- Dynamic property cards populated via Vanilla JS -->
+      </div>
+    </main>
+
+    <!-- MOBILE NAVIGATION BOTTOM DOCK BAR -->
+    <nav class="market-nav-bar">
+      <button onclick="showAllProperties()" class="market-nav-btn active" id="mobNavExplore">
+        <span class="material-symbols-outlined">travel_explore</span>
+        <span>Explore</span>
+      </button>
+
+      <button onclick="showBookmarkedProperties()" class="market-nav-btn" id="mobNavSaved">
+        <span class="material-symbols-outlined">bookmark</span>
+        <span>Saved</span>
+      </button>
+
+      <button onclick="openModal('valuationModal')" class="market-nav-btn">
+        <span class="material-symbols-outlined">calculate</span>
+        <span>Valuation</span>
+      </button>
+
+      <button onclick="openModal('legalCheckModal')" class="market-nav-btn">
+        <span class="material-symbols-outlined">gavel</span>
+        <span>Legal Check</span>
+      </button>
+
+      <button onclick="openModal('vendorDashboardModal')" class="market-nav-btn">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Portal</span>
+      </button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. PROPERTY DETAIL & INTERACTIVE 360 PANORAMA SIMULATOR MODAL -->
+    <div id="detailModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="modalPropTitle">Property Title</h3>
+            <p style="font-size: 12px; color: #64748b;" id="modalPropLocation">Location Address</p>
+          </div>
+          <button onclick="closeModal('detailModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- WORKING 360 SIMULATION BOX -->
+        <div class="virtual-view-container" id="virtual360Container">
+          <img id="modalPropImg" src="" class="virtual-view-img" alt="Property View">
+          <div class="panorama-overlay-tag">
+            <span class="material-symbols-outlined">360</span>
+            <span id="panStatusText">360° Interactive View (Click controls or drag to pan)</span>
+          </div>
+          <div class="panorama-controls-bar">
+            <button onclick="pan360(-30)" class="pan-btn" title="Pan Left">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <button onclick="toggleAutoRotate()" class="pan-btn" title="Auto Rotate">
+              <span class="material-symbols-outlined" id="autoRotateIcon">sync</span>
+            </button>
+            <button onclick="zoom360(0.1)" class="pan-btn" title="Zoom In">
+              <span class="material-symbols-outlined">zoom_in</span>
+            </button>
+            <button onclick="zoom360(-0.1)" class="pan-btn" title="Zoom Out">
+              <span class="material-symbols-outlined">zoom_out</span>
+            </button>
+            <button onclick="pan360(30)" class="pan-btn" title="Pan Right">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-family: var(--font-heading); font-size: 24px; font-weight: 800;" id="modalPropPrice">₦0</span>
+          <span id="modalPropTitleBadge" class="badge-title-verified">Verified Title</span>
+        </div>
+
+        <p style="font-size: 13px; color: #334155; margin-bottom: 14px;" id="modalPropDescription">Description text goes here...</p>
+
+        <!-- Verified Title & Document Checklist -->
+        <div class="document-checklist-box">
+          <strong style="font-size: 12px; display: block; margin-bottom: 6px;">Title Audit & Legal Document Checklist:</strong>
+          <div class="checklist-item">
+            <span class="material-symbols-outlined" style="color: var(--emerald-dark); font-size: 18px;">check_circle</span>
+            <span>Certificate of Occupancy (C of O) - Verified #LA-2023-994</span>
+          </div>
+          <div class="checklist-item">
+            <span class="material-symbols-outlined" style="color: var(--emerald-dark); font-size: 18px;">check_circle</span>
+            <span>Deed of Assignment & Registered Survey Plan - Clear</span>
+          </div>
+          <div class="checklist-item">
+            <span class="material-symbols-outlined" style="color: var(--emerald-dark); font-size: 18px;">check_circle</span>
+            <span>Escrow Guarantee Protected Payment Supported</span>
+          </div>
+        </div>
+
+        <!-- 3. SHORTENED BOOK & ESCROW TEXT -->
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button onclick="openScheduleModal()" class="btn-submit-primary" style="flex: 1;">Book</button>
+          <button onclick="triggerEscrowFlow()" class="btn-submit-primary" style="background: var(--black); color: var(--emerald); flex: 1.5;">Initiate Escrow Payment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SCHEDULE INSPECTION MODAL -->
+    <div id="scheduleModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Schedule Property Viewing</h3>
+          <button onclick="closeModal('scheduleModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form onsubmit="handleScheduleSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Select Inspection Date *</label>
+            <input type="date" id="inspectionDate" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Preferred Time Slot *</label>
+            <select id="inspectionTime" class="form-control" required>
+              <option value="morning">Morning (10:00 AM - 12:00 PM)</option>
+              <option value="afternoon">Afternoon (2:00 PM - 4:00 PM)</option>
+              <option value="evening">Evening (4:30 PM - 6:00 PM)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Viewing Type</label>
+            <select class="form-control">
+              <option value="physical">Physical On-Site Inspection</option>
+              <option value="virtual">Guided 360° Live Video Call Inspection</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit-primary">Confirm Viewing Appointment</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. AI VALUATION MODAL -->
+    <div id="valuationModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">AI Property Valuation Estimator</h3>
+          <button onclick="closeModal('valuationModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form onsubmit="handleValuationCalculate(event)">
+          <div class="form-group">
+            <label class="form-label">Property Location / Area *</label>
+            <select id="valLocation" class="form-control" required>
+              <option value="lekki">Lekki Phase 1, Lagos</option>
+              <option value="ikeja">Ikeja GRA, Lagos</option>
+              <option value="victoria">Victoria Island, Lagos</option>
+              <option value="maitama">Maitama, Abuja</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Property Type</label>
+            <select id="valType" class="form-control">
+              <option value="duplex">4 Bedroom Semi-Detached Duplex</option>
+              <option value="apartment">3 Bedroom Serviced Apartment</option>
+              <option value="commercial">Commercial Office Space</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit-primary">Run Valuation Model</button>
+        </form>
+
+        <div id="valuationResultBox" style="margin-top: 16px; display: none; background: var(--surface-gray); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <strong style="font-size: 12px; color: #64748b; text-transform: uppercase;">Estimated Market Range:</strong>
+          <h2 style="font-family: var(--font-heading); color: var(--emerald-dark); margin-top: 4px;" id="valPriceText">₦85,000,000 - ₦92,000,000</h2>
+          <p style="font-size: 11px; color: #475569; margin-top: 4px;">Based on 142 recent registered title transactions & neighborhood price benchmarks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. LEGAL TITLE CHECK MODAL -->
+    <div id="legalCheckModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Request Property Legal Title Check</h3>
+          <button onclick="closeModal('legalCheckModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form onsubmit="handleLegalCheckSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Property Title / Land File Number *</label>
+            <input type="text" id="titleFileNo" class="form-control" placeholder="e.g. C of O No. 44/44/2021B" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">State Land Registry Jurisdiction</label>
+            <select class="form-control">
+              <option>Lagos State Lands Bureau (Alausa)</option>
+              <option>FCT Abuja AGIS Land Registry</option>
+              <option>Rivers State Ministry of Lands</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit-primary">Dispatch Legal Search Request</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 5. FULL VENDOR / SELLER DASHBOARD PORTAL -->
+    <div id="vendorDashboardModal" class="modal-overlay">
+      <div class="modal-card dashboard-modal">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Owner & Agent Portal</h3>
+            <p style="font-size: 13px; color: #64748b;">Manage your portfolio, active escrow offers, and title verifications.</p>
+          </div>
+          <button onclick="closeModal('vendorDashboardModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        
+        <!-- Dashboard Navigation Tabs -->
+        <div class="dash-nav-tabs">
+          <button class="dash-tab active" onclick="switchDashTab('dashOverview', this)">Overview</button>
+          <button class="dash-tab" onclick="switchDashTab('dashListings', this)">My Properties</button>
+          <button class="dash-tab" onclick="switchDashTab('dashOffers', this)">Escrow Offers <span class="badge-count">1</span></button>
+        </div>
+        
+        <!-- TAB 1: OVERVIEW -->
+        <div id="dashOverview" class="dash-tab-content active">
+          <div class="dash-stats-grid">
+            <div class="dash-stat-card">
+              <span class="dash-stat-title">Active Listings</span>
+              <span class="dash-stat-value" id="dashTotalListings">0</span>
+            </div>
+            <div class="dash-stat-card">
+              <span class="dash-stat-title">Total Views</span>
+              <span class="dash-stat-value">1,405</span>
+            </div>
+            <div class="dash-stat-card">
+              <span class="dash-stat-title">Saved / Favorites</span>
+              <span class="dash-stat-value">34</span>
+            </div>
+            <div class="dash-stat-card">
+              <span class="dash-stat-title">Escrow Pending</span>
+              <span class="dash-stat-value" style="color: var(--emerald-dark);">1</span>
+            </div>
+          </div>
+          
+          <div class="my-listings-list" style="padding: 16px;">
+            <h4 style="font-family: var(--font-heading); margin-bottom: 12px;">Recent Portal Activity</h4>
+            <div class="checklist-item"><span class="material-symbols-outlined" style="color:#2563eb; font-size:16px;">visibility</span> 12 new views on "Modern 3-Bedroom" today.</div>
+            <div class="checklist-item"><span class="material-symbols-outlined" style="color:var(--emerald-dark); font-size:16px;">account_balance</span> Escrow deposit initiated for "Waterfront Penthouse".</div>
+            <div class="checklist-item"><span class="material-symbols-outlined" style="color:#d97706; font-size:16px;">pending_actions</span> Title audit pending for newly added "Lekki Duplex".</div>
+          </div>
+        </div>
+        
+        <!-- TAB 2: MY LISTINGS -->
+        <div id="dashListings" class="dash-tab-content">
+          <div class="dash-action-bar">
+            <h4 style="margin: 0;">Portfolio & Properties</h4>
+            <button onclick="openModal('addPropertyModal'); closeModal('vendorDashboardModal');" class="btn-submit-primary" style="width: auto; padding: 8px 16px; font-size: 12px; display: flex; gap: 4px; align-items: center;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">add</span> Add Property
+            </button>
+          </div>
+          
+          <div class="my-listings-list" id="dashboardListingsContainer">
+            <!-- Dynamic Vendor Listings injected via JavaScript -->
+          </div>
+        </div>
+        
+        <!-- TAB 3: ESCROW OFFERS & MESSAGES -->
+        <div id="dashOffers" class="dash-tab-content">
+          <h4 style="font-family: var(--font-heading); margin-bottom: 16px;">Active Inquiries & Escrow Contracts</h4>
+          <div class="my-listings-list">
+            <div class="message-row">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div class="msg-avatar">JD</div>
+                <div>
+                  <strong style="font-size: 13px; display: block;">John Doe - Escrow Initiated</strong>
+                  <span style="font-size: 11px; color: #64748b;">Regarding: Waterfront Penthouse • ₦150,000 deposited.</span>
+                </div>
+              </div>
+              <button class="btn-submit-primary" style="width: auto; padding: 6px 12px; font-size: 11px;">View Contract</button>
+            </div>
+            <div class="message-row">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div class="msg-avatar" style="background: #e2e8f0; color: #334155;">SA</div>
+                <div>
+                  <strong style="font-size: 13px; display: block;">Sarah Adams - Viewing Request</strong>
+                  <span style="font-size: 11px; color: #64748b;">Regarding: Modern 3-Bedroom • Tomorrow 2:00 PM.</span>
+                </div>
+              </div>
+              <button class="btn-submit-primary" style="width: auto; padding: 6px 12px; font-size: 11px; background: var(--black); color: var(--white);">Approve</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 6. COMPREHENSIVE LIST PROPERTY MODAL -->
+    <div id="addPropertyModal" class="modal-overlay">
+      <div class="modal-card large-form-modal">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">List a New Property</h3>
+            <p style="font-size: 13px; color: #64748b;">Provide complete details for faster title verification and approval.</p>
+          </div>
+          <button onclick="closeModal('addPropertyModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form onsubmit="handleAddProperty(event)">
+          <!-- Core Details Section -->
+          <h4 class="form-section-title">Core Information</h4>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label class="form-label">Property Title / Name *</label>
+              <input type="text" id="newPropTitle" class="form-control" placeholder="e.g. Contemporary 4 Bed Duplex" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Property Category *</label>
+              <select id="newPropCategory" class="form-control" required>
+                <option value="house">House / Duplex</option>
+                <option value="apartment">Apartment / Flat</option>
+                <option value="commercial">Commercial Space</option>
+                <option value="land">Land / Plot</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Listing Intent *</label>
+              <select id="newPropIntent" class="form-control" required>
+                <option value="buy">For Sale</option>
+                <option value="rent">For Rent</option>
+                <option value="shortlet">Short-Let</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Price (₦) *</label>
+              <input type="number" id="newPropPrice" class="form-control" placeholder="e.g. 75000000" required>
+              <div class="checkbox-group">
+                <input type="checkbox" id="priceNegotiable">
+                <label for="priceNegotiable" style="font-size: 11px; color: #64748b;">Price is negotiable</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Location & Specs Section -->
+          <h4 class="form-section-title">Location & Specifications</h4>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label class="form-label">Full Address / Estate *</label>
+              <input type="text" id="newPropAddress" class="form-control" placeholder="e.g. Chevron Drive, Lekki" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City / Region *</label>
+              <input type="text" id="newPropLocation" class="form-control" placeholder="e.g. Lekki Phase 1, Lagos" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Bedrooms</label>
+              <input type="number" id="newPropBeds" class="form-control" placeholder="e.g. 4">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bathrooms</label>
+              <input type="number" id="newPropBaths" class="form-control" placeholder="e.g. 4">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Detailed Description</label>
+            <textarea id="newPropDesc" class="form-textarea" placeholder="Describe the property's key features, amenities, and selling points..."></textarea>
+          </div>
+          
+          <!-- Legal & Media Section -->
+          <h4 class="form-section-title">Legal Title & Media (For Verification)</h4>
+          <div class="form-group">
+            <label class="form-label">Current Title Document Type *</label>
+            <select id="newPropDocType" class="form-control" required>
+              <option value="cofo">Certificate of Occupancy (C of O)</option>
+              <option value="gov">Governor's Consent</option>
+              <option value="deed">Deed of Assignment</option>
+              <option value="survey">Registered Survey Only</option>
+              <option value="receipt">Family Receipt (High Risk)</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button type="submit" class="btn-submit-primary">Submit Listing for Title Audit & Publication</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 7. EDIT PROPERTY MODAL -->
+    <div id="editPropertyModal" class="modal-overlay">
+      <div class="modal-card large-form-modal">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Edit Property Details</h3>
+            <p style="font-size: 13px; color: #64748b;">Modify your property specifications and price.</p>
+          </div>
+          <button onclick="closeModal('editPropertyModal')" class="close-modal-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form onsubmit="handleEditProperty(event)">
+          <h4 class="form-section-title">Core Information</h4>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label class="form-label">Property Title / Name *</label>
+              <input type="text" id="editPropTitle" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Listing Intent *</label>
+              <select id="editPropIntent" class="form-control" required>
+                <option value="buy">For Sale</option>
+                <option value="rent">For Rent</option>
+                <option value="shortlet">Short-Let</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price (₦) *</label>
+              <input type="number" id="editPropPrice" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City / Region *</label>
+              <input type="text" id="editPropLocation" class="form-control" required>
+            </div>
+          </div>
+          
+          <h4 class="form-section-title">Specifications</h4>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label class="form-label">Bedrooms</label>
+              <input type="number" id="editPropBeds" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bathrooms</label>
+              <input type="number" id="editPropBaths" class="form-control">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Detailed Description</label>
+            <textarea id="editPropDesc" class="form-textarea"></textarea>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button type="submit" class="btn-submit-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- VANILLA JAVASCRIPT CONTROLLER ENGINE -->
+    <script src="src/pages/haven.js"></script>
+  </body>
+</html>

@@ -290,7 +290,35 @@
           <h2 id="card-sec-heading" class="card-heading-md">theKapita Black Virtual Card</h2>
         </div>
         
-        <p>Virtual cards are unavailable until a card issuer is connected to this wallet.</p>
+        <div class="kapita-virtual-card">
+          <div class="card-chip-row">
+            <span class="card-brand-logo">theKapita.</span>
+            <span class="material-symbols-outlined card-chip-icon" aria-hidden="true">contactless</span>
+          </div>
+          <div class="card-number-display" id="cardNumberDisplay">
+            •••• •••• •••• 8821
+          </div>
+          <div class="card-bottom-meta">
+            <div>
+              <span class="card-meta-label">Card Holder</span>
+              <strong id="cardHolderNameDisplay">Loading...</strong>
+            </div>
+            <div>
+              <span class="card-meta-label">Expires</span>
+              <strong>08/29</strong>
+            </div>
+            <div>
+              <span class="card-meta-label">CVV</span>
+              <strong id="cardCvvDisplay">•••</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-controls-row">
+          <button type="button" class="btn-secondary" onclick="toggleCardDetails()">Show Details</button>
+          <button type="button" class="btn-secondary" onclick="toggleFreezeCard(this)">Freeze Card</button>
+          <button type="button" class="btn-primary" onclick="alert('Card limit management modal opening...')">Manage Limits</button>
+        </div>
       </section>
     </div>
 

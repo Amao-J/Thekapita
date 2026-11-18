@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>theKapita. — One Super App. Every Everyday Essential.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0" />
+
+  <style>
+    :root {
+      --emerald: #00d084;
+      --emerald-light: #e6fdf4;
+      --emerald-dark: #008755;
+      --black: #121212;
+      --charcoal: #1e293b;
+      --white: #ffffff;
+      --surface-gray: #f8fafc;
+      --surface-muted: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-muted: #475569;
+      --font-heading: 'Bricolage Grotesque', sans-serif;
+      --font-body: 'Montserrat', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--white); color: var(--black); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
+    .container { width: 100%; max-width: 1120px; margin: 0 auto; }
+
+    /* ==========================================
+       NAV
+       ========================================== */
+    .nav-wrapper { position: fixed; top: 20px; left: 0; width: 100%; z-index: 1000; padding: 0 20px; display: flex; justify-content: center; }
+    .pill-navbar { width: 100%; max-width: 1120px; background: rgba(255,255,255,0.94); backdrop-filter: blur(14px); border: 1px solid var(--border-color); border-radius: 100px; padding: 10px 14px 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 12px 32px rgba(18,18,18,0.06); }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 36px; height: 36px; background: var(--black); color: var(--emerald); font-family: var(--font-heading); font-weight: 800; font-size: 18px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .brand-name { font-family: var(--font-heading); font-size: 24px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; display: flex; align-items: baseline; }
+    .brand-name .prefix { font-size: 14px; font-weight: 500; margin-right: 1px; }
+    .brand-name .dot { color: var(--emerald-dark); }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 600; transition: color .2s ease; }
+    .nav-links a:hover { color: var(--black); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .btn-ghost { text-decoration: none; color: var(--black); font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 100px; transition: background .2s ease; }
+    .btn-ghost:hover { background: var(--surface-muted); }
+    .btn-pill-emerald { background: var(--emerald); color: var(--black); text-decoration: none; font-family: var(--font-heading); font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 100px; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; transition: transform .2s ease, background .2s ease; }
+    .btn-pill-emerald:hover { background: #00b875; transform: translateY(-1px); }
+    .btn-pill-emerald .circle-arrow { width: 22px; height: 22px; background: var(--black); color: var(--emerald); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .mobile-menu-btn { display: none; background: var(--surface-muted); border: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; cursor: pointer; color: var(--black); }
+
+    /* Mobile Drawer Overlay & Content */
+    .mobile-drawer-overlay { position: fixed; inset: 0; background: rgba(18,18,18,0.4); backdrop-filter: blur(4px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .mobile-drawer { position: fixed; top: 20px; right: 20px; bottom: 20px; width: calc(100% - 40px); max-width: 360px; background: var(--white); border-radius: 32px; padding: 28px; z-index: 1002; display: flex; flex-direction: column; transform: translateY(-12px) scale(0.98); opacity: 0; pointer-events: none; transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .3s ease; box-shadow: 0 24px 48px rgba(18,18,18,0.18); }
+    .mobile-drawer.open { transform: none; opacity: 1; pointer-events: auto; }
+    .drawer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .drawer-links { display: flex; flex-direction: column; gap: 20px; margin-bottom: auto; }
+    .drawer-links a { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--black); text-decoration: none; transition: color .2s ease; }
+    .drawer-links a:hover { color: var(--emerald-dark); }
+    .drawer-footer { padding-top: 24px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
+
+    /* ==========================================
+       HERO
+       ========================================== */
+    .hero-section { padding: 140px 24px 88px; position: relative; background: radial-gradient(circle at 85% 20%, rgba(0,208,132,0.14) 0%, rgba(255,255,255,0) 55%), linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); }
+    .hero-grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 48px; align-items: center; }
+    .eyebrow-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--emerald-light); border: 1px solid rgba(0,135,85,0.25); color: var(--emerald-dark); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 20px; }
+    .eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald-dark); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(.95); opacity: .8; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(.95); opacity: .8; } }
+    .hero-title { font-family: var(--font-heading); font-size: clamp(38px, 5vw, 60px); font-weight: 800; line-height: 1.06; letter-spacing: -1.5px; color: var(--black); margin-bottom: 20px; }
+    .hero-title .highlight { color: var(--emerald-dark); }
+    .hero-subtitle { font-size: 16px; color: var(--text-muted); max-width: 520px; margin-bottom: 32px; font-weight: 500; }
+    .hero-cta-group { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 36px; }
+    .btn-dark-hero { background: var(--black); color: var(--white); text-decoration: none; font-family: var(--font-heading); font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 100px; display: inline-flex; align-items: center; gap: 12px; border: none; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+    .btn-dark-hero:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(18,18,18,0.18); }
+    .btn-dark-hero .icon-circle { width: 28px; height: 28px; border-radius: 50%; background: var(--emerald); color: var(--black); display: flex; align-items: center; justify-content: center; }
+    .btn-secondary-hero { background: var(--white); color: var(--black); border: 1px solid var(--border-color); text-decoration: none; font-family: var(--font-heading); font-weight: 700; font-size: 14px; padding: 14px 22px; border-radius: 100px; display: inline-flex; align-items: center; gap: 8px; transition: border-color .2s ease, background .2s ease; }
+    .btn-secondary-hero:hover { border-color: var(--black); background: var(--surface-gray); }
+    .hero-subapp-pills { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+    .mini-tag { background: var(--white); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--black); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all .2s ease; }
+    .mini-tag:hover { border-color: var(--emerald-dark); background: var(--emerald-light); }
+    .hero-visual { position: relative; display: flex; justify-content: center; align-items: center; min-height: 520px; }
+    .phone-mockup { width: 286px; height: 560px; background: var(--black); border-radius: 44px; padding: 11px; box-shadow: 0 32px 64px rgba(18,18,18,0.24), 0 0 0 2px #334155; position: relative; z-index: 2; transform: perspective(1000px) rotateY(12deg) rotateZ(3deg); transition: transform .3s ease; }
+    .phone-mockup:hover { transform: perspective(1000px) rotateY(4deg) rotateZ(1deg); }
+    .phone-screen { width: 100%; height: 100%; background: var(--surface-gray); border-radius: 34px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .phone-notch { width: 104px; height: 22px; background: var(--black); border-radius: 0 0 14px 14px; margin: 0 auto; position: relative; z-index: 5; }
+    .phone-app-header { padding: 10px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
+    .phone-wallet-box { margin: 0 14px 14px; background: linear-gradient(135deg, #121212 0%, #1e293b 100%); color: var(--white); border-radius: 20px; padding: 16px; box-shadow: 0 10px 24px rgba(18,18,18,0.14); }
+    .phone-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 14px 14px; }
+    .phone-app-tile { background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 10px 6px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .phone-app-tile .tile-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--emerald-light); color: var(--emerald-dark); display: flex; align-items: center; justify-content: center; }
+    .phone-app-tile span.tile-label { font-size: 10px; font-weight: 700; color: var(--black); }
+    .phone-feed-area { padding: 0 14px; flex: 1; }
+    .phone-bottom-bar { background: var(--white); border-top: 1px solid var(--border-color); padding: 10px 18px; display: flex; justify-content: space-around; color: var(--text-muted); }
+    .phone-notif-toast { position: absolute; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 18px; padding: 10px 14px; box-shadow: 0 16px 32px rgba(18,18,18,0.14); display: flex; align-items: center; gap: 10px; z-index: 6; max-width: 245px; animation: floatToast 4s ease-in-out infinite; }
+    .phone-notif-toast.notif-wallet { top: 72px; left: -34px; background: linear-gradient(135deg, #00d084 0%, #00b371 100%); border-color: rgba(0,135,85,0.25); color: var(--black); }
+    .phone-notif-toast.notif-escrow { top: 235px; right: -36px; animation-delay: 1.2s; }
+    .phone-notif-toast.notif-delivery { bottom: 64px; left: -28px; background: var(--black); border-color: rgba(255,255,255,0.14); color: var(--white); animation-delay: 2.2s; }
+    @keyframes floatToast { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    .notif-badge-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ==========================================
+       SHARED SECTION BITS
+       ========================================== */
+    .section { padding: 112px 24px; }
+    .section-header { max-width: 640px; margin: 0 auto 56px; text-align: center; }
+    .kicker { display: inline-block; font-family: var(--font-heading); font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--emerald-dark); margin-bottom: 14px; }
+    .section-title { font-family: var(--font-heading); font-size: clamp(30px, 4vw, 46px); font-weight: 800; line-height: 1.1; letter-spacing: -1.2px; }
+    .section-desc { font-size: 15px; color: var(--text-muted); margin-top: 14px; }
+
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ==========================================
+       STATS
+       ========================================== */
+    .stats { padding: 0 24px; background: linear-gradient(135deg, #000 0%, #000 100%); color: var(--white); }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .stat { padding: 44px 24px; text-align: center; border-right: 1px solid rgba(255,255,255,0.22); }
+    .stat:last-child { border-right: none; }
+    .stat b { display: block; font-family: var(--font-heading); font-size: clamp(28px, 3.4vw, 42px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; color: var(--white); }
+    .stat span { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); }
+
+    /* ==========================================
+       ECOSYSTEM
+       ========================================== */
+    .eco-panels { display: flex; gap: 12px; height: 540px; }
+    .panel { position: relative; flex: 1; min-width: 0; border-radius: 28px; overflow: hidden; cursor: pointer; color: var(--white); background-size: cover; background-position: center; transition: flex .7s cubic-bezier(.2,.8,.2,1); isolation: isolate; }
+    .panel.active { flex: 5; cursor: default; }
+    .panel::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(10,14,20,0.25) 0%, rgba(10,14,20,0.9) 100%); transition: background .5s ease; }
+    .panel:not(.active)::before { background: linear-gradient(180deg, rgba(10,14,20,0.55) 0%, rgba(10,14,20,0.92) 100%); }
+    .panel:not(.active):hover::before { background: linear-gradient(180deg, rgba(0,100,64,0.5) 0%, rgba(10,14,20,0.92) 100%); }
+    .panel-num { position: absolute; top: 22px; left: 24px; font-family: var(--font-heading); font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); letter-spacing: 1px; }
+    .panel-icon { position: absolute; top: 16px; right: 18px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.14); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; transition: background .4s ease, color .4s ease; }
+    .panel.active .panel-icon { background: var(--emerald); color: var(--black); border-color: var(--emerald); }
+    .panel-label { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); writing-mode: vertical-rl; transform-origin: center; white-space: nowrap; font-family: var(--font-heading); font-size: 17px; font-weight: 700; letter-spacing: .3px; transition: opacity .3s ease; }
+    .panel.active .panel-label { opacity: 0; pointer-events: none; }
+    .panel-content { position: absolute; left: 0; right: 0; bottom: 0; padding: 36px; opacity: 0; transform: translateY(16px); transition: opacity .4s ease, transform .5s ease; pointer-events: none; }
+    .panel.active .panel-content { opacity: 1; transform: none; transition-delay: .25s; pointer-events: auto; }
+    .panel-content h3 { font-family: var(--font-heading); font-size: clamp(28px, 3.4vw, 40px); font-weight: 800; letter-spacing: -1px; line-height: 1.05; margin-bottom: 8px; white-space: nowrap; }
+    .panel-content p { font-size: 15px; color: rgba(255,255,255,0.82); max-width: 340px; }
+    .panel-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.14); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.22); padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+    .panel-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--emerald); display: inline-block; }
+    .eco-more { margin-top: 28px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .eco-more strong { color: var(--black); }
+
+    /* ==========================================
+       AUDIENCE
+       ========================================== */
+    .audience { padding: 0 24px 112px; }
+    .audience-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border-color); border-radius: 28px; overflow: hidden; background: var(--surface-gray); }
+    .audience-item { border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .aud-wrap { overflow: hidden; }
+    .aud-img { height: 220px; background-size: cover; background-position: center; transition: transform .6s ease; }
+    .audience-item:hover .aud-img { transform: scale(1.05); }
+    .aud-body { padding: 28px 32px 36px; }
+    .audience-item:last-child { border-right: none; }
+    .audience-item .tag { font-family: var(--font-heading); font-size: 12px; font-weight: 700; color: var(--emerald-dark); letter-spacing: 1px; text-transform: uppercase; }
+    .audience-item h3 { font-family: var(--font-heading); font-size: 24px; font-weight: 800; letter-spacing: -.5px; line-height: 1.15; margin: 10px 0 8px; }
+    .audience-item p { font-size: 13.5px; color: var(--text-muted); }
+
+    /* ==========================================
+       APP SHOWCASE
+       ========================================== */
+    .app-section { padding: 0 24px 112px; }
+    .app-box { position: relative; background: var(--black); color: var(--white); border-radius: 36px; padding: 64px 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; overflow: hidden; }
+    .app-box::before { content: ''; position: absolute; width: 560px; height: 560px; right: -140px; top: -180px; background: radial-gradient(circle, rgba(0,208,132,0.28), transparent 65%); pointer-events: none; }
+    .app-copy { position: relative; z-index: 1; }
+    .app-copy .kicker { color: var(--emerald); }
+    .app-copy h2 { font-family: var(--font-heading); font-size: clamp(30px, 3.8vw, 46px); font-weight: 800; letter-spacing: -1.2px; line-height: 1.08; margin-bottom: 14px; }
+    .app-copy > p { font-size: 15px; color: #94a3b8; margin-bottom: 30px; max-width: 380px; }
+    .app-feats { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+    .app-feats li { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: #e2e8f0; }
+    .app-feats .fi { width: 38px; height: 38px; border-radius: 12px; background: rgba(0,208,132,0.14); color: var(--emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .store-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .store-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--white); color: var(--black); text-decoration: none; padding: 10px 18px; border-radius: 14px; font-family: var(--font-heading); font-weight: 700; font-size: 14px; line-height: 1.15; transition: transform .2s ease; }
+    .store-btn:hover { transform: translateY(-2px); }
+    .store-btn small { display: block; font-size: 9px; font-weight: 600; color: var(--text-muted); }
+    .store-btn.alt { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.22); }
+    .store-btn.alt small { color: #94a3b8; }
+    .app-visual { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; min-height: 580px; }
+    .app-box .phone-screen { color: var(--black); background: var(--surface-gray); }
+    .app-box .phone-app-header span { color: var(--black); }
+    .app-box .app-notif-1 { color: var(--black); background: rgba(255,255,255,0.97); }
+    .app-box .listing-info strong { color: var(--black); }
+    .app-box .listing-info > div { color: var(--black); }
+    .app-box .listing-chips span { color: var(--black); background: var(--white); border: 1px solid var(--border-color); }
+    .app-box .listing-cta { background: var(--emerald); color: var(--black); }
+    .app-box .listing-img { background-color: #cbd5e1; box-shadow: 0 6px 16px rgba(18,18,18,0.12); }
+    .app-box .phone-bottom-bar { background: var(--white); color: var(--text-muted); }
+    .phone-mockup.flip { transform: perspective(1000px) rotateY(-12deg) rotateZ(-3deg); box-shadow: 0 32px 64px rgba(0,0,0,0.55), 0 0 0 2px #334155; }
+    .phone-mockup.flip:hover { transform: perspective(1000px) rotateY(-4deg) rotateZ(-1deg); }
+    .app-notif-1 { top: 120px; left: 0; }
+    .app-notif-2 { bottom: 100px; right: 0; background: linear-gradient(135deg, #00d084 0%, #00b371 100%); border-color: rgba(0,135,85,0.25); color: var(--black); animation-delay: 1.4s; }
+    .listing-img { margin: 0 14px; height: 150px; border-radius: 18px; background-size: cover; background-position: center; position: relative; }
+    .listing-badge { position: absolute; top: 10px; left: 10px; background: var(--emerald); color: var(--black); font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 100px; display: flex; align-items: center; gap: 3px; }
+    .listing-info { padding: 12px 16px 0; }
+    .listing-chips { display: flex; gap: 6px; padding: 10px 16px 0; }
+    .listing-chips span { background: var(--white); border: 1px solid var(--border-color); border-radius: 100px; font-size: 9px; font-weight: 700; padding: 4px 8px; }
+    .listing-cta { margin: 14px 16px 0; background: var(--black); color: var(--white); text-align: center; border-radius: 14px; padding: 11px; font-family: var(--font-heading); font-size: 12px; font-weight: 700; }
+
+    /* ==========================================
+       STEPS
+       ========================================== */
+    .steps { padding: 0 24px 112px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
+    .steps-grid::before { content: ''; position: absolute; top: 23px; left: 8%; right: 8%; height: 1px; background: var(--border-color); }
+    .step { position: relative; text-align: center; }
+    .step-num { position: relative; width: 46px; height: 46px; margin: 0 auto 20px; border-radius: 50%; background: var(--white); border: 1px solid var(--black); font-family: var(--font-heading); font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+    .step h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 6px; }
+    .step p { font-size: 13.5px; color: var(--text-muted); max-width: 260px; margin: 0 auto; }
+
+    /* ==========================================
+       CTA
+       ========================================== */
+    .cta-section { padding: 0 24px 88px; }
+    .cta-banner { background: linear-gradient(180deg, rgba(18,18,18,0.5) 0%, rgba(0,60,38,0.88) 100%), url('https://images.unsplash.com/photo-1543501527-49e855165f73?q=80&w=1170&auto=format&fit=crop') center/cover no-repeat, #008755; border-radius: 32px; padding: 96px 40px; text-align: center; color: var(--white); box-shadow: 0 20px 48px rgba(0,135,85,0.22); }
+    .cta-banner .btn-dark-hero { background: var(--emerald); color: var(--black); }
+    .cta-banner .btn-dark-hero .icon-circle { background: var(--black); color: var(--emerald); }
+    .cta-banner h2 { font-family: var(--font-heading); font-size: clamp(30px, 4.5vw, 46px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+    .cta-banner p { font-size: 16px; font-weight: 500; max-width: 560px; margin: 0 auto 32px; opacity: .9; }
+    .cta-buttons { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* ==========================================
+       FOOTER
+       ========================================== */
+    .app-footer { background: var(--black); color: var(--white); padding: 64px 24px 32px; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .footer-brand p { font-size: 13px; color: #94a3b8; margin-top: 14px; max-width: 260px; }
+    .footer-col h4 { font-family: var(--font-heading); font-size: 13px; font-weight: 700; margin-bottom: 14px; color: #64748b; letter-spacing: 1px; text-transform: uppercase; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a { color: #cbd5e1; text-decoration: none; font-size: 13px; transition: color .2s ease; }
+    .footer-col a:hover { color: var(--emerald); }
+    .footer-bottom { padding-top: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #64748b; }
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+    @media (max-width: 960px) {
+      .hero-grid, .app-box { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: none; }
+      .stat:nth-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,0.22); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .pill-navbar .btn-pill-emerald { display: none; } /* Hide main CTA on smaller mobile screens inside pill to save space, keeping menu button + Get Started in drawer or customized */
+      .mobile-menu-btn { display: flex; }
+      .pill-navbar { padding: 8px 12px 8px 20px; }
+      
+      /* Let's keep a compact Get Started button visible on mobile header next to the menu toggle */
+      .nav-actions .btn-pill-emerald.mobile-header-btn { display: inline-flex; padding: 8px 14px; font-size: 12px; }
+      .nav-actions .btn-pill-emerald.mobile-header-btn .circle-arrow { width: 18px; height: 18px; font-size: 11px; }
+
+      .section { padding: 80px 24px; }
+      .audience-grid, .steps-grid { grid-template-columns: 1fr; }
+      .audience-item { border-right: none; border-bottom: 1px solid var(--border-color); }
+      .audience-item:last-child { border-bottom: none; }
+      .steps-grid::before { display: none; }
+      .eco-panels { flex-direction: column; height: auto; }
+      .panel { flex: none; height: 76px; transition: height .6s cubic-bezier(.2,.8,.2,1); }
+      .panel.active { flex: none; height: 360px; }
+      .panel-label { writing-mode: horizontal-tb; left: 24px; bottom: auto; top: 26px; transform: none; font-size: 16px; }
+      .panel-num { display: none; }
+      .panel-icon { top: 16px; }
+      .panel-content { padding: 24px; }
+      .app-box { padding: 44px 22px; }
+      .app-notif-1 { left: -6px; }
+      .app-notif-2 { right: -6px; }
+      .phone-mockup { width: 266px; height: 520px; }
+      .phone-notif-toast.notif-wallet { left: -10px; }
+      .phone-notif-toast.notif-escrow { right: -10px; }
+      .phone-notif-toast.notif-delivery { left: -10px; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+    
+    @media (min-width: 721px) {
+      .nav-actions .btn-pill-emerald.mobile-header-btn { display: inline-flex; }
+      .mobile-drawer-overlay, .mobile-drawer { display: none !important; }
+    }
+
+    .btn-pill-emerald.mobile-header-btn {
+  padding: 10px;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <div class="nav-wrapper">
+    <nav class="pill-navbar">
+      <a href="#" class="brand-logo">
+        <div class="brand-name"><span class="prefix">the</span>Kapita<span class="dot">.</span></div>
+      </a>
+      <div class="nav-links">
+        <a href="#ecosystem">Sub-Apps</a>
+        <a href="#app">The App</a>
+        <a href="#how-it-works">How it Works</a>
+      </div>
+      <div class="nav-actions">
+        <a href="auth.html" class="btn-pill-emerald mobile-header-btn" title="Get Started" aria-label="Get Started">
+  <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
+</a>
+        <button class="mobile-menu-btn" onclick="toggleMobileDrawer()" aria-label="Toggle Menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- MOBILE DRAWER NAVIGATION MENU -->
+  <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="drawer-header">
+      <div class="brand-logo">
+        <div class="brand-name"><span class="prefix">the</span>Kapita<span class="dot">.</span></div>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()" aria-label="Close Menu">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="drawer-links" onclick="toggleMobileDrawer()">
+      <a href="#ecosystem">Sub-Apps</a>
+      <a href="#app">The App</a>
+      <a href="#how-it-works">How it Works</a>
+    </div>
+    <a href="auth.html" class="btn-pill-emerald mobile-header-btn" title="Get Started" aria-label="Get Started">
+  <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
+</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow-badge">
+            <span class="eyebrow-dot"></span>
+            <span>The Unified Super-App Ecosystem</span>
+          </div>
+          <h1 class="hero-title">One Super App.<br>Every <span class="highlight">Everyday Essential.</span></h1>
+          <p class="hero-subtitle">Uniting Wallet, Bills & Payments, Restaurant, Haven, Marketplace, and Logistics into a single, trusted platform powered by one verified identity.</p>
+          <div class="hero-cta-group">
+            <a href="index.html" class="btn-dark-hero">
+              <span>Launch</span>
+              <span class="icon-circle"><span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span></span>
+            </a>
+            <a href="#app" class="btn-secondary-hero">
+              <span class="material-symbols-outlined" style="font-size: 18px;">smartphone</span>
+              <span>See the App</span>
+            </a>
+          </div>
+          <div class="hero-subapp-pills">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-muted); align-self: center;">POPULAR:</span>
+            <a href="#ecosystem" class="mini-tag"><span class="material-symbols-outlined" style="font-size: 14px; color: var(--emerald-dark);">account_balance_wallet</span>Wallet &amp; Escrow</a>
+            <a href="#ecosystem" class="mini-tag"><span class="material-symbols-outlined" style="font-size: 14px; color: var(--emerald-dark);">real_estate_agent</span>Haven Real Estate</a>
+            <a href="#ecosystem" class="mini-tag"><span class="material-symbols-outlined" style="font-size: 14px; color: var(--emerald-dark);">local_shipping</span>Logistics</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="phone-notif-toast notif-wallet">
+            <div class="notif-badge-icon" style="background: var(--black); color: var(--emerald);">
+              <span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <strong style="font-size: 11px; font-family: var(--font-heading);">Wallet Credited</strong>
+                <span style="font-size: 9px; font-weight: 800; opacity: 0.75;">NOW</span>
+              </div>
+              <span style="font-size: 12px; font-weight: 800; display: block;">+ ₦250,000.00</span>
+            </div>
+          </div>
+
+          <div class="phone-notif-toast notif-escrow">
+            <div class="notif-badge-icon" style="background: var(--emerald-light); color: var(--emerald-dark);">
+              <span class="material-symbols-outlined" style="font-size: 18px;">verified_user</span>
+            </div>
+            <div>
+              <strong style="font-size: 11px; display: block; font-family: var(--font-heading); color: var(--black);">Haven Title Verified</strong>
+              <span style="font-size: 10px; color: var(--text-muted); display: block;">C of O Clean • Escrow Ready</span>
+            </div>
+          </div>
+
+          <div class="phone-notif-toast notif-delivery">
+            <div class="notif-badge-icon" style="background: var(--emerald); color: var(--black);">
+              <span class="material-symbols-outlined" style="font-size: 18px;">two_wheeler</span>
+            </div>
+            <div>
+              <strong style="font-size: 11px; display: block; font-family: var(--font-heading);">Rider Arriving • 4 mins</strong>
+              <span style="font-size: 10px; color: #94a3b8; display: block;">Restaurant #409 • OTP: 4829</span>
+            </div>
+          </div>
+
+          <div class="phone-mockup">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="phone-app-header">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="width: 24px; height: 24px; border-radius: 7px; background: var(--black); color: var(--emerald); font-family: var(--font-heading); font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center;">K</div>
+                  <span style="font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--black);">theKapita<span style="color: var(--emerald-dark);">.</span></span>
+                </div>
+                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--black);">notifications</span>
+              </div>
+              <div class="phone-wallet-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; font-weight: 700;">Unified Balance</span>
+                  <span style="background: rgba(0, 208, 132, 0.2); color: var(--emerald); font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 100px;">ACTIVE</span>
+                </div>
+                <div style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 10px;">₦ 1,450,800.00</div>
+                <div style="display: flex; gap: 6px;">
+                  <span style="flex: 1; background: var(--emerald); color: var(--black); text-align: center; padding: 5px; border-radius: 8px; font-size: 10px; font-weight: 800;">+ Top Up</span>
+                  <span style="flex: 1; background: rgba(255,255,255,0.12); color: var(--white); text-align: center; padding: 5px; border-radius: 8px; font-size: 10px; font-weight: 700;">Send</span>
+                </div>
+              </div>
+              <div class="phone-mini-grid">
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">bolt</span></div><span class="tile-label">Bills</span></div>
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">restaurant</span></div><span class="tile-label">Food</span></div>
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">real_estate_agent</span></div><span class="tile-label">Haven</span></div>
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">storefront</span></div><span class="tile-label">Market</span></div>
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">local_shipping</span></div><span class="tile-label">Logistics</span></div>
+                <div class="phone-app-tile"><div class="tile-icon"><span class="material-symbols-outlined" style="font-size: 16px;">apps</span></div><span class="tile-label">More</span></div>
+              </div>
+              <div class="phone-feed-area">
+                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">RECENT ACTIVITY</div>
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <strong style="font-size: 11px; display: block; color: var(--black);">IKEDC Power Token</strong>
+                    <span style="font-size: 9px; color: var(--text-muted);">Bills • Instant Receipt</span>
+                  </div>
+                  <span style="font-size: 11px; font-weight: 800; color: var(--black);">-₦15,000</span>
+                </div>
+              </div>
+              <div class="phone-bottom-bar">
+                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--emerald-dark);">home</span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">explore</span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-row reveal">
+        <div class="stat"><b>7+</b><span>Sub-apps</span></div>
+        <div class="stat"><b>99.98%</b><span>Uptime</span></div>
+        <div class="stat"><b>1 ID</b><span>Universal KYC</span></div>
+        <div class="stat"><b>4.9/5</b><span>User rating</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ECOSYSTEM -->
+  <section id="ecosystem" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="kicker">The Ecosystem</span>
+        <h2 class="section-title">Everything you need. One flow.</h2>
+        <p class="section-desc">One wallet, one identity, every service.</p>
+      </div>
+
+      <div class="eco-panels reveal" id="ecoPanels">
+        <div class="panel active" style="background-image:url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#00805a,#0b1220);">
+          <span class="panel-num">01</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">account_balance_wallet</span></span>
+          <span class="panel-label">Wallet</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>One balance</span>
+            <h3>Wallet</h3>
+            <p>Send, split and hold funds in escrow.</p>
+          </div>
+        </div>
+        <div class="panel" style="background-image:url('https://plus.unsplash.com/premium_photo-1668613403973-8fed78417ce7?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#1e3a5f,#0b1220);">
+          <span class="panel-num">02</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">bolt</span></span>
+          <span class="panel-label">Bills</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>Instant receipts</span>
+            <h3>Bills</h3>
+            <p>Airtime, data, power and TV. Instant.</p>
+          </div>
+        </div>
+        <div class="panel" style="background-image:url('https://images.unsplash.com/photo-1763048443535-1243379234e2?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#7c2d12,#0b1220);">
+          <span class="panel-num">03</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">restaurant</span></span>
+          <span class="panel-label">Restaurant</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>Live tracking</span>
+            <h3>Restaurant</h3>
+            <p>Order, reserve and track your food live.</p>
+          </div>
+        </div>
+        <div class="panel" style="background-image:url('https://plus.unsplash.com/premium_photo-1687960114927-fa6bac0a63a7?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#0f766e,#0b1220);">
+          <span class="panel-num">04</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">real_estate_agent</span></span>
+          <span class="panel-label">Haven</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>Title verified</span>
+            <h3>Haven</h3>
+            <p>Verified property, protected by escrow.</p>
+          </div>
+        </div>
+        <div class="panel" style="background-image:url('https://images.unsplash.com/photo-1552710307-8d1c604d6319?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#4c1d95,#0b1220);">
+          <span class="panel-num">05</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">storefront</span></span>
+          <span class="panel-label">Marketplace</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>Buyer protection</span>
+            <h3>Marketplace</h3>
+            <p>Shop verified merchants with buyer protection.</p>
+          </div>
+        </div>
+        <div class="panel" style="background-image:url('https://plus.unsplash.com/premium_photo-1661962991947-515784607187?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#334155,#0b1220);">
+          <span class="panel-num">06</span>
+          <span class="panel-icon"><span class="material-symbols-outlined" style="font-size:22px;">local_shipping</span></span>
+          <span class="panel-label">Logistics</span>
+          <div class="panel-content">
+            <span class="panel-chip"><i></i>OTP delivery</span>
+            <h3>Logistics</h3>
+            <p>Rides and parcels with OTP delivery.</p>
+          </div>
+        </div>
+      </div>
+      <p class="eco-more reveal"><strong>+ Verified Directories</strong> and new mini-apps launching soon.</p>
+    </div>
+  </section>
+
+  <!-- AUDIENCE -->
+  <section class="audience">
+    <div class="container">
+      <div class="audience-grid reveal">
+        <div class="audience-item">
+          <div class="aud-wrap"><div class="aud-img" style="background-image:url('https://plus.unsplash.com/premium_photo-1710459663291-c62b873c7c98?q=80&w=900&auto=format&fit=crop'), linear-gradient(135deg,#0f172a,#008755);"></div></div>
+          <div class="aud-body">
+            <span class="tag">Everyday users</span>
+            <h3>Less juggling. More living.</h3>
+            <p>Food, bills, rides and shopping in one wallet.</p>
+          </div>
+        </div>
+        <div class="audience-item">
+          <div class="aud-wrap"><div class="aud-img" style="background-image:url('https://plus.unsplash.com/premium_photo-1661661696236-dfb02e570634?q=80&w=900&auto=format&fit=crop'), linear-gradient(135deg,#0f172a,#008755);"></div></div>
+          <div class="aud-body">
+            <span class="tag">Merchants &amp; landlords</span>
+            <h3>Get paid, instantly.</h3>
+            <p>Escrow settlements and built-in delivery.</p>
+          </div>
+        </div>
+        <div class="audience-item">
+          <div class="aud-wrap"><div class="aud-img" style="background-image:url('https://plus.unsplash.com/premium_photo-1710459651137-02ba8990f26a?q=80&w=900&auto=format&fit=crop'), linear-gradient(135deg,#0f172a,#008755);"></div></div>
+          <div class="aud-body">
+            <span class="tag">Riders &amp; drivers</span>
+            <h3>Fair fares. Fast cash-out.</h3>
+            <p>Clear earnings and smart navigation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE APP -->
+  <section id="app" class="app-section">
+    <div class="container">
+      <div class="app-box reveal">
+        <div class="app-copy">
+          <span class="kicker">The app</span>
+          <h2>Your whole day, in one app.</h2>
+          <p>Pay, eat, move and find a home. All from one screen.</p>
+          <ul class="app-feats">
+            <li><span class="fi"><span class="material-symbols-outlined" style="font-size:20px;">account_balance_wallet</span></span>One wallet for everything</li>
+            <li><span class="fi"><span class="material-symbols-outlined" style="font-size:20px;">verified_user</span></span>Escrow on every purchase</li>
+            <li><span class="fi"><span class="material-symbols-outlined" style="font-size:20px;">my_location</span></span>Live tracking, door to door</li>
+          </ul>
+          <div class="store-row">
+            <a href="#" class="store-btn"><span class="material-symbols-outlined">phone_iphone</span><span><small>Download on the</small>App Store</span></a>
+            <a href="#" class="store-btn alt"><span class="material-symbols-outlined">android</span><span><small>Get it on</small>Google Play</span></a>
+          </div>
+        </div>
+
+        <div class="app-visual">
+          <div class="phone-notif-toast app-notif-1">
+            <div class="notif-badge-icon" style="background: var(--emerald-light); color: var(--emerald-dark);"><span class="material-symbols-outlined" style="font-size:18px;">lock</span></div>
+            <div>
+              <strong style="font-size: 11px; display: block; font-family: var(--font-heading); color: var(--black);">Escrow Locked</strong>
+              <span style="font-size: 10px; color: var(--text-muted); display: block;">Funds held safely</span>
+            </div>
+          </div>
+          <div class="phone-notif-toast app-notif-2">
+            <div class="notif-badge-icon" style="background: var(--black); color: var(--emerald);"><span class="material-symbols-outlined" style="font-size:18px;">two_wheeler</span></div>
+            <div>
+              <strong style="font-size: 11px; display: block; font-family: var(--font-heading);">Rider arriving</strong>
+              <span style="font-size: 10px; display: block; opacity:.8;">4 mins away</span>
+            </div>
+          </div>
+
+          <div class="phone-mockup flip">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="phone-app-header">
+                <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
+                <span style="font-family: var(--font-heading); font-weight: 800; font-size: 14px;">Haven<span style="color: var(--emerald-dark);">.</span></span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">favorite</span>
+              </div>
+              <div class="listing-img" style="background-image:url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=900&auto=format&fit=crop'), linear-gradient(135deg,#1e293b,#008755);">
+                <span class="listing-badge"><span class="material-symbols-outlined" style="font-size:11px;">verified</span>C of O VERIFIED</span>
+              </div>
+              <div class="listing-info">
+                <strong style="font-family: var(--font-heading); font-size: 15px; display: block;">4-Bed Duplex, Maitama</strong>
+                <span style="font-size: 10px; color: var(--text-muted);">Abuja • Verified agent</span>
+                <div style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-top: 6px;">₦85,000,000</div>
+              </div>
+              <div class="listing-chips"><span>4 Beds</span><span>5 Baths</span><span>360° Tour</span></div>
+              <div class="listing-cta">Pay with Escrow</div>
+              <div class="phone-bottom-bar" style="margin-top:auto;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span>
+                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--emerald-dark);">explore</span>
+                <span class="material-symbols-outlined" style="font-size: 18px;">person</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section id="how-it-works" class="steps">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="kicker">How it works</span>
+        <h2 class="section-title">Up and running in 3 steps.</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step reveal">
+          <div class="step-num">1</div>
+          <h3>Create your ID</h3>
+          <p>Sign up once. KYC carries across every app.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">2</div>
+          <h3>Fund your wallet</h3>
+          <p>Top up by transfer or card.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">3</div>
+          <h3>Use any app</h3>
+          <p>Eat, pay, move and buy. No friction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-banner">
+        <h2>Ready to experience theKapita?</h2>
+        <p>Join thousands of users and merchants powering everyday commerce, mobility, and living in one place.</p>
+        <div class="cta-buttons">
+          <a href="auth.html" class="btn-dark-hero">
+            <span>Get Started</span>
+            <span class="icon-circle"><span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="security" class="app-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <div class="brand-name" style="color: var(--white);"><span class="prefix">the</span>Kapita<span class="dot" style="color: var(--emerald);">.</span></div>
+          </div>
+          <p>One super app for every everyday essential.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Sub-Apps</h4>
+          <ul>
+            <li><a href="#ecosystem">Wallet</a></li>
+            <li><a href="#ecosystem">Bills &amp; Payments</a></li>
+            <li><a href="#ecosystem">Restaurant</a></li>
+            <li><a href="#ecosystem">Haven</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>More</h4>
+          <ul>
+            <li><a href="#ecosystem">Marketplace</a></li>
+            <li><a href="#ecosystem">Logistics</a></li>
+            <li><a href="#app">The App</a></li>
+          </ul>
+        </div>
+        <!-- <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#security">Escrow Protection</a></li>
+            <li><a href="#security">Privacy Policy</a></li>
+            <li><a href="#security">Terms of Service</a></li>
+          </ul>
+        </div> -->
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 theKapita.</span>
+        <span>Built for speed, trust &amp; everyday life.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('mobileDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      if (drawer && overlay) {
+        drawer.classList.toggle('open');
+        overlay.classList.toggle('open');
+      }
+    }
+
+    // Expanding ecosystem panels
+    (function () {
+      const panels = document.querySelectorAll('#ecoPanels .panel');
+      const activate = (el) => { panels.forEach(p => p.classList.toggle('active', p === el)); };
+      panels.forEach(p => {
+        p.addEventListener('click', () => activate(p));
+        p.addEventListener('mouseenter', () => { if (window.matchMedia('(hover: hover)').matches && window.innerWidth > 720) activate(p); });
+      });
+    })();
+
+    // Gentle scroll reveal
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.transitionDelay = (i % 3) * 80 + 'ms';
+      io.observe(el);
+    });
+  </script>
+</body>
+</html>

@@ -1111,3 +1111,81 @@
   -webkit-font-smoothing: antialiased;
   vertical-align: middle;
 }
+
+/* ==========================================
+   EDIT MODAL & DYNAMIC FORM STYLES
+   ========================================== */
+
+/* Edit Modal Card Layout */
+.edit-modal-card {
+  background: var(--white, #ffffff);
+  border-radius: 28px;
+  padding: 32px;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.edit-modal-header {
+  margin-bottom: 20px;
+}
+
+.edit-modal-header h3,
+.edit-modal-header h2 {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.edit-modal-header p {
+  font-size: 12px;
+  color: #475569;
+  margin-top: 2px;
+}
+
+/* Form Controls & Layout Containers */
+.form-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--black, #121212);
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  border-radius: 12px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 14px;
+  color: var(--black, #121212);
+  background-color: var(--white, #ffffff);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.form-control:focus {
+  border-color: var(--black, #121212);
+}
+
+.edit-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
