@@ -12,6 +12,8 @@ export default function TabLayout() {
           headerShown: false, // or true if you want headers
         }}
       >
+        <Stack.Screen name="LandingScreen" />
+        <Stack.Screen name="SignInScreen" />
       </Stack>
 
       <StatusBar backgroundColor="#161622" style="dark" />

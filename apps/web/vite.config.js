@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'index.html'),
+        landing: resolve(__dirname, 'landingpage.html'),
         auth: resolve(__dirname, 'auth.html'),
         profile: resolve(__dirname, 'profile.html'),
         wallet: resolve(__dirname, 'wallet.html'),

@@ -5,7 +5,7 @@ import { isAuthenticated } from '../state/session.js';
 export default function Index() {
   return (
     <Redirect
-      href={isAuthenticated() ? '/(tabs)/HomeScreen' : '/(auth)/SignInScreen'}
+      href={isAuthenticated() ? '/(tabs)/HomeScreen' : '/(auth)/LandingScreen'}
     />
   );
 }
