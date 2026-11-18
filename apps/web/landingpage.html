@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
   <title>theKapita. — One Super App. Every Everyday Essential.</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -293,9 +294,65 @@
   align-items: center;
   justify-content: center;
 }
+
+    /* ==========================================
+       MOBILE APP EXPERIENCE (splash + onboarding)
+       Desktop sees the landing page; phones see this.
+       ========================================== */
+    .mobile-app { display: none; }
+
+    @media (max-width: 720px) {
+      html, body { height: 100%; overflow: hidden; }
+      #desktopSite { display: none !important; }
+      .mobile-app { display: block; position: fixed; inset: 0; z-index: 5000; background: #0b0f14; color: var(--white); font-family: var(--font-body); overflow: hidden; }
+    }
+
+    /* Splash / spinner */
+    .m-splash { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 38%, rgba(0,208,132,0.30), transparent 58%), #0b0f14; transition: opacity .7s ease, visibility .7s ease; }
+    .mobile-app.ready .m-splash { opacity: 0; visibility: hidden; }
+    .m-logo { font-family: var(--font-heading); font-weight: 800; font-size: 46px; letter-spacing: -1.5px; display: flex; align-items: baseline; animation: mPop .9s cubic-bezier(.16,1,.3,1) both; }
+    .m-logo .prefix { font-size: 22px; font-weight: 500; margin-right: 2px; }
+    .m-logo .dot { color: var(--emerald); }
+    .m-tagline { margin-top: 10px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); animation: mPop .9s .15s cubic-bezier(.16,1,.3,1) both; }
+    .m-spinner { margin-top: 44px; width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--emerald); animation: mSpin .8s linear infinite; }
+    .m-splash-foot { position: absolute; bottom: calc(36px + env(safe-area-inset-bottom)); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+    @keyframes mSpin { to { transform: rotate(360deg); } }
+    @keyframes mPop { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+
+    /* Onboarding */
+    .m-onboard { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
+    .mobile-app.ready .m-onboard { opacity: 1; }
+    .m-track { display: flex; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+    .m-track::-webkit-scrollbar { display: none; }
+    .m-slide { position: relative; flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; background-size: cover; background-position: center; overflow: hidden; }
+    .m-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,11,16,0.55) 0%, rgba(8,11,16,0.05) 28%, rgba(8,11,16,0.55) 58%, rgba(8,11,16,0.97) 100%); }
+    .m-slide-body { position: absolute; left: 0; right: 0; bottom: calc(176px + env(safe-area-inset-bottom)); padding: 0 28px; opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+    .m-slide.in-view .m-slide-body { opacity: 1; transform: none; transition-delay: .1s; }
+    .m-chip { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.24); padding: 6px 14px 6px 6px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 18px; }
+    .m-chip .ci { width: 28px; height: 28px; border-radius: 50%; background: var(--emerald); color: var(--black); display: flex; align-items: center; justify-content: center; }
+    .m-slide h2 { font-family: var(--font-heading); font-size: 38px; font-weight: 800; line-height: 1.04; letter-spacing: -1.2px; margin-bottom: 10px; }
+    .m-slide h2 em { font-style: normal; color: var(--emerald); }
+    .m-slide p { font-size: 15px; line-height: 1.5; color: rgba(255,255,255,0.8); max-width: 320px; }
+
+    .m-top { position: absolute; top: 0; left: 0; right: 0; z-index: 4; display: flex; align-items: center; justify-content: space-between; padding: calc(18px + env(safe-area-inset-top)) 24px 0; pointer-events: none; }
+    .m-top .m-brand { font-family: var(--font-heading); font-weight: 800; font-size: 20px; letter-spacing: -.5px; display: flex; align-items: baseline; }
+    .m-top .m-brand .prefix { font-size: 12px; font-weight: 500; margin-right: 1px; }
+    .m-top .m-brand .dot { color: var(--emerald); }
+    .m-skip { pointer-events: auto; color: var(--white); text-decoration: none; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 100px; background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); transition: opacity .3s ease; }
+    .m-onboard.last .m-skip { opacity: 0; pointer-events: none; }
+
+    .m-controls { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 0 24px calc(28px + env(safe-area-inset-bottom)); }
+    .m-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 22px; }
+    .m-dots span { width: 6px; height: 6px; border-radius: 100px; background: rgba(255,255,255,0.3); transition: width .35s ease, background .35s ease; }
+    .m-dots span.active { width: 24px; background: var(--emerald); }
+    .m-next { width: 100%; display: flex; align-items: center; justify-content: space-between; background: var(--emerald); color: var(--black); border: none; border-radius: 100px; padding: 8px 8px 8px 28px; font-family: var(--font-heading); font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .2s ease; }
+    .m-next:active { transform: scale(.98); }
+    .m-next .na { width: 48px; height: 48px; border-radius: 50%; background: var(--black); color: var(--emerald); display: flex; align-items: center; justify-content: center; }
+    .m-hint { text-align: center; margin-top: 14px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.45); }
   </style>
 </head>
 <body>
+<div id="desktopSite">
 
   <!-- NAV -->
   <div class="nav-wrapper">
@@ -726,6 +783,86 @@
     </div>
   </footer>
 
+</div><!-- /#desktopSite -->
+
+  <!-- MOBILE APP EXPERIENCE: splash, spinner, onboarding -->
+  <div class="mobile-app" id="mobileApp" aria-label="theKapita app introduction">
+    <div class="m-splash">
+      <div class="m-logo"><span class="prefix">the</span>Kapita<span class="dot">.</span></div>
+      <div class="m-tagline">One super app. Every essential.</div>
+      <div class="m-spinner" role="status" aria-label="Loading"></div>
+      <div class="m-splash-foot">Loading your world</div>
+    </div>
+
+    <div class="m-onboard" id="mOnboard">
+      <div class="m-top">
+        <div class="m-brand"><span class="prefix">the</span>Kapita<span class="dot">.</span></div>
+        <a href="auth.html" class="m-skip">Skip</a>
+      </div>
+
+      <div class="m-track" id="mTrack">
+        <div class="m-slide in-view" style="background-image:url('https://images.unsplash.com/photo-1543501527-49e855165f73?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#00805a,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">apps</span></span>Welcome</span>
+            <h2>One super app.<br>Every <em>essential.</em></h2>
+            <p>Wallet, food, home, shopping and rides. One verified identity.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#00805a,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">account_balance_wallet</span></span>Wallet</span>
+            <h2>Money, <em>simplified.</em></h2>
+            <p>Send, split and hold funds in escrow.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://plus.unsplash.com/premium_photo-1668613403973-8fed78417ce7?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#1e3a5f,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">bolt</span></span>Bills</span>
+            <h2>Pay bills in <em>seconds.</em></h2>
+            <p>Airtime, data, power and TV. Instant receipts.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://images.unsplash.com/photo-1763048443535-1243379234e2?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#7c2d12,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">restaurant</span></span>Restaurant</span>
+            <h2>Hungry? <em>Sorted.</em></h2>
+            <p>Order, reserve and track your food live.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://plus.unsplash.com/premium_photo-1687960114927-fa6bac0a63a7?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#0f766e,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">real_estate_agent</span></span>Haven</span>
+            <h2>Find a home, <em>safely.</em></h2>
+            <p>Verified property, protected by escrow.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://images.unsplash.com/photo-1552710307-8d1c604d6319?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#4c1d95,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">storefront</span></span>Marketplace</span>
+            <h2>Shop with <em>confidence.</em></h2>
+            <p>Verified merchants and buyer protection.</p>
+          </div>
+        </div>
+        <div class="m-slide" style="background-image:url('https://plus.unsplash.com/premium_photo-1661962991947-515784607187?q=80&w=1000&auto=format&fit=crop'), linear-gradient(160deg,#334155,#0b1220);">
+          <div class="m-slide-body">
+            <span class="m-chip"><span class="ci"><span class="material-symbols-outlined" style="font-size:16px;">local_shipping</span></span>Logistics</span>
+            <h2>Rides and parcels, <em>on time.</em></h2>
+            <p>Live tracking with OTP delivery.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-controls">
+        <div class="m-dots" id="mDots"><span class="active"></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <button class="m-next" id="mNext" type="button">
+          <span id="mNextLabel">Next</span>
+          <span class="na"><span class="material-symbols-outlined" style="font-size:22px;">arrow_forward</span></span>
+        </button>
+        <div class="m-hint">Swipe to explore</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     function toggleMobileDrawer() {
       const drawer = document.getElementById('mobileDrawer');
@@ -743,6 +880,54 @@
       panels.forEach(p => {
         p.addEventListener('click', () => activate(p));
         p.addEventListener('mouseenter', () => { if (window.matchMedia('(hover: hover)').matches && window.innerWidth > 720) activate(p); });
+      });
+    })();
+
+
+    // ===== Mobile splash + onboarding =====
+    (function () {
+      const app = document.getElementById('mobileApp');
+      const onboard = document.getElementById('mOnboard');
+      const track = document.getElementById('mTrack');
+      const nextBtn = document.getElementById('mNext');
+      const nextLabel = document.getElementById('mNextLabel');
+      if (!app || !track) return;
+
+      const slides = Array.from(track.querySelectorAll('.m-slide'));
+      const dots = Array.from(document.querySelectorAll('#mDots span'));
+      const last = slides.length - 1;
+      let index = 0;
+
+      // Splash + spinner, then reveal onboarding
+      setTimeout(() => app.classList.add('ready'), 2400);
+
+      function render(i) {
+        index = i;
+        slides.forEach((s, n) => s.classList.toggle('in-view', n === i));
+        dots.forEach((d, n) => d.classList.toggle('active', n === i));
+        const isLast = i === last;
+        onboard.classList.toggle('last', isLast);
+        nextLabel.textContent = isLast ? 'Get Started' : 'Next';
+      }
+
+      let ticking = false;
+      track.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const i = Math.round(track.scrollLeft / track.clientWidth);
+          if (i !== index && i >= 0 && i <= last) render(i);
+          ticking = false;
+        });
+      }, { passive: true });
+
+      nextBtn.addEventListener('click', () => {
+        if (index >= last) { window.location.href = 'auth.html'; return; }
+        track.scrollTo({ left: (index + 1) * track.clientWidth, behavior: 'smooth' });
+      });
+
+      window.addEventListener('resize', () => {
+        track.scrollTo({ left: index * track.clientWidth });
       });
     })();
 
