@@ -659,6 +659,59 @@ html, body.food-page-body {
   color: #0369a1; /* High-contrast text */
 }
 
+.vendor-type-tag.external {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.directory-restaurant-card {
+  cursor: default;
+}
+
+.directory-restaurant-card:hover {
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.directory-place-detail {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.directory-discovery-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-directory-link {
+  text-decoration: none;
+}
+
+.directory-load-state,
+.directory-credit-note {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.directory-load-error {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.directory-load-error strong {
+  color: var(--danger);
+}
+
 .vendor-meta-row {
   display: flex;
   align-items: center;

@@ -3,7 +3,8 @@ import re
 
 from django.conf import settings
 from django.db import IntegrityError
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Case, Count, ExpressionWrapper, F, FloatField, IntegerField, Q, Value, When
+from django.db.models.functions import Coalesce
 from ninja import Field, Router, Schema
 from ninja.errors import HttpError
 
@@ -37,6 +38,7 @@ class ListingOut(Schema):
     services: list[str]
     tier: str
     is_verified: bool
+    attribution: str | None = None   # credit line the provider's licence requires us to show
     latitude: float | None = None
     longitude: float | None = None
     rating: float | None = None
@@ -116,6 +118,7 @@ def _listing(l, near=None):
         "id": l.id, "name": l.name, "category": l.category, "category_label": l.get_category_display(),
         "description": l.description, "address": l.address, "city": l.city, "phone": l.phone,
         "hours": l.hours, "services": l.services or [], "tier": l.tier, "is_verified": l.is_verified,
+        "attribution": ATTRIBUTION.get(l.source),
         "latitude": l.latitude, "longitude": l.longitude,
         "rating": round(avg, 1) if avg is not None else None,
         "review_count": getattr(l, "n_reviews", 0) or 0,
@@ -123,13 +126,27 @@ def _listing(l, near=None):
     }
 
 
-def _order(rows, near):
-    """Sponsored first, then nearest (when we know where the user is), then A-Z."""
-    def key(l):
-        d = _haversine_km(near[0], near[1], l.latitude, l.longitude) if (
-            near and l.latitude is not None and l.longitude is not None) else float("inf")
-        return (l.tier != Listing.Tier.SPONSORED, d, l.name.lower())
-    return sorted(rows, key=key)
+ATTRIBUTION = {Listing.Source.OSM: "\u00A9 OpenStreetMap contributors"}
+
+def _ranked(qs, near, limit, offset):
+    """One page of results, ranked entirely in the database so paging and 'nearest' stay correct with any number
+    of rows: sponsored first, then closest to the person (rows with no position last), then A-Z.
+
+    Distance here is only for ordering (a flat-earth approximation, plenty accurate at city/country scale);
+    the distance_km shown to the person is computed exactly for the rows on the page."""
+    sponsor = Case(When(tier=Listing.Tier.SPONSORED, then=0), default=1, output_field=IntegerField())
+    if near:
+        lat, lng = near
+        dlat = F("latitude") - lat
+        dlng = (F("longitude") - lng) * math.cos(math.radians(lat))
+        d2 = Coalesce(
+            ExpressionWrapper(dlat * dlat + dlng * dlng, output_field=FloatField()),
+            Value(1e9, output_field=FloatField()),
+        )
+        qs = qs.annotate(sponsor_rank=sponsor, dist2=d2).order_by("sponsor_rank", "dist2", "name", "id")
+    else:
+        qs = qs.annotate(sponsor_rank=sponsor).order_by("sponsor_rank", "name", "id")
+    return list(qs[offset: offset + limit])
 
 
 # Rule-based intent parsing (keywords -> category). No LLM involved; swap parse_intent() for one later.
@@ -138,6 +155,8 @@ CATEGORY_WORDS = {
     Listing.Category.SCHOOLS: {"school", "schools", "university", "college", "institute", "academy", "education"},
     Listing.Category.GOVERNMENT: {"government", "ministry", "agency", "police", "immigration", "passport", "council", "tax", "office"},
     Listing.Category.BUSINESSES: {"business", "businesses", "shop", "store", "company", "bank", "market"},
+    Listing.Category.RESTAURANTS: {"restaurant", "restaurants", "eatery", "cafe", "cafes", "buka", "bukateria", "suya",
+                                   "food", "diner", "lunch", "dinner", "breakfast"},
 }
 STOP = {"a", "an", "the", "in", "near", "me", "open", "now", "find", "show", "for", "and", "of", "at", "to", "any", "best"}
 
@@ -166,8 +185,7 @@ def list_listings(request, category: str | None = None, q: str | None = None,
         qs = qs.filter(Q(name__icontains=n) | Q(description__icontains=n) | Q(address__icontains=n))
     limit, offset = max(1, min(limit, 100)), max(offset, 0)
     near = _near(lat, lng)
-    rows = _order(list(qs[:500]), near)[offset: offset + limit]
-    return [_listing(l, near) for l in rows]
+    return [_listing(l, near) for l in _ranked(qs, near, limit, offset)]
 
 
 @router.get("/search", response=SearchOut)
@@ -182,7 +200,7 @@ def search(request, q: str, lat: float | None = None, lng: float | None = None):
             cond |= Q(name__icontains=w) | Q(description__icontains=w) | Q(address__icontains=w)
         qs = qs.filter(cond)
     near = _near(lat, lng)
-    return {"intent": intent, "results": [_listing(l, near) for l in _order(list(qs[:200]), near)[:60]]}
+    return {"intent": intent, "results": [_listing(l, near) for l in _ranked(qs, near, 60, 0)]}
 
 
 @router.get("/listings/{listing_id}", response=ListingDetailOut)

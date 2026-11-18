@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 Backend/src/db.sqlite3
 Backend/src/staticfiles/
+/nigeria-261117.osm.pbf
 .DS_Store
 *.md
 DEPLOY.md
@@ -17,3 +18,4 @@ Thekapita-Weekly-Progress-Report.docx
 *.patch
 Thekapita-Weekly-Progress-Report.docx
 *.md
+!apps/mobile/MOBILE-TESTING-AND-STORE-RELEASE.md

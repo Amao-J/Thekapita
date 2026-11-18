@@ -6,7 +6,7 @@ from .models import Bookmark, Listing, Report, Review
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "tier", "status", "is_verified", "owner", "created_at")
-    list_filter = ("status", "category", "tier", "is_verified")
+    list_filter = ("status", "category", "tier", "is_verified", "source")
     search_fields = ("name", "address", "phone", "owner__email")
     actions = ["approve", "reject"]
     raw_id_fields = ("owner",)

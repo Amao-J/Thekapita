@@ -12,3 +12,4 @@ google-auth
 boto3
 django-storages[s3]
 pillow
+osmium

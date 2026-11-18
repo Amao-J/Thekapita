@@ -107,6 +107,7 @@
           <button class="cat-pill" onclick="setCategoryFilter('Government', this)">Government Agencies</button>
           <button class="cat-pill" onclick="setCategoryFilter('Schools', this)">Schools & Institutes</button>
           <button class="cat-pill" onclick="setCategoryFilter('Hospitals', this)">Hospitals & Health</button>
+          <button class="cat-pill" onclick="setCategoryFilter('Restaurants', this)">Restaurants & Food</button>
         </div>
 
         <!-- Functional View Toggle Controls -->
@@ -123,6 +124,10 @@
       <div id="directoryGrid" class="directory-grid">
         <!-- Dynamic listings populated via JS -->
       </div>
+      <div style="text-align: center; margin: 20px 0;">
+        <button type="button" id="loadMoreBtn" class="btn-submit-primary" hidden>Show more</button>
+      </div>
+      <p id="directoryAttribution" style="font-size: 11px; color: #64748b; text-align: center;" hidden></p>
     </div>
 
     <!-- TAB 2: DASHBOARD (MY BIZ) -->
@@ -277,6 +282,7 @@
           <span id="modalHours">Open 24 Hours • 7 Days a week</span>
         </div>
       </div>
+      <p id="modalAttribution" style="font-size: 11px; color: #64748b; margin: 6px 0 0;" hidden></p>
 
       <div>
         <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 6px;">Provided Services & Specialties</h4>
@@ -419,6 +425,7 @@
             <option value="Hospitals">Hospital & Health</option>
             <option value="Schools">School & Education</option>
             <option value="Government">Government Agency</option>
+            <option value="Restaurants">Restaurant & Food</option>
           </select>
         </div>
         <div class="form-group">

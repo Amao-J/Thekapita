@@ -3,7 +3,7 @@ import re
 import uuid
 
 from django.db import IntegrityError, transaction
-from django.db.models import Q, Sum
+from django.db.models import Avg, Count, Sum
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -16,6 +16,8 @@ from app.auth import JWTAuth
 from app.models import Wallet
 from app.throttles import user_throttle
 from app.idempotency import IdempotencyConflict, get_or_create_idempotent_response
+from directory.api import ATTRIBUTION as DIRECTORY_ATTRIBUTION
+from directory.models import Listing
 
 from . import services
 from .models import FoodOrder, MenuItem, Reservation, Restaurant
@@ -52,6 +54,11 @@ class RestaurantOut(Schema):
     eta_max: int
     is_open: bool
     rating: float | None = None  # no reviews model yet
+    source: str = "food"
+    is_orderable: bool = True
+    attribution: str | None = None
+    services: list[str] = Field(default_factory=list)
+    review_count: int = 0
 
 
 class RestaurantDetailOut(RestaurantOut):
@@ -186,7 +193,51 @@ def _restaurant(r):
         "description": r.description, "image_url": r.image_url or None,
         "address": r.address, "phone": r.phone, "hours": r.hours,
         "delivery_fee": float(r.delivery_fee), "eta_min": r.eta_min, "eta_max": r.eta_max,
-        "is_open": r.is_open, "rating": None,
+        "is_open": r.is_open, "rating": None, "source": "food", "is_orderable": True,
+        "attribution": None, "services": [], "review_count": 0,
+    }
+
+
+def _directory_category(listing):
+    clues = " ".join((listing.name, listing.description, *(listing.services or []))).casefold().replace("_", " ")
+    if re.search(r"\b(buka|bukateria)\b", clues):
+        return "buka"
+    if re.search(r"\b(bakery|bakeries)\b", clues):
+        return "bakery"
+    if re.search(r"\b(grill|grills|suya|barbecue|bbq)\b", clues):
+        return "grill"
+    if re.search(r"\bfine dining\b", clues):
+        return "fine"
+    return "external"
+
+
+def _directory_restaurant(listing):
+    city = listing.city.strip()
+    address = listing.address
+    if city and city.casefold() not in address.casefold():
+        address = f"{address}, {city}"
+    return {
+        "id": -listing.id,
+        "slug": f"directory-{listing.id}",
+        "name": listing.name,
+        "category": _directory_category(listing),
+        "category_label": listing.get_category_display(),
+        "tags": listing.services or [],
+        "description": listing.description,
+        "image_url": None,
+        "address": address,
+        "phone": listing.phone,
+        "hours": listing.hours,
+        "delivery_fee": 0,
+        "eta_min": 0,
+        "eta_max": 0,
+        "is_open": False,
+        "rating": round(listing.avg_rating, 1) if listing.avg_rating is not None else None,
+        "source": "directory",
+        "is_orderable": False,
+        "attribution": DIRECTORY_ATTRIBUTION.get(listing.source),
+        "services": listing.services or [],
+        "review_count": listing.review_count,
     }
 
 
@@ -229,22 +280,47 @@ def _orders_qs():
 @router.get("/restaurants", response=list[RestaurantOut])
 def list_restaurants(request, category: str | None = None, tag: str | None = None, q: str | None = None,
                      limit: int = 60, offset: int = 0):
-    qs = _listed()
-    if category and category != "all":
-        qs = qs.filter(category=category)
-    if q and q.strip():
-        needle = q.strip()
-        qs = qs.filter(
-            Q(name__icontains=needle) | Q(items__name__icontains=needle, items__is_available=True)
-        ).distinct()
     limit, offset = max(1, min(limit, 100)), max(offset, 0)
-    qs = qs.order_by("name")
+    needle = q.strip().casefold() if q and q.strip() else None
+    vendors = list(_listed().prefetch_related("items"))
+    matching_vendor_ids = set()
+    if needle:
+        matching_vendor_ids = {
+            restaurant.id for restaurant in vendors
+            if needle in restaurant.name.casefold()
+            or any(needle in item.name.casefold() for item in restaurant.items.all() if item.is_available)
+        }
+    directory_rows = list(
+        Listing.objects.filter(
+            status=Listing.Status.APPROVED,
+            category=Listing.Category.RESTAURANTS,
+        ).annotate(
+            avg_rating=Avg("reviews__rating"),
+            review_count=Count("reviews", distinct=True),
+        )
+    )
+    results = [_restaurant(restaurant) for restaurant in vendors]
+    results.extend(_directory_restaurant(listing) for listing in directory_rows)
+
+    if category and category.casefold() != "all":
+        results = [row for row in results if row["category"] == category.casefold()]
     if tag:
-        # JSON-list membership isn't portable across SQLite/Postgres; the catalogue is small, so filter here.
-        rows = [r for r in qs[:300] if tag in (r.tags or [])][offset: offset + limit]
-    else:
-        rows = list(qs[offset: offset + limit])
-    return [_restaurant(r) for r in rows]
+        wanted_tag = tag.casefold()
+        results = [
+            row for row in results
+            if any(value.casefold() == wanted_tag for value in row["tags"])
+        ]
+    if needle:
+        results = [
+            row for row in results
+            if needle in " ".join((
+                row["name"], row["description"], row["address"], row["phone"], row["hours"],
+                *row["tags"], *row["services"],
+            )).casefold()
+            or row["id"] in matching_vendor_ids
+        ]
+    results.sort(key=lambda row: (row["name"].casefold(), row["source"], row["id"]))
+    return results[offset: offset + limit]
 
 
 @router.get("/restaurants/{slug}", response=RestaurantDetailOut)

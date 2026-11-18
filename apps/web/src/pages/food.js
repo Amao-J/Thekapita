@@ -7,6 +7,7 @@ let currentDish = null; // { id, slug, name, price, vendor, img } for the dish m
 let currentModalQty = 1;
 let orderKey = null;    // Idempotency-Key for the order being placed (reused only for network retries)
 let restaurants = [];   // from GET /food/restaurants
+let directoryRestaurants = [];
 let isOnline = navigator.onLine;
 
 function requireLogin() {
@@ -58,7 +59,8 @@ function showNotification(message, type = 'success') {
 /* Live restaurant list from the API */
 async function fetchRealVendorData() {
   const container = document.getElementById('restaurantCardList');
-  if (!container) return;
+  const directoryContainer = document.getElementById('restaurantDirectoryList');
+  if (!container || !directoryContainer) return;
 
   // Render Skeleton Loaders
   container.innerHTML = `
@@ -73,30 +75,37 @@ async function fetchRealVendorData() {
       <div class="skeleton-box text"></div>
     </div>
   `;
+  directoryContainer.replaceChildren(el('p', { class: 'directory-load-state' }, 'Loading restaurant directory...'));
 
   try {
-    restaurants = await request(ENDPOINTS.food.restaurants);
+    const catalogue = await fetchFoodRestaurants();
+    restaurants = catalogue.filter((row) => row.is_orderable !== false);
+    directoryRestaurants = catalogue.filter((row) => row.is_orderable === false);
     renderVendorCards(restaurants);
+    renderDirectoryCards(directoryRestaurants);
     populateReservationSelect();
   } catch (error) {
-    renderErrorState(container, error.message);
+    restaurants = [];
+    directoryRestaurants = [];
+    renderVendorCards([], error);
+    renderDirectoryCards([], error);
   }
 }
 
-function renderErrorState(container, errorMessage) {
-  container.innerHTML = `
-    <div class="error-state-box" role="alert">
-      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--danger);" aria-hidden="true">wifi_off</span>
-      <h4>Unable to Connect to Kapita Food API</h4>
-      <p></p>
-      <button type="button" class="btn-retry" onclick="fetchRealVendorData()">
-        <span>Retry Loading</span>
-      </button>
-    </div>
-  `;
-  container.querySelector('p').textContent = errorMessage || 'Please check your connection and try again.';
-  document.getElementById('merchantCountTag').textContent = 'Offline';
-  announceToSR("Error loading vendors. Please retry.");
+const FOOD_PAGE_SIZE = 100;
+
+async function fetchFoodRestaurants() {
+  const catalogue = [];
+  for (let offset = 0; ; offset += FOOD_PAGE_SIZE) {
+    const params = new URLSearchParams({
+      limit: FOOD_PAGE_SIZE,
+      offset,
+    });
+    const page = await request(`${ENDPOINTS.food.restaurants}?${params}`);
+    if (!Array.isArray(page)) throw new Error('The Eats catalogue returned an invalid response.');
+    catalogue.push(...page);
+    if (page.length < FOOD_PAGE_SIZE) return catalogue;
+  }
 }
 
 const CATEGORY_IMG = {
@@ -118,18 +127,26 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-function renderVendorCards(vendors) {
+function renderVendorCards(vendors, error = null) {
   const container = document.getElementById('restaurantCardList');
   container.replaceChildren();
 
+  if (error) {
+    container.append(el('div', { class: 'directory-load-error', role: 'alert' },
+      el('strong', {}, 'Food vendors could not be loaded.'),
+      el('span', {}, error.message || 'Please check your connection and retry.'),
+      el('button', { type: 'button', class: 'btn-retry', onclick: fetchRealVendorData }, 'Retry Loading'),
+    ));
+  }
+
   if (!vendors.length) {
-    container.append(el('p', { style: 'text-align:center;color:var(--text-muted);padding:24px;font-size:13px;' }, 'No restaurants are open yet. Check back soon!'));
+    if (!error) container.append(el('p', { style: 'text-align:center;color:var(--text-muted);padding:24px;font-size:13px;' }, 'No onboarded food vendors are available yet.'));
   }
 
   for (const v of vendors) {
     const card = el('article', {
       class: 'restaurant-option-card',
-      dataset: { category: v.category, cuisine: [v.category, ...(v.tags || [])].join(' '), slug: v.slug },
+      dataset: { category: v.category, cuisine: [v.category, ...(v.tags || [])].join(' '), slug: v.slug, source: 'food' },
     },
       el('div', { class: 'vendor-card-header' },
         el('img', { src: v.image_url || CATEGORY_IMG[v.category] || CATEGORY_IMG.buka, alt: `${v.name}`, class: 'vendor-thumb-box' }),
@@ -156,8 +173,80 @@ function renderVendorCards(vendors) {
     container.append(card);
   }
 
-  document.getElementById('merchantCountTag').textContent = `${vendors.length} Merchants Active`;
-  announceToSR(`${vendors.length} food vendors loaded.`);
+  updateVisibleCounts();
+  announceToSR(`${vendors.length} orderable food vendors loaded.`);
+}
+
+function directoryPlaceType(place) {
+  if (['buka', 'bakery', 'grill', 'fine'].includes(place.category)) return place.category;
+  const text = `${place.name} ${place.description || ''} ${(place.services || []).join(' ')}`.toLowerCase().replace(/[_-]/g, ' ');
+  if (/\b(buka|bukateria)\b/.test(text)) return 'buka';
+  if (/\bfine dining\b/.test(text)) return 'fine';
+  return 'external';
+}
+
+function renderDirectoryCards(listings, error = null) {
+  const container = document.getElementById('restaurantDirectoryList');
+  const credit = document.getElementById('restaurantDirectoryAttribution');
+  container.replaceChildren();
+
+  if (error) {
+    container.append(el('div', { class: 'directory-load-error', role: 'alert' },
+      el('strong', {}, 'Restaurant directory could not be loaded.'),
+      el('span', {}, error.message || 'Please check your connection and retry.'),
+      el('button', { type: 'button', class: 'btn-retry', onclick: fetchRealVendorData }, 'Retry Loading'),
+    ));
+  }
+
+  if (!listings.length && !error) {
+    container.append(el('p', { class: 'directory-load-state' }, 'No restaurant directory listings are available yet.'));
+  }
+
+  for (const place of listings) {
+    const type = directoryPlaceType(place);
+    const terms = [type, place.name, place.description, ...(place.services || [])]
+      .filter(Boolean).join(' ').toLowerCase().replace(/[_-]/g, ' ');
+    const address = [place.address, place.city].filter(Boolean).join(', ');
+    const detailLines = [
+      address,
+      place.hours ? `Hours: ${place.hours}` : '',
+      place.phone ? `Phone: ${place.phone}` : '',
+      place.services?.length ? place.services.join(' · ') : '',
+    ].filter(Boolean);
+    container.append(el('article', {
+      class: 'restaurant-option-card directory-restaurant-card',
+      dataset: { category: type, cuisine: terms, source: 'directory' },
+    },
+    el('div', { class: 'vendor-card-header' },
+      el('img', { src: CATEGORY_IMG[type === 'buka' ? 'buka' : 'fine'], alt: '', class: 'vendor-thumb-box' }),
+      el('div', { class: 'vendor-info' },
+        el('div', { class: 'vendor-title-row' },
+          el('h4', {}, place.name),
+          el('span', { class: `vendor-type-tag ${type}` }, type === 'buka' ? 'Buka' : 'Restaurant'),
+        ),
+        ...detailLines.map((line) => el('p', { class: 'directory-place-detail' }, line)),
+      ),
+    ),
+    el('div', { class: 'vendor-card-actions' },
+      el('span', { class: 'directory-discovery-label' }, 'Directory listing · Not orderable'),
+      el('a', { href: 'directories.html', class: 'btn-see-menu btn-directory-link' }, 'Browse Directory'),
+    )));
+  }
+
+  const credits = [...new Set(listings.map((place) => place.attribution).filter(Boolean))];
+  credit.hidden = credits.length === 0;
+  credit.textContent = credits.length ? `Restaurant directory data: ${credits.join('; ')}` : '';
+  updateVisibleCounts();
+}
+
+function updateVisibleCounts() {
+  const cards = [...document.querySelectorAll('.restaurant-option-card')];
+  const visibleFood = cards.filter((card) => card.dataset.source !== 'directory' && card.style.display !== 'none').length;
+  const visibleDirectory = cards.filter((card) => card.dataset.source === 'directory' && card.style.display !== 'none').length;
+  const merchantCount = document.getElementById('merchantCountTag');
+  const directoryCount = document.getElementById('directoryCountTag');
+  if (merchantCount) merchantCount.textContent = `${visibleFood} Merchants Active`;
+  if (directoryCount) directoryCount.textContent = `${visibleDirectory} Listings`;
 }
 /* Modal Handlers with Keyboard Escape Support */
 function openModal(modalId) {
@@ -444,19 +533,17 @@ async function openReservationsListModal() {
 function handleFilterSearch() {
   const q = document.getElementById('foodSearchInput').value.toLowerCase();
   const cards = document.querySelectorAll('.restaurant-option-card');
-  let visible = 0;
 
   cards.forEach(card => {
     const text = card.textContent.toLowerCase();
     if (text.includes(q)) {
       card.style.display = 'flex';
-      visible++;
     } else {
       card.style.display = 'none';
     }
   });
 
-  document.getElementById('merchantCountTag').textContent = `${visible} Merchants Active`;
+  updateVisibleCounts();
 }
 
 function switchVendorCategory(category, btnElement) {
@@ -468,18 +555,16 @@ function switchVendorCategory(category, btnElement) {
   btnElement.setAttribute('aria-selected', 'true');
 
   const cards = document.querySelectorAll('.restaurant-option-card');
-  let visible = 0;
 
   cards.forEach(card => {
     if (category === 'all' || card.dataset.category === category) {
       card.style.display = 'flex';
-      visible++;
     } else {
       card.style.display = 'none';
     }
   });
 
-  document.getElementById('merchantCountTag').textContent = `${visible} Merchants Active`;
+  updateVisibleCounts();
 }
 
 function filterByCuisine(cuisine, chipElement) {
@@ -487,19 +572,17 @@ function filterByCuisine(cuisine, chipElement) {
   chipElement.classList.add('active');
 
   const cards = document.querySelectorAll('.restaurant-option-card');
-  let visible = 0;
 
   cards.forEach(card => {
     const categories = card.dataset.cuisine.split(' ');
     if (cuisine === 'all' || categories.includes(cuisine)) {
       card.style.display = 'flex';
-      visible++;
     } else {
       card.style.display = 'none';
     }
   });
 
-  document.getElementById('merchantCountTag').textContent = `${visible} Merchants Active`;
+  updateVisibleCounts();
 }
 
 function toggleAiWidget() {

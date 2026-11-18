@@ -24,7 +24,11 @@ const state = {
   route: null,
   searchTimer: null,
   loadToken: 0,
+  hasMore: false,         // the last page was full, so there may be more
+  loadingMore: false,
 };
+
+const PAGE_SIZE = 60;
 
 const SPEED_KMH = { drive: 30, transit: 20, walk: 5 }; // rough city averages for a straight-line estimate
 
@@ -40,30 +44,66 @@ function initials(name) {
 
 /* ---------- loading & rendering ---------- */
 
-async function loadListings() {
+/** Load the first page (append = false) or the next page of the current filter (append = true). */
+async function loadListings(append = false) {
   const token = ++state.loadToken; // ignore answers that arrive after a newer request
   const grid = $('directoryGrid');
-  grid.replaceChildren(h('p', { style: 'padding:24px;color:#64748b;font-size:13px;' }, 'Loading listings...'));
+  if (append) {
+    state.loadingMore = true;
+    $('loadMoreBtn').disabled = true;
+  } else {
+    state.hasMore = false;
+    grid.replaceChildren(h('p', { style: 'padding:24px;color:#64748b;font-size:13px;' }, 'Loading listings...'));
+    paintLoadMore();
+  }
   try {
     let rows;
     if (state.mode === 'bookmarks') {
       if (!requireLogin()) return;
       rows = await authorizedRequest(ENDPOINTS.directory.bookmarks);
+      state.hasMore = false;
     } else {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ limit: PAGE_SIZE, offset: append ? state.listings.length : 0 });
       if (state.category !== 'All') params.set('category', state.category.toLowerCase());
       if (state.query) params.set('q', state.query);
       if (state.pos) { params.set('lat', state.pos.lat); params.set('lng', state.pos.lng); }
       rows = await request(`${ENDPOINTS.directory.listings}?${params}`);
+      state.hasMore = rows.length === PAGE_SIZE;
     }
     if (token !== state.loadToken) return;
-    state.listings = rows;
+    if (append) {
+      const have = new Set(state.listings.map((l) => l.id));
+      state.listings = state.listings.concat(rows.filter((l) => !have.has(l.id)));
+    } else {
+      state.listings = rows;
+    }
     renderGrid();
     fillReportSelect();
   } catch (err) {
     if (token !== state.loadToken) return;
-    grid.replaceChildren(h('p', { role: 'alert', style: 'padding:24px;color:#b91c1c;font-size:13px;' }, errorMessage(err, 'Could not load the directory.')));
+    if (append) toast(errorMessage(err, 'Could not load more listings.'), 'error');
+    else grid.replaceChildren(h('p', { role: 'alert', style: 'padding:24px;color:#b91c1c;font-size:13px;' }, errorMessage(err, 'Could not load the directory.')));
+  } finally {
+    if (token === state.loadToken) {
+      state.loadingMore = false;
+      paintLoadMore();
+    }
   }
+}
+
+function paintLoadMore() {
+  const btn = $('loadMoreBtn');
+  btn.hidden = !state.hasMore;
+  btn.disabled = state.loadingMore;
+  btn.textContent = state.loadingMore ? 'Loading...' : 'Show more';
+}
+
+/** Licences such as OpenStreetMap's require a visible credit for imported data. */
+function paintAttribution() {
+  const credits = [...new Set(state.listings.map((l) => l.attribution).filter(Boolean))];
+  const note = $('directoryAttribution');
+  note.hidden = credits.length === 0;
+  note.textContent = credits.length ? `Some listings: ${credits.join('; ')}` : '';
 }
 
 function renderGrid(rows = state.listings) {
@@ -75,6 +115,8 @@ function renderGrid(rows = state.listings) {
     return;
   }
   grid.replaceChildren(...rows.map(card));
+  paintAttribution();
+  paintLoadMore();
 }
 
 function card(l) {
@@ -142,6 +184,7 @@ async function executeAISearch() {
     const res = await request(`${ENDPOINTS.directory.search}?${params}`);
     state.mode = 'explore';
     state.listings = res.results;
+    state.hasMore = false; // search answers are one ranked page
     const bits = [];
     if (res.intent.category) bits.push(`category: ${res.intent.category}`);
     if (res.intent.keywords.length) bits.push(`keywords: ${res.intent.keywords.join(', ')}`);
@@ -176,8 +219,10 @@ async function openDetail(id) {
     setText('modalTitle', l.name);
     setText('modalCategory', l.category_label);
     setText('modalAddress', l.address);
-    setText('modalPhone', l.phone);
+    setText('modalPhone', l.phone || 'Phone not listed');
     setText('modalHours', l.hours || 'Hours not provided');
+    setText('modalAttribution', l.attribution || '');
+    $('modalAttribution').hidden = !l.attribution;
     $('modalServices').replaceChildren(...l.services.map((s) => h('span', { class: 'stat-badge badge-emerald' }, s)));
     $('reviewCommentInput').value = '';
     paintStars(0);
@@ -414,5 +459,6 @@ Object.assign(window, {
 });
 
 $('aiParsedFeedback').style.display = 'none';
+$('loadMoreBtn').addEventListener('click', () => loadListings(true));
 loadListings();
 loadBookmarks();

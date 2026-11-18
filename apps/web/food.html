@@ -183,8 +183,8 @@
       <!-- 5. Restaurant & Buka Vendor List -->
       <section class="bills-section-title">
         <div>
-          <h3>Top Restaurants &amp; Local Bukas</h3>
-          <p>Curated dining spots with fast delivery dispatch</p>
+          <h3>Order from Food Vendors</h3>
+          <p>Menus, prices and ordering are available from onboarded vendors</p>
         </div>
         <span class="count-tag" id="merchantCountTag">Loading...</span>
       </section>
@@ -203,6 +203,18 @@
           <div class="skeleton-box text"></div>
         </div>
       </div>
+
+      <section class="bills-section-title" aria-labelledby="restaurantDirectoryHeading">
+        <div>
+          <h3 id="restaurantDirectoryHeading">Explore Restaurants &amp; Bukas</h3>
+          <p>Directory listings are for discovery only and are not available for ordering</p>
+        </div>
+        <span class="count-tag" id="directoryCountTag">Loading...</span>
+      </section>
+      <div class="restaurant-card-list" id="restaurantDirectoryList" aria-live="polite">
+        <p class="directory-load-state">Loading restaurant directory...</p>
+      </div>
+      <p class="directory-credit-note" id="restaurantDirectoryAttribution" hidden></p>
 
       <!-- 6. Digital Menu Grid -->
       <section class="bills-section-title">

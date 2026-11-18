@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Image,
@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ENDPOINTS } from '@thekapita/shared/endpoints';
+import { request } from '../../api/client.js';
 
 
 const C = {
@@ -108,6 +110,44 @@ const dishes = [
   },
 ];
 
+const FOOD_PAGE_SIZE = 100;
+
+async function fetchFoodCatalogue() {
+  const catalogue = [];
+  for (let offset = 0; ; offset += FOOD_PAGE_SIZE) {
+    const params = new URLSearchParams({
+      limit: String(FOOD_PAGE_SIZE),
+      offset: String(offset),
+    });
+    const page = await request(`${ENDPOINTS.food.restaurants}?${params}`);
+    if (!Array.isArray(page)) {
+      throw new Error('The Eats catalogue returned an invalid response.');
+    }
+    catalogue.push(...page);
+    if (page.length < FOOD_PAGE_SIZE) return catalogue;
+  }
+}
+
+function directoryPlaceType(place) {
+  if (['buka', 'bakery', 'grill', 'fine'].includes(place.category)) return place.category;
+  const text = `${place.name} ${place.description || ''} ${(place.services || []).join(' ')}`
+    .toLowerCase()
+    .replace(/[_-]/g, ' ');
+  if (/\b(buka|bukateria)\b/.test(text)) return 'buka';
+  if (/\bfine dining\b/.test(text)) return 'fine';
+  return 'restaurant';
+}
+
+function directoryPlaceMatches(place, mode, cuisine, search) {
+  const type = directoryPlaceType(place);
+  const terms = `${place.name} ${place.description || ''} ${place.address || ''} ${place.city || ''} ${place.phone || ''} ${place.hours || ''} ${(place.services || []).join(' ')}`
+    .toLowerCase()
+    .replace(/[_-]/g, ' ');
+  const matchesMode = mode === 'all' || type === mode;
+  const matchesCuisine = cuisine === 'all' || terms.includes(cuisine);
+  return matchesMode && matchesCuisine && (!search.trim() || terms.includes(search.trim().toLowerCase()));
+}
+
 const cash = n => `₦${Number(n).toLocaleString('en-NG')}`;
 
 function Button({ title, onPress, secondary = false, style }) {
@@ -167,6 +207,10 @@ export default function FoodScreen() {
   const [mode, setMode] = useState('all');
   const [cuisine, setCuisine] = useState('all');
   const [search, setSearch] = useState('');
+  const [directoryListings, setDirectoryListings] = useState([]);
+  const [directoryError, setDirectoryError] = useState('');
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+  const [directoryReload, setDirectoryReload] = useState(0);
 
   const [location, setLocation] = useState('Victoria Island, Lagos');
   const [headerLocation, setHeaderLocation] = useState('Yaba, Lagos');
@@ -207,6 +251,30 @@ export default function FoodScreen() {
       ),
     [mode, cuisine, search],
   );
+
+  const filteredDirectory = useMemo(
+    () => directoryListings.filter(place => directoryPlaceMatches(place, mode, cuisine, search)),
+    [directoryListings, mode, cuisine, search],
+  );
+
+  useEffect(() => {
+    let active = true;
+    setDirectoryLoading(true);
+    setDirectoryError('');
+    fetchFoodCatalogue()
+      .then(rows => {
+        if (active) setDirectoryListings(rows.filter(row => row.is_orderable === false));
+      })
+      .catch(error => {
+        if (active) setDirectoryError(error.message || 'Could not load restaurant directory listings.');
+      })
+      .finally(() => {
+        if (active) setDirectoryLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [directoryReload]);
 
   const openDish = d => {
     setDish(d);
@@ -506,6 +574,57 @@ export default function FoodScreen() {
               </View>
             </Pressable>
           ))
+        )}
+
+        <Heading
+          title="Restaurant Directory"
+          subtitle="Browse local restaurants and bukas. These listings are not orderable on theKapita."
+          right={<Text style={s.count}>{filteredDirectory.length} places</Text>}
+        />
+        {directoryLoading ? (
+          <Text style={s.directoryState}>Loading restaurant directory...</Text>
+        ) : directoryError ? (
+          <View style={s.directoryError}>
+            <Text style={s.bodySmall}>{directoryError}</Text>
+            <Pressable onPress={() => setDirectoryReload(value => value + 1)}>
+              <Text style={s.link}>Retry loading ›</Text>
+            </Pressable>
+          </View>
+        ) : filteredDirectory.length === 0 ? (
+          <Text style={s.directoryState}>No directory places match these filters.</Text>
+        ) : (
+          filteredDirectory.map(place => {
+            const type = directoryPlaceType(place);
+            const details = [
+              [place.address, place.city].filter(Boolean).join(', '),
+              place.hours ? `Hours: ${place.hours}` : '',
+              place.phone ? `Phone: ${place.phone}` : '',
+              (place.services || []).join(' · '),
+            ].filter(Boolean);
+            const initials = place.name.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0].toUpperCase()).join('');
+            return (
+              <View key={place.id} style={s.vendorCard}>
+                <View style={s.directoryPlaceholder}>
+                  <Text style={s.directoryInitials}>{initials}</Text>
+                </View>
+                <View style={s.cardPad}>
+                  <View style={s.row}>
+                    <Text style={[s.cardTitle, { flex: 1 }]}>{place.name}</Text>
+                    <Text style={s.directoryType}>{type === 'buka' ? 'BUKA' : 'RESTAURANT'}</Text>
+                  </View>
+                  <Text style={s.directoryOnly}>Directory listing · Not orderable</Text>
+                  {details.map((line, index) => (
+                    <Text key={`${place.id}-${index}`} style={s.bodySmall}>{line}</Text>
+                  ))}
+                </View>
+              </View>
+            );
+          })
+        )}
+        {!directoryLoading && !directoryError && directoryListings.some(place => place.attribution) && (
+          <Text style={s.directoryAttribution}>
+            Restaurant directory data: {[...new Set(directoryListings.map(place => place.attribution).filter(Boolean))].join('; ')}
+          </Text>
         )}
 
         {/* Featured dishes */}
@@ -953,6 +1072,13 @@ const s = StyleSheet.create({
   sub: { fontSize: 11, color: C.muted, lineHeight: 16, marginTop: 3 },
   count: { fontSize: 10, fontWeight: '900', color: C.darkGreen, backgroundColor: C.pale, padding: 7, borderRadius: 18 },
   vendorCard: { borderRadius: 14, overflow: 'hidden', backgroundColor: C.white, borderWidth: 1, borderColor: C.border, marginBottom: 12 },
+  directoryPlaceholder: { height: 74, backgroundColor: C.pale, alignItems: 'center', justifyContent: 'center' },
+  directoryInitials: { color: C.darkGreen, fontSize: 24, fontWeight: '900' },
+  directoryType: { color: C.darkGreen, backgroundColor: C.pale, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5, fontSize: 9, fontWeight: '900' },
+  directoryOnly: { color: C.orange, fontSize: 10, fontWeight: '900', marginTop: 4 },
+  directoryState: { color: C.muted, fontSize: 12, textAlign: 'center', padding: 16 },
+  directoryError: { borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 14, marginBottom: 12 },
+  directoryAttribution: { color: C.muted, fontSize: 10, textAlign: 'center', marginBottom: 14 },
   vendorImage: { width: '100%', height: 135, backgroundColor: C.surface },
   cardPad: { padding: 12 },
   cardTitle: { fontSize: 14, fontWeight: '900', color: C.ink },

@@ -10,6 +10,7 @@ from django.utils import timezone
 from app import ledger
 from app.auth import issue_token_pair
 from app.models import Wallet
+from directory.models import Listing
 
 from .models import FoodOrder, MenuItem, Restaurant
 
@@ -63,6 +64,42 @@ class FoodTests(TestCase):
         self.r.is_active = False
         self.r.save()
         self.assertEqual(self.client.get("/api/food/restaurants/buka-one").status_code, 404)
+
+    def test_food_catalogue_includes_directory_places_as_non_orderable(self):
+        place = Listing.objects.create(
+            name="Iya Bisi Bukateria",
+            category=Listing.Category.RESTAURANTS,
+            address="Wuse 2",
+            city="Abuja",
+            phone="",
+            services=["Local Buka", "Suya"],
+            source=Listing.Source.OSM,
+            source_id="node/123",
+            status=Listing.Status.APPROVED,
+        )
+
+        response = self.client.get("/api/food/restaurants")
+        self.assertEqual(response.status_code, 200)
+        rows = response.json()
+        self.assertEqual({row["slug"] for row in rows}, {"buka-one", "fine-one", f"directory-{place.id}"})
+        directory_row = next(row for row in rows if row["slug"] == f"directory-{place.id}")
+        self.assertEqual(directory_row["id"], -place.id)
+        self.assertEqual(directory_row["category"], "buka")
+        self.assertEqual(directory_row["address"], "Wuse 2, Abuja")
+        self.assertEqual(directory_row["source"], "directory")
+        self.assertFalse(directory_row["is_orderable"])
+        self.assertFalse(directory_row["is_open"])
+        self.assertEqual(directory_row["attribution"], "\u00a9 OpenStreetMap contributors")
+        self.assertEqual(
+            self.client.get(f"/api/food/restaurants/{directory_row['slug']}").status_code,
+            404,
+        )
+        self.assertEqual(self.order(restaurant=directory_row["slug"], key="directory-order").status_code, 422)
+
+        buka_rows = self.client.get("/api/food/restaurants?category=buka").json()
+        self.assertEqual({row["slug"] for row in buka_rows}, {"buka-one", f"directory-{place.id}"})
+        search_rows = self.client.get("/api/food/restaurants?q=suya").json()
+        self.assertEqual([row["slug"] for row in search_rows], [f"directory-{place.id}"])
 
     # -- ordering + escrow
     def test_order_holds_total_in_escrow_and_is_idempotent(self):

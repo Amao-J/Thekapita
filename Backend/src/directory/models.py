@@ -9,6 +9,7 @@ class Listing(models.Model):
         HOSPITALS = "hospitals", "Hospital & Health"
         SCHOOLS = "schools", "School & Education"
         GOVERNMENT = "government", "Government Agency"
+        RESTAURANTS = "restaurants", "Restaurant & Food"
 
     class Tier(models.TextChoices):
         STANDARD = "standard", "Standard"
@@ -18,6 +19,10 @@ class Listing(models.Model):
         PENDING = "pending", "Pending review"
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
+
+    class Source(models.TextChoices):
+        USER = "user", "Submitted by a user"
+        OSM = "osm", "OpenStreetMap import"
 
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=12, choices=Category.choices, db_index=True)
@@ -35,10 +40,24 @@ class Listing(models.Model):
     )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
     is_verified = models.BooleanField(default=False)
+    # Where the record came from. Imported rows carry the provider's id so re-running an import updates them
+    # instead of duplicating them. (We never store Google Places content: see the import docs.)
+    source = models.CharField(max_length=8, choices=Source.choices, default=Source.USER, db_index=True)
+    source_id = models.CharField(max_length=40, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "source_id"], condition=~models.Q(source_id=""), name="uniq_listing_source_id"
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["status", "category"], name="listing_status_cat_idx"),
+            models.Index(fields=["latitude", "longitude"], name="listing_latlng_idx"),
+        ]
 
     def __str__(self):
         return self.name
