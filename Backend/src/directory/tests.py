@@ -3,6 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase, override_settings
+from unittest.mock import patch
 
 from app.auth import issue_token_pair
 
@@ -107,3 +108,129 @@ class DirectoryTests(TestCase):
         self.assertEqual(ok.status_code, 201, ok.content)
         self.assertEqual(self.call("post", "/api/directory/reports", {"listing_id": self.hosp.id, "issue_type": "Spam"}).status_code, 422)
         self.assertEqual(self.call("post", "/api/directory/reports", {"listing_id": 99999, "issue_type": "Business Permanently Closed"}).status_code, 404)
+
+
+class ListingImageTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user("photo-owner", "photo@example.com", "pw-12345")
+        self.other = User.objects.create_user("photo-other", "other@example.com", "pw-12345")
+        self.owner_auth = bearer(self.owner)
+        self.other_auth = bearer(self.other)
+        self.listing = Listing.objects.create(
+            name="Photo Listing", category="restaurants", address="Abuja", phone="",
+            owner=self.owner, status=Listing.Status.APPROVED,
+        )
+        self.imported = Listing.objects.create(
+            name="Imported Place", category="businesses", address="Lagos", phone="",
+            source=Listing.Source.OSM, source_id="node/123", status=Listing.Status.APPROVED,
+        )
+
+    def test_owner_requests_signed_upload_and_saves_only_the_s3_key(self):
+        key = f"directory/listings/{self.listing.id}/photo"
+        upload_url_path = f"/api/directory/listings/{self.listing.id}/image/upload-url"
+        upload_request = {"filename": "restaurant.png", "content_type": "image/png", "size": 512}
+        with patch("directory.api.storage.generate_presigned_upload", return_value={
+            "url": "https://bucket.example/upload", "fields": {"key": key, "Content-Type": "image/png"},
+        }) as presign:
+            response = self.client.post(
+                upload_url_path,
+                data=json.dumps(upload_request),
+                content_type="application/json",
+                **self.owner_auth,
+            )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json(), {
+            "key": key,
+            "upload_url": "https://bucket.example/upload",
+            "fields": {"key": key, "Content-Type": "image/png"},
+        })
+        presign.assert_called_once_with(key, "image/png")
+
+        with (
+            patch("directory.api.storage.inspect_uploaded_image", return_value={
+                "content_type": "image/png", "size": 512,
+            }),
+            patch("directory.models.generate_presigned_url", return_value="https://bucket.example/photo?signature=..."),
+        ):
+            attached = self.client.post(
+                f"/api/directory/listings/{self.listing.id}/image",
+                data=json.dumps({"key": key}),
+                content_type="application/json",
+                **self.owner_auth,
+            )
+            detail = self.client.get(f"/api/directory/listings/{self.listing.id}", **self.owner_auth).json()
+        self.assertEqual(attached.status_code, 200, attached.content)
+        self.assertEqual(attached.json()["image_key"], key)
+        self.assertEqual(detail["image_url"], "https://bucket.example/photo?signature=...")
+        self.assertTrue(detail["can_upload_image"])
+        other_detail = self.client.get(f"/api/directory/listings/{self.imported.id}", **self.other_auth).json()
+        self.assertFalse(other_detail["can_upload_image"])
+
+    def test_only_owner_or_staff_can_request_upload_and_keys_are_validated(self):
+        upload_url_path = f"/api/directory/listings/{self.listing.id}/image/upload-url"
+        upload_request = {"filename": "restaurant.png", "content_type": "image/png", "size": 512}
+        denied = self.client.post(
+            upload_url_path,
+            data=json.dumps(upload_request),
+            content_type="application/json",
+            **self.other_auth,
+        )
+        self.assertEqual(denied.status_code, 403)
+
+        invalid = self.client.post(
+            upload_url_path,
+            data=json.dumps({**upload_request, "filename": "restaurant.svg", "content_type": "image/svg+xml"}),
+            content_type="application/json",
+            **self.owner_auth,
+        )
+        self.assertEqual(invalid.status_code, 422)
+        oversize = self.client.post(
+            upload_url_path,
+            data=json.dumps({**upload_request, "size": 8 * 1024 * 1024 + 1}),
+            content_type="application/json",
+            **self.owner_auth,
+        )
+        self.assertEqual(oversize.status_code, 422)
+
+        wrong_key = self.client.post(
+            f"/api/directory/listings/{self.listing.id}/image",
+            data=json.dumps({"key": "directory/listings/someone-elses/photo"}),
+            content_type="application/json",
+            **self.owner_auth,
+        )
+        self.assertEqual(wrong_key.status_code, 422)
+        with patch("directory.api.storage.inspect_uploaded_image", return_value=None):
+            missing_object = self.client.post(
+                f"/api/directory/listings/{self.listing.id}/image",
+                data=json.dumps({"key": f"directory/listings/{self.listing.id}/photo"}),
+                content_type="application/json",
+                **self.owner_auth,
+            )
+        self.assertEqual(missing_object.status_code, 422)
+
+        key = f"directory/listings/{self.imported.id}/photo"
+        with (
+            patch("directory.api.storage.inspect_uploaded_image", return_value={
+                "content_type": "image/png", "size": 512,
+            }),
+            patch("directory.models.generate_presigned_url", return_value="https://bucket.example/photo"),
+        ):
+            denied_key = self.client.post(
+                f"/api/directory/listings/{self.imported.id}/image",
+                data=json.dumps({"key": key}),
+                content_type="application/json",
+                **self.other_auth,
+            )
+        self.assertEqual(denied_key.status_code, 403)
+
+        staff = User.objects.create_superuser("photo-admin", "admin@example.com", "pw-12345")
+        with patch("directory.api.storage.inspect_uploaded_image", return_value={
+            "content_type": "image/png", "size": 512,
+        }), patch("directory.models.generate_presigned_url", return_value="https://bucket.example/photo"):
+            staff_response = self.client.post(
+                f"/api/directory/listings/{self.imported.id}/image",
+                data=json.dumps({"key": key}),
+                content_type="application/json",
+                **bearer(staff),
+            )
+        self.assertEqual(staff_response.status_code, 200, staff_response.content)

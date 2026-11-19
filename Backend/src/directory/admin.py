@@ -5,11 +5,19 @@ from .models import Bookmark, Listing, Report, Review
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "tier", "status", "is_verified", "owner", "created_at")
+    list_display = ("name", "category", "tier", "status", "is_verified", "owner", "has_image", "created_at")
     list_filter = ("status", "category", "tier", "is_verified", "source")
     search_fields = ("name", "address", "phone", "owner__email")
+    fields = (
+        "name", "category", "description", "image_key", "address", "city", "phone", "hours", "services",
+        "tier", "latitude", "longitude", "owner", "status", "is_verified", "source", "source_id",
+    )
     actions = ["approve", "reject"]
     raw_id_fields = ("owner",)
+
+    @admin.display(boolean=True, description="Photo")
+    def has_image(self, listing):
+        return bool(listing.image_key)
 
     @admin.action(description="Approve selected listings")
     def approve(self, request, queryset):

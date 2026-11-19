@@ -605,7 +605,14 @@ export default function FoodScreen() {
             return (
               <View key={place.id} style={s.vendorCard}>
                 <View style={s.directoryPlaceholder}>
-                  <Text style={s.directoryInitials}>{initials}</Text>
+                  {place.image_url ? (
+                    <Image
+                      source={{ uri: place.image_url }}
+                      style={s.directoryImage}
+                      resizeMode="cover"
+                      accessibilityLabel={`${place.name} photo`}
+                    />
+                  ) : <Text style={s.directoryInitials}>{initials}</Text>}
                 </View>
                 <View style={s.cardPad}>
                   <View style={s.row}>
@@ -1073,6 +1080,7 @@ const s = StyleSheet.create({
   count: { fontSize: 10, fontWeight: '900', color: C.darkGreen, backgroundColor: C.pale, padding: 7, borderRadius: 18 },
   vendorCard: { borderRadius: 14, overflow: 'hidden', backgroundColor: C.white, borderWidth: 1, borderColor: C.border, marginBottom: 12 },
   directoryPlaceholder: { height: 74, backgroundColor: C.pale, alignItems: 'center', justifyContent: 'center' },
+  directoryImage: { width: '100%', height: 74 },
   directoryInitials: { color: C.darkGreen, fontSize: 24, fontWeight: '900' },
   directoryType: { color: C.darkGreen, backgroundColor: C.pale, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5, fontSize: 9, fontWeight: '900' },
   directoryOnly: { color: C.orange, fontSize: 10, fontWeight: '900', marginTop: 4 },

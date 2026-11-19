@@ -2,6 +2,7 @@ import math
 import re
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.db import IntegrityError
 from django.db.models import Avg, Case, Count, ExpressionWrapper, F, FloatField, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
@@ -11,9 +12,18 @@ from ninja.errors import HttpError
 from app.auth import JWTAuth
 from app.throttles import user_throttle
 
+from . import storage
 from .models import Bookmark, Listing, Report, Review
 
 router = Router()
+
+
+class OptionalJWTAuth(JWTAuth):
+    def __call__(self, request):
+        if not request.headers.get("Authorization"):
+            return AnonymousUser()
+        return super().__call__(request)
+
 
 REPORT_ISSUES = (
     "Phone Number Disconnected / Changed",
@@ -21,6 +31,12 @@ REPORT_ISSUES = (
     "Incorrect Operating Hours",
     "Duplicate Listing Record",
 )
+MAX_LISTING_IMAGE_BYTES = storage.MAX_IMAGE_BYTES
+LISTING_IMAGE_TYPES = {
+    "image/jpeg": {"jpg", "jpeg"},
+    "image/png": {"png"},
+    "image/webp": {"webp"},
+}
 
 
 # ---- schemas ----------------------------------------------------------------
@@ -32,6 +48,8 @@ class ListingOut(Schema):
     category_label: str
     description: str = ""
     address: str
+    image_url: str | None = None
+    can_upload_image: bool = False
     city: str = ""
     phone: str
     hours: str = ""
@@ -109,14 +127,17 @@ def _haversine_km(lat1, lng1, lat2, lng2):
     return 6371.0 * 2 * math.asin(math.sqrt(a))
 
 
-def _listing(l, near=None):
+def _listing(l, near=None, can_upload_image=False):
     dist = None
     if near and l.latitude is not None and l.longitude is not None:
         dist = round(_haversine_km(near[0], near[1], l.latitude, l.longitude), 2)
     avg = getattr(l, "avg_rating", None)
     return {
         "id": l.id, "name": l.name, "category": l.category, "category_label": l.get_category_display(),
-        "description": l.description, "address": l.address, "city": l.city, "phone": l.phone,
+        "description": l.description, "address": l.address,
+        "image_url": l.image_url,
+        "can_upload_image": can_upload_image,
+        "city": l.city, "phone": l.phone,
         "hours": l.hours, "services": l.services or [], "tier": l.tier, "is_verified": l.is_verified,
         "attribution": ATTRIBUTION.get(l.source),
         "latitude": l.latitude, "longitude": l.longitude,
@@ -203,7 +224,7 @@ def search(request, q: str, lat: float | None = None, lng: float | None = None):
     return {"intent": intent, "results": [_listing(l, near) for l in _ranked(qs, near, 60, 0)]}
 
 
-@router.get("/listings/{listing_id}", response=ListingDetailOut)
+@router.get("/listings/{listing_id}", response=ListingDetailOut, auth=OptionalJWTAuth())
 def get_listing(request, listing_id: int):
     l = _approved().filter(pk=listing_id).first()
     if l is None:
@@ -213,7 +234,73 @@ def get_listing(request, listing_id: int):
          "comment": r.comment, "created_at": r.created_at.isoformat()}
         for r in l.reviews.select_related("user")[:30]
     ]
-    return {**_listing(l), "reviews": reviews}
+    user = request.auth
+    can_upload_image = bool(
+        user and user.is_authenticated and (user.is_staff or l.owner_id == user.id)
+    )
+    return {**_listing(l, can_upload_image=can_upload_image), "reviews": reviews}
+
+
+class ListingImageUploadIn(Schema):
+    filename: str = Field(min_length=1, max_length=255)
+    content_type: str = Field(min_length=1, max_length=50)
+    size: int = Field(gt=0, le=MAX_LISTING_IMAGE_BYTES)
+
+
+class ListingImageKeyIn(Schema):
+    key: str = Field(min_length=1, max_length=512)
+
+
+def _image_upload_listing(listing_id, user):
+    listing = Listing.objects.filter(pk=listing_id).first()
+    if listing is None:
+        raise HttpError(404, "Listing not found.")
+    if listing.owner_id != user.id and not user.is_staff:
+        raise HttpError(403, "Only the listing owner or directory staff can upload a photo.")
+    return listing
+
+
+@router.post("/listings/{listing_id}/image/upload-url", auth=JWTAuth(),
+             throttle=[user_throttle("dir_image_url", "20/h")])
+def create_listing_image_upload(request, listing_id: int, payload: ListingImageUploadIn):
+    listing = _image_upload_listing(listing_id, request.auth)
+    extensions = LISTING_IMAGE_TYPES.get(payload.content_type)
+    extension = payload.filename.rsplit(".", 1)[-1].lower() if "." in payload.filename else ""
+    if extensions is None or extension not in extensions:
+        raise HttpError(422, "Upload a JPEG, PNG, or WebP image with a matching file extension.")
+
+    key = f"directory/listings/{listing.id}/photo"
+    try:
+        upload = storage.generate_presigned_upload(key, payload.content_type)
+    except storage.S3ImageStorageError as exc:
+        raise HttpError(503, str(exc)) from exc
+    return {"key": key, "upload_url": upload["url"], "fields": upload["fields"]}
+
+
+@router.post("/listings/{listing_id}/image", auth=JWTAuth(),
+             throttle=[user_throttle("dir_image_confirm", "20/h")])
+def confirm_listing_image_upload(request, listing_id: int, payload: ListingImageKeyIn):
+    listing = _image_upload_listing(listing_id, request.auth)
+    expected_key = f"directory/listings/{listing.id}/photo"
+    if payload.key != expected_key:
+        raise HttpError(422, "The image key was not issued for this listing.")
+
+    try:
+        image = storage.inspect_uploaded_image(payload.key)
+    except storage.S3ImageStorageError as exc:
+        raise HttpError(503, str(exc)) from exc
+    if image is None:
+        raise HttpError(422, "Upload the image to private storage before saving its key.")
+    if image["content_type"] not in LISTING_IMAGE_TYPES or not 0 < image["size"] <= MAX_LISTING_IMAGE_BYTES:
+        raise HttpError(422, "The stored image must be a JPEG, PNG, or WebP no larger than 8 MB.")
+
+    listing.image_key = payload.key
+    listing.save(update_fields=["image_key", "updated_at"])
+    try:
+        image_url = listing.image_url
+    except storage.S3ImageStorageError as exc:
+        raise HttpError(503, str(exc)) from exc
+    return {"id": listing.id, "image_key": listing.image_key, "image_url": image_url}
 
 
 # ---- signed-in actions -------------------------------------------------------

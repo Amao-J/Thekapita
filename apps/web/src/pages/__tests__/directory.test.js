@@ -17,6 +17,7 @@ const IDS = ['directoryGrid', 'aiParsedFeedback', 'aiParsedText', 'directorySear
 const listing = (id, over = {}) => ({
   id, name: `Place ${id}`, category: 'restaurants', category_label: 'Restaurant & Food', description: '', address: 'Wuse 2, Abuja',
   city: 'Abuja', phone: '', hours: '', services: [], tier: 'standard', is_verified: false, attribution: null,
+  image_url: null, can_upload_image: false,
   latitude: null, longitude: null, rating: null, review_count: 0, distance_km: null, ...over,
 });
 const OSM = '\u00A9 OpenStreetMap contributors';
@@ -85,6 +86,13 @@ describe.skipIf(!jsdom)('directory page', () => {
 
     await boot([listing(1), listing(2)]);
     expect($('directoryAttribution').hidden).toBe(true);
+  });
+
+  it('renders an uploaded listing photo in its card', async () => {
+    await boot([listing(1, { image_url: 'https://bucket.example/photo.jpg' })]);
+    const image = document.querySelector('.entity-logo-box img');
+    expect(image.getAttribute('src')).toBe('https://bucket.example/photo.jpg');
+    expect(image.getAttribute('alt')).toBe('Place 1 photo');
   });
 
   it('the detail view handles a listing with no phone, shows its credit, and cannot be used to inject HTML', async () => {

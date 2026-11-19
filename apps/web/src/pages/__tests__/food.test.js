@@ -30,6 +30,7 @@ const listing = (id, over = {}) => ({
   phone: '',
   hours: '',
   services: [],
+  image_url: 'https://bucket.example/place.jpg',
   tier: 'standard',
   is_verified: false,
   attribution: OSM,
@@ -90,6 +91,7 @@ describe.skipIf(!jsdom)('food page directory listings', () => {
     expect($('#directoryCountTag').textContent).toBe('101 Listings');
     expect(document.querySelector('#restaurantDirectoryList button.btn-see-menu')).toBeNull();
     expect(document.querySelector('#restaurantDirectoryList').textContent).toContain('Not orderable');
+    expect(document.querySelector('#restaurantDirectoryList img').getAttribute('src')).toBe('https://bucket.example/place.jpg');
     expect(mocks.request.mock.calls.map(([path]) =>
       new URL(path, 'http://localhost').searchParams.get('offset'),
     )).toEqual(['0', '100']);

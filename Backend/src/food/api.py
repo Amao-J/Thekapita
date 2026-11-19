@@ -224,7 +224,7 @@ def _directory_restaurant(listing):
         "category_label": listing.get_category_display(),
         "tags": listing.services or [],
         "description": listing.description,
-        "image_url": None,
+        "image_url": listing.image_url,
         "address": address,
         "phone": listing.phone,
         "hours": listing.hours,

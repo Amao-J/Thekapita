@@ -59,6 +59,8 @@ export const ENDPOINTS = Object.freeze({
   directory: {
     listings: '/directory/listings',
     listing: (id) => `/directory/listings/${id}`,
+    listingImage: (id) => `/directory/listings/${id}/image`,
+    listingImageUploadUrl: (id) => `/directory/listings/${id}/image/upload-url`,
     search: '/directory/search',
     reviews: (id) => `/directory/listings/${id}/reviews`,
     bookmark: (id) => `/directory/listings/${id}/bookmark`,

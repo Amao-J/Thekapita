@@ -1,16 +1,12 @@
-"""Turn OpenStreetMap places into directory listings.
 
-Why OpenStreetMap and not Google Places: Google's terms let you cache a place_id (and coordinates for 30 days) but
-not names, addresses or phone numbers, and bar Places content from non-Google maps, so a copied directory of
-Google data is not allowed. OSM data may be stored and reused if you credit "(c) OpenStreetMap contributors"
-(the listing API returns that credit in `attribution`). OSM is under the ODbL licence, which also has share-alike
-terms for *databases* you publish; get that checked by someone qualified before you expose a bulk export.
-"""
 import json
 import re
+import sqlite3
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 from django.db import transaction
 
@@ -19,10 +15,36 @@ from .models import Listing
 # Approximate box around Abuja city (S, W, N, E): Kubwa and Gwarinpa in the north-west, Lugbe south, Karu / Nyanya
 # east. It is a rectangle, not the city limit; adjust with --bbox.
 ABUJA_BBOX = (8.85, 7.15, 9.25, 7.65)
+LAGOS_BBOX = (6.30, 2.70, 6.80, 3.75)
+CITY_BBOXES = {"Abuja": ABUJA_BBOX, "Lagos": LAGOS_BBOX}
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 USER_AGENT = "theKapita-directory-import/1.0"
 FOOD_AMENITIES = ("restaurant", "fast_food", "cafe", "food_court")
 AMENITY_LABEL = {"fast_food": "Fast food", "cafe": "Cafe", "food_court": "Food court"}
+CATEGORY_TAGS = {
+    Listing.Category.RESTAURANTS: {
+        "amenity": set(FOOD_AMENITIES),
+    },
+    Listing.Category.HOSPITALS: {
+        "amenity": {"hospital", "clinic", "doctors", "dentist", "pharmacy"},
+        "healthcare": {"hospital", "clinic", "doctor", "dentist", "pharmacy", "laboratory",
+                       "physiotherapist", "rehabilitation", "blood_donation", "birthing_centre"},
+    },
+    Listing.Category.SCHOOLS: {
+        "amenity": {"school", "college", "university", "kindergarten", "language_school", "music_school"},
+        "office": {"educational_institution"},
+    },
+    Listing.Category.GOVERNMENT: {
+        "office": {"government"},
+        "amenity": {"police", "fire_station", "courthouse", "townhall", "embassy", "prison"},
+    },
+    Listing.Category.BUSINESSES: {
+        "shop": None,
+        "craft": None,
+        "office": None,
+    },
+}
+ALL_CATEGORIES = tuple(CATEGORY_TAGS)
 BATCH = 500
 
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]+")
@@ -54,14 +76,34 @@ def fetch_overpass(bbox, url=OVERPASS_URL, timeout=120):
         raise ImportErrorMessage("Overpass returned something that is not JSON (it may have timed out).") from None
 
 
-def read_pbf(path, bbox):
-    """Read food-place objects from a local OSM PBF extract within bbox."""
+def _bboxes(bbox):
+    if isinstance(bbox, dict):
+        return [(name, tuple(bounds)) for name, bounds in bbox.items()]
+    return [("", tuple(bbox))]
+
+
+def _inside(lat, lon, boxes):
+    return next(
+        (name for name, (south, west, north, east) in boxes
+         if south <= lat <= north and west <= lon <= east),
+        None,
+    )
+
+
+def read_pbf(path, bbox, categories=None):
+    """Read supported directory places from a local OSM PBF extract within one or more boxes."""
     try:
         import osmium
     except ImportError:
         raise ImportErrorMessage("PBF imports require pyosmium; install the backend requirements first.") from None
 
-    south, west, north, east = bbox
+    boxes = _bboxes(bbox)
+    selected = set(categories or ALL_CATEGORIES)
+    tag_keys = {
+        key
+        for category in selected
+        for key in CATEGORY_TAGS.get(category, {})
+    }
 
     def center(points):
         points = [(lat, lon) for lat, lon in points if -90 <= lat <= 90 and -180 <= lon <= 180]
@@ -70,81 +112,119 @@ def read_pbf(path, bbox):
         latitudes, longitudes = zip(*points)
         return (min(latitudes) + max(latitudes)) / 2, (min(longitudes) + max(longitudes)) / 2
 
+    def nearby_locations(connection, node_ids):
+        points = []
+        node_ids = tuple(set(node_ids))
+        for start in range(0, len(node_ids), 500):
+            batch = node_ids[start:start + 500]
+            placeholders = ",".join("?" for _ in batch)
+            points.extend(
+                (lat, lon)
+                for lat, lon in connection.execute(
+                    f"SELECT lat, lon FROM node_locations WHERE id IN ({placeholders})", batch
+                )
+            )
+        return points
+
     try:
-        food_ways = {}
-        food_relations = {}
-        elements = []
-        food_filter = osmium.filter.TagFilter(*(("amenity", value) for value in FOOD_AMENITIES))
-        food_filter.enable_for(osmium.osm.NODE | osmium.osm.WAY | osmium.osm.RELATION)
-        for obj in osmium.FileProcessor(path).with_filter(food_filter):
-            if obj.is_node():
-                if not obj.location.valid():
-                    continue
-                tags = {tag.k: tag.v for tag in obj.tags}
-                lat, lon = obj.location.lat, obj.location.lon
-                if (
-                    tags.get("amenity") in FOOD_AMENITIES
-                    and south <= lat <= north
-                    and west <= lon <= east
-                ):
-                    elements.append({"type": "node", "id": obj.id, "lat": lat, "lon": lon, "tags": tags})
-            elif obj.is_way():
-                tags = {tag.k: tag.v for tag in obj.tags}
-                if tags.get("amenity") in FOOD_AMENITIES:
-                    food_ways[obj.id] = (tags, tuple(node.ref for node in obj.nodes))
-            elif obj.is_relation():
-                tags = {tag.k: tag.v for tag in obj.tags}
-                if tags.get("amenity") in FOOD_AMENITIES:
-                    members = tuple(
-                        (member.type, member.ref) for member in obj.members if member.type in ("n", "w")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            connection = sqlite3.connect(Path(temp_dir) / "locations.sqlite3")
+            try:
+                connection.execute("PRAGMA journal_mode=OFF")
+                connection.execute("PRAGMA synchronous=OFF")
+                connection.execute("CREATE TABLE node_locations (id INTEGER PRIMARY KEY, lat REAL, lon REAL)")
+                pending = []
+
+                class LocationIndexer(osmium.SimpleHandler):
+                    def node(self, node):
+                        if not node.location.valid():
+                            return
+                        lat, lon = node.location.lat, node.location.lon
+                        if any(
+                            south - 0.05 <= lat <= north + 0.05
+                            and west - 0.05 <= lon <= east + 0.05
+                            for _, (south, west, north, east) in boxes
+                        ):
+                            pending.append((node.id, lat, lon))
+                            if len(pending) >= BATCH * 10:
+                                connection.executemany(
+                                    "INSERT OR REPLACE INTO node_locations VALUES (?, ?, ?)", pending
+                                )
+                                pending.clear()
+
+                LocationIndexer().apply_file(path)
+                if pending:
+                    connection.executemany("INSERT OR REPLACE INTO node_locations VALUES (?, ?, ?)", pending)
+                connection.commit()
+
+                object_relations = {}
+                elements = []
+                place_filter = osmium.filter.KeyFilter(*tag_keys)
+                place_filter.enable_for(osmium.osm.NODE | osmium.osm.WAY | osmium.osm.RELATION)
+                for obj in osmium.FileProcessor(path).with_filter(place_filter):
+                    tags = {tag.k: tag.v for tag in obj.tags}
+                    category = category_for_tags(tags, selected)
+                    if category is None:
+                        continue
+                    if obj.is_node():
+                        if not obj.location.valid():
+                            continue
+                        lat, lon = obj.location.lat, obj.location.lon
+                        city = _inside(lat, lon, boxes)
+                        if city is not None:
+                            elements.append({
+                                "type": "node", "id": obj.id, "lat": lat, "lon": lon, "tags": tags, "city": city,
+                            })
+                    elif obj.is_way():
+                        point = center(nearby_locations(connection, (node.ref for node in obj.nodes)))
+                        if point is not None:
+                            lat, lon = point
+                            city = _inside(lat, lon, boxes)
+                            if city is not None:
+                                elements.append({
+                                    "type": "way", "id": obj.id, "lat": lat, "lon": lon, "tags": tags,
+                                    "city": city,
+                                })
+                    elif obj.is_relation():
+                        members = tuple(
+                            (member.type, member.ref) for member in obj.members if member.type in ("n", "w")
+                        )
+                        object_relations[obj.id] = (tags, members)
+
+                relation_way_ids = {
+                    ref for _, members in object_relations.values() for kind, ref in members if kind == "w"
+                }
+                relation_ways = {}
+                if relation_way_ids:
+                    relation_way_filter = osmium.filter.IdFilter(relation_way_ids)
+                    relation_way_filter.enable_for(osmium.osm.WAY)
+                    for obj in osmium.FileProcessor(path).with_filter(relation_way_filter):
+                        if obj.id in relation_way_ids:
+                            relation_ways[obj.id] = nearby_locations(
+                                connection, (node.ref for node in obj.nodes)
+                            )
+
+                for object_id, (tags, members) in object_relations.items():
+                    points = nearby_locations(
+                        connection, (ref for kind, ref in members if kind == "n")
                     )
-                    food_relations[obj.id] = (tags, members)
-
-        relation_way_ids = {
-            ref for _, members in food_relations.values() for kind, ref in members if kind == "w"
-        } - food_ways.keys()
-        relation_ways = {}
-        if relation_way_ids:
-            relation_way_filter = osmium.filter.IdFilter(relation_way_ids)
-            relation_way_filter.enable_for(osmium.osm.WAY)
-            for obj in osmium.FileProcessor(path).with_filter(relation_way_filter):
-                if obj.id in relation_way_ids:
-                    relation_ways[obj.id] = tuple(node.ref for node in obj.nodes)
-
-        node_ids = {
-            ref for _, refs in food_ways.values() for ref in refs
-        } | {
-            ref for _, members in food_relations.values() for kind, ref in members if kind == "n"
-        } | {
-            ref for refs in relation_ways.values() for ref in refs
-        }
-        locations = {}
-        if node_ids:
-            node_filter = osmium.filter.IdFilter(node_ids)
-            node_filter.enable_for(osmium.osm.NODE)
-            for obj in osmium.FileProcessor(path).with_filter(node_filter):
-                if obj.id in node_ids and obj.location.valid():
-                    locations[obj.id] = (obj.location.lat, obj.location.lon)
-
-        def append_feature(kind, object_id, tags, refs):
-            point = center(locations[ref] for ref in refs if ref in locations)
-            if point is None:
-                return
-            lat, lon = point
-            if south <= lat <= north and west <= lon <= east:
-                elements.append({"type": kind, "id": object_id, "lat": lat, "lon": lon, "tags": tags})
-
-        for object_id, (tags, refs) in food_ways.items():
-            append_feature("way", object_id, tags, refs)
-        for object_id, (tags, members) in food_relations.items():
-            refs = [ref for kind, ref in members if kind == "n"]
-            for kind, way_id in members:
-                if kind == "w":
-                    refs.extend(relation_ways.get(way_id, ()))
-            append_feature("relation", object_id, tags, refs)
-    except (OSError, RuntimeError) as exc:
+                    for kind, way_id in members:
+                        if kind == "w":
+                            points.extend(relation_ways.get(way_id, ()))
+                    point = center(points)
+                    if point is not None:
+                        lat, lon = point
+                        city = _inside(lat, lon, boxes)
+                        if city is not None:
+                            elements.append({
+                                "type": "relation", "id": object_id, "lat": lat, "lon": lon,
+                                "tags": tags, "city": city,
+                            })
+                return elements
+            finally:
+                connection.close()
+    except (OSError, RuntimeError, sqlite3.Error) as exc:
         raise ImportErrorMessage(f"Could not read OSM PBF file '{path}': {exc}") from None
-    return elements
 
 
 def _clean(value, limit):
@@ -183,14 +263,41 @@ def _services(tags):
             out.append(text)
     if tags.get("internet_access") in ("wlan", "yes"):
         out.append("Wi-Fi")
+    for key in ("healthcare", "shop", "craft", "office"):
+        value = tags.get(key)
+        if value and value not in ("yes", "no", "government", "educational_institution"):
+            label = value.replace("_", " ").title()
+            if label not in out:
+                out.append(label)
     return out[:10]
 
 
-def element_to_fields(el, city="Abuja"):
+def category_for_tags(tags, categories=None):
+    selected = set(categories or ALL_CATEGORIES)
+    amenity = tags.get("amenity")
+    priority = (
+        Listing.Category.RESTAURANTS,
+        Listing.Category.HOSPITALS,
+        Listing.Category.SCHOOLS,
+        Listing.Category.GOVERNMENT,
+        Listing.Category.BUSINESSES,
+    )
+    for category in priority:
+        if category not in selected:
+            continue
+        for key, values in CATEGORY_TAGS[category].items():
+            value = tags.get(key)
+            if value and (values is None or value in values):
+                return category
+    return None
+
+
+def element_to_fields(el, city="Abuja", categories=None):
     """One Overpass element -> dict of Listing fields, or None when it is not usable (and why is not needed:
     the caller counts it as skipped)."""
     tags = el.get("tags") or {}
-    if tags.get("amenity") not in FOOD_AMENITIES:
+    category = category_for_tags(tags, categories)
+    if category is None:
         return None
     name = _clean(tags.get("name") or tags.get("name:en"), 150)
     if not name:
@@ -206,9 +313,9 @@ def element_to_fields(el, city="Abuja"):
     return {
         "source_id": f'{el["type"]}/{el["id"]}',
         "name": name,
-        "category": Listing.Category.RESTAURANTS,
-        "address": _address(tags, city) or city,
-        "city": city,
+        "category": category,
+        "address": _address(tags, el.get("city") or city) or el.get("city") or city,
+        "city": el.get("city") or city,
         "phone": _first_phone(tags),
         "hours": _clean(tags.get("opening_hours"), 120),
         "services": _services(tags),
@@ -220,15 +327,19 @@ def element_to_fields(el, city="Abuja"):
 IMPORTED = ("name", "category", "address", "city", "phone", "hours", "services", "latitude", "longitude")
 
 
-def import_elements(elements, city="Abuja", dry_run=False):
+def import_elements(elements, city="Abuja", dry_run=False, categories=None):
     """Create or refresh listings from Overpass elements. Safe to re-run: rows are matched on (source, source_id).
 
     Never touches a listing that has an owner: a business that claimed its listing keeps its own edits.
     Returns counts: created, updated, unchanged, claimed (left alone), skipped (unusable)."""
     stats = {"created": 0, "updated": 0, "unchanged": 0, "claimed": 0, "skipped": 0}
+    selected = set(categories or ALL_CATEGORIES)
     wanted = {}
     for el in elements:
-        fields = element_to_fields(el, city)
+        tags = el.get("tags") or {}
+        if category_for_tags(tags, selected) is None:
+            continue
+        fields = element_to_fields(el, city, selected)
         if fields is None:
             stats["skipped"] += 1
         else:

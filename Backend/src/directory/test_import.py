@@ -30,7 +30,7 @@ FIXTURE = {"elements": [
     {"type": "way", "id": 77, "center": {"lat": 9.06, "lon": 7.5}, "tags": {"amenity": "fast_food", "name": "Quick Bites"}},
     {"type": "relation", "id": 5, "center": {"lat": 9.07, "lon": 7.51}, "tags": {"amenity": "cafe", "name": "Cafe Uno"}},
     {"type": "node", "id": 9, "lat": 9.1, "lon": 7.4, "tags": {"amenity": "restaurant"}},                 # no name
-    {"type": "node", "id": 10, "lat": 9.1, "lon": 7.4, "tags": {"amenity": "pharmacy", "name": "Not food"}},  # wrong kind
+    {"type": "node", "id": 10, "lat": 9.1, "lon": 7.4, "tags": {"amenity": "drinking_water", "name": "Not a directory place"}},
     {"type": "node", "id": 11, "tags": {"amenity": "restaurant", "name": "No position"}},                     # no coords
     {"type": "node", "id": 12, "lat": 999, "lon": 7.4, "tags": {"amenity": "restaurant", "name": "Bad lat"}},  # invalid
 ]}
@@ -67,6 +67,31 @@ class MappingTests(TestCase):
     def test_missing_phone_is_empty_not_none(self):
         self.assertEqual(importers.element_to_fields(node(4))["phone"], "")
 
+    def test_maps_supported_directory_categories_from_osm_tags(self):
+        examples = [
+            ({"amenity": "hospital"}, "hospitals"),
+            ({"healthcare": "pharmacy"}, "hospitals"),
+            ({"amenity": "school"}, "schools"),
+            ({"office": "government"}, "government"),
+            ({"shop": "supermarket"}, "businesses"),
+            ({"craft": "carpenter"}, "businesses"),
+        ]
+        for index, (tags, category) in enumerate(examples, 20):
+            with self.subTest(category=category, tags=tags):
+                mapped = importers.element_to_fields({
+                    "type": "node", "id": index, "lat": 9.05, "lon": 7.49,
+                    "tags": {"name": "Place", **tags},
+                })
+                self.assertEqual(mapped["category"], category)
+
+    def test_category_selection_limits_import_mapping(self):
+        place = node(30, amenity="school")
+        self.assertIsNone(importers.element_to_fields(place, categories=("restaurants",)))
+        self.assertEqual(
+            importers.element_to_fields(place, categories=("schools",))["category"],
+            "schools",
+        )
+
 
 class ImportTests(TestCase):
     def run_import(self, elements=None, **kw):
@@ -74,13 +99,13 @@ class ImportTests(TestCase):
 
     def test_creates_approved_unverified_osm_listings(self):
         stats = self.run_import()
-        self.assertEqual(stats, {"created": 3, "updated": 0, "unchanged": 0, "claimed": 0, "skipped": 4})
+        self.assertEqual(stats, {"created": 3, "updated": 0, "unchanged": 0, "claimed": 0, "skipped": 3})
         l = Listing.objects.get(source_id="node/1")
         self.assertEqual((l.status, l.source, l.is_verified, l.owner_id), ("approved", "osm", False, None))
 
     def test_rerunning_is_idempotent_and_refreshes_changes(self):
         self.run_import()
-        self.assertEqual(self.run_import(), {"created": 0, "updated": 0, "unchanged": 3, "claimed": 0, "skipped": 4})
+        self.assertEqual(self.run_import(), {"created": 0, "updated": 0, "unchanged": 3, "claimed": 0, "skipped": 3})
         changed = [node(1, "Mama Put Kitchen Renamed", lat=9.05, lon=7.49)] + FIXTURE["elements"][1:3]
         stats = self.run_import(changed)
         self.assertEqual((stats["created"], stats["updated"], stats["unchanged"]), (0, 1, 2))
@@ -129,6 +154,9 @@ class PBFReadTests(TestCase):
             def with_filter(self, _filter):
                 return self
 
+            def with_locations(self, storage="flex_mem"):
+                return self
+
             def __iter__(self):
                 return iter(self.objects)
 
@@ -144,10 +172,13 @@ class PBFReadTests(TestCase):
                 return True
 
         class Object:
-            def __init__(self, kind, object_id, tags, refs=(), location=None, members=()):
+            def __init__(self, kind, object_id, tags, refs=(), node_locations=(), location=None, members=()):
                 self.kind, self.id = kind, object_id
                 self.tags = [Tag(*tag) for tag in tags.items()]
-                self.nodes = [type("NodeRef", (), {"ref": ref})() for ref in refs]
+                self.nodes = [
+                    type("NodeRef", (), {"ref": ref, "location": node_locations[index]})()
+                    for index, ref in enumerate(refs)
+                ]
                 self.location = location
                 self.members = [type("Member", (), {"type": kind, "ref": ref})() for kind, ref in members]
 
@@ -165,20 +196,32 @@ class PBFReadTests(TestCase):
                    location=Location(9.0, 7.3)),
             Object("node", 2, {"amenity": "restaurant", "name": "Outside"},
                    location=Location(10.0, 7.3)),
-            Object("way", 10, {"amenity": "fast_food", "name": "Way Eatery"}, refs=(100, 101)),
+            Object("way", 10, {"amenity": "fast_food", "name": "Way Eatery"}, refs=(100, 101),
+                   node_locations=(Location(9.0, 7.3), Location(9.1, 7.5))),
             Object("relation", 20, {"amenity": "cafe", "name": "Relation Cafe"}, members=(("w", 30),)),
         ]
-        relation_ways = [Object("way", 30, {}, refs=(102, 103))]
+        relation_ways = [Object("way", 30, {}, refs=(102, 103),
+                                node_locations=(Location(9.08, 7.4), Location(9.12, 7.6)))]
         nodes = [
             Object("node", 100, {}, location=Location(9.0, 7.3)),
             Object("node", 101, {}, location=Location(9.1, 7.5)),
             Object("node", 102, {}, location=Location(9.08, 7.4)),
             Object("node", 103, {}, location=Location(9.12, 7.6)),
         ]
-        with mock.patch("osmium.FileProcessor", side_effect=[
-            FakeProcessor(first_pass), FakeProcessor(relation_ways), FakeProcessor(nodes),
-        ]):
-            elements = importers.read_pbf("extract.osm.pbf", importers.ABUJA_BBOX)
+        class FakeSimpleHandler:
+            def apply_file(self, _path):
+                for obj in nodes:
+                    self.node(obj)
+
+        with (
+            mock.patch("osmium.SimpleHandler", FakeSimpleHandler),
+            mock.patch("osmium.FileProcessor", side_effect=[
+                FakeProcessor(first_pass), FakeProcessor(relation_ways),
+            ]),
+        ):
+            elements = importers.read_pbf(
+                "extract.osm.pbf", importers.ABUJA_BBOX, ("restaurants",)
+            )
 
         self.assertEqual([(el["type"], el["id"]) for el in elements], [
             ("node", 1), ("way", 10), ("relation", 20),
@@ -206,8 +249,36 @@ class CommandTests(TestCase):
     def test_pbf_option_reads_local_extract_with_the_requested_bbox(self):
         with mock.patch.object(importers, "read_pbf", return_value=FIXTURE["elements"]) as read_pbf:
             out = self.call("--pbf", "nigeria.osm.pbf", "--bbox", "8.9,7.2,9.2,7.6", "--dry-run")
-        read_pbf.assert_called_once_with("nigeria.osm.pbf", (8.9, 7.2, 9.2, 7.6))
+        read_pbf.assert_called_once_with("nigeria.osm.pbf", (8.9, 7.2, 9.2, 7.6), ("restaurants",))
         self.assertIn("Would change: 3 new", out)
+
+    def test_pbf_command_accepts_city_boxes_and_all_categories(self):
+        with mock.patch.object(importers, "read_pbf", return_value=FIXTURE["elements"]) as read_pbf:
+            out = self.call("--pbf", "nigeria.osm.pbf", "--cities", "Abuja,Lagos",
+                            "--categories", "all", "--dry-run")
+        read_pbf.assert_called_once_with(
+            "nigeria.osm.pbf", importers.CITY_BBOXES, importers.ALL_CATEGORIES
+        )
+        self.assertIn("Would change: 3 new", out)
+
+    def test_pbf_command_exports_reusable_json_snapshot(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            export_path = fh.name
+        self.addCleanup(os.unlink, export_path)
+        with mock.patch.object(importers, "read_pbf", return_value=FIXTURE["elements"]):
+            out = self.call(
+                "--pbf", "nigeria.osm.pbf", "--cities", "Abuja,Lagos", "--categories", "all",
+                "--export-json", export_path, "--dry-run",
+            )
+        with open(export_path, encoding="utf-8") as fh:
+            snapshot = json.load(fh)
+        self.assertIn("Saved PBF data snapshot", out)
+        self.assertEqual(snapshot["source"], "OpenStreetMap")
+        self.assertEqual(snapshot["cities"], ["Abuja", "Lagos"])
+        self.assertEqual(snapshot["elements"], FIXTURE["elements"])
+        self.assertIn("Would change: 3 new", self.call(
+            "--file", export_path, "--categories", "all", "--dry-run"
+        ))
 
     def test_bad_input_gives_clear_errors(self):
         with self.assertRaises(CommandError):

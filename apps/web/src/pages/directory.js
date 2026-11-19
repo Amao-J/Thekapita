@@ -121,9 +121,16 @@ function renderGrid(rows = state.listings) {
 
 function card(l) {
   const saved = state.bookmarks.has(l.id);
+  const logo = h('div', { class: 'entity-logo-box' },
+    l.image_url
+      ? h('img', {
+        src: l.image_url, alt: `${l.name} photo`, loading: 'lazy',
+        style: 'width:100%;height:100%;object-fit:cover;border-radius:inherit;',
+      })
+      : initials(l.name));
   return h('article', { class: 'directory-card entity-card' + (l.tier === 'sponsored' ? ' sponsored' : '') },
     h('div', { class: 'entity-header' },
-      h('div', { class: 'entity-logo-box' }, initials(l.name)),
+      logo,
       h('div', {},
         h('h3', { class: 'entity-name' }, l.name, l.is_verified ? h('span', { class: 'material-symbols-outlined', title: 'Verified', style: 'font-size:16px;color:#008a57;vertical-align:middle;margin-left:4px;' }, 'verified') : null),
         h('span', { class: 'entity-category' }, l.category_label),
@@ -212,12 +219,19 @@ async function detectUserLocation() {
 
 async function openDetail(id) {
   try {
-    const l = await request(ENDPOINTS.directory.listing(id));
+    const l = await (isAuthenticated()
+      ? authorizedRequest(ENDPOINTS.directory.listing(id))
+      : request(ENDPOINTS.directory.listing(id)));
     state.selected = l;
     state.rating = 0;
     setText('modalLogo', initials(l.name));
     setText('modalTitle', l.name);
     setText('modalCategory', l.category_label);
+    $('modalImage').src = l.image_url || '';
+    $('modalImage').alt = l.image_url ? `${l.name} photo` : '';
+    $('modalImage').hidden = !l.image_url;
+    $('modalImageUploadForm').hidden = !l.can_upload_image;
+    $('modalImageInput').value = '';
     setText('modalAddress', l.address);
     setText('modalPhone', l.phone || 'Phone not listed');
     setText('modalHours', l.hours || 'Hours not provided');
@@ -360,10 +374,66 @@ async function handleBusinessSubmit(event) {
         longitude: where?.lng ?? null,
       },
     });
+    const image = $('newListingImage').files?.[0];
+    if (image) {
+      try {
+        await uploadListingImage(listing.id, image);
+      } catch (err) {
+        closeModal('addBusinessModal');
+        event.target.reset();
+        toast(`Your listing was submitted, but its photo could not be uploaded: ${errorMessage(err)}`, 'error');
+        if (state.mode === 'dashboard') loadMyListings();
+        return;
+      }
+    }
     closeModal('addBusinessModal');
     event.target.reset();
-    toast(listing.status === 'approved' ? 'Your listing is live.' : 'Submitted! Your listing will appear once our team reviews it.', 'success');
+    toast(image
+      ? 'Your listing and photo were submitted.'
+      : listing.status === 'approved' ? 'Your listing is live.' : 'Submitted! Your listing will appear once our team reviews it.',
+    'success');
     if (listing.status === 'approved') loadListings();
+    if (state.mode === 'dashboard') loadMyListings();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+async function uploadListingImage(listingId, image) {
+  const { key, upload_url: uploadUrl, fields } = await authorizedRequest(
+    ENDPOINTS.directory.listingImageUploadUrl(listingId),
+    {
+      method: 'POST',
+      body: { filename: image.name, content_type: image.type, size: image.size },
+    },
+  );
+  const form = new FormData();
+  for (const [name, value] of Object.entries(fields)) form.append(name, value);
+  form.append('file', image);
+  const uploadResponse = await fetch(uploadUrl, { method: 'POST', body: form });
+  if (!uploadResponse.ok) {
+    throw new ApiError(uploadResponse.status, 'Photo could not be uploaded to private storage.');
+  }
+  return authorizedRequest(ENDPOINTS.directory.listingImage(listingId), {
+    method: 'POST',
+    body: { key },
+  });
+}
+
+async function uploadSelectedListingImage(event) {
+  event.preventDefault();
+  if (!requireLogin() || !state.selected) return;
+  const file = $('modalImageInput').files?.[0];
+  if (!file) return toast('Choose a photo to upload.', 'error');
+  const button = event.target.querySelector('button[type="submit"]');
+  if (button) button.disabled = true;
+  try {
+    await uploadListingImage(state.selected.id, file);
+    toast('Listing photo uploaded.', 'success');
+    await openDetail(state.selected.id);
+    loadListings();
   } catch (err) {
     toast(errorMessage(err), 'error');
   } finally {
@@ -455,7 +525,7 @@ Object.assign(window, {
   openModal, closeModal, setCategoryFilter, setDirectoryView, handleSearchKeyup, executeAISearch,
   detectUserLocation, setRating, submitReview, setTransitMode, launchExternalMaps,
   handleBusinessSubmit, submitReport, switchNavMode, toggleNotifDropdown,
-  markNotificationRead, markAllNotificationsRead, saveBillingSettings,
+  markNotificationRead, markAllNotificationsRead, saveBillingSettings, uploadSelectedListingImage,
 });
 
 $('aiParsedFeedback').style.display = 'none';

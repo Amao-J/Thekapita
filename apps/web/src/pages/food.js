@@ -218,7 +218,7 @@ function renderDirectoryCards(listings, error = null) {
       dataset: { category: type, cuisine: terms, source: 'directory' },
     },
     el('div', { class: 'vendor-card-header' },
-      el('img', { src: CATEGORY_IMG[type === 'buka' ? 'buka' : 'fine'], alt: '', class: 'vendor-thumb-box' }),
+      el('img', { src: place.image_url || CATEGORY_IMG[type === 'buka' ? 'buka' : 'fine'], alt: place.name, class: 'vendor-thumb-box' }),
       el('div', { class: 'vendor-info' },
         el('div', { class: 'vendor-title-row' },
           el('h4', {}, place.name),

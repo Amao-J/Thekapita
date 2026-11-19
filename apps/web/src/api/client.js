@@ -31,12 +31,13 @@ export class ApiError extends Error {
 export async function request(path, { method = 'GET', body, headers = {}, timeout = DEFAULT_TIMEOUT_MS } = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
 
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method,
-      headers: { 'Content-Type': 'application/json', ...headers },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      headers: { ...(!isFormData ? { 'Content-Type': 'application/json' } : {}), ...headers },
+      body: body !== undefined ? (isFormData ? body : JSON.stringify(body)) : undefined,
       signal: controller.signal,
     });
 

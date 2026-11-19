@@ -263,6 +263,13 @@
         </button>
       </div>
 
+      <img id="modalImage" alt="" style="width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px;" hidden>
+      <form id="modalImageUploadForm" onsubmit="uploadSelectedListingImage(event)" hidden style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <label class="form-label" for="modalImageInput">Listing photo (JPEG, PNG, or WebP; up to 8 MB)</label>
+        <input id="modalImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <button type="submit" class="btn-submit-primary">Upload photo</button>
+      </form>
+
       <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--emerald-dark); font-weight: 700; background: rgba(0,208,132,0.1); padding: 8px 12px; border-radius: 10px;">
         <span class="material-symbols-outlined">verified</span>
         <span>Verified Institutional Listing • Official Government Record</span>
@@ -435,6 +442,10 @@
         <div class="form-group">
           <label class="form-label">Physical Address</label>
           <input type="text" id="newAddress" class="form-control" required placeholder="123 Street Name...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newListingImage">Photo (JPEG, PNG, or WebP; up to 8 MB)</label>
+          <input type="file" id="newListingImage" accept="image/jpeg,image/png,image/webp">
         </div>
         <div class="form-group">
           <label class="form-label">Listing Tier</label>

@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .storage import generate_presigned_url
+
 
 class Listing(models.Model):
     class Category(models.TextChoices):
@@ -22,12 +24,13 @@ class Listing(models.Model):
 
     class Source(models.TextChoices):
         USER = "user", "Submitted by a user"
-        OSM = "osm", "OpenStreetMap import"
+        OSM = "osm", "Map import"
 
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=12, choices=Category.choices, db_index=True)
     description = models.CharField(max_length=400, blank=True)
     address = models.CharField(max_length=255)
+    image_key = models.CharField(max_length=512, blank=True, default="")
     city = models.CharField(max_length=80, blank=True)
     phone = models.CharField(max_length=30)
     hours = models.CharField(max_length=120, blank=True)
@@ -61,6 +64,10 @@ class Listing(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def image_url(self) -> str | None:
+        return generate_presigned_url(self.image_key) if self.image_key else None
 
 
 class Review(models.Model):
