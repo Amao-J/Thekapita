@@ -674,3 +674,107 @@ input:focus-visible,
   height: 400px; /* Or whatever fixed/responsive height fits your layout */
   border-radius: 12px;
 }
+
+/* ==========================================
+   SPOTLIGHT IMAGE STRIP (PORTAL SAFE)
+   ========================================== */
+.spotlight-section {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.spotlight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.spotlight-header h2 {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.spotlight-header span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.spotlight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.spotlight-card {
+  position: relative;
+  height: 136px;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: #ffffff;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  isolation: isolate;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(12, 18, 28, 0.22) 0%, rgba(12, 18, 28, 0.86) 100%);
+}
+
+.spotlight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.spotlight-badge {
+  align-self: flex-start;
+  background: rgba(18, 18, 18, 0.72);
+  backdrop-filter: blur(6px);
+  color: var(--emerald);
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.spotlight-copy strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.spotlight-copy span {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .spotlight-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .spotlight-card {
+    height: 112px;
+  }
+}

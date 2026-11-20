@@ -2498,3 +2498,110 @@ html body .wallet-container {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* ==========================================================================
+   CARE-MATCHED HEADER FOR MARKETPLACE
+   ========================================================================== */
+.marketplace-body .profile-back-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--white, #ffffff);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.marketplace-body .header-back-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.marketplace-body .back-btn-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark, #0f172a);
+  transition: background 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+}
+
+.marketplace-body .back-btn-circle:hover {
+  background: var(--border-color, #e2e8f0);
+  color: var(--emerald-dark, #00a367);
+}
+
+.marketplace-body .brand-title {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--black, #121212);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: 0;
+}
+
+.marketplace-body .brand-title .prefix {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black, #121212);
+  text-transform: lowercase;
+}
+
+.marketplace-body .brand-title .dot {
+  color: var(--emerald, #00d084);
+}
+
+.marketplace-body .brand-title .brand-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--emerald-dark, #00a367);
+  margin-left: 4px;
+}
+
+.marketplace-body .header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marketplace-body .icon-btn.market-cart-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface-gray, #f8fafc);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  color: var(--text-dark, #0f172a);
+}
+
+.marketplace-body .cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #00d084;
+  color: #121212;
+  font-weight: 800;
+  font-size: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

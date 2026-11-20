@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita | one app, one wallet, one identity.</title>
-  <script>
+  <script src="src/pages/theme.js"></script>
+  <!-- <script>
     (function () {
       try {
         const session = JSON.parse(localStorage.getItem('kapita.session.v1') || 'null');
@@ -15,7 +16,7 @@
         window.location.replace('landingpage.html');
       }
     })();
-  </script>
+  </script> -->
 
   <!-- SVG Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
@@ -26,6 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
   <style>
     /* Inline styles for custom inline SVG alignment inside cards/pills */
     .app-card .icon-circle svg, .launcher-icon svg, .pill svg {
@@ -60,6 +62,9 @@
 
     <!-- Right Header: Location + Notification Hub + Profile -->
     <div class="header-right">
+
+      <!-- Drop-in Dark/Light Icon Button -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
       
       <!-- Notification Bell Widget -->
       <div class="notif-wrapper">
@@ -79,100 +84,6 @@
           </div>
         </div>
       </div>
-
-      <!-- App Launcher Button (9-Dot Grid) -->
-      <!-- <div class="launcher-wrapper">
-        <button class="icon-btn app-launcher-btn" id="launcherBtn" title="App Launcher" aria-label="Open theKapita Apps launcher" aria-haspopup="true" aria-expanded="false" onclick="toggleLauncherMenu(event)">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
-        </button>
-
-        <div class="app-launcher-menu" id="launcherMenu" role="dialog" aria-label="Apps Menu">
-          <div class="menu-header">
-            <span>theKapita Apps</span>
-          </div>
-          <div class="launcher-grid">
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Pay app" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="#00d084"/><path d="M2 10h20" stroke="#121212" stroke-width="1.5"/><rect x="5" y="14" width="4" height="2" rx="1" fill="#ffffff"/></svg>
-              </div>
-              <span>Pay</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Bills app" onclick="window.location.href='bills.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z" fill="#3b82f6"/><path d="M8 7h8M8 11h8M8 15h5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <span>Bills</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Ride app" onclick="window.location.href='ride.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M5 13l2-5h10l2 5v5H5v-5z" fill="#00d084"/><circle cx="7.5" cy="18" r="2" fill="#121212"/><circle cx="16.5" cy="18" r="2" fill="#121212"/><path d="M6 10h12" stroke="#ffffff" stroke-width="1.5"/></svg>
-              </div>
-              <span>Ride</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Eats app" onclick="window.location.href='food.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M3 13h18c0-4.97-4.03-9-9-9s-9 4.03-9 9z" fill="#d97706"/><path d="M2 17h20v2H2z" fill="#b45309"/><path d="M10 2v2M14 2v2M6 2v2" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <span>Eats</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Marketplace app" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M4 7h16l-2 13H6L4 7z" fill="#8b5cf6"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="#8b5cf6" stroke-width="2" fill="none"/></svg>
-              </div>
-              <span>Market</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Directory app" onclick="window.location.href='directories.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M3 6h6l2 2h10v10H3V6z" fill="#008755"/><path d="M3 8h18v11H3z" fill="#00d084" opacity="0.8"/></svg>
-              </div>
-              <span>Directory</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Haven app" onclick="window.location.href='haven.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="#0ea5e9"/><path d="M10 20v-6h4v6" fill="#ffffff"/></svg>
-              </div>
-              <span>Haven</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Care app" onclick="window.location.href='care.html'" style="cursor: pointer;">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444"/><path d="M12 7v10M7 12h10" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
-              </div>
-              <span>Care</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Counsel app" onclick="openApp('Counsel')">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 2v20M4 6h16M7 10h10M5 18h14" stroke="#d97706" stroke-width="2" stroke-linecap="round"/></svg>
-              </div>
-              <span>Counsel</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Talent app" onclick="openApp('Talent')">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" fill="#6366f1"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="#6366f1" stroke-width="2" fill="none"/></svg>
-              </div>
-              <span>Talent</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Brain AI app" onclick="openApp('Brain')">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#10b981"/><path d="M9 10h.01M15 10h.01M9.5 15s1 1.5 2.5 1.5 2.5-1.5 2.5-1.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
-              </div>
-              <span>Brain AI</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Stays app" onclick="openApp('Stays')">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M4 9h16M8 3v6" stroke="#f43f5e" stroke-width="2" fill="none"/></svg>
-              </div>
-              <span>Stays</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="Handy app" onclick="openApp('Handy')">
-              <div class="launcher-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="#eab308"/></svg>
-              </div>
-              <span>Handy</span>
-            </div>
-            <div class="launcher-item" tabindex="0" role="button" aria-label="View all applications" onclick="openApp('More')"><div class="launcher-icon dark-bg" aria-hidden="true">+12</div><span>All Apps</span></div>
-          </div>
-        </div>
-      </div> -->
 
       <!-- User Profile Avatar Shortcut -->
       <div class="profile-avatar photo-avatar" title="Account Settings">
@@ -217,6 +128,40 @@
         <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">
           <svg viewBox="0 0 24 24"><path d="M4 7h16l-2 13H6L4 7z" fill="#8b5cf6"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="#8b5cf6" stroke-width="2" fill="none"/></svg> Marketplace
         </button>
+      </div>
+    </section>
+
+    <!-- Slim Featured Spotlight Strip (Multiple Images) -->
+    <section class="spotlight-section" aria-label="Featured services">
+      <div class="spotlight-header">
+        <h2>Spotlight</h2>
+        <span>Quick picks</span>
+      </div>
+
+      <div class="spotlight-grid">
+        <a href="haven.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=900&auto=format&fit=crop');">
+          <span class="spotlight-badge">Haven</span>
+          <div class="spotlight-copy">
+            <strong>Verified Homes</strong>
+            <span>Escrow-protected listings</span>
+          </div>
+        </a>
+
+        <a href="food.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1763048443535-1243379234e2?q=80&w=900&auto=format&fit=crop');">
+          <span class="spotlight-badge">Eats</span>
+          <div class="spotlight-copy">
+            <strong>Order Chow</strong>
+            <span>Live kitchen &amp; rider tracking</span>
+          </div>
+        </a>
+
+        <a href="ride.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1616805111699-0e52fa62f779?q=80&w=900&auto=format&fit=crop');">
+          <span class="spotlight-badge">Logistics</span>
+          <div class="spotlight-copy">
+            <strong>Rides &amp; Parcels</strong>
+            <span>Fast pickup with OTP</span>
+          </div>
+        </a>
       </div>
     </section>
 

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita Marketplace — Premium Ecosystem</title>
 
+  <script src="src/pages/theme.js"></script>
+
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,52 +17,47 @@
   <link rel="stylesheet" href="css/profile.css">
   <link rel="stylesheet" href="css/wallet.css">
   <link rel="stylesheet" href="css/marketplace.css">
+  <link rel="stylesheet" href="css/theme.css">
   <style>
-     .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-icon { width: 36px; height: 36px; background: var(--black); color: var(--emerald); font-family: var(--font-heading); font-weight: 800; font-size: 18px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
     .brand-name { font-family: var(--font-heading); font-size: 24px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; display: flex; align-items: baseline; }
     .brand-name .prefix { font-size: 14px; font-weight: 500; margin-right: 1px; }
     .brand-name .dot { color: var(--emerald); }
-    
   </style>
 </head>
-<body class="wallet-body">
+<body class="wallet-body marketplace-body">
 
   <!-- Skip Navigation Link -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- Desktop Header -->
-  <header class="desktop-header profile-back-header">
+  <!-- Header Navigation -->
+  <header class="profile-back-header">
     <div class="header-back-action" onclick="window.location.href='index.html'">
       <div class="back-btn-circle">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </div><a href="#" class="brand-logo">
-        <div class="brand-name"><span class="prefix">the</span>Kapita<span class="dot"></span></div>
-      </a>
-      <div class="brand-name"><span class="dot"> Market</span></div>
-      
-      <!-- <span style="font-weight: 700; font-size: 16px;"><span style="color: #00d084;">Market</span></span> -->
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </div>
+      <div class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span class="brand-sub">Market</span>
+      </div>
     </div>
 
-    <div class="wallet-header-tag">
+    <div class="header-right-actions">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <!-- Cart Button -->
-      <!-- <button type="button" class="text-btn cart-icon-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart">
+      <button type="button" class="icon-btn market-cart-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart">
         <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
         <span id="cartCountBadge" class="cart-badge">0</span>
-      </button> -->
-
-      <!-- Separated Cart Button -->
-      <button class="text-btn" onclick="switchMarketView('cart')" aria-label="View Shopping Cart" style="position: relative; margin-right: 8px;">
-        <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
-        <span id="cartCountBadge" class="cart-badge" style="position: absolute; top: -6px; right: -8px; background: #00d084; color: #121212; font-weight: 800; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
       </button>
 
-      <!-- Desktop Header Menu Dropdown -->
+      <!-- Account & Menu Navigation Pill -->
       <div class="header-nav-dropdown-wrapper">
-        <button class="header-menu-pill-btn" aria-expanded="false" aria-haspopup="true" aria-controls="headerNavDropdownMenu" aria-label="Account and Wallet Navigation Menu" onclick="toggleHeaderNavMenu(event)">
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-          
-          <span class="material-symbols-outlined arrow-icon" aria-hidden="true">expand_more</span>
+        <button type="button" class="header-menu-pill-btn" aria-expanded="false" aria-haspopup="true" aria-controls="headerNavDropdownMenu" aria-label="Account and Wallet Navigation Menu" onclick="toggleHeaderNavMenu(event)">
+          <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">account_circle</span>
+          <span class="material-symbols-outlined arrow-icon" style="font-size: 16px;" aria-hidden="true">expand_more</span>
         </button>
 
         <div class="header-nav-dropdown-menu" id="headerNavDropdownMenu">
@@ -87,7 +84,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </header>
 
@@ -119,7 +115,7 @@
         <span class="nav-text">Wishlist</span>
       </button>
 
-      <button class="market-nav-btn" onclick="window.location.href='seller-dashboard.html'">
+      <button type="button" class="market-nav-btn" onclick="window.location.href='seller-dashboard.html'">
         <span class="material-symbols-outlined nav-icon" aria-hidden="true">store</span>
         <span class="nav-text">Seller Hub</span>
       </button>

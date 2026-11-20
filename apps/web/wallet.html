@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita Pay — Universal Financial Engine</title>
 
+  <script src="src/pages/theme.js"></script>
+
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,19 +18,26 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/profile.css">
   <link rel="stylesheet" href="css/wallet.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="wallet-body">
 
-  <header class="desktop-header profile-back-header">
-    <button type="button" class="header-back-action" onclick="window.location.href='index.html'" aria-label="Go back to dashboard">
-      <span class="back-btn-circle">
+  <header class="profile-back-header">
+    <div class="header-back-action" onclick="window.location.href='index.html'">
+      <div class="back-btn-circle">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-      </span>
-    </button>
-    
-    <div class="wallet-header-tag">
-      <span class="sec-indicator">Protected <span class="material-symbols-outlined check-icon" aria-hidden="true">check_circle</span></span>
-      <span class="id-badge">ID: <strong id="walletKapitaId">—</strong></span>
+      </div>
+      <div class="brand-title">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span class="brand-sub">Pay</span>
+      </div>
+    </div>
+
+    <div class="header-right-actions">
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+      <div class="wallet-header-tag">
+        <span class="sec-indicator"><span class="material-symbols-outlined check-icon" aria-hidden="true">check_circle</span></span>
+        <span class="id-badge">ID: <strong id="walletKapitaId">—</strong></span>
+      </div>
     </div>
   </header>
 

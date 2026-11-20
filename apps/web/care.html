@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>theKapita Care - Health Access & Emergency</title>
+  <title>theKapita Care - Health Access &amp; Emergency</title>
+
+  <script src="src/pages/theme.js"></script>
 
   <!-- Fonts: Bricolage Grotesque & Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +17,7 @@
 
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="css/care.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="care-page-body">
 
@@ -33,6 +36,9 @@
     </div>
 
     <div class="header-right-actions">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <!-- Location Pill -->
       <div class="location-pill" onclick="triggerAddressChange()" role="button" tabindex="0" aria-label="Change current location">
         <span class="material-symbols-outlined loc-icon" aria-hidden="true">location_on</span>
@@ -72,14 +78,14 @@
           </button>
 
           <!-- Emergency SOS -->
-          <button type="button" class="header-dropdown-item" style="color: #ef4444;" onclick="openModal('sosModal')">
+          <button type="button" class="header-dropdown-item sos-dropdown-item" onclick="openModal('sosModal')">
             <span class="material-symbols-outlined icon" aria-hidden="true">ambulance</span>
             <span>Emergency SOS</span>
           </button>
 
           <button type="button" class="header-dropdown-item" onclick="openModal('historyModal')">
             <span class="material-symbols-outlined icon" aria-hidden="true">folder_shared</span>
-            <span>Medical History & Rx</span>
+            <span>Medical History &amp; Rx</span>
           </button>
         </div>
       </div>
@@ -159,7 +165,7 @@
           <!-- Dropdown Filter Wrapper (Right) -->
           <div class="care-filter-dropdown-wrapper" id="careFilterDropdown">
             <button type="button" class="filter-dropdown-trigger" onclick="toggleCareFilterDropdown()" aria-expanded="false" aria-label="Filter healthcare network">
-              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--emerald-dark);">tune</span>
+              <span class="material-symbols-outlined filter-tune-icon">tune</span>
               <span id="selectedFilterLabel">All Network</span>
               <span class="material-symbols-outlined dropdown-arrow" aria-hidden="true">expand_more</span>
             </button>
@@ -170,7 +176,7 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">grid_view</span> All Network
               </button>
               <button type="button" class="filter-option-item" onclick="selectCareFilter('hospital', 'Hospitals & Clinics', this)">
-                <span class="material-symbols-outlined" style="font-size: 16px;">local_hospital</span> Hospitals & Clinics
+                <span class="material-symbols-outlined" style="font-size: 16px;">local_hospital</span> Hospitals &amp; Clinics
               </button>
               <button type="button" class="filter-option-item" onclick="selectCareFilter('pharmacy', 'Pharmacies', this)">
                 <span class="material-symbols-outlined" style="font-size: 16px;">pill</span> Pharmacies
@@ -179,10 +185,10 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">stethoscope</span> Specialist Doctors
               </button>
               <button type="button" class="filter-option-item" onclick="selectCareFilter('lab', 'Diagnostics & Labs', this)">
-                <span class="material-symbols-outlined" style="font-size: 16px;">science</span> Diagnostics & Labs
+                <span class="material-symbols-outlined" style="font-size: 16px;">science</span> Diagnostics &amp; Labs
               </button>
               <button type="button" class="filter-option-item" onclick="selectCareFilter('wellness', 'Wellness & Articles', this)">
-                <span class="material-symbols-outlined" style="font-size: 16px;">spa</span> Wellness & Articles
+                <span class="material-symbols-outlined" style="font-size: 16px;">spa</span> Wellness &amp; Articles
               </button>
             </div>
           </div>
@@ -194,7 +200,7 @@
           <span class="material-symbols-outlined icon" aria-hidden="true">stethoscope</span>
           <div>
             <h4>Are you a Healthcare Provider?</h4>
-            <p>Join our network of trusted clinics, pharmacies & doctors.</p>
+            <p>Join our network of trusted clinics, pharmacies &amp; doctors.</p>
           </div>
         </div>
         <span class="badge-new">Partner Up</span>
@@ -245,7 +251,7 @@
 
             <div class="vendor-card-actions">
               <button type="button" class="btn-see-menu" onclick="openHospitalCatalog('St. Nicholas Hospital')">
-                <span>View Hospital Services & Doctors</span>
+                <span>View Hospital Services &amp; Doctors</span>
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
               </button>
             </div>
@@ -279,14 +285,14 @@
                 <span class="dish-price">₦4,500</span>
               </div>
               <div class="popular-dish-pill" onclick="openPharmacyMedModal('Vitamin C & Zinc', 2500, 'HealthPlus Pharmacy', 'https://images.unsplash.com/photo-1550572017-edb7fd9062cb?auto=format&fit=crop&w=400&q=80', 'Daily immunity support capsules (100 tablets).')">
-                <span>Vitamin C & Zinc</span>
+                <span>Vitamin C &amp; Zinc</span>
                 <span class="dish-price">₦2,500</span>
               </div>
             </div>
 
             <div class="vendor-card-actions">
               <button type="button" class="btn-see-menu" onclick="openPharmacyCatalog('HealthPlus Pharmacy')">
-                <span>Order Medications & Rx</span>
+                <span>Order Medications &amp; Rx</span>
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
               </button>
             </div>
@@ -323,7 +329,7 @@
 
             <div class="vendor-card-actions">
               <button type="button" class="btn-see-menu" onclick="openDoctorProfile('Dr. Rita Okon', 'General Practitioner', 5000, 'https://images.unsplash.com/photo-1643297654416-05795d62e39c?q=80&w=853&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D', 'MDCN: 42198 • 12 Years Exp • English, Yoruba')">
-                <span>View Profile & Schedule Consult</span>
+                <span>View Profile &amp; Schedule Consult</span>
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
               </button>
             </div>
@@ -357,7 +363,7 @@
                 <span class="dish-price">₦12,500</span>
               </div>
               <div class="popular-dish-pill" onclick="openLabTestModal('Full Malaria & Widal Test', 8000, 'Kapita Diagnostics Lab', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80', 'No fasting required. Results delivered in 4 hours.')">
-                <span>Malaria & Widal</span>
+                <span>Malaria &amp; Widal</span>
                 <span class="dish-price">₦8,000</span>
               </div>
             </div>
@@ -417,14 +423,14 @@
 
           <div class="card-content-body">
             <div class="vendor-title-row">
-              <h4>Zen Wellness & Nutrition</h4>
+              <h4>Zen Wellness &amp; Nutrition</h4>
               <span class="vendor-rating">
                 <span class="material-symbols-outlined star-icon" aria-hidden="true">star</span> 4.8 <span class="rating-count">(140+)</span>
               </span>
             </div>
 
             <div class="vendor-meta-row">
-              <span class="meta-item">Holistic Care & Coaching</span>
+              <span class="meta-item">Holistic Care &amp; Coaching</span>
               <span class="meta-dot">•</span>
               <span class="meta-item online-tag">Virtual / In-Person</span>
             </div>
@@ -517,7 +523,7 @@
       <!-- 6. Featured Services & Wellness (Horizontal Scrollable Row) -->
       <section class="bills-section-title">
         <div>
-          <h3 id="healthArticlesSection">Featured Services & Wellness</h3>
+          <h3 id="healthArticlesSection">Featured Services &amp; Wellness</h3>
           <p>Direct bookings and essential health kits</p>
         </div>
         <span class="count-tag">6 Items Available</span>
@@ -612,7 +618,7 @@
           </div>
           <div class="wellness-card-body">
             <div class="wellness-info">
-              <h4>Vitamin C & Zinc Immunity Pack</h4>
+              <h4>Vitamin C &amp; Zinc Immunity Pack</h4>
               <p>Daily dietary supplements to boost immune response.</p>
             </div>
             <div class="wellness-footer">
@@ -658,9 +664,9 @@
       <span class="material-symbols-outlined nav-icon" aria-hidden="true">search</span>
       <span class="nav-text">Search</span>
     </button>
-    <button type="button" class="market-nav-btn" onclick="openModal('sosModal')" style="color: #ef4444;">
+    <button type="button" class="market-nav-btn sos-dock-btn" onclick="openModal('sosModal')">
       <span class="material-symbols-outlined nav-icon" aria-hidden="true">ambulance</span>
-      <span class="nav-text" style="color: #ef4444; font-weight: bold;">SOS</span>
+      <span class="nav-text">SOS</span>
     </button>
     <button type="button" class="market-nav-btn" onclick="openAppointmentsListModal()">
       <span class="material-symbols-outlined nav-icon" aria-hidden="true">medical_services</span>
@@ -727,7 +733,7 @@
           </div>
           <div class="summary-row">
             <span>Insurance Match</span>
-            <strong style="color: var(--emerald-dark);">HMO Eligible</strong>
+            <strong class="hmo-eligible-text">HMO Eligible</strong>
           </div>
         </div>
 
@@ -742,40 +748,40 @@
       <div class="wallet-modal-header">
         <div>
           <h3 id="docProfileName">Doctor Profile</h3>
-          <p class="modal-sub" id="docProfileSpecialty">Specialist Consultation & Schedule</p>
+          <p class="modal-sub" id="docProfileSpecialty">Specialist Consultation &amp; Schedule</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('doctorProfileModal')" aria-label="Close modal">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
-        <img src="" id="docProfileImg" alt="Doctor" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--emerald);">
+      <div class="doc-profile-hero">
+        <img src="" id="docProfileImg" alt="Doctor" class="doc-profile-avatar">
         <div>
-          <h4 id="docProfileTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark);">Dr. Name</h4>
-          <p id="docProfileMeta" style="font-size: 12px; color: var(--text-muted);">MDCN & Credentials</p>
-          <span style="display: inline-block; background: #e6fdf4; color: var(--emerald-dark); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-top: 4px;">Verified Specialist</span>
+          <h4 id="docProfileTitle" class="doc-profile-title">Dr. Name</h4>
+          <p id="docProfileMeta" class="doc-profile-meta">MDCN &amp; Credentials</p>
+          <span class="verified-specialist-badge">Verified Specialist</span>
         </div>
       </div>
 
-      <div style="background: var(--surface-gray); padding: 12px; border-radius: 10px; margin-bottom: 14px; font-size: 12px; color: var(--text-dark); line-height: 1.4;">
+      <div class="doc-clinical-note">
         <strong>Clinical Focus:</strong> Primary care diagnostics, telemedicine consultations, chronic illness management, and preventative health counselling.
       </div>
 
       <!-- Schedule Consultation Form -->
       <form onsubmit="confirmDoctorBooking(event)">
-        <div class="reservation-grid" style="margin-bottom: 12px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="docScheduleDate" style="font-size: 12px; font-weight: 700;">Select Date</label>
+        <div class="reservation-grid doc-schedule-grid">
+          <div class="form-group no-bottom-margin">
+            <label for="docScheduleDate" class="compact-form-label">Select Date</label>
             <input type="date" id="docScheduleDate" class="form-control" value="2026-10-25" required>
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="docScheduleTime" style="font-size: 12px; font-weight: 700;">Select Time Slot</label>
+          <div class="form-group no-bottom-margin">
+            <label for="docScheduleTime" class="compact-form-label">Select Time Slot</label>
             <input type="time" id="docScheduleTime" class="form-control" value="11:00" required>
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 14px;">
+        <div class="form-group doc-mode-group">
           <label>Consultation Mode</label>
           <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalConsultDropdown">
             <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalConsultDropdown')" aria-expanded="false">
@@ -791,12 +797,12 @@
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--surface-gray); padding: 10px 12px; border-radius: 10px;">
+        <div class="doc-fee-strip">
           <div>
-            <div style="font-size: 11px; color: var(--text-muted);">Consultation Fee</div>
-            <div id="docProfilePrice" style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--emerald-dark);">₦5,000.00</div>
+            <div class="doc-fee-label">Consultation Fee</div>
+            <div id="docProfilePrice" class="doc-fee-amount">₦5,000.00</div>
           </div>
-          <span style="font-size: 11px; font-weight: 700; color: var(--emerald-dark);">HMO Covered</span>
+          <span class="doc-hmo-tag">HMO Covered</span>
         </div>
 
         <button type="submit" class="btn-primary w-full">
@@ -812,31 +818,31 @@
       <div class="wallet-modal-header">
         <div>
           <h3 id="medProviderTitle">Pharmacy Order</h3>
-          <p class="modal-sub">Secure Medication Checkout & Prescription Verification</p>
+          <p class="modal-sub">Secure Medication Checkout &amp; Prescription Verification</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('pharmacyMedModal')" aria-label="Close modal">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <img src="" id="medModalImg" alt="Medication" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
-      <h4 id="medModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Medication Name</h4>
-      <p id="medModalDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+      <img src="" id="medModalImg" alt="Medication" class="modal-preview-banner">
+      <h4 id="medModalTitle" class="modal-item-heading">Medication Name</h4>
+      <p id="medModalDesc" class="modal-item-desc"></p>
       
-      <div id="medModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+      <div id="medModalPrice" class="modal-item-price">₦0.00</div>
 
-      <div class="form-group" style="margin-bottom: 12px;">
-        <label for="rxUploadInput" style="font-size: 12px; font-weight: 700;">Upload Doctor's Prescription (Optional for OTC)</label>
-        <input type="file" id="rxUploadInput" class="form-control" style="font-size: 12px; padding: 6px;">
+      <div class="form-group rx-upload-group">
+        <label for="rxUploadInput" class="compact-form-label">Upload Doctor's Prescription (Optional for OTC)</label>
+        <input type="file" id="rxUploadInput" class="form-control rx-file-input">
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div style="display: inline-flex; align-items: center; background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
-          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" onclick="adjustMedQty(-1)">-</button>
-          <span id="medModalQty" style="width: 36px; text-align: center; font-weight: 800; font-size: 14px;">1</span>
-          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" onclick="adjustMedQty(1)">+</button>
+      <div class="med-qty-row">
+        <div class="qty-stepper-box">
+          <button type="button" class="add-dish-btn qty-step-btn" onclick="adjustMedQty(-1)">-</button>
+          <span id="medModalQty" class="qty-step-value">1</span>
+          <button type="button" class="add-dish-btn qty-step-btn" onclick="adjustMedQty(1)">+</button>
         </div>
-        <span style="font-size: 11px; color: var(--text-muted);">Standard Delivery: 30-45 mins</span>
+        <span class="med-delivery-eta">Standard Delivery: 30-45 mins</span>
       </div>
 
       <button type="button" class="btn-primary w-full" onclick="confirmPharmacyOrder()">
@@ -851,21 +857,21 @@
       <div class="wallet-modal-header">
         <div>
           <h3 id="labModalProvider">Diagnostics Lab</h3>
-          <p class="modal-sub">Home Sample Collection & Lab Test Booking</p>
+          <p class="modal-sub">Home Sample Collection &amp; Lab Test Booking</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('labTestModal')" aria-label="Close modal">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <img src="" id="labModalImg" alt="Lab Test" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
-      <h4 id="labModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Test Name</h4>
-      <p id="labModalInstructions" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; background: #e6fdf4; padding: 8px; border-radius: 8px; color: var(--emerald-dark); font-weight: 600;"></p>
+      <img src="" id="labModalImg" alt="Lab Test" class="modal-preview-banner">
+      <h4 id="labModalTitle" class="modal-item-heading">Test Name</h4>
+      <p id="labModalInstructions" class="lab-prep-callout"></p>
 
-      <div id="labModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+      <div id="labModalPrice" class="modal-item-price">₦0.00</div>
 
       <!-- Custom Styled Dropdown for Sample Collection -->
-      <div class="form-group" style="margin-bottom: 12px;">
+      <div class="form-group lab-sample-group">
         <label>Sample Collection Preference</label>
         <div class="care-filter-dropdown-wrapper custom-modal-select-wrapper" id="modalLabDropdown">
           <button type="button" class="filter-dropdown-trigger" onclick="toggleModalDropdown('modalLabDropdown')" aria-expanded="false">
@@ -881,7 +887,7 @@
       </div>
 
       <button type="button" class="btn-primary w-full" onclick="confirmLabBooking()">
-        Book Lab Test & Phlebotomist
+        Book Lab Test &amp; Phlebotomist
       </button>
     </div>
   </div>
@@ -892,22 +898,22 @@
       <div class="wallet-modal-header">
         <div>
           <h3 id="wellnessModalProvider">Zen Wellness Hub</h3>
-          <p class="modal-sub">Holistic Care & Clinical Nutrition Coaching</p>
+          <p class="modal-sub">Holistic Care &amp; Clinical Nutrition Coaching</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('wellnessProgramModal')" aria-label="Close modal">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <img src="" id="wellnessModalImg" alt="Wellness" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
-      <h4 id="wellnessModalTitle" style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Program Name</h4>
-      <p id="wellnessModalDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
+      <img src="" id="wellnessModalImg" alt="Wellness" class="modal-preview-banner">
+      <h4 id="wellnessModalTitle" class="modal-item-heading">Program Name</h4>
+      <p id="wellnessModalDesc" class="modal-item-desc"></p>
 
-      <div id="wellnessModalPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 14px;">₦0.00</div>
+      <div id="wellnessModalPrice" class="modal-item-price">₦0.00</div>
 
-      <div class="form-group" style="margin-bottom: 12px;">
-        <label for="wellnessGoalInput" style="font-size: 12px; font-weight: 700;">Primary Health Goal / Dietary Restrictions</label>
-        <input type="text" id="wellnessGoalInput" class="form-control" placeholder="e.g. Weight management, hypertension diet, stress relief" style="font-size: 12px;">
+      <div class="form-group wellness-goal-group">
+        <label for="wellnessGoalInput" class="compact-form-label">Primary Health Goal / Dietary Restrictions</label>
+        <input type="text" id="wellnessGoalInput" class="form-control wellness-goal-input" placeholder="e.g. Weight management, hypertension diet, stress relief">
       </div>
 
       <button type="button" class="btn-primary w-full" onclick="confirmWellnessBooking()">
@@ -970,13 +976,13 @@
           </div>
           <div class="summary-row">
             <span>Verification Process</span>
-            <strong style="color: var(--emerald-dark);">Required</strong>
+            <strong class="hmo-eligible-text">Required</strong>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary w-full" style="margin-top: 16px;">Submit Application</button>
+        <button type="submit" class="btn-primary w-full provider-submit-btn">Submit Application</button>
       </form>
-      <a href="care-provider.html" class="btn-primary w-full" style="display: block; margin-top: 10px; text-align: center; text-decoration: none;">Open Provider Portal</a>
+      <a href="care-provider.html" class="btn-primary w-full provider-portal-link">Open Provider Portal</a>
     </div>
   </div>
 
@@ -1004,13 +1010,13 @@
           <div class="custom-select-wrapper" id="triageCustomSelect">
             <div class="custom-select-trigger" onclick="toggleCustomDropdown(event)">
               <span id="selectedTriageLabel">Describe Symptoms...</span>
-              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);" aria-hidden="true">expand_more</span>
+              <span class="material-symbols-outlined triage-chevron" aria-hidden="true">expand_more</span>
             </div>
 
             <div class="custom-options-menu" id="triageOptionsMenu">
-              <div class="custom-option-item selected" onclick="selectTriageOption('fever', 'Fever & Chills')">Fever & Chills</div>
+              <div class="custom-option-item selected" onclick="selectTriageOption('fever', 'Fever & Chills')">Fever &amp; Chills</div>
               <div class="custom-option-item" onclick="selectTriageOption('headache', 'Severe Headache')">Severe Headache</div>
-              <div class="custom-option-item" onclick="selectTriageOption('stomach', 'Stomach Pain & Nausea')">Stomach Pain & Nausea</div>
+              <div class="custom-option-item" onclick="selectTriageOption('stomach', 'Stomach Pain & Nausea')">Stomach Pain &amp; Nausea</div>
               <div class="custom-option-item" onclick="selectTriageOption('cough', 'Persistent Cough')">Persistent Cough</div>
             </div>
 
@@ -1018,10 +1024,10 @@
           </div>
         </div>
 
-        <div id="triageResultBox" style="display: none; background: var(--surface-gray); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px dashed var(--emerald);">
-          <h4 id="triageResultTitle" style="font-size: 14px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 2px;">Recommendation</h4>
-          <p id="triageResultDetails" style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;"></p>
-          <button type="button" class="btn-primary w-full" style="font-size: 12px; padding: 10px;" onclick="proceedTriageBooking()">Book Recommended Consult</button>
+        <div id="triageResultBox" class="triage-result-box">
+          <h4 id="triageResultTitle" class="triage-result-title">Recommendation</h4>
+          <p id="triageResultDetails" class="triage-result-details"></p>
+          <button type="button" class="btn-primary w-full triage-book-btn" onclick="proceedTriageBooking()">Book Recommended Consult</button>
         </div>
 
         <button type="submit" id="triageAnalyzeBtn" class="btn-primary w-full">Analyze Symptoms</button>
@@ -1031,10 +1037,10 @@
 
   <!-- MODAL: Emergency SOS Dispatch -->
   <div class="wallet-modal-overlay" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosTitle">
-    <div class="wallet-modal-card" style="border-top: 6px solid #ef4444;">
+    <div class="wallet-modal-card sos-modal-card">
       <div class="wallet-modal-header">
         <div>
-          <h3 id="sosTitle" style="color: #ef4444;">Emergency SOS Dispatch</h3>
+          <h3 id="sosTitle" class="sos-heading">Emergency SOS Dispatch</h3>
           <p class="modal-sub">Dispatch the nearest active ambulance to your location.</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('sosModal')" aria-label="Close modal">
@@ -1042,17 +1048,17 @@
         </button>
       </div>
 
-      <div class="fare-calculation-summary" style="margin-bottom: 16px;">
-        <h4 style="font-size: 14px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Live Paramedic Matcher</h4>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">We found <strong>Ambulance Unit 4</strong> (St. Nicholas Hospital) 1.2km away from your GPS location.</p>
-        <div style="font-size: 12px; color: #ef4444; font-weight: 700;">ETA: 4 Minutes</div>
+      <div class="fare-calculation-summary sos-matcher-box">
+        <h4 class="sos-matcher-title">Live Paramedic Matcher</h4>
+        <p class="sos-matcher-copy">We found <strong>Ambulance Unit 4</strong> (St. Nicholas Hospital) 1.2km away from your GPS location.</p>
+        <div class="sos-eta-text">ETA: 4 Minutes</div>
       </div>
 
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; text-align: center;">
+      <p class="sos-warning-text">
         Warning: False emergency requests may result in account penalties.
       </p>
 
-      <button type="button" class="btn-primary w-full" style="background: #ef4444; color: white;" onclick="confirmSOSDispatch()">
+      <button type="button" class="btn-primary w-full sos-confirm-btn" onclick="confirmSOSDispatch()">
         Confirm Immediate Dispatch
       </button>
     </div>
@@ -1063,7 +1069,7 @@
     <div class="wallet-modal-card">
       <div class="wallet-modal-header">
         <div>
-          <h3 id="historyModalTitle">Medical & Rx History</h3>
+          <h3 id="historyModalTitle">Medical &amp; Rx History</h3>
           <p class="modal-sub">Your recent orders and consultation history</p>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeModal('historyModal')" aria-label="Close modal">
@@ -1071,25 +1077,25 @@
         </button>
       </div>
 
-      <div class="history-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
-        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
+      <div class="history-list">
+        <div class="history-card">
+          <div class="history-card-top">
             <span>HealthPlus Pharmacy</span>
-            <span style="color: var(--emerald-dark);">₦4,500.00</span>
+            <span class="history-card-amount">₦4,500.00</span>
           </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Malaria Treatment Kit • Delivered Oct 6, 2026</p>
-          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderService('Malaria Treatment Kit', 4500)">
+          <p class="history-card-sub">Malaria Treatment Kit • Delivered Oct 6, 2026</p>
+          <button type="button" class="add-dish-btn history-action-btn" onclick="reorderService('Malaria Treatment Kit', 4500)">
             Reorder Rx
           </button>
         </div>
 
-        <div class="history-card" style="background: var(--surface-gray); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 4px;">
+        <div class="history-card">
+          <div class="history-card-top">
             <span>Dr. Rita Okon</span>
-            <span style="color: var(--emerald-dark);">₦5,000.00</span>
+            <span class="history-card-amount">₦5,000.00</span>
           </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Video Consultation • Completed Oct 2, 2026</p>
-          <button type="button" class="add-dish-btn" style="width: 100%; border-radius: 8px; height: 32px; font-size: 12px; background: var(--black); color: var(--emerald);" onclick="reorderService('Standard Video Consult', 5000)">
+          <p class="history-card-sub">Video Consultation • Completed Oct 2, 2026</p>
+          <button type="button" class="add-dish-btn history-action-btn" onclick="reorderService('Standard Video Consult', 5000)">
             Book Follow-up
           </button>
         </div>
@@ -1109,13 +1115,13 @@
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
-      <div id="appointmentsListContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      <div id="appointmentsListContainer" class="appointments-list-container"></div>
     </div>
   </div>
 
   <!-- MODAL: Full Provider Catalog -->
   <div class="wallet-modal-overlay" id="fullCatalogModal" role="dialog" aria-modal="true" aria-labelledby="fullCatalogProviderName">
-    <div class="wallet-modal-card" style="padding: 20px 16px;">
+    <div class="wallet-modal-card full-catalog-card">
       <div class="wallet-modal-header">
         <div>
           <h3 id="fullCatalogProviderName">Provider Catalog</h3>
