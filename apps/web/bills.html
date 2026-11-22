@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>theKapita Pay — Bills & Utility Payments</title>
+  <title>theKapita Pay — Bills &amp; Utility Payments</title>
+
+  <script src="src/pages/theme.js"></script>
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +18,7 @@
   <link rel="stylesheet" href="css/wallet.css">
   <link rel="stylesheet" href="css/marketplace.css">
   <link rel="stylesheet" href="css/bills.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="bills-page-body">
 
@@ -34,10 +37,13 @@
       <div class="back-btn-circle">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </div>
-      <span style="font-weight: 700; font-size: 16px;"><span style="color: #00d084;">Bills & Pay</span></span>
+      <span class="bills-header-title"><span class="bills-header-accent">Bills &amp; Pay</span></span>
     </div>
 
     <div class="wallet-header-tag">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <!-- Top Right Dropdown Navigation -->
       <div class="header-nav-dropdown-wrapper">
         <button class="header-menu-pill-btn" id="headerNavMenuBtn" onclick="toggleHeaderNavMenu(event)" aria-expanded="false" aria-controls="headerNavDropdownMenu" aria-label="Open Navigation Menu">
@@ -54,13 +60,13 @@
           <div class="dropdown-divider" role="separator"></div>
 
           <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchBillsTab('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ') switchBillsTab('services', this)">
-            <span class="material-symbols-outlined icon" aria-hidden="true">receipt_long</span> Quick Pay & Utilities
+            <span class="material-symbols-outlined icon" aria-hidden="true">receipt_long</span> Quick Pay &amp; Utilities
           </div>
           <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchBillsTab('autopay', this)" onkeydown="if(event.key==='Enter'||event.key===' ') switchBillsTab('autopay', this)">
-            <span class="material-symbols-outlined icon" aria-hidden="true">update</span> Auto-Pay & Subscriptions
+            <span class="material-symbols-outlined icon" aria-hidden="true">update</span> Auto-Pay &amp; Subscriptions
           </div>
           <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="switchBillsTab('history', this)" onkeydown="if(event.key==='Enter'||event.key===' ') switchBillsTab('history', this)">
-            <span class="material-symbols-outlined icon" aria-hidden="true">history</span> History & Reminders
+            <span class="material-symbols-outlined icon" aria-hidden="true">history</span> History &amp; Reminders
           </div>
           <div class="header-dropdown-item" role="menuitem" tabindex="0" onclick="window.location.href='wallet.html'" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='wallet.html'">
             <span class="material-symbols-outlined icon" aria-hidden="true">account_balance_wallet</span> Kapita Pay Wallet
@@ -118,14 +124,13 @@
       <section id="viewServices" class="bills-view-pane active" aria-labelledby="servicesHeading">
 
         <!-- Categories Header -->
-        <!-- Categories Header -->
         <div class="bills-section-title">
-          <h2 id="servicesHeading">Utility & Payment Services</h2>
+          <h2 id="servicesHeading">Utility &amp; Payment Services</h2>
           <p>Zero-fee instant processing protected by Kapita Security</p>
         </div>
 
         <!-- NEW: Search Bar -->
-        <div class="bills-search-container" style="margin-bottom: 20px;">
+        <div class="bills-search-container">
           <input type="text" id="billSearchInput" class="form-control" placeholder="Search for a service or biller..." onkeyup="filterBillServices()" aria-label="Search bills and services">
         </div>
 
@@ -138,7 +143,7 @@
               <span class="material-symbols-outlined" aria-hidden="true">cell_tower</span>
             </div>
             <div class="bill-service-info">
-              <h3>Buy Airtime & Data</h3>
+              <h3>Buy Airtime &amp; Data</h3>
               <p>MTN, Airtel, Glo, 9mobile</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
@@ -150,8 +155,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">water_drop</span>
             </div>
             <div class="bill-service-info">
-              <h3>Electricity & Water</h3>
-              <p>DisCo Tokens & State Water</p>
+              <h3>Electricity &amp; Water</h3>
+              <p>DisCo Tokens &amp; State Water</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -174,7 +179,7 @@
               <span class="material-symbols-outlined" aria-hidden="true">tv</span>
             </div>
             <div class="bill-service-info">
-              <h3>Cable TV & Entertainment</h3>
+              <h3>Cable TV &amp; Entertainment</h3>
               <p>DStv, GOtv, Showmax, Event Tickets</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
@@ -186,8 +191,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
             </div>
             <div class="bill-service-info">
-              <h3>Airlines, Travels & Logistics</h3>
-              <p>Flight Tickets & Shipping Lines</p>
+              <h3>Airlines, Travels &amp; Logistics</h3>
+              <p>Flight Tickets &amp; Shipping Lines</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -198,7 +203,7 @@
               <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
             </div>
             <div class="bill-service-info">
-              <h3>Government & Remita</h3>
+              <h3>Government &amp; Remita</h3>
               <p>Taxes, Levies, VISA Fees</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
@@ -210,8 +215,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">school</span>
             </div>
             <div class="bill-service-info">
-              <h3>Schools & Professionals</h3>
-              <p>Tuition & Institute Dues</p>
+              <h3>Schools &amp; Professionals</h3>
+              <p>Tuition &amp; Institute Dues</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -222,8 +227,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">holiday_village</span>
             </div>
             <div class="bill-service-info">
-              <h3>Estates & Associations</h3>
-              <p>Estate Dues & Resident Levies</p>
+              <h3>Estates &amp; Associations</h3>
+              <p>Estate Dues &amp; Resident Levies</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -235,7 +240,7 @@
             </div>
             <div class="bill-service-info">
               <h3>Toll Fees - LCC</h3>
-              <p>LCC eTag & Toll Top-ups</p>
+              <p>LCC eTag &amp; Toll Top-ups</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -247,7 +252,7 @@
             </div>
             <div class="bill-service-info">
               <h3>Sports and Gaming</h3>
-              <p>Wallet Top-ups & Betting</p>
+              <p>Wallet Top-ups &amp; Betting</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -258,8 +263,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">diversity_1</span>
             </div>
             <div class="bill-service-info">
-              <h3>Religious & NGOs</h3>
-              <p>Tithes, Offerings & Donations</p>
+              <h3>Religious &amp; NGOs</h3>
+              <p>Tithes, Offerings &amp; Donations</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -270,8 +275,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">health_and_safety</span>
             </div>
             <div class="bill-service-info">
-              <h3>Insurance & HMO</h3>
-              <p>Health & Vehicle Policies</p>
+              <h3>Insurance &amp; HMO</h3>
+              <p>Health &amp; Vehicle Policies</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -282,8 +287,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
             </div>
             <div class="bill-service-info">
-              <h3>Capital Market & Investments</h3>
-              <p>Stocks, Bonds & Portfolios</p>
+              <h3>Capital Market &amp; Investments</h3>
+              <p>Stocks, Bonds &amp; Portfolios</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -294,8 +299,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">groups</span>
             </div>
             <div class="bill-service-info">
-              <h3>Distributors & Agent Payments</h3>
-              <p>Supply Chain & Agency Networks</p>
+              <h3>Distributors &amp; Agent Payments</h3>
+              <p>Supply Chain &amp; Agency Networks</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -307,7 +312,7 @@
             </div>
             <div class="bill-service-info">
               <h3>Financial Institutions</h3>
-              <p>Microfinance, Mortgages & Loans</p>
+              <p>Microfinance, Mortgages &amp; Loans</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -318,8 +323,8 @@
               <span class="material-symbols-outlined" aria-hidden="true">computer</span>
             </div>
             <div class="bill-service-info">
-              <h3>Infotechs & Other Services</h3>
-              <p>Software Subscriptions & Cloud</p>
+              <h3>Infotechs &amp; Other Services</h3>
+              <p>Software Subscriptions &amp; Cloud</p>
             </div>
             <span class="material-symbols-outlined arrow" aria-hidden="true">chevron_right</span>
           </div>
@@ -339,8 +344,8 @@
         </div>
 
         <!-- Quick Favorites Rail -->
-        <div class="bills-section-title" style="margin-top: 32px;">
-          <h2>Frequent & Saved Beneficiaries</h2>
+        <div class="bills-section-title bills-beneficiaries-heading">
+          <h2>Frequent &amp; Saved Beneficiaries</h2>
         </div>
 
         <div class="quick-bills-rail" role="region" aria-label="Frequent Beneficiaries">
@@ -426,7 +431,7 @@
       <!-- HISTORY TAB VIEW -->
       <section id="viewHistory" class="bills-view-pane" style="display: none;" aria-labelledby="historyHeading">
         <div class="bills-section-title">
-          <h2 id="historyHeading">Payment Receipts & Audit Log</h2>
+          <h2 id="historyHeading">Payment Receipts &amp; Audit Log</h2>
           <p>Track every processed token and government fee</p>
         </div>
 

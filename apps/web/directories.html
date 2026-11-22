@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita - Directory & Public Service Ecosystem</title>
-  
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
 
+  <script src="src/pages/theme.js"></script>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +17,9 @@
   <!-- Material Symbols & Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <link rel="stylesheet" type="text/css" href="css/directory.css">
+  <link rel="stylesheet" type="text/css" href="css/theme.css">
 </head>
-<body>
+<body class="directory-body">
 
   <a href="#mainContent" class="skip-link">Skip to main content</a>
 
@@ -34,6 +36,9 @@
     </div>
 
     <div class="header-right">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <button onclick="openModal('addBusinessModal')" class="btn-add-listing-header">
         <span class="material-symbols-outlined" style="font-size: 18px;">add_business</span>
         <span>Claim / Add Listing</span>
@@ -46,7 +51,7 @@
 
       <div id="notifDropdown" class="notif-dropdown">
         <div class="notif-header">
-          <span>System & Verification Updates</span>
+          <span>System &amp; Verification Updates</span>
           <button onclick="markAllNotificationsRead()" class="btn-text-link">Mark all read</button>
         </div>
         <div class="notif-item" id="notif1" onclick="markNotificationRead('notif1')">
@@ -73,7 +78,7 @@
     <!-- TAB 1: EXPLORE / DIRECTORY GRID -->
     <div id="exploreSection" class="tab-section">
       <section class="search-hero-section">
-        <h1 class="hero-title">Verified Public & Business Directory</h1>
+        <h1 class="hero-title">Verified Public &amp; Business Directory</h1>
         <p class="hero-subtitle">Search structured, real-time verified government agencies, hospitals, schools, and local businesses across the ecosystem.</p>
 
         <!-- Search Bar with Current Location on the Left -->
@@ -84,19 +89,17 @@
           </button>
           
           <div class="search-input-wrapper">
-            <!-- <span class="material-symbols-outlined" style="color: #64748b; font-size: 20px;">search</span> -->
             <input type="text" id="directorySearchInput" class="search-input-field" placeholder="search..." onkeyup="handleSearchKeyup(event)">
           </div>
 
           <button onclick="executeAISearch()" class="ai-trigger-btn">
             <span class="material-symbols-outlined" style="font-size: 18px;">search</span>
-           
           </button>
         </div>
 
         <div id="aiParsedFeedback" class="ai-parsed-feedback">
           <span class="material-symbols-outlined" style="font-size: 18px;">smart_toy</span>
-          <span id="aiParsedText">AI Intent Parsed: Filtering for Healthcare & Hospital entities open now</span>
+          <span id="aiParsedText">AI Intent Parsed: Filtering for Healthcare &amp; Hospital entities open now</span>
         </div>
       </section>
 
@@ -105,9 +108,9 @@
           <button class="cat-pill active" onclick="setCategoryFilter('All', this)">All Listings</button>
           <button class="cat-pill" onclick="setCategoryFilter('Businesses', this)">Businesses</button>
           <button class="cat-pill" onclick="setCategoryFilter('Government', this)">Government Agencies</button>
-          <button class="cat-pill" onclick="setCategoryFilter('Schools', this)">Schools & Institutes</button>
-          <button class="cat-pill" onclick="setCategoryFilter('Hospitals', this)">Hospitals & Health</button>
-          <button class="cat-pill" onclick="setCategoryFilter('Restaurants', this)">Restaurants & Food</button>
+          <button class="cat-pill" onclick="setCategoryFilter('Schools', this)">Schools &amp; Institutes</button>
+          <button class="cat-pill" onclick="setCategoryFilter('Hospitals', this)">Hospitals &amp; Health</button>
+          <button class="cat-pill" onclick="setCategoryFilter('Restaurants', this)">Restaurants &amp; Food</button>
         </div>
 
         <!-- Functional View Toggle Controls -->
@@ -124,10 +127,10 @@
       <div id="directoryGrid" class="directory-grid">
         <!-- Dynamic listings populated via JS -->
       </div>
-      <div style="text-align: center; margin: 20px 0;">
+      <div class="load-more-wrap">
         <button type="button" id="loadMoreBtn" class="btn-submit-primary" hidden>Show more</button>
       </div>
-      <p id="directoryAttribution" style="font-size: 11px; color: #64748b; text-align: center;" hidden></p>
+      <p id="directoryAttribution" class="directory-attribution-note" hidden></p>
     </div>
 
     <!-- TAB 2: DASHBOARD (MY BIZ) -->
@@ -135,13 +138,13 @@
       <div class="dashboard-header">
         <div>
           <h2 class="dashboard-title">Business Portal</h2>
-          <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Manage your listing profile, verify identity, and boost visibility.</p>
+          <p class="dashboard-subtitle">Manage your listing profile, verify identity, and boost visibility.</p>
         </div>
       </div>
 
-      <div id="myListings" class="panel-card" style="margin-bottom: 24px;">
+      <div id="myListings" class="panel-card my-listings-panel">
         <h3 class="panel-title"><span class="material-symbols-outlined">storefront</span> My Listings</h3>
-        <div id="myListingsBody" style="font-size: 13px; color: #64748b;">Sign in to see the listings you submitted.</div>
+        <div id="myListingsBody" class="my-listings-body">Sign in to see the listings you submitted.</div>
       </div>
 
       <div class="dashboard-grid">
@@ -152,12 +155,12 @@
             Edit Business Profile
           </h3>
           <form onsubmit="event.preventDefault(); alert('Profile details updated successfully!');">
-            <div style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
-              <div class="form-group" style="flex: 1; min-width: 200px;">
+            <div class="form-row-flex">
+              <div class="form-group form-col-grow">
                 <label class="form-label">Business Name</label>
-                <input type="text" class="form-control" value="Apex Innovation & Tech Hub" required>
+                <input type="text" class="form-control" value="Apex Innovation &amp; Tech Hub" required>
               </div>
-              <div class="form-group" style="flex: 1; min-width: 200px;">
+              <div class="form-group form-col-grow">
                 <label class="form-label">Category</label>
                 <select class="form-control">
                   <option selected>Businesses (Co-Working Space)</option>
@@ -167,23 +170,23 @@
               </div>
             </div>
             
-            <div style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
-              <div class="form-group" style="flex: 1; min-width: 200px;">
+            <div class="form-row-flex">
+              <div class="form-group form-col-grow">
                 <label class="form-label">Public Phone Number</label>
                 <input type="tel" class="form-control" value="+234 812 345 6789" required>
               </div>
-              <div class="form-group" style="flex: 1; min-width: 200px;">
+              <div class="form-group form-col-grow">
                 <label class="form-label">Operating Hours</label>
                 <input type="text" class="form-control" value="Mon - Sat: 8:00 AM - 9:00 PM" required>
               </div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 24px;">
+            <div class="form-group address-group-spaced">
               <label class="form-label">Physical Address</label>
               <input type="text" class="form-control" value="22 Commercial Avenue, Sabo, Yaba, Lagos" required>
             </div>
             
-            <button type="submit" class="btn-submit-primary" style="background: var(--black); color: var(--emerald);">
+            <button type="submit" class="btn-submit-primary btn-dark-emerald">
               Save Profile Changes
             </button>
           </form>
@@ -193,16 +196,16 @@
         <div class="panel-card">
           <h3 class="panel-title">
             <span class="material-symbols-outlined">trending_up</span>
-            Visibility & Subscription
+            Visibility &amp; Subscription
           </h3>
           
           <div class="subscription-box">
             <div class="subs-header">
               <div>
-                <span style="font-size: 10px; font-weight: 800; background: var(--black); color: var(--emerald); padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">Current Plan</span>
-                <h4 style="font-family: var(--font-heading); font-size: 18px; margin-top: 8px;">Enhanced Profile</h4>
+                <span class="subs-plan-badge">Current Plan</span>
+                <h4 class="subs-plan-title">Enhanced Profile</h4>
               </div>
-              <div class="subs-price">₦15,000<span style="font-size: 12px; color: #64748b; font-weight: 500;">/mo</span></div>
+              <div class="subs-price">₦15,000<span class="subs-price-period">/mo</span></div>
             </div>
             
             <ul class="feature-list">
@@ -216,7 +219,7 @@
               <div class="toggle-track"><div class="toggle-knob"></div></div>
             </div>
           </div>
-          <button onclick="openModal('billingModal')" class="btn-submit-primary" style="background: transparent; border: 2px solid var(--border-color); color: var(--black);">
+          <button onclick="openModal('billingModal')" class="btn-submit-primary btn-outline-secondary">
             Manage Billing Settings
           </button>
         </div>
@@ -251,11 +254,11 @@
   <div id="detailModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="detail-modal-title-group">
           <div id="modalLogo" class="entity-logo-box">SN</div>
           <div>
             <h3 id="modalTitle" class="modal-title">St. Nicholas Hospital</h3>
-            <span id="modalCategory" class="entity-category">Hospital & Healthcare</span>
+            <span id="modalCategory" class="entity-category">Hospital &amp; Healthcare</span>
           </div>
         </div>
         <button onclick="closeModal('detailModal')" class="close-modal-btn">
@@ -263,22 +266,16 @@
         </button>
       </div>
 
-      <img id="modalImage" alt="" loading="lazy" style="width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px;" hidden>
-      <!-- The layout lives on the inner div: a display value on the form itself would override its hidden attribute. -->
-      <form id="modalImageUploadForm" onsubmit="uploadSelectedListingImage(event)" hidden>
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <label class="form-label" for="modalImageInput">Listing photo (JPEG, PNG, or WebP; resized for you)</label>
-          <input id="modalImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
-          <button type="submit" class="btn-submit-primary">Upload photo</button>
-          <button type="button" id="modalImageRemoveBtn" class="btn-submit-primary" style="background: transparent; border: 2px solid var(--border-color); color: var(--black);" onclick="removeSelectedListingImage()" hidden>Remove photo</button>
-        </div>
+      <img id="modalImage" alt="" class="detail-modal-image" hidden>
+      <form id="modalImageUploadForm" onsubmit="uploadSelectedListingImage(event)" hidden class="detail-upload-form">
+        <label class="form-label" for="modalImageInput">Listing photo (JPEG, PNG, or WebP; up to 8 MB)</label>
+        <input id="modalImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <button type="submit" class="btn-submit-primary">Upload photo</button>
       </form>
 
-      <div id="modalVerifiedBanner" hidden>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--emerald-dark); font-weight: 700; background: rgba(0,208,132,0.1); padding: 8px 12px; border-radius: 10px;">
-          <span class="material-symbols-outlined">verified</span>
-          <span>Verified listing: checked by the theKapita team</span>
-        </div>
+      <div class="verified-record-banner">
+        <span class="material-symbols-outlined">verified</span>
+        <span>Verified Institutional Listing • Official Government Record</span>
       </div>
 
       <div class="info-list">
@@ -295,15 +292,15 @@
           <span id="modalHours">Open 24 Hours • 7 Days a week</span>
         </div>
       </div>
-      <p id="modalAttribution" style="font-size: 11px; color: #64748b; margin: 6px 0 0;" hidden></p>
+      <p id="modalAttribution" class="detail-modal-attribution" hidden></p>
 
       <div>
-        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 6px;">Provided Services & Specialties</h4>
-        <div id="modalServices" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        <h4 class="detail-section-heading">Provided Services &amp; Specialties</h4>
+        <div id="modalServices" class="detail-services-wrap"></div>
       </div>
 
-      <div style="border-top: 1px solid var(--border-color); padding-top: 14px;">
-        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Write a Verified Review</h4>
+      <div class="detail-review-divider">
+        <h4 class="detail-section-heading">Write a Verified Review</h4>
         <div class="star-select-row" id="starRatingRow">
           <span class="material-symbols-outlined selected" onclick="setRating(1)">star</span>
           <span class="material-symbols-outlined selected" onclick="setRating(2)">star</span>
@@ -311,12 +308,12 @@
           <span class="material-symbols-outlined selected" onclick="setRating(4)">star</span>
           <span class="material-symbols-outlined" onclick="setRating(5)">star</span>
         </div>
-        <textarea id="reviewCommentInput" class="form-control" rows="2" placeholder="Share your transaction experience..." style="margin-top: 8px;"></textarea>
-        <button onclick="submitReview()" class="btn-submit-primary" style="margin-top: 8px; padding: 10px;">Post Review</button>
+        <textarea id="reviewCommentInput" class="form-control review-textarea" rows="2" placeholder="Share your transaction experience..."></textarea>
+        <button onclick="submitReview()" class="btn-submit-primary review-submit-btn">Post Review</button>
       </div>
 
       <div>
-        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 6px;">Community Reviews</h4>
+        <h4 class="detail-section-heading">Community Reviews</h4>
         <div id="modalReviewsList" class="reviews-list"></div>
       </div>
     </div>
@@ -324,21 +321,21 @@
 
   <!-- 2. ROUTE & NAVIGATION DIRECTIONS MODAL -->
   <div id="routeModal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 640px;">
+    <div class="modal-card route-modal-card">
       <div class="modal-header">
         <div>
           <h3 id="routeModalTitle" class="modal-title">Directions to Destination</h3>
-          <p id="routeModalSub" style="font-size: 12px; color: #64748b;">Route guidance & transit estimate</p>
+          <p id="routeModalSub" class="route-modal-sub">Route guidance &amp; transit estimate</p>
         </div>
         <button onclick="closeModal('routeModal')" class="close-modal-btn">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <div style="background: var(--surface-gray); border: 1px solid var(--border-color); padding: 14px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div class="route-estimate-bar">
         <div>
-          <span style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Estimated Travel</span>
-          <h4 id="routeDistanceTime" style="font-size: 16px; font-weight: 800; color: var(--black);">12 mins (3.4 km)</h4>
+          <span class="route-estimate-label">Estimated Travel</span>
+          <h4 id="routeDistanceTime" class="route-estimate-val">12 mins (3.4 km)</h4>
         </div>
         <!-- Styled Transit Buttons -->
         <div class="transit-mode-group">
@@ -354,21 +351,21 @@
         </div>
       </div>
 
-      <div style="width: 100%; height: 180px; background: #e2e8f0; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid var(--border-color);">
-        <div style="position: absolute; top: 12px; left: 12px; background: var(--white); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-          📍 Current Location: <span id="routeCurrentLocDisplay" style="color: var(--emerald-dark);">Lagos, NG</span>
+      <div class="route-map-placeholder">
+        <div class="route-loc-badge">
+          📍 Current Location: <span id="routeCurrentLocDisplay" class="route-loc-highlight">Lagos, NG</span>
         </div>
-        <span class="material-symbols-outlined" style="font-size: 42px; color: var(--emerald-dark); margin-bottom: 4px;">map</span>
-        <p style="font-size: 12px; font-weight: 700; color: #475569;">Interactive GPS Navigation Active</p>
+        <span class="material-symbols-outlined route-map-icon">map</span>
+        <p class="route-map-label">Interactive GPS Navigation Active</p>
       </div>
 
       <div>
-        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Turn-by-Turn Guidance</h4>
-        <div id="turnByTurnList" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #334155;"></div>
+        <h4 class="route-guidance-heading">Turn-by-Turn Guidance</h4>
+        <div id="turnByTurnList" class="turn-by-turn-list"></div>
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 6px;">
-        <button onclick="launchExternalMaps()" class="btn-submit-primary" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+      <div class="route-action-row">
+        <button onclick="launchExternalMaps()" class="btn-submit-primary route-gps-btn">
           <span class="material-symbols-outlined">near_me</span>
           <span>Start Turn-by-Turn GPS</span>
         </button>
@@ -380,18 +377,18 @@
   <div id="billingModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Manage Billing & Subscriptions</h3>
+        <h3 class="modal-title">Manage Billing &amp; Subscriptions</h3>
         <button onclick="closeModal('billingModal')" class="close-modal-btn">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="background: var(--surface-gray); border: 1px solid var(--border-color); padding: 16px; border-radius: 14px;">
-          <span style="font-size: 11px; color: #64748b; font-weight: 700;">ACTIVE PAYMENT METHOD</span>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-            <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px;">
-              <span class="material-symbols-outlined" style="color: var(--emerald-dark);">credit_card</span>
+      <div class="billing-stack">
+        <div class="billing-card-box">
+          <span class="billing-card-label">ACTIVE PAYMENT METHOD</span>
+          <div class="billing-card-row">
+            <div class="billing-card-brand">
+              <span class="material-symbols-outlined billing-card-icon">credit_card</span>
               <span>Mastercard ending in •••• 4092</span>
             </div>
             <button onclick="alert('Card update portal opened.')" class="btn-text-link">Change</button>
@@ -426,7 +423,7 @@
         </button>
       </div>
 
-      <form id="addBusinessForm" onsubmit="handleBusinessSubmit(event)" style="display: flex; flex-direction: column; gap: 16px;">
+      <form id="addBusinessForm" onsubmit="handleBusinessSubmit(event)" class="add-business-form">
         <div class="form-group">
           <label class="form-label">Business / Institution Name</label>
           <input type="text" id="newEntityName" class="form-control" required placeholder="e.g. Kapita Clinic">
@@ -435,10 +432,10 @@
           <label class="form-label">Category</label>
           <select id="newCategory" class="form-control" required>
             <option value="Businesses">Local Business</option>
-            <option value="Hospitals">Hospital & Health</option>
-            <option value="Schools">School & Education</option>
+            <option value="Hospitals">Hospital &amp; Health</option>
+            <option value="Schools">School &amp; Education</option>
             <option value="Government">Government Agency</option>
-            <option value="Restaurants">Restaurant & Food</option>
+            <option value="Restaurants">Restaurant &amp; Food</option>
           </select>
         </div>
         <div class="form-group">

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita Care - Provider Portal</title>
 
+  <script src="src/pages/theme.js"></script>
+
   <!-- Fonts: Bricolage Grotesque & Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,38 +17,39 @@
 
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="css/care-provider.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="provider-body">
 
   <!-- Role Selector Onboarding Modal (First Selection) -->
   <div class="provider-onboarding-overlay active" id="providerOnboardingModal" role="dialog" aria-modal="true">
     <div class="onboarding-card">
-      <div class="brand-title" style="margin-bottom: 6px;">
-        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span style="color: #059669;">Provider Portal</span>
+      <div class="brand-title onboarding-brand-row">
+        <span class="prefix">the</span>Kapita<span class="dot">.</span> <span class="onboarding-portal-label">Provider Portal</span>
       </div>
       <h2>Select Your Healthcare Facility Type</h2>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Choose your practice category to personalize your dashboard workspace, active queues, and catalog tools.</p>
+      <p class="onboarding-subtitle">Choose your practice category to personalize your dashboard workspace, active queues, and catalog tools.</p>
       
       <div class="role-grid">
         <button type="button" class="role-card-btn" onclick="selectProviderRole('hospital')">
           <span class="material-symbols-outlined icon">local_hospital</span>
           <span class="title">Hospital / Clinic</span>
-          <span class="desc">ER, wards & specialists</span>
+          <span class="desc">ER, wards &amp; specialists</span>
         </button>
         <button type="button" class="role-card-btn" onclick="selectProviderRole('pharmacy')">
           <span class="material-symbols-outlined icon">pill</span>
           <span class="title">Pharmacy</span>
-          <span class="desc">Rx dispatches & inventory</span>
+          <span class="desc">Rx dispatches &amp; inventory</span>
         </button>
         <button type="button" class="role-card-btn" onclick="selectProviderRole('doctor')">
           <span class="material-symbols-outlined icon">stethoscope</span>
           <span class="title">Specialist / Doctor</span>
-          <span class="desc">Telemed & patient notes</span>
+          <span class="desc">Telemed &amp; patient notes</span>
         </button>
         <button type="button" class="role-card-btn" onclick="selectProviderRole('lab')">
           <span class="material-symbols-outlined icon">science</span>
           <span class="title">Diagnostics Lab</span>
-          <span class="desc">Sample collection & tests</span>
+          <span class="desc">Sample collection &amp; tests</span>
         </button>
       </div>
     </div>
@@ -64,6 +67,9 @@
     </div>
 
     <div class="header-right">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <div class="facility-switcher" onclick="openOnboardingModal()" title="Switch Facility Role">
         <span class="material-symbols-outlined" style="font-size: 16px;">swap_horiz</span>
         <span id="switcherFacilityName">St. Nicholas Hospital</span>
@@ -87,8 +93,8 @@
     <section class="section-box">
       <div class="section-header">
         <div>
-          <h3 id="queueSectionTitle">Live Patient Consultations & Queue</h3>
-          <p id="queueSectionSub" style="font-size: 11px; color: #64748b; margin-top: 1px;">Manage incoming bookings and real-time dispatches</p>
+          <h3 id="queueSectionTitle">Live Patient Consultations &amp; Queue</h3>
+          <p id="queueSectionSub" class="section-sub-text">Manage incoming bookings and real-time dispatches</p>
         </div>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="action-btn" onclick="openAddRecordModal()">+ Add New Entry</button>
@@ -121,8 +127,8 @@
       <section class="section-box" style="margin-bottom: 0;">
         <div class="section-header">
           <div>
-            <h3 id="catalogSectionTitle">Services & Inventory Menu</h3>
-            <p style="font-size: 11px; color: #64748b; margin-top: 1px;">Manage network offerings</p>
+            <h3 id="catalogSectionTitle">Services &amp; Inventory Menu</h3>
+            <p class="section-sub-text">Manage network offerings</p>
           </div>
           <button type="button" class="action-btn" onclick="openCatalogItemModal()">+ Add Item</button>
         </div>
@@ -147,8 +153,8 @@
       <section class="section-box" style="margin-bottom: 0;">
         <div class="section-header">
           <div>
-            <h3 id="rosterSectionTitle">Staff & Duty Roster</h3>
-            <p style="font-size: 11px; color: #64748b; margin-top: 1px;">Active medical personnel</p>
+            <h3 id="rosterSectionTitle">Staff &amp; Duty Roster</h3>
+            <p class="section-sub-text">Active medical personnel</p>
           </div>
           <button type="button" class="action-btn" onclick="openStaffModal()">+ Add Staff</button>
         </div>

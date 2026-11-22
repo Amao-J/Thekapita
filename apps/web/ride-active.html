@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>theKapita | Trip in Progress</title>
+  <script src="src/pages/theme.js"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ride.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="ride-page-body">
 
@@ -21,9 +23,12 @@
   <header class="desktop-header profile-back-header" role="banner">
     <div class="header-back-action" onclick="window.location.href='ride.html'" tabindex="0" role="button" aria-label="Return to ride home" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='ride.html'">
       <div class="back-btn-circle"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></div>
-      <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #008a57;">Live Ride</span></span>
+      <span class="ride-header-brand" style="font-weight: 700; font-size: 16px;">theKapita <span class="ride-header-accent" style="color: #008a57;">Live Ride</span></span>
     </div>
-    <div id="rideStatusBadge" class="status-badge live" role="status" aria-live="polite"><span class="pulse-dot" aria-hidden="true"></span> REQUEST SUBMITTED</div>
+    <div class="header-right">
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+      <div id="rideStatusBadge" class="status-badge live" role="status" aria-live="polite"><span class="pulse-dot" aria-hidden="true"></span> REQUEST SUBMITTED</div>
+    </div>
   </header>
 
   <main id="main-content" class="ride-main-container" tabindex="-1">
@@ -57,7 +62,7 @@
 
       <!-- Rider PIN: the driver must type this to start the trip -->
       <div id="rideOtpBox" class="active-shipment-card" style="margin-bottom: 20px; text-align:center;" hidden>
-        <p style="font-size: 12px; color: #475569; margin-bottom: 4px;">Share this PIN with your driver to start the trip</p>
+        <p class="ride-otp-label" style="font-size: 12px; color: #475569; margin-bottom: 4px;">Share this PIN with your driver to start the trip</p>
         <strong id="rideOtp" style="font-size: 30px; letter-spacing: 8px; color:#0f172a;">----</strong>
       </div>
 
@@ -70,10 +75,10 @@
         </div>
         <div class="inputs-column">
           <div class="input-row" style="background: transparent; border: none; padding: 0;">
-            <div style="font-size: 12px; color: #475569;">Pickup: <strong id="ridePickup"></strong></div>
+            <div class="ride-route-pickup" style="font-size: 12px; color: #475569;">Pickup: <strong id="ridePickup"></strong></div>
           </div>
           <div class="input-row" style="background: transparent; border: none; padding: 0;">
-            <div style="font-size: 12px; color: #0f172a;">Dropoff: <strong id="rideDestination"></strong></div>
+            <div class="ride-route-dropoff" style="font-size: 12px; color: #0f172a;">Dropoff: <strong id="rideDestination"></strong></div>
           </div>
         </div>
       </div>

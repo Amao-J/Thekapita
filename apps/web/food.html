@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita - Restaurants & Buka</title>
+
+  <script src="src/pages/theme.js"></script>
   
   <!-- Fonts: Bricolage Grotesque & Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +17,7 @@
   
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="css/food.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="food-page-body">
 
@@ -36,6 +39,9 @@
     </div>
 
     <div class="header-right-actions">
+      <!-- Theme Toggle -->
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
+
       <!-- Delivery Location Pill -->
       <button type="button" class="location-pill" onclick="triggerAddressChange()" aria-label="Change delivery location. Current location: Yaba, Lagos">
         <span class="material-symbols-outlined loc-icon" aria-hidden="true">location_on</span>
@@ -91,7 +97,6 @@
   <main id="main-food-content" class="food-main-container" tabindex="-1">
     <div class="food-content-wrapper">
 
-      <!-- 1. Dual Service Switcher Bar -->
       <!-- 1. Dual Service Switcher Bar -->
       <div class="service-mode-toggle" role="tablist" aria-label="Food Categories">
         <button type="button" class="mode-btn active" id="tab-all" role="tab" aria-selected="true" aria-controls="restaurantCardList" onclick="switchVendorCategory('all', this)">
@@ -191,7 +196,6 @@
 
       <!-- Network State Overlay / Container for Vendor Cards -->
       <div class="restaurant-card-list" id="restaurantCardList" aria-live="polite">
-        <!-- Initial Skeleton Loading UI -->
         <div class="skeleton-card" aria-hidden="true">
           <div class="skeleton-box img"></div>
           <div class="skeleton-box title"></div>
@@ -336,10 +340,6 @@
       <span class="nav-text">Bookings</span>
     </button>
   </nav>
-
-  <!-- ==========================================
-        MODAL DIALOG OVERLAYS
-        ========================================== -->
 
   <!-- MODAL 1: Table Reservation Input -->
   <div class="wallet-modal-overlay" id="reservationModal" role="dialog" aria-modal="true" aria-labelledby="resModalTitle">
@@ -547,7 +547,6 @@
       <div class="history-list" id="historyList" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;">
         <p style="font-size:13px;color:var(--text-muted);">Loading...</p>
       </div>
-      </div>
     </div>
   </div>
 
@@ -617,14 +616,14 @@
       <img id="extSpotImg" src="" alt="Restaurant View" style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 16px;">
       
       <div class="form-group" style="margin-bottom: 16px;">
-        <label>Location & Address</label>
+        <label>Location &amp; Address</label>
         <div style="font-size: 13px; font-weight: 600; color: var(--text-dark); background: var(--surface-gray); padding: 12px; border-radius: 10px; border: 1px dashed var(--border-color);" id="extSpotAddress">
           --
         </div>
       </div>
 
       <div class="form-group" style="margin-bottom: 24px;">
-        <label>Cuisine & Vibe</label>
+        <label>Cuisine &amp; Vibe</label>
         <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;" id="extSpotDesc">
           --
         </div>

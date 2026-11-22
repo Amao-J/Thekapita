@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>theKapita | Ride & Express Logistics</title>
 
+  <!-- Theme Preloader -->
+  <script src="src/pages/theme.js"></script>
+
   <!-- SVG Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
 
@@ -20,7 +23,7 @@
   <!-- Stylesheet Imports -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/ride.css">
-  <link rel="stylesheet" href="css/map-picker.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="ride-page-body">
 
@@ -39,11 +42,12 @@
       <div class="back-btn-circle">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </div>
-      <span style="font-weight: 700; font-size: 16px;">theKapita <span style="color: #008a57;">Ride & Courier</span></span>
+      <span class="ride-header-brand" style="font-weight: 700; font-size: 16px;">theKapita <span class="ride-header-accent" style="color: #008a57;">Ride & Courier</span></span>
     </div>
 
     <!-- Header Dropdown Controls -->
-    <div class="wallet-header-tag">
+    <div class="wallet-header-tag" style="display: flex; align-items: center; gap: 8px;">
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
       <div class="header-nav-dropdown-wrapper">
         <button type="button" class="header-menu-pill-btn" id="headerNavMenuBtn" onclick="toggleHeaderNavMenu(event)" aria-expanded="false" aria-controls="headerNavDropdownMenu" aria-label="Open service menu">
           <span class="material-symbols-outlined" aria-hidden="true">menu</span>

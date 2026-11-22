@@ -1292,3 +1292,83 @@
     max-width: 280px;
   }
 }
+
+/* ==========================================================================
+   CARE-MATCHED HEADER FOR WALLET
+   ========================================================================== */
+.wallet-body .profile-back-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--white, #ffffff);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.wallet-body .header-back-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.wallet-body .back-btn-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark, #0f172a);
+  transition: background 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+}
+
+.wallet-body .header-back-action:hover .back-btn-circle {
+  background: var(--border-color, #e2e8f0);
+  color: var(--emerald-dark, #00a367);
+}
+
+.wallet-body .brand-title {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--black, #121212);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: 0;
+}
+
+.wallet-body .brand-title .prefix {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black, #121212);
+  text-transform: lowercase;
+}
+
+.wallet-body .brand-title .dot {
+  color: var(--emerald, #00d084);
+}
+
+.wallet-body .brand-title .brand-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--emerald-dark, #00a367);
+  margin-left: 4px;
+}
+
+.wallet-body .header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
