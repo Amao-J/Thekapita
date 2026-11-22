@@ -20,6 +20,9 @@ export const ENDPOINTS = Object.freeze({
     transactions: '/wallet/transactions',
     beneficiaries: '/wallet/beneficiaries',
   },
+  routing: {
+    route: '/routing/route', // GET ?from_lat&from_lng&to_lat&to_lng -> road distance, traffic-aware ETA, polyline
+  },
   rides: {
     book: '/rides/book',
     detail: (ref) => `/rides/${encodeURIComponent(ref)}`,
@@ -40,6 +43,7 @@ export const ENDPOINTS = Object.freeze({
   food: {
     restaurants: '/food/restaurants',
     restaurant: (slug) => `/food/restaurants/${encodeURIComponent(slug)}`,
+    deliveryEstimate: (slug) => `/food/restaurants/${encodeURIComponent(slug)}/delivery-estimate`, // GET ?lat&lng (signed in)
     orders: '/food/orders',
     confirmOrder: (ref) => `/food/orders/${encodeURIComponent(ref)}/confirm`,
     cancelOrder: (ref) => `/food/orders/${encodeURIComponent(ref)}/cancel`,
@@ -52,6 +56,10 @@ export const ENDPOINTS = Object.freeze({
       summary: '/food/vendor/summary',
       menu: '/food/vendor/menu',
       menuItem: (id) => `/food/vendor/menu/${id}`,
+      storeImageUploadUrl: '/food/vendor/store/image/upload-url',
+      storeImage: '/food/vendor/store/image',
+      dishImageUploadUrl: (id) => `/food/vendor/menu/${id}/image/upload-url`,
+      dishImage: (id) => `/food/vendor/menu/${id}/image`,
       orders: '/food/vendor/orders',
       orderStatus: (ref) => `/food/vendor/orders/${encodeURIComponent(ref)}/status`,
     },

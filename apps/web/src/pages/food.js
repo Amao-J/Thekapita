@@ -1,13 +1,14 @@
 import { authorizedRequest, getCurrentUser, hydrateProfile, isAuthenticated } from '../state/session.js';
 import { ApiError, newIdempotencyKey, request } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
+import { buildDirectoryQuery, DIRECTORY_PAGE_SIZE } from '@thekapita/shared/directoryQuery';
+import { currentPosition, locationAlreadyGranted } from '../ui/map.js';
 
 /* Application State */
 let currentDish = null; // { id, slug, name, price, vendor, img } for the dish modal
 let currentModalQty = 1;
 let orderKey = null;    // Idempotency-Key for the order being placed (reused only for network retries)
-let restaurants = [];   // from GET /food/restaurants
-let directoryRestaurants = [];
+let restaurants = [];   // orderable vendors, from GET /food/restaurants?source=food
 let isOnline = navigator.onLine;
 
 function requireLogin() {
@@ -56,11 +57,60 @@ function showNotification(message, type = 'success') {
   }, 3500);
 }
 
-/* Live restaurant list from the API */
+/* Live restaurant list from the API.
+ *
+ * Orderable vendors are few, so they load in one request. The directory can hold thousands of places, so it loads one
+ * page at a time and the SERVER does the searching and filtering. Never download the whole catalogue to filter it here:
+ * that is slow for everyone and gets slower with every import. */
+const VENDOR_LIMIT = 100;
+const DIRECTORY_PAGE = DIRECTORY_PAGE_SIZE;
+const dir = { rows: [], hasMore: false, loading: false, token: 0, category: 'all', chip: 'all', q: '', timer: null };
+let userPos = null; // {lat, lng}, only when the browser already allows location (never a surprise prompt)
+
+// Neutral tile for places with no photo. A stock food photo would pretend to be the real place.
+const NO_PHOTO = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" fill="#e2e8f0"/>'
+  + '<path d="M28 20v14a4 4 0 0 0 4 4v22h4V38a4 4 0 0 0 4-4V20h-3v10h-2V20h-3v10h-2V20zM50 20c-4 2-6 8-6 14h6v26h4V20z" fill="#94a3b8"/></svg>',
+)}`;
+
+function ensureDirectorySection() {
+  let list = document.getElementById('restaurantDirectoryList');
+  if (!list) {
+    const anchor = document.getElementById('restaurantCardList');
+    list = el('div', { id: 'restaurantDirectoryList' });
+    anchor.after(el('section', { id: 'restaurantDirectorySection', 'aria-labelledby': 'restaurantDirectoryHeading', style: 'margin-top: 24px;' },
+      el('h3', { id: 'restaurantDirectoryHeading' }, 'Restaurant directory ', el('small', { id: 'directoryCountTag' })),
+      list));
+  }
+  if (!document.getElementById('restaurantDirectoryAttribution')) {
+    list.after(el('p', { id: 'restaurantDirectoryAttribution', hidden: '', style: 'font-size: 11px; color: #64748b; text-align: center;' }));
+  }
+  if (!document.getElementById('directoryLoadMore')) {
+    list.after(el('div', { style: 'text-align: center; margin: 16px 0;' },
+      el('button', { type: 'button', id: 'directoryLoadMore', class: 'btn-see-menu', hidden: '', onclick: () => loadDirectory(false) }, 'Show more restaurants')));
+  }
+  return list;
+}
+
+async function locateQuietly() {
+  if (userPos || !(await locationAlreadyGranted())) return userPos;
+  const here = await Promise.race([currentPosition(), new Promise((resolve) => setTimeout(resolve, 2500, null))]);
+  userPos = here || null;
+  return userPos;
+}
+
+function withPosition(params) {
+  if (userPos) {
+    params.set('lat', userPos.lat);
+    params.set('lng', userPos.lng);
+  }
+  return params;
+}
+
 async function fetchRealVendorData() {
   const container = document.getElementById('restaurantCardList');
-  const directoryContainer = document.getElementById('restaurantDirectoryList');
-  if (!container || !directoryContainer) return;
+  if (!container) return;
+  const directoryContainer = ensureDirectorySection();
 
   // Render Skeleton Loaders
   container.innerHTML = `
@@ -77,35 +127,68 @@ async function fetchRealVendorData() {
   `;
   directoryContainer.replaceChildren(el('p', { class: 'directory-load-state' }, 'Loading restaurant directory...'));
 
+  await locateQuietly();
   try {
-    const catalogue = await fetchFoodRestaurants();
-    restaurants = catalogue.filter((row) => row.is_orderable !== false);
-    directoryRestaurants = catalogue.filter((row) => row.is_orderable === false);
+    const params = withPosition(new URLSearchParams({ source: 'food', limit: VENDOR_LIMIT }));
+    const vendors = await request(`${ENDPOINTS.food.restaurants}?${params}`);
+    if (!Array.isArray(vendors)) throw new Error('The Eats catalogue returned an invalid response.');
+    restaurants = vendors;
     renderVendorCards(restaurants);
-    renderDirectoryCards(directoryRestaurants);
     populateReservationSelect();
   } catch (error) {
     restaurants = [];
-    directoryRestaurants = [];
     renderVendorCards([], error);
-    renderDirectoryCards([], error);
+  }
+  await loadDirectory(true);
+}
+
+/** The server filter for the directory section, from the mode tabs, the cuisine chip and the search box. */
+function directoryParams(offset) {
+  return buildDirectoryQuery({ category: dir.category, chip: dir.chip, q: dir.q, offset, limit: DIRECTORY_PAGE, position: userPos });
+}
+
+function paintDirectoryMore() {
+  const btn = document.getElementById('directoryLoadMore');
+  if (!btn) return;
+  btn.hidden = !dir.hasMore;
+  btn.disabled = dir.loading;
+  btn.textContent = dir.loading ? 'Loading...' : 'Show more restaurants';
+}
+
+async function loadDirectory(reset) {
+  const list = ensureDirectorySection();
+  const token = ++dir.token; // a newer request makes any older answer irrelevant
+  if (reset) {
+    dir.rows = [];
+    dir.hasMore = false;
+    list.replaceChildren(el('p', { class: 'directory-load-state' }, 'Loading restaurant directory...'));
+  }
+  dir.loading = true;
+  paintDirectoryMore();
+  try {
+    const params = directoryParams(reset ? 0 : dir.rows.length);
+    const page = params ? await request(`${ENDPOINTS.food.restaurants}?${params}`) : [];
+    if (!Array.isArray(page)) throw new Error('The restaurant directory returned an invalid response.');
+    if (token !== dir.token) return;
+    const have = new Set(dir.rows.map((row) => row.id));
+    dir.rows = dir.rows.concat(page.filter((row) => !have.has(row.id)));
+    dir.hasMore = params !== null && page.length === DIRECTORY_PAGE;
+    renderDirectoryCards(dir.rows);
+  } catch (error) {
+    if (token !== dir.token) return;
+    if (reset) renderDirectoryCards([], error);
+    else showNotification(error.message || 'Could not load more restaurants.', 'error');
+  } finally {
+    if (token === dir.token) {
+      dir.loading = false;
+      paintDirectoryMore();
+    }
   }
 }
 
-const FOOD_PAGE_SIZE = 100;
-
-async function fetchFoodRestaurants() {
-  const catalogue = [];
-  for (let offset = 0; ; offset += FOOD_PAGE_SIZE) {
-    const params = new URLSearchParams({
-      limit: FOOD_PAGE_SIZE,
-      offset,
-    });
-    const page = await request(`${ENDPOINTS.food.restaurants}?${params}`);
-    if (!Array.isArray(page)) throw new Error('The Eats catalogue returned an invalid response.');
-    catalogue.push(...page);
-    if (page.length < FOOD_PAGE_SIZE) return catalogue;
-  }
+function reloadDirectorySoon(delay = 0) {
+  clearTimeout(dir.timer);
+  dir.timer = setTimeout(() => loadDirectory(true), delay);
 }
 
 const CATEGORY_IMG = {
@@ -158,6 +241,7 @@ function renderVendorCards(vendors, error = null) {
           el('div', { class: 'vendor-meta-row' },
             el('span', { class: 'vendor-rating' }, v.rating ? `\u2605 ${v.rating}` : 'New'),
             el('span', {}, `\u2022 ${v.eta_min}-${v.eta_max} mins`),
+            v.distance_km != null ? el('span', {}, `\u2022 ${v.distance_km} km`) : null,
             v.is_open ? null : el('span', { style: 'color:var(--danger);font-weight:700;' }, '\u2022 Closed'),
           ),
         ),
@@ -199,7 +283,9 @@ function renderDirectoryCards(listings, error = null) {
   }
 
   if (!listings.length && !error) {
-    container.append(el('p', { class: 'directory-load-state' }, 'No restaurant directory listings are available yet.'));
+    const filtered = dir.q || dir.category !== 'all' || dir.chip !== 'all';
+    container.append(el('p', { class: 'directory-load-state' },
+      filtered ? 'No directory restaurants match these filters. Try clearing the search or choosing All.' : 'No restaurant directory listings are available yet.'));
   }
 
   for (const place of listings) {
@@ -209,6 +295,7 @@ function renderDirectoryCards(listings, error = null) {
     const address = [place.address, place.city].filter(Boolean).join(', ');
     const detailLines = [
       address,
+      place.distance_km != null ? `${place.distance_km} km away` : '',
       place.hours ? `Hours: ${place.hours}` : '',
       place.phone ? `Phone: ${place.phone}` : '',
       place.services?.length ? place.services.join(' · ') : '',
@@ -218,7 +305,7 @@ function renderDirectoryCards(listings, error = null) {
       dataset: { category: type, cuisine: terms, source: 'directory' },
     },
     el('div', { class: 'vendor-card-header' },
-      el('img', { src: place.image_url || CATEGORY_IMG[type === 'buka' ? 'buka' : 'fine'], alt: place.name, class: 'vendor-thumb-box' }),
+      el('img', { src: place.image_url || NO_PHOTO, alt: place.image_url ? place.name : '', class: 'vendor-thumb-box', loading: 'lazy' }),
       el('div', { class: 'vendor-info' },
         el('div', { class: 'vendor-title-row' },
           el('h4', {}, place.name),
@@ -246,7 +333,7 @@ function updateVisibleCounts() {
   const merchantCount = document.getElementById('merchantCountTag');
   const directoryCount = document.getElementById('directoryCountTag');
   if (merchantCount) merchantCount.textContent = `${visibleFood} Merchants Active`;
-  if (directoryCount) directoryCount.textContent = `${visibleDirectory} Listings`;
+  if (directoryCount) directoryCount.textContent = `${visibleDirectory}${dir.hasMore ? '+' : ''} Listings`;
 }
 /* Modal Handlers with Keyboard Escape Support */
 function openModal(modalId) {
@@ -530,20 +617,20 @@ async function openReservationsListModal() {
 }
 
 /* Search Bar Filter */
+// Orderable vendors are few, so they are filtered right here. The directory can be huge, so its filters go to the server.
+function vendorCards() {
+  return document.querySelectorAll('.restaurant-option-card:not(.directory-restaurant-card)');
+}
+
 function handleFilterSearch() {
-  const q = document.getElementById('foodSearchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.restaurant-option-card');
-
-  cards.forEach(card => {
-    const text = card.textContent.toLowerCase();
-    if (text.includes(q)) {
-      card.style.display = 'flex';
-    } else {
-      card.style.display = 'none';
-    }
+  const raw = document.getElementById('foodSearchInput').value;
+  const q = raw.toLowerCase();
+  vendorCards().forEach((card) => {
+    card.style.display = card.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
   });
-
+  dir.q = raw.trim();
   updateVisibleCounts();
+  reloadDirectorySoon(350); // wait for a pause in typing
 }
 
 function switchVendorCategory(category, btnElement) {
@@ -554,35 +641,25 @@ function switchVendorCategory(category, btnElement) {
   btnElement.classList.add('active');
   btnElement.setAttribute('aria-selected', 'true');
 
-  const cards = document.querySelectorAll('.restaurant-option-card');
-
-  cards.forEach(card => {
-    if (category === 'all' || card.dataset.category === category) {
-      card.style.display = 'flex';
-    } else {
-      card.style.display = 'none';
-    }
+  vendorCards().forEach((card) => {
+    card.style.display = category === 'all' || card.dataset.category === category ? 'flex' : 'none';
   });
-
+  dir.category = category;
   updateVisibleCounts();
+  reloadDirectorySoon();
 }
 
 function filterByCuisine(cuisine, chipElement) {
   document.querySelectorAll('.cuisine-filter-bar .cuisine-chip').forEach(c => c.classList.remove('active'));
   chipElement.classList.add('active');
 
-  const cards = document.querySelectorAll('.restaurant-option-card');
-
-  cards.forEach(card => {
+  vendorCards().forEach((card) => {
     const categories = card.dataset.cuisine.split(' ');
-    if (cuisine === 'all' || categories.includes(cuisine)) {
-      card.style.display = 'flex';
-    } else {
-      card.style.display = 'none';
-    }
+    card.style.display = cuisine === 'all' || categories.includes(cuisine) ? 'flex' : 'none';
   });
-
+  dir.chip = cuisine;
   updateVisibleCounts();
+  reloadDirectorySoon();
 }
 
 function toggleAiWidget() {
@@ -624,7 +701,23 @@ async function handleVendorRegistration(event) {
 }
 
 /* Menu (loaded per restaurant from the API) */
+/** "About 12 min away by road": shown above the menu when we know where the person is and where the restaurant is. */
+async function showDeliveryEstimate(restaurant, menuList) {
+  if (!userPos || restaurant.latitude == null || !isAuthenticated()) return;
+  try {
+    const params = new URLSearchParams({ lat: userPos.lat, lng: userPos.lng });
+    const estimate = await authorizedRequest(`${ENDPOINTS.food.deliveryEstimate(restaurant.slug)}?${params}`);
+    if (document.getElementById('fullMenuVendorName').textContent !== restaurant.name) return; // they opened another menu meanwhile
+    const how = estimate.source === 'road' ? 'by road' : '(estimate)';
+    const text = estimate.minutes ? `About ${estimate.minutes} min away ${how}, ${estimate.distance_km} km` : 'You are right next to this restaurant';
+    menuList.before(el('p', { id: 'fullMenuEta', style: 'font-size:12px;font-weight:600;color:var(--text-muted);margin:0 0 10px;' }, text));
+  } catch {
+    /* the menu is fine without an estimate */
+  }
+}
+
 async function openFullVendorMenu(slug) {
+  document.getElementById('fullMenuEta')?.remove();
   const menuList = document.getElementById('fullMenuList');
   menuList.replaceChildren(el('p', { style: 'text-align:center;color:var(--text-muted);font-size:13px;padding:20px;' }, 'Loading menu...'));
   document.getElementById('fullMenuVendorName').textContent = restaurants.find((r) => r.slug === slug)?.name || 'Vendor Menu';
@@ -633,6 +726,7 @@ async function openFullVendorMenu(slug) {
   try {
     const r = await request(ENDPOINTS.food.restaurant(slug));
     document.getElementById('fullMenuVendorName').textContent = r.name;
+    showDeliveryEstimate(r, menuList); // in the background: never delay the menu
     if (!r.menu.length) {
       menuList.replaceChildren(el('p', { style: 'text-align:center;color:var(--text-muted);font-size:13px;padding:20px;' }, 'No menu items available yet.'));
       return;

@@ -632,8 +632,10 @@ from marketplace.api import router as marketplace_router  # noqa: E402
 from food.api import router as food_router  # noqa: E402
 from directory.api import router as directory_router  # noqa: E402
 from .driver_api import driver_router  # noqa: E402
+from .routing_api import routing_router  # noqa: E402
 
 api.add_router("/marketplace/", marketplace_router)
 api.add_router("/driver/", driver_router)
+api.add_router("/routing/", routing_router)
 api.add_router("/food/", food_router)
 api.add_router("/directory/", directory_router)

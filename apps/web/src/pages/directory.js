@@ -9,6 +9,8 @@ import { ApiError, request } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { $, closeModal, errorMessage, h, openModal, setText, toast } from '../ui/dom.js';
 import { currentPosition, geocode, hasCoords } from '../ui/map.js';
+import { uploadPhoto } from '../ui/image.js';
+import { describeRoute, getRoadRoute } from '../ui/route.js';
 
 const state = {
   category: 'All',        // 'All' | 'Businesses' | 'Government' | 'Schools' | 'Hospitals' (labels the page already uses)
@@ -227,11 +229,15 @@ async function openDetail(id) {
     setText('modalLogo', initials(l.name));
     setText('modalTitle', l.name);
     setText('modalCategory', l.category_label);
-    $('modalImage').src = l.image_url || '';
-    $('modalImage').alt = l.image_url ? `${l.name} photo` : '';
-    $('modalImage').hidden = !l.image_url;
+    const photo = $('modalImage');
+    if (l.image_url) photo.src = l.image_url;
+    else photo.removeAttribute('src'); // src="" would make some browsers re-request the page itself
+    photo.alt = l.image_url ? `${l.name} photo` : '';
+    photo.hidden = !l.image_url;
     $('modalImageUploadForm').hidden = !l.can_upload_image;
+    $('modalImageRemoveBtn').hidden = !(l.can_upload_image && l.image_url);
     $('modalImageInput').value = '';
+    $('modalVerifiedBanner').hidden = !l.is_verified; // only listings staff have verified may claim it
     setText('modalAddress', l.address);
     setText('modalPhone', l.phone || 'Phone not listed');
     setText('modalHours', l.hours || 'Hours not provided');
@@ -324,17 +330,25 @@ function setTransitMode(mode) {
   paintRoute();
 }
 
-function paintRoute() {
+let routeToken = 0;
+
+async function paintRoute() {
   for (const [id, mode] of [['modeDrive', 'drive'], ['modeTransit', 'transit'], ['modeWalk', 'walk']]) {
     $(id)?.classList.toggle('active', state.transit === mode);
   }
   const l = state.route;
   if (!l) return;
   const dest = hasCoords(l.latitude, l.longitude) ? { lat: l.latitude, lng: l.longitude } : null;
+  const token = ++routeToken; // the newest request wins; older answers are dropped
   if (state.pos && dest) {
     const km = haversineKm(state.pos, dest);
     const mins = Math.max(1, Math.round((km / SPEED_KMH[state.transit]) * 60));
-    setText('routeDistanceTime', `~${mins} min (${km.toFixed(1)} km straight line)`);
+    setText('routeDistanceTime', `~${mins} min (${km.toFixed(1)} km straight line, estimate)`);
+    if (state.transit === 'drive') {
+      // Driving gets a real road route (with traffic when the backend has it). Walking/transit stay estimates.
+      const road = await getRoadRoute(state.pos, dest);
+      if (token === routeToken && state.transit === 'drive' && road) setText('routeDistanceTime', describeRoute(road));
+    }
   } else {
     setText('routeDistanceTime', dest ? 'Share your location for an estimate' : 'No map position for this listing yet');
   }
@@ -401,25 +415,24 @@ async function handleBusinessSubmit(event) {
   }
 }
 
-async function uploadListingImage(listingId, image) {
-  const { key, upload_url: uploadUrl, fields } = await authorizedRequest(
-    ENDPOINTS.directory.listingImageUploadUrl(listingId),
-    {
-      method: 'POST',
-      body: { filename: image.name, content_type: image.type, size: image.size },
-    },
-  );
-  const form = new FormData();
-  for (const [name, value] of Object.entries(fields)) form.append(name, value);
-  form.append('file', image);
-  const uploadResponse = await fetch(uploadUrl, { method: 'POST', body: form });
-  if (!uploadResponse.ok) {
-    throw new ApiError(uploadResponse.status, 'Photo could not be uploaded to private storage.');
-  }
-  return authorizedRequest(ENDPOINTS.directory.listingImage(listingId), {
-    method: 'POST',
-    body: { key },
+/** Shrinks the photo on the device, uploads it straight to storage, then asks the server to verify and save it. */
+function uploadListingImage(listingId, image) {
+  return uploadPhoto(image, {
+    issue: (spec) => authorizedRequest(ENDPOINTS.directory.listingImageUploadUrl(listingId), { method: 'POST', body: spec }),
+    confirm: (key) => authorizedRequest(ENDPOINTS.directory.listingImage(listingId), { method: 'POST', body: { key } }),
   });
+}
+
+async function removeSelectedListingImage() {
+  if (!requireLogin() || !state.selected) return;
+  try {
+    await authorizedRequest(ENDPOINTS.directory.listingImage(state.selected.id), { method: 'DELETE' });
+    toast('Listing photo removed.', 'success');
+    await openDetail(state.selected.id);
+    loadListings();
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
 }
 
 async function uploadSelectedListingImage(event) {
@@ -428,7 +441,7 @@ async function uploadSelectedListingImage(event) {
   const file = $('modalImageInput').files?.[0];
   if (!file) return toast('Choose a photo to upload.', 'error');
   const button = event.target.querySelector('button[type="submit"]');
-  if (button) button.disabled = true;
+  if (button) { button.disabled = true; button.textContent = 'Uploading...'; }
   try {
     await uploadListingImage(state.selected.id, file);
     toast('Listing photo uploaded.', 'success');
@@ -437,7 +450,7 @@ async function uploadSelectedListingImage(event) {
   } catch (err) {
     toast(errorMessage(err), 'error');
   } finally {
-    if (button) button.disabled = false;
+    if (button) { button.disabled = false; button.textContent = 'Upload photo'; }
   }
 }
 
@@ -526,6 +539,7 @@ Object.assign(window, {
   detectUserLocation, setRating, submitReview, setTransitMode, launchExternalMaps,
   handleBusinessSubmit, submitReport, switchNavMode, toggleNotifDropdown,
   markNotificationRead, markAllNotificationsRead, saveBillingSettings, uploadSelectedListingImage,
+  removeSelectedListingImage,
 });
 
 $('aiParsedFeedback').style.display = 'none';

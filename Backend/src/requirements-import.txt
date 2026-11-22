@@ -1,0 +1,4 @@
+# Only needed on the machine that runs `import_osm_places --pbf ...`. NOT needed by the web server:
+# production can import a saved snapshot with `import_osm_places --file snapshot.json` using the normal requirements.
+-r requirements.txt
+osmium>=4.0,<5

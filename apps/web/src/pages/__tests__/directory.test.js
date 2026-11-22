@@ -5,14 +5,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const jsdom = await import('jsdom').catch(() => null);
 
-const mocks = vi.hoisted(() => ({ request: vi.fn(), authorizedRequest: vi.fn() }));
-vi.mock('../../state/session.js', () => ({ authorizedRequest: mocks.authorizedRequest, isAuthenticated: () => false }));
+const mocks = vi.hoisted(() => ({ request: vi.fn(), authorizedRequest: vi.fn(), uploadPhoto: vi.fn(), signedIn: false }));
+vi.mock('../../state/session.js', () => ({ authorizedRequest: mocks.authorizedRequest, isAuthenticated: () => mocks.signedIn }));
+vi.mock('../../ui/image.js', () => ({ uploadPhoto: mocks.uploadPhoto }));
 vi.mock('../../api/client.js', async (importOriginal) => ({ ...(await importOriginal()), request: mocks.request }));
 
 const IDS = ['directoryGrid', 'aiParsedFeedback', 'aiParsedText', 'directorySearchInput', 'gridViewBtn', 'listViewBtn',
   'reportEntitySelect', 'currentLocationLabel', 'detailModal', 'modalLogo', 'modalTitle', 'modalCategory', 'modalAddress',
   'modalPhone', 'modalHours', 'modalServices', 'modalAttribution', 'reviewCommentInput', 'modalReviewsList',
-  'directoryAttribution'];
+  'directoryAttribution', 'modalVerifiedBanner'];
 
 const listing = (id, over = {}) => ({
   id, name: `Place ${id}`, category: 'restaurants', category_label: 'Restaurant & Food', description: '', address: 'Wuse 2, Abuja',
@@ -29,12 +30,18 @@ describe.skipIf(!jsdom)('directory page', () => {
   const cards = () => document.querySelectorAll('#directoryGrid .directory-card');
   const lastUrl = () => new URL(mocks.request.mock.calls.at(-1)[0], 'http://x');
 
+  let dom;
   async function boot(firstPage) {
     vi.resetModules();
     mocks.request.mockReset().mockResolvedValueOnce(firstPage);
-    const dom = new jsdom.JSDOM(`<!doctype html><body>
+    mocks.authorizedRequest.mockReset();
+    mocks.uploadPhoto.mockReset();
+    mocks.signedIn = false;
+    dom = new jsdom.JSDOM(`<!doctype html><body>
       ${IDS.map((id) => (id === 'reportEntitySelect' ? `<select id="${id}"></select>` : id === 'directorySearchInput' ? `<input id="${id}">` : `<div id="${id}"></div>`)).join('')}
-      <button id="loadMoreBtn" hidden></button><div id="starRatingRow"></div></body>`, { url: 'http://localhost/directories.html' });
+      <button id="loadMoreBtn" hidden></button><div id="starRatingRow"></div>
+      <img id="modalImage" hidden><form id="modalImageUploadForm" hidden><input id="modalImageInput" type="file">
+      <button type="submit">Upload photo</button><button type="button" id="modalImageRemoveBtn" hidden></button></form></body>`, { url: 'http://localhost/directories.html' });
     vi.stubGlobal('window', dom.window);
     vi.stubGlobal('document', dom.window.document);
     vi.stubGlobal('Node', dom.window.Node);
@@ -124,5 +131,71 @@ describe.skipIf(!jsdom)('directory page', () => {
     expect(document.querySelector('.entity-name').textContent).toBe('Place 900');
     expect(lastUrl().searchParams.get('category')).toBe('schools');
     expect(lastUrl().searchParams.get('offset')).toBe('0');
+  });
+
+  describe('photos and the verified badge in the detail view', () => {
+    const open = async (over, { signedIn = false } = {}) => {
+      await boot([listing(1)]);
+      mocks.signedIn = signedIn;
+      const detail = { ...listing(1, over), reviews: [] };
+      (signedIn ? mocks.authorizedRequest : mocks.request).mockResolvedValueOnce(detail);
+      document.querySelector('.directory-card button').click();
+      await flush();
+    };
+
+    it('shows the photo when there is one and drops the src attribute (not src="") when there is none', async () => {
+      await open({ image_url: 'https://img.example/a.jpg' });
+      expect($('modalImage').getAttribute('src')).toBe('https://img.example/a.jpg');
+      expect($('modalImage').hidden).toBe(false);
+      await open({ image_url: null });
+      expect($('modalImage').hasAttribute('src')).toBe(false);
+      expect($('modalImage').hidden).toBe(true);
+    });
+
+    it('only people who may edit the listing see the upload form, and Remove only when there is a photo', async () => {
+      await open({ image_url: 'https://img.example/a.jpg', can_upload_image: false });
+      expect($('modalImageUploadForm').hidden).toBe(true);
+      await open({ image_url: null, can_upload_image: true }, { signedIn: true });
+      expect($('modalImageUploadForm').hidden).toBe(false);
+      expect($('modalImageRemoveBtn').hidden).toBe(true);
+      await open({ image_url: 'https://img.example/a.jpg', can_upload_image: true }, { signedIn: true });
+      expect($('modalImageRemoveBtn').hidden).toBe(false);
+    });
+
+    it('claims "verified" only for listings staff verified', async () => {
+      await open({ is_verified: false });
+      expect($('modalVerifiedBanner').hidden).toBe(true);
+      await open({ is_verified: true });
+      expect($('modalVerifiedBanner').hidden).toBe(false);
+    });
+
+    it('removing the photo calls DELETE for that listing and refreshes the view', async () => {
+      await open({ image_url: 'https://img.example/a.jpg', can_upload_image: true }, { signedIn: true });
+      mocks.authorizedRequest
+        .mockResolvedValueOnce({ id: 1, image_key: '', image_url: null })             // the DELETE
+        .mockResolvedValueOnce({ ...listing(1, { image_url: null, can_upload_image: true }), reviews: [] }); // re-open
+      mocks.request.mockResolvedValue([listing(1)]);                                    // list refresh
+      document.defaultView.removeSelectedListingImage();
+      await flush();
+      await flush();
+      expect(mocks.authorizedRequest.mock.calls[1]).toEqual(['/directory/listings/1/image', { method: 'DELETE' }]);
+      expect($('modalImage').hidden).toBe(true);
+    });
+
+    it('uploading goes through the shared resize-and-upload helper with this listing\'s endpoints', async () => {
+      await open({ can_upload_image: true }, { signedIn: true });
+      mocks.uploadPhoto.mockImplementationOnce(async (file, { issue, confirm }) => {
+        await issue({ filename: 'a.jpg', content_type: 'image/jpeg', size: 10 });
+        await confirm('the-key');
+      });
+      mocks.authorizedRequest.mockResolvedValue({ ...listing(1), reviews: [] });
+      Object.defineProperty($('modalImageInput'), 'files', { value: [new dom.window.File(['x'], 'a.jpg', { type: 'image/jpeg' })] });
+      document.defaultView.uploadSelectedListingImage({ preventDefault() {}, target: $('modalImageUploadForm') });
+      await flush();
+      await flush();
+      const urls = mocks.authorizedRequest.mock.calls.map((c) => c[0]);
+      expect(urls).toContain('/directory/listings/1/image/upload-url');
+      expect(mocks.authorizedRequest.mock.calls.find((c) => c[0] === '/directory/listings/1/image')[1]).toEqual({ method: 'POST', body: { key: 'the-key' } });
+    });
   });
 });

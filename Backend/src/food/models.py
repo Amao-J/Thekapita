@@ -16,7 +16,11 @@ class Restaurant(models.Model):
     category = models.CharField(max_length=12, choices=Category.choices, default=Category.BUKA)
     tags = models.JSONField(default=list, blank=True)  # cuisine chips on the page: "swallow", "pastry"...
     description = models.CharField(max_length=300, blank=True)
-    image_url = models.URLField(max_length=500, blank=True)
+    image_url = models.URLField(max_length=500, blank=True)   # legacy: a link to a picture hosted elsewhere
+    image_key = models.CharField(max_length=512, blank=True, default="")  # preferred: a photo uploaded to our storage
+    # Where the store is. Lets customers see distance, lets us estimate delivery time by road, and rank by nearest.
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=30)
     hours = models.CharField(max_length=120, blank=True)
@@ -41,6 +45,7 @@ class MenuItem(models.Model):
     category = models.CharField(max_length=60, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(1)])
     image_url = models.URLField(max_length=500, blank=True)
+    image_key = models.CharField(max_length=512, blank=True, default="")
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

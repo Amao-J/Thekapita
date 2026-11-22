@@ -7,6 +7,7 @@ import { ApiError, newIdempotencyKey } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { createMap, currentPosition, geocode, hasCoords, locationAlreadyGranted, pin, reverseGeocode, upsertMarker } from '../ui/map.js';
 import { pickLocation } from '../ui/picker.js';
+import { describeRoute, estimateRoute, getRoadRoute, legKey, legMessage, pickLeg, shouldRecalculate } from '../ui/route.js';
 
 const ACTIVE_KEY = 'kapita.ride.active.v1';
 const TERMINAL_STATUSES = ['cancelled', 'completed'];
@@ -66,7 +67,7 @@ function storeBooking(booking) {
 }
 
 function initActiveRidePage() {
-  rideMap = createMap('rideMap');
+  rideMap = createMap('rideMap', { traffic: true });
   renderActiveRideRequest();
   if (!isAuthenticated()) {
     window.location.replace('auth.html?next=ride-active.html');
@@ -121,8 +122,11 @@ function renderActiveRideRequest() {
   const pickupPos = hasCoords(booking.pickup_lat, booking.pickup_lng)
     ? { lat: booking.pickup_lat, lng: booking.pickup_lng } : null;
   if (driverPos && pickupPos && booking.status === 'assigned') {
-    line = `Your driver is about ${distanceKm(driverPos, pickupPos).toFixed(1)} km away.`;
+    line = `Your driver is about ${distanceKm(driverPos, pickupPos).toFixed(1)} km away in a straight line.`;
   }
+  // Prefer the road-route wording once we have it for the leg the ride is on right now.
+  const currentLeg = pickLeg(booking, driverPos);
+  if (currentLeg && etaMemo && etaMemo.kind === currentLeg.kind && etaMemo.text) line = etaMemo.text;
   if (status) status.textContent = line;
 
   const badge = document.getElementById('rideStatusBadge');
@@ -157,6 +161,47 @@ function renderActiveRideRequest() {
   }
   if (cancelButton) cancelButton.disabled = !['requested', 'assigned', 'arrived'].includes(booking.status);
   updateRideMap(booking, driverPos, pickupPos);
+  updateRideRoute(booking, driverPos);
+}
+
+// Road route for the leg the ride is on (driver -> pickup, driver -> destination, or the planned trip).
+let rideRouteLine = null;
+let legState = null;   // { kind, key, at } of the last leg we asked the backend about
+let etaMemo = null;    // { kind, text } so polling does not flip the ETA back to the rough wording
+
+function clearRideRoute() {
+  if (rideRouteLine) rideRouteLine.remove();
+  rideRouteLine = null;
+}
+
+function drawRideRoute(route, kind) {
+  if (!rideMap || !route.geometry?.length) return;
+  clearRideRoute();
+  const planned = kind === 'trip';
+  rideRouteLine = window.L.polyline(route.geometry, {
+    color: planned ? '#94a3b8' : '#008a57', weight: 5, opacity: 0.85, dashArray: planned ? '8 8' : null,
+  }).addTo(rideMap);
+}
+
+async function updateRideRoute(booking, driverPos) {
+  const leg = TERMINAL_STATUSES.includes(booking.status) ? null : pickLeg(booking, driverPos);
+  if (!leg) {
+    clearRideRoute();
+    legState = null;
+    etaMemo = null;
+    return;
+  }
+  if (!shouldRecalculate(legState, leg)) return;
+  legState = { kind: leg.kind, key: legKey(leg), at: Date.now() };
+  const route = await getRoadRoute(leg.from, leg.to);
+  if (!route || !legState || legState.kind !== leg.kind) return; // failed, or the ride moved on meanwhile
+  const text = legMessage(leg, route);
+  if (text) {
+    etaMemo = { kind: leg.kind, text };
+    const status = document.getElementById('rideRequestStatus');
+    if (status) status.textContent = text;
+  }
+  drawRideRoute(route, leg.kind);
 }
 
 async function updateRideMap(booking, driverPos, pickupPos) {
@@ -419,21 +464,24 @@ async function pickRideLocation(which) {
   input.focus();
 }
 
-// Straight-line distance between the two points; road distance is typically ~30% longer, at ~30 km/h in town.
-const ROAD_FACTOR = 1.3;
-const CITY_SPEED_KMH = 30;
 
-function updateRouteSummary() {
+let summaryToken = 0;
+
+/** Road distance + arrival time for the chosen points; falls back to a labelled straight-line estimate. */
+async function updateRouteSummary() {
   const box = document.getElementById('rideRouteSummary');
   if (!box) return;
-  if (!picks.pickup || !picks.destination) {
+  const token = ++summaryToken; // only the newest request may write to the box
+  const { pickup, destination } = picks;
+  if (!pickup || !destination) {
     box.hidden = true;
     return;
   }
-  const km = distanceKm(picks.pickup, picks.destination);
-  const mins = Math.max(1, Math.round(((km * ROAD_FACTOR) / CITY_SPEED_KMH) * 60));
-  box.textContent = `${km.toFixed(1)} km apart in a straight line \u2022 roughly ${mins} min by road`;
+  box.textContent = 'Finding the best road route...';
   box.hidden = false;
+  const road = await getRoadRoute(pickup, destination);
+  if (token !== summaryToken) return;
+  box.textContent = describeRoute(road || estimateRoute(pickup, destination));
 }
 
 function selectRideType(element, rideName, price) {

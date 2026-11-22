@@ -19,3 +19,4 @@ Thekapita-Weekly-Progress-Report.docx
 Thekapita-Weekly-Progress-Report.docx
 *.md
 !apps/mobile/MOBILE-TESTING-AND-STORE-RELEASE.md
+*.patch

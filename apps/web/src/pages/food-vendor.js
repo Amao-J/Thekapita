@@ -10,6 +10,8 @@ import { authorizedRequest, isAuthenticated } from '../state/session.js';
 import { ApiError } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { $, closeModal, errorMessage, h, money, moneyShort, openModal, setText, toast } from '../ui/dom.js';
+import { uploadPhoto } from '../ui/image.js';
+import { pickLocation } from '../ui/picker.js';
 
 const POLL_MS = 15000;
 const CATEGORY_SLUG = {
@@ -55,7 +57,8 @@ function renderStore() {
   $('storeAddressInput').value = s.address;
   $('storePhoneInput').value = s.phone;
   $('storeHoursInput').value = s.hours || '';
-  $('storeAvatarInput').value = s.image_url || '';
+  paintStorePhoto();
+  paintStorePin();
   setText('storeCategoryText', s.category_label);
   $('storeCategoryHidden').value = s.category_label;
   if (!s.is_active) toast('Your store is awaiting approval and is not visible to customers yet.');
@@ -169,6 +172,8 @@ function renderMenu() {
   list.replaceChildren(...rows.map((m) => h('div', { class: 'menu-item-row' },
     h('div', { class: 'menu-item-left' },
       m.image_url ? h('img', { src: m.image_url, alt: '', class: 'menu-item-thumb', loading: 'lazy' }) : null,
+      h('button', { type: 'button', class: 'btn-action', style: 'padding:4px 8px;font-size:11px;', onclick: () => chooseDishPhoto(m) },
+        m.image_url ? 'Change photo' : 'Add photo'),
       h('div', { class: 'menu-item-info' },
         h('h4', {}, m.name),
         h('p', { style: 'color:var(--text-muted);font-weight:500;font-size:11px;' }, `${m.category || 'Uncategorised'} \u2022 ${money(m.price)}`),
@@ -206,14 +211,22 @@ async function handleAddNewDish(e) {
         name: $('newDishName').value.trim(),
         price: Number($('newDishPrice').value),
         category: $('dishCategoryHidden').value,
-        image_url: $('newDishImg').value.trim(),
       },
     });
+    const photo = $('newDishPhoto').files[0];
     state.menu.push(dish);
-    renderMenu();
     closeModal('addItemModal');
     e.target.reset();
     toast(`"${dish.name}" published at ${money(dish.price)}`, 'success');
+    if (photo) {
+      try {
+        await uploadDishPhoto(dish, photo);
+      } catch (photoError) {
+        // The dish itself is saved; only the picture failed, and it can be added again from the menu list.
+        toast(`The dish was added, but its photo was not: ${errorMessage(photoError)}`, 'error');
+      }
+    }
+    renderMenu();
   } catch (err) {
     toast(errorMessage(err), 'error');
   } finally {
@@ -252,7 +265,6 @@ async function handleStoreUpdate(e) {
       address: $('storeAddressInput').value.trim(),
       phone: $('storePhoneInput').value.trim(),
       hours: $('storeHoursInput').value.trim(),
-      image_url: $('storeAvatarInput').value.trim(),
     });
     toast('Store profile updated', 'success');
   } catch (err) {
@@ -260,6 +272,92 @@ async function handleStoreUpdate(e) {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+/* ---------- photos and map pin (uploads go straight to private storage; see ui/image.js) ---------- */
+
+function paintStorePhoto() {
+  const s = state.store;
+  if (s.image_url) $('sidebarStoreAvatar').src = s.image_url;
+  $('storePhotoRemove').hidden = !s.image_url;
+}
+
+function paintStorePin() {
+  const s = state.store;
+  $('storePinStatus').textContent = s.latitude != null && s.longitude != null
+    ? `Pinned (${s.latitude.toFixed(4)}, ${s.longitude.toFixed(4)}). Customers can see your distance and a delivery time.`
+    : 'Not pinned yet. Pinning lets customers see how far you are and get a delivery time.';
+  $('storePinBtn').textContent = s.latitude != null ? 'Move pin' : 'Pin on map';
+}
+
+async function pinStoreOnMap() {
+  const s = state.store;
+  const spot = await pickLocation({
+    title: 'Pin your store on the map',
+    initial: s.latitude != null ? { lat: s.latitude, lng: s.longitude } : null,
+  });
+  if (!spot) return;
+  try {
+    // Only the pin is sent. The form below may have unsaved edits that a full refresh would wipe.
+    state.store = await authorizedRequest(ENDPOINTS.food.vendor.store, { method: 'PATCH', body: { latitude: spot.lat, longitude: spot.lng } });
+    paintStorePin();
+    toast('Store pinned on the map.', 'success');
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
+
+async function uploadStorePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = $('storePhotoStatus');
+  status.textContent = 'Resizing and uploading...';
+  try {
+    const result = await uploadPhoto(file, {
+      issue: (spec) => authorizedRequest(ENDPOINTS.food.vendor.storeImageUploadUrl, { method: 'POST', body: spec }),
+      confirm: (key) => authorizedRequest(ENDPOINTS.food.vendor.storeImage, { method: 'POST', body: { key } }),
+    });
+    Object.assign(state.store, result);
+    paintStorePhoto();
+    status.textContent = 'Photo saved.';
+  } catch (err) {
+    status.textContent = errorMessage(err);
+  } finally {
+    event.target.value = '';
+  }
+}
+
+async function removeStorePhoto() {
+  try {
+    Object.assign(state.store, await authorizedRequest(ENDPOINTS.food.vendor.storeImage, { method: 'DELETE' }));
+    paintStorePhoto();
+    $('storePhotoStatus').textContent = 'Photo removed.';
+  } catch (err) {
+    toast(errorMessage(err), 'error');
+  }
+}
+
+async function uploadDishPhoto(dish, file) {
+  const result = await uploadPhoto(file, {
+    issue: (spec) => authorizedRequest(ENDPOINTS.food.vendor.dishImageUploadUrl(dish.id), { method: 'POST', body: spec }),
+    confirm: (key) => authorizedRequest(ENDPOINTS.food.vendor.dishImage(dish.id), { method: 'POST', body: { key } }),
+  });
+  Object.assign(dish, result);
+}
+
+function chooseDishPhoto(dish) {
+  const input = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp' });
+  input.addEventListener('change', async () => {
+    if (!input.files[0]) return;
+    try {
+      await uploadDishPhoto(dish, input.files[0]);
+      renderMenu();
+      toast(`Photo saved for ${dish.name}.`, 'success');
+    } catch (err) {
+      toast(errorMessage(err), 'error');
+    }
+  });
+  input.click();
 }
 
 /* ---------- withdrawals ---------- */
@@ -313,6 +411,7 @@ window.addEventListener('click', () => {
 Object.assign(window, {
   switchTab, openModal, closeModal, toggleCustomDropdown, selectDropdownOption,
   toggleStoreStatus, handleWithdrawal, handleAddNewDish, handleStoreUpdate, filterMenuList,
+  pinStoreOnMap, uploadStorePhoto, removeStorePhoto,
 });
 
 boot();

@@ -13,11 +13,19 @@ const ATTRIBUTION =
 // Abuja city centre: sensible default until we know where the user is.
 export const DEFAULT_CENTER = [9.0765, 7.3986];
 
-export function createMap(elementId, { center = DEFAULT_CENTER, zoom = 13 } = {}) {
+// Optional live-traffic colouring drawn over the base map (e.g. a TomTom traffic-flow tile URL). The key in such a
+// URL is visible in the browser, so restrict it to your site's domain in the provider dashboard.
+const TRAFFIC_URL = import.meta.env.VITE_TRAFFIC_OVERLAY_URL || '';
+const TRAFFIC_ATTRIBUTION = import.meta.env.VITE_TRAFFIC_ATTRIBUTION || '';
+
+export function createMap(elementId, { center = DEFAULT_CENTER, zoom = 13, traffic = false } = {}) {
   const L = window.L;
   if (!L || !document.getElementById(elementId)) return null;
   const map = L.map(elementId, { zoomControl: false }).setView(center, zoom);
   L.tileLayer(TILE_URL, { maxZoom: 19, attribution: ATTRIBUTION, referrerPolicy: 'strict-origin-when-cross-origin' }).addTo(map);
+  if (traffic && TRAFFIC_URL) {
+    L.tileLayer(TRAFFIC_URL, { maxZoom: 19, opacity: 0.8, attribution: TRAFFIC_ATTRIBUTION }).addTo(map);
+  }
   L.control.zoom({ position: 'topright' }).addTo(map);
   return map;
 }

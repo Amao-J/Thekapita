@@ -10,7 +10,7 @@ class ListingAdmin(admin.ModelAdmin):
     search_fields = ("name", "address", "phone", "owner__email")
     fields = (
         "name", "category", "description", "image_key", "address", "city", "phone", "hours", "services",
-        "tier", "latitude", "longitude", "owner", "status", "is_verified", "source", "source_id",
+        "subtype", "tier", "latitude", "longitude", "owner", "status", "is_verified", "source", "source_id",
     )
     actions = ["approve", "reject"]
     raw_id_fields = ("owner",)

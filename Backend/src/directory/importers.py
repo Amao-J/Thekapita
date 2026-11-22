@@ -10,6 +10,7 @@ from pathlib import Path
 
 from django.db import transaction
 
+from .classify import classify_restaurant
 from .models import Listing
 
 # Approximate box around Abuja city (S, W, N, E): Kubwa and Gwarinpa in the north-west, Lugbe south, Karu / Nyanya
@@ -310,21 +311,23 @@ def element_to_fields(el, city="Abuja", categories=None):
         return None
     if not (-90 <= lat <= 90 and -180 <= lng <= 180) or el.get("type") not in ("node", "way", "relation") or not el.get("id"):
         return None
+    services = _services(tags)
     return {
         "source_id": f'{el["type"]}/{el["id"]}',
         "name": name,
         "category": category,
+        "subtype": classify_restaurant(name, "", services) if category == Listing.Category.RESTAURANTS else "",
         "address": _address(tags, el.get("city") or city) or el.get("city") or city,
         "city": el.get("city") or city,
         "phone": _first_phone(tags),
         "hours": _clean(tags.get("opening_hours"), 120),
-        "services": _services(tags),
+        "services": services,
         "latitude": round(lat, 6),
         "longitude": round(lng, 6),
     }
 
 
-IMPORTED = ("name", "category", "address", "city", "phone", "hours", "services", "latitude", "longitude")
+IMPORTED = ("name", "category", "subtype", "address", "city", "phone", "hours", "services", "latitude", "longitude")
 
 
 def import_elements(elements, city="Abuja", dry_run=False, categories=None):

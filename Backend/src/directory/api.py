@@ -12,17 +12,21 @@ from ninja.errors import HttpError
 from app.auth import JWTAuth
 from app.throttles import user_throttle
 
-from . import storage
+from . import storage, uploads
+from .classify import classify_restaurant
 from .models import Bookmark, Listing, Report, Review
 
 router = Router()
 
 
 class OptionalJWTAuth(JWTAuth):
+    """For public pages that show a little extra to signed-in people. A missing, expired or garbage token must not
+    break the public page, so it simply means 'anonymous'."""
+
     def __call__(self, request):
         if not request.headers.get("Authorization"):
             return AnonymousUser()
-        return super().__call__(request)
+        return super().__call__(request) or AnonymousUser()
 
 
 REPORT_ISSUES = (
@@ -31,12 +35,7 @@ REPORT_ISSUES = (
     "Incorrect Operating Hours",
     "Duplicate Listing Record",
 )
-MAX_LISTING_IMAGE_BYTES = storage.MAX_IMAGE_BYTES
-LISTING_IMAGE_TYPES = {
-    "image/jpeg": {"jpg", "jpeg"},
-    "image/png": {"png"},
-    "image/webp": {"webp"},
-}
+MAX_LISTING_IMAGE_BYTES = uploads.MAX_IMAGE_BYTES
 
 
 # ---- schemas ----------------------------------------------------------------
@@ -256,51 +255,42 @@ def _image_upload_listing(listing_id, user):
     if listing is None:
         raise HttpError(404, "Listing not found.")
     if listing.owner_id != user.id and not user.is_staff:
-        raise HttpError(403, "Only the listing owner or directory staff can upload a photo.")
+        raise HttpError(403, "Only the listing owner or directory staff can change its photo.")
     return listing
+
+
+def _image_prefix(listing):
+    return f"directory/listings/{listing.id}"
 
 
 @router.post("/listings/{listing_id}/image/upload-url", auth=JWTAuth(),
              throttle=[user_throttle("dir_image_url", "20/h")])
 def create_listing_image_upload(request, listing_id: int, payload: ListingImageUploadIn):
     listing = _image_upload_listing(listing_id, request.auth)
-    extensions = LISTING_IMAGE_TYPES.get(payload.content_type)
-    extension = payload.filename.rsplit(".", 1)[-1].lower() if "." in payload.filename else ""
-    if extensions is None or extension not in extensions:
-        raise HttpError(422, "Upload a JPEG, PNG, or WebP image with a matching file extension.")
-
-    key = f"directory/listings/{listing.id}/photo"
-    try:
-        upload = storage.generate_presigned_upload(key, payload.content_type)
-    except storage.S3ImageStorageError as exc:
-        raise HttpError(503, str(exc)) from exc
-    return {"key": key, "upload_url": upload["url"], "fields": upload["fields"]}
+    return uploads.issue_upload(_image_prefix(listing), payload.filename, payload.content_type, payload.size)
 
 
 @router.post("/listings/{listing_id}/image", auth=JWTAuth(),
              throttle=[user_throttle("dir_image_confirm", "20/h")])
 def confirm_listing_image_upload(request, listing_id: int, payload: ListingImageKeyIn):
     listing = _image_upload_listing(listing_id, request.auth)
-    expected_key = f"directory/listings/{listing.id}/photo"
-    if payload.key != expected_key:
-        raise HttpError(422, "The image key was not issued for this listing.")
-
-    try:
-        image = storage.inspect_uploaded_image(payload.key)
-    except storage.S3ImageStorageError as exc:
-        raise HttpError(503, str(exc)) from exc
-    if image is None:
-        raise HttpError(422, "Upload the image to private storage before saving its key.")
-    if image["content_type"] not in LISTING_IMAGE_TYPES or not 0 < image["size"] <= MAX_LISTING_IMAGE_BYTES:
-        raise HttpError(422, "The stored image must be a JPEG, PNG, or WebP no larger than 8 MB.")
-
-    listing.image_key = payload.key
+    key = uploads.verify_upload(_image_prefix(listing), payload.key)
+    previous = listing.image_key
+    listing.image_key = key
     listing.save(update_fields=["image_key", "updated_at"])
-    try:
-        image_url = listing.image_url
-    except storage.S3ImageStorageError as exc:
-        raise HttpError(503, str(exc)) from exc
-    return {"id": listing.id, "image_key": listing.image_key, "image_url": image_url}
+    if previous and previous != key:
+        storage.delete_object(previous)  # the replaced photo is no longer needed
+    return {"id": listing.id, "image_key": listing.image_key, "image_url": listing.image_url}
+
+
+@router.delete("/listings/{listing_id}/image", auth=JWTAuth(), throttle=[user_throttle("dir_image_delete", "20/h")])
+def delete_listing_image(request, listing_id: int):
+    listing = _image_upload_listing(listing_id, request.auth)
+    previous = listing.image_key
+    listing.image_key = ""
+    listing.save(update_fields=["image_key", "updated_at"])
+    storage.delete_object(previous)
+    return {"id": listing.id, "image_key": "", "image_url": None}
 
 
 # ---- signed-in actions -------------------------------------------------------
@@ -316,6 +306,8 @@ def create_listing(request, payload: ListingIn):
         address=payload.address.strip(), tier=payload.tier, description=payload.description.strip(),
         hours=payload.hours.strip(), city=payload.city.strip(),
         services=[s.strip()[:60] for s in payload.services if s.strip()],
+        subtype=classify_restaurant(payload.name, payload.description, payload.services)
+        if payload.category == Listing.Category.RESTAURANTS else "",
         latitude=payload.latitude, longitude=payload.longitude,
         status=Listing.Status.APPROVED if settings.DIRECTORY_AUTO_APPROVE else Listing.Status.PENDING,
     )

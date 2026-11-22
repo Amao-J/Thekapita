@@ -6,6 +6,7 @@
   "main": "index.js",
   "exports": {
     "./endpoints": "./endpoints.js",
+    "./directoryQuery": "./directoryQuery.js",
     "./currency": "./currency.js",
     "./validators": "./validators.js"
   }

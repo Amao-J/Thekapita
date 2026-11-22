@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .storage import generate_presigned_url
+from .storage import image_url_for
 
 
 class Listing(models.Model):
@@ -45,6 +45,8 @@ class Listing(models.Model):
     is_verified = models.BooleanField(default=False)
     # Where the record came from. Imported rows carry the provider's id so re-running an import updates them
     # instead of duplicating them. (We never store Google Places content: see the import docs.)
+    # For restaurants only: 'buka' | 'bakery' | 'grill' | 'fine' (blank = plain restaurant). See classify.py.
+    subtype = models.CharField(max_length=10, blank=True, default="", db_index=True)
     source = models.CharField(max_length=8, choices=Source.choices, default=Source.USER, db_index=True)
     source_id = models.CharField(max_length=40, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,7 +69,7 @@ class Listing(models.Model):
 
     @property
     def image_url(self) -> str | None:
-        return generate_presigned_url(self.image_key) if self.image_key else None
+        return image_url_for(self.image_key)
 
 
 class Review(models.Model):

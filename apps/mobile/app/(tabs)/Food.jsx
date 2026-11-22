@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -15,6 +15,7 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
+import { buildDirectoryQuery, DIRECTORY_PAGE_SIZE } from '@thekapita/shared/directoryQuery';
 import { request } from '../../api/client.js';
 
 
@@ -110,22 +111,15 @@ const dishes = [
   },
 ];
 
-const FOOD_PAGE_SIZE = 100;
-
-async function fetchFoodCatalogue() {
-  const catalogue = [];
-  for (let offset = 0; ; offset += FOOD_PAGE_SIZE) {
-    const params = new URLSearchParams({
-      limit: String(FOOD_PAGE_SIZE),
-      offset: String(offset),
-    });
-    const page = await request(`${ENDPOINTS.food.restaurants}?${params}`);
-    if (!Array.isArray(page)) {
-      throw new Error('The Eats catalogue returned an invalid response.');
-    }
-    catalogue.push(...page);
-    if (page.length < FOOD_PAGE_SIZE) return catalogue;
+// The directory can hold thousands of places, so the server filters and pages it. Never fetch every page here.
+async function fetchDirectoryPage(filters) {
+  const params = buildDirectoryQuery(filters);
+  if (params === null) return []; // the chosen filters contradict each other: nothing can match
+  const page = await request(`${ENDPOINTS.food.restaurants}?${params}`);
+  if (!Array.isArray(page)) {
+    throw new Error('The restaurant directory returned an invalid response.');
   }
+  return page;
 }
 
 function directoryPlaceType(place) {
@@ -136,16 +130,6 @@ function directoryPlaceType(place) {
   if (/\b(buka|bukateria)\b/.test(text)) return 'buka';
   if (/\bfine dining\b/.test(text)) return 'fine';
   return 'restaurant';
-}
-
-function directoryPlaceMatches(place, mode, cuisine, search) {
-  const type = directoryPlaceType(place);
-  const terms = `${place.name} ${place.description || ''} ${place.address || ''} ${place.city || ''} ${place.phone || ''} ${place.hours || ''} ${(place.services || []).join(' ')}`
-    .toLowerCase()
-    .replace(/[_-]/g, ' ');
-  const matchesMode = mode === 'all' || type === mode;
-  const matchesCuisine = cuisine === 'all' || terms.includes(cuisine);
-  return matchesMode && matchesCuisine && (!search.trim() || terms.includes(search.trim().toLowerCase()));
 }
 
 const cash = n => `₦${Number(n).toLocaleString('en-NG')}`;
@@ -211,6 +195,10 @@ export default function FoodScreen() {
   const [directoryError, setDirectoryError] = useState('');
   const [directoryLoading, setDirectoryLoading] = useState(true);
   const [directoryReload, setDirectoryReload] = useState(0);
+  const [directoryHasMore, setDirectoryHasMore] = useState(false);
+  const [directoryLoadingMore, setDirectoryLoadingMore] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const directoryRequest = useRef(0); // lets a newer request make older answers irrelevant
 
   const [location, setLocation] = useState('Victoria Island, Lagos');
   const [headerLocation, setHeaderLocation] = useState('Yaba, Lagos');
@@ -252,29 +240,57 @@ export default function FoodScreen() {
     [mode, cuisine, search],
   );
 
-  const filteredDirectory = useMemo(
-    () => directoryListings.filter(place => directoryPlaceMatches(place, mode, cuisine, search)),
-    [directoryListings, mode, cuisine, search],
-  );
+  // The server already applied the mode, cuisine and search filters.
+  const filteredDirectory = directoryListings;
 
   useEffect(() => {
-    let active = true;
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    const requestId = ++directoryRequest.current;
     setDirectoryLoading(true);
     setDirectoryError('');
-    fetchFoodCatalogue()
+    setDirectoryLoadingMore(false);
+    fetchDirectoryPage({ category: mode, chip: cuisine, q: debouncedSearch, offset: 0 })
       .then(rows => {
-        if (active) setDirectoryListings(rows.filter(row => row.is_orderable === false));
+        if (requestId !== directoryRequest.current) return;
+        setDirectoryListings(rows);
+        setDirectoryHasMore(rows.length === DIRECTORY_PAGE_SIZE);
       })
       .catch(error => {
-        if (active) setDirectoryError(error.message || 'Could not load restaurant directory listings.');
+        if (requestId === directoryRequest.current) {
+          setDirectoryListings([]);
+          setDirectoryHasMore(false);
+          setDirectoryError(error.message || 'Could not load restaurant directory listings.');
+        }
       })
       .finally(() => {
-        if (active) setDirectoryLoading(false);
+        if (requestId === directoryRequest.current) setDirectoryLoading(false);
       });
-    return () => {
-      active = false;
-    };
-  }, [directoryReload]);
+  }, [mode, cuisine, debouncedSearch, directoryReload]);
+
+  const loadMoreDirectory = () => {
+    if (directoryLoadingMore) return;
+    const requestId = ++directoryRequest.current;
+    setDirectoryLoadingMore(true);
+    fetchDirectoryPage({ category: mode, chip: cuisine, q: debouncedSearch, offset: directoryListings.length })
+      .then(rows => {
+        if (requestId !== directoryRequest.current) return;
+        setDirectoryListings(previous => {
+          const have = new Set(previous.map(place => place.id));
+          return previous.concat(rows.filter(place => !have.has(place.id)));
+        });
+        setDirectoryHasMore(rows.length === DIRECTORY_PAGE_SIZE);
+      })
+      .catch(() => {
+        // Keep what is already on screen; the "Show more" button stays so the person can try again.
+      })
+      .finally(() => {
+        if (requestId === directoryRequest.current) setDirectoryLoadingMore(false);
+      });
+  };
 
   const openDish = d => {
     setDish(d);
@@ -579,7 +595,7 @@ export default function FoodScreen() {
         <Heading
           title="Restaurant Directory"
           subtitle="Browse local restaurants and bukas. These listings are not orderable on theKapita."
-          right={<Text style={s.count}>{filteredDirectory.length} places</Text>}
+          right={<Text style={s.count}>{filteredDirectory.length}{directoryHasMore ? '+' : ''} places</Text>}
         />
         {directoryLoading ? (
           <Text style={s.directoryState}>Loading restaurant directory...</Text>
@@ -627,6 +643,11 @@ export default function FoodScreen() {
               </View>
             );
           })
+        )}
+        {!directoryLoading && !directoryError && directoryHasMore && (
+          <Pressable onPress={loadMoreDirectory} disabled={directoryLoadingMore}>
+            <Text style={s.link}>{directoryLoadingMore ? 'Loading...' : 'Show more restaurants ›'}</Text>
+          </Pressable>
         )}
         {!directoryLoading && !directoryError && directoryListings.some(place => place.attribution) && (
           <Text style={s.directoryAttribution}>

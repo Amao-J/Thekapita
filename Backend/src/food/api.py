@@ -3,7 +3,8 @@ import re
 import uuid
 
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Count, Sum
+from django.db.models import Q, Sum, TextField
+from django.db.models.functions import Cast
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -16,7 +17,12 @@ from app.auth import JWTAuth
 from app.models import Wallet
 from app.throttles import user_throttle
 from app.idempotency import IdempotencyConflict, get_or_create_idempotent_response
+from app import routing
+from directory import storage as image_storage
+from directory import uploads
 from directory.api import ATTRIBUTION as DIRECTORY_ATTRIBUTION
+from directory.api import _approved as approved_listings
+from directory.api import _haversine_km, _ranked
 from directory.models import Listing
 
 from . import services
@@ -59,6 +65,9 @@ class RestaurantOut(Schema):
     attribution: str | None = None
     services: list[str] = Field(default_factory=list)
     review_count: int = 0
+    latitude: float | None = None
+    longitude: float | None = None
+    distance_km: float | None = None   # straight-line, only when the request included lat & lng
 
 
 class RestaurantDetailOut(RestaurantOut):
@@ -143,6 +152,8 @@ class StoreUpdateIn(Schema):
     image_url: str | None = Field(None, max_length=500)
     delivery_fee: float | None = Field(None, ge=0, le=100000)
     is_open: bool | None = None
+    latitude: float | None = Field(None, ge=-90, le=90)
+    longitude: float | None = Field(None, ge=-180, le=180)
 
     @field_validator("image_url")
     @classmethod
@@ -186,32 +197,27 @@ class VendorSummaryOut(Schema):
 
 # ---- serializers ------------------------------------------------------------
 
-def _restaurant(r):
+def _distance(near, lat, lng):
+    if near and lat is not None and lng is not None:
+        return round(_haversine_km(near[0], near[1], lat, lng), 2)
+    return None
+
+
+def _restaurant(r, near=None):
     return {
         "id": r.id, "slug": r.slug, "name": r.name, "category": r.category,
         "category_label": r.get_category_display(), "tags": r.tags or [],
-        "description": r.description, "image_url": r.image_url or None,
+        "description": r.description, "image_url": image_storage.image_url_for(r.image_key) or r.image_url or None,
         "address": r.address, "phone": r.phone, "hours": r.hours,
         "delivery_fee": float(r.delivery_fee), "eta_min": r.eta_min, "eta_max": r.eta_max,
         "is_open": r.is_open, "rating": None, "source": "food", "is_orderable": True,
         "attribution": None, "services": [], "review_count": 0,
+        "latitude": r.latitude, "longitude": r.longitude, "distance_km": _distance(near, r.latitude, r.longitude),
     }
 
 
-def _directory_category(listing):
-    clues = " ".join((listing.name, listing.description, *(listing.services or []))).casefold().replace("_", " ")
-    if re.search(r"\b(buka|bukateria)\b", clues):
-        return "buka"
-    if re.search(r"\b(bakery|bakeries)\b", clues):
-        return "bakery"
-    if re.search(r"\b(grill|grills|suya|barbecue|bbq)\b", clues):
-        return "grill"
-    if re.search(r"\bfine dining\b", clues):
-        return "fine"
-    return "external"
-
-
-def _directory_restaurant(listing):
+def _directory_restaurant(listing, near=None):
+    """A restaurant that is only in the directory (no vendor account yet): browsable, not orderable."""
     city = listing.city.strip()
     address = listing.address
     if city and city.casefold() not in address.casefold():
@@ -220,7 +226,7 @@ def _directory_restaurant(listing):
         "id": -listing.id,
         "slug": f"directory-{listing.id}",
         "name": listing.name,
-        "category": _directory_category(listing),
+        "category": listing.subtype or "external",
         "category_label": listing.get_category_display(),
         "tags": listing.services or [],
         "description": listing.description,
@@ -237,14 +243,17 @@ def _directory_restaurant(listing):
         "is_orderable": False,
         "attribution": DIRECTORY_ATTRIBUTION.get(listing.source),
         "services": listing.services or [],
-        "review_count": listing.review_count,
+        "review_count": listing.n_reviews,
+        "latitude": listing.latitude, "longitude": listing.longitude,
+        "distance_km": _distance(near, listing.latitude, listing.longitude),
     }
 
 
 def _menu_item(m):
     return {
         "id": m.id, "name": m.name, "description": m.description, "category": m.category,
-        "price": float(m.price), "image_url": m.image_url or None, "is_available": m.is_available,
+        "price": float(m.price), "image_url": image_storage.image_url_for(m.image_key) or m.image_url or None,
+        "is_available": m.is_available,
     }
 
 
@@ -277,50 +286,73 @@ def _orders_qs():
 
 # ---- public catalogue -------------------------------------------------------
 
+SUBTYPES = ("buka", "bakery", "grill", "fine")
+
+
 @router.get("/restaurants", response=list[RestaurantOut])
 def list_restaurants(request, category: str | None = None, tag: str | None = None, q: str | None = None,
+                     source: str = "all", lat: float | None = None, lng: float | None = None,
                      limit: int = 60, offset: int = 0):
-    limit, offset = max(1, min(limit, 100)), max(offset, 0)
-    needle = q.strip().casefold() if q and q.strip() else None
-    vendors = list(_listed().prefetch_related("items"))
-    matching_vendor_ids = set()
-    if needle:
-        matching_vendor_ids = {
-            restaurant.id for restaurant in vendors
-            if needle in restaurant.name.casefold()
-            or any(needle in item.name.casefold() for item in restaurant.items.all() if item.is_available)
-        }
-    directory_rows = list(
-        Listing.objects.filter(
-            status=Listing.Status.APPROVED,
-            category=Listing.Category.RESTAURANTS,
-        ).annotate(
-            avg_rating=Avg("reviews__rating"),
-            review_count=Count("reviews", distinct=True),
-        )
-    )
-    results = [_restaurant(restaurant) for restaurant in vendors]
-    results.extend(_directory_restaurant(listing) for listing in directory_rows)
+    """Restaurants customers can order from (source=food) and restaurants that are only in the directory
+    (source=directory), or both (source=all, orderable ones first).
 
-    if category and category.casefold() != "all":
-        results = [row for row in results if row["category"] == category.casefold()]
-    if tag:
-        wanted_tag = tag.casefold()
-        results = [
-            row for row in results
-            if any(value.casefold() == wanted_tag for value in row["tags"])
-        ]
-    if needle:
-        results = [
-            row for row in results
-            if needle in " ".join((
-                row["name"], row["description"], row["address"], row["phone"], row["hours"],
-                *row["tags"], *row["services"],
-            )).casefold()
-            or row["id"] in matching_vendor_ids
-        ]
-    results.sort(key=lambda row: (row["name"].casefold(), row["source"], row["id"]))
-    return results[offset: offset + limit]
+    Paging and filtering happen in the database for the directory rows, so a request costs about the same whether
+    there are 500 or 50,000 of them: do NOT fetch every page to build a full list on the client."""
+    if source not in ("all", "food", "directory"):
+        raise HttpError(422, "source must be all, food or directory.")
+    if (lat is None) != (lng is None) or (lat is not None and not (-90 <= lat <= 90 and -180 <= lng <= 180)):
+        raise HttpError(422, "Send both lat and lng, as valid coordinates, or neither.")
+    limit, offset = max(1, min(limit, 100)), max(offset, 0)
+    near = (lat, lng) if lat is not None else None
+    wanted = (category or "all").casefold()
+    needle = q.strip() if q and q.strip() else None
+    wanted_tag = tag.strip() if tag and tag.strip() else None
+
+    vendors = []
+    if source in ("all", "food"):
+        vq = _listed()
+        if wanted != "all":
+            vq = vq.filter(category=wanted) if wanted in Restaurant.Category.values else vq.none()
+        if needle:
+            vq = vq.filter(
+                Q(name__icontains=needle) | Q(description__icontains=needle) | Q(address__icontains=needle)
+                | Q(items__name__icontains=needle, items__is_available=True)
+            ).distinct()
+        vendors = list(vq)
+        if wanted_tag:
+            vendors = [r for r in vendors if wanted_tag.casefold() in [t.casefold() for t in (r.tags or [])]]
+        vendors.sort(key=lambda r: (
+            _distance(near, r.latitude, r.longitude) if _distance(near, r.latitude, r.longitude) is not None else 1e9,
+            r.name.casefold(), r.id,
+        ))
+
+    def directory_page(page_limit, page_offset):
+        dq = approved_listings().filter(category=Listing.Category.RESTAURANTS)
+        if wanted in SUBTYPES:
+            dq = dq.filter(subtype=wanted)
+        elif wanted == "external":
+            dq = dq.filter(subtype="")
+        elif wanted != "all":
+            return []
+        if needle or wanted_tag:
+            dq = dq.annotate(services_text=Cast("services", TextField()))
+        if needle:
+            dq = dq.filter(
+                Q(name__icontains=needle) | Q(description__icontains=needle) | Q(address__icontains=needle)
+                | Q(city__icontains=needle) | Q(services_text__icontains=needle)
+            )
+        if wanted_tag:
+            dq = dq.filter(services_text__icontains=f'"{wanted_tag}"')
+        return [_directory_restaurant(l, near) for l in _ranked(dq, near, page_limit, page_offset)]
+
+    if source == "food":
+        return [_restaurant(r, near) for r in vendors[offset: offset + limit]]
+    if source == "directory":
+        return directory_page(limit, offset)
+    page = [_restaurant(r, near) for r in vendors[offset: offset + limit]]
+    if len(page) < limit:  # vendors are exhausted: continue with directory rows
+        page += directory_page(limit - len(page), max(0, offset - len(vendors)))
+    return page
 
 
 @router.get("/restaurants/{slug}", response=RestaurantDetailOut)
@@ -500,6 +532,8 @@ def vendor_update_store(request, payload: StoreUpdateIn):
     data = payload.dict(exclude_unset=True)
     if "category" in data and data["category"] not in Restaurant.Category.values:
         raise HttpError(422, "Choose a supported store category.")
+    if ("latitude" in data) != ("longitude" in data):
+        raise HttpError(422, "Send both latitude and longitude to pin the store on the map.")
     for field, value in data.items():
         if value is None:
             continue
@@ -555,3 +589,102 @@ def vendor_order_status(request, reference: str, payload: VendorStatusIn):
     if payload.status not in FoodOrder.Status.values:
         raise HttpError(422, "Unknown status.")
     return _run(lambda pk: services.vendor_set_status(pk, payload.status), order)
+
+
+# ---- vendor photos (uploaded straight to private storage; see directory/uploads.py) --------------------
+
+class ImageUploadIn(Schema):
+    filename: str = Field(min_length=1, max_length=255)
+    content_type: str = Field(min_length=1, max_length=50)
+    size: int = Field(gt=0, le=uploads.MAX_IMAGE_BYTES)
+
+
+class ImageKeyIn(Schema):
+    key: str = Field(min_length=1, max_length=512)
+
+
+def _dish(request, item_id):
+    try:
+        return _store(request).items.get(pk=item_id)
+    except MenuItem.DoesNotExist:
+        raise HttpError(404, "Menu item not found.")
+
+
+def _photo_result(obj):
+    return {"image_key": obj.image_key, "image_url": image_storage.image_url_for(obj.image_key) or obj.image_url or None}
+
+
+def _set_photo(obj, key):
+    previous = obj.image_key
+    obj.image_key = key
+    obj.save(update_fields=["image_key"])
+    if previous and previous != key:
+        image_storage.delete_object(previous)
+    return _photo_result(obj)
+
+
+@router.post("/vendor/store/image/upload-url", auth=JWTAuth(), throttle=[user_throttle("food_store_img_url", "30/h")])
+def store_image_upload_url(request, payload: ImageUploadIn):
+    store = _store(request)
+    return uploads.issue_upload(f"food/restaurants/{store.id}", payload.filename, payload.content_type, payload.size)
+
+
+@router.post("/vendor/store/image", auth=JWTAuth(), throttle=[user_throttle("food_store_img_ok", "30/h")])
+def store_image_confirm(request, payload: ImageKeyIn):
+    store = _store(request)
+    return _set_photo(store, uploads.verify_upload(f"food/restaurants/{store.id}", payload.key))
+
+
+@router.delete("/vendor/store/image", auth=JWTAuth())
+def store_image_delete(request):
+    store = _store(request)
+    return _set_photo(store, "")
+
+
+@router.post("/vendor/menu/{item_id}/image/upload-url", auth=JWTAuth(), throttle=[user_throttle("food_dish_img_url", "60/h")])
+def dish_image_upload_url(request, item_id: int, payload: ImageUploadIn):
+    item = _dish(request, item_id)
+    return uploads.issue_upload(f"food/menu/{item.id}", payload.filename, payload.content_type, payload.size)
+
+
+@router.post("/vendor/menu/{item_id}/image", auth=JWTAuth(), throttle=[user_throttle("food_dish_img_ok", "60/h")])
+def dish_image_confirm(request, item_id: int, payload: ImageKeyIn):
+    item = _dish(request, item_id)
+    return _set_photo(item, uploads.verify_upload(f"food/menu/{item.id}", payload.key))
+
+
+@router.delete("/vendor/menu/{item_id}/image", auth=JWTAuth())
+def dish_image_delete(request, item_id: int):
+    return _set_photo(_dish(request, item_id), "")
+
+
+# ---- delivery estimate by road (uses the routing service, i.e. OSRM / TomTom) ----------------------------
+
+class DeliveryEstimateOut(Schema):
+    distance_km: float
+    minutes: int          # travel time only: add the restaurant's preparation time yourself
+    source: str           # "road" or "estimate" (straight line, used when no road route is available)
+    traffic: bool
+    provider: str
+
+
+@router.get("/restaurants/{slug}/delivery-estimate", response=DeliveryEstimateOut, auth=JWTAuth(),
+            throttle=[user_throttle("food_eta", "60/m")])
+def delivery_estimate(request, slug: str, lat: float, lng: float):
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        raise HttpError(422, "lat and lng must be valid coordinates.")
+    try:
+        store = _listed().get(slug=slug)
+    except Restaurant.DoesNotExist:
+        raise HttpError(404, "Restaurant not found.")
+    if store.latitude is None or store.longitude is None:
+        raise HttpError(422, "This restaurant has not pinned its location yet.")
+    try:
+        route = routing.get_route((store.latitude, store.longitude), (lat, lng))
+        return {"distance_km": route.distance_km, "minutes": max(1, round(route.duration_min)) if route.distance_km else 0,
+                "source": "road", "traffic": route.traffic, "provider": route.provider}
+    except routing.RoutingError:
+        km = _haversine_km(store.latitude, store.longitude, lat, lng)
+        # Straight line is shorter than the road; ~30% longer at ~30 km/h is a sensible city rule of thumb.
+        return {"distance_km": round(km, 2), "minutes": max(1, round(km * 1.3 / 30 * 60)) if km > 0.02 else 0,
+                "source": "estimate", "traffic": False, "provider": "none"}

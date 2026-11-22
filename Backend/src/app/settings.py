@@ -172,6 +172,18 @@ else:
 DRIVER_AUTO_APPROVE = os.environ.get("DRIVER_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
 RIDE_PLATFORM_FEE_PERCENT = os.environ.get("RIDE_PLATFORM_FEE_PERCENT", "12.5")
 
+# Road routing for ride distance/ETA (see app/routing.py). TomTom adds live-traffic travel times; without a
+# key we use OSRM (road distance, no live traffic). The public OSRM demo server is for light, non-commercial
+# use only: host your own and set OSRM_BASE_URL before launch.
+TOMTOM_API_KEY = os.environ.get("TOMTOM_API_KEY", "")
+ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "tomtom" if TOMTOM_API_KEY else "osrm")
+OSRM_BASE_URL = os.environ.get("OSRM_BASE_URL", "https://router.project-osrm.org")
+
+# Optional: a PUBLIC base URL for stored listing/restaurant/dish photos (e.g. a Cloudflare/CDN domain in front of a
+# public-read bucket). When set, photo URLs are stable and cacheable instead of short-lived signed links. Leave unset to
+# keep the bucket fully private.
+LISTING_IMAGE_PUBLIC_BASE_URL = os.environ.get("LISTING_IMAGE_PUBLIC_BASE_URL", "")
+
 # New restaurants / directory listings are visible straight away in development; in
 # production staff approve them in the admin unless these are set to 1.
 FOOD_AUTO_APPROVE = os.environ.get("FOOD_AUTO_APPROVE", "1" if DEBUG else "0") == "1"

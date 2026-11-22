@@ -13,10 +13,12 @@ const mocks = vi.hoisted(() => ({
   currentPosition: vi.fn(),
   reverseGeocode: vi.fn(),
   locationAlreadyGranted: vi.fn(),
+  getRoadRoute: vi.fn(),
 }));
 
 vi.mock('../../state/session.js', () => ({ authorizedRequest: mocks.authorizedRequest, isAuthenticated: () => true }));
 vi.mock('../../ui/picker.js', () => ({ pickLocation: mocks.pickLocation }));
+vi.mock('../../ui/route.js', async (importOriginal) => ({ ...(await importOriginal()), getRoadRoute: mocks.getRoadRoute }));
 vi.mock('../../ui/map.js', async (importOriginal) => ({
   ...(await importOriginal()),
   geocode: mocks.geocode,
@@ -31,6 +33,7 @@ const FAR = { lat: 9.95, lng: 8.95, address: 'Rayfield, Jos' };
 describe.skipIf(!jsdom)('ride planner form', () => {
   let dom;
   const $ = (id) => document.getElementById(id);
+  const flush = () => new Promise((r) => setTimeout(r, 0));
   const booked = () => mocks.authorizedRequest.mock.calls.find(([path]) => String(path).includes('/rides'))?.[1];
 
   async function boot({ granted = false, setup = () => {} } = {}) {
@@ -63,8 +66,10 @@ describe.skipIf(!jsdom)('ride planner form', () => {
     await window.pickRideLocation('destination');
     expect($('rideOriginInput').value).toBe('Bauchi Road, Jos');
     expect($('rideDestinationInput').value).toBe('Rayfield, Jos');
+    await flush();
     expect($('rideRouteSummary').hidden).toBe(false);
-    expect($('rideRouteSummary').textContent).toMatch(/\d+\.\d km apart .* roughly \d+ min/);
+    // no road route available in this test (mock returns nothing) -> the labelled straight-line estimate
+    expect($('rideRouteSummary').textContent).toMatch(/straight line.*\(estimate\)$/);
     // the second picker opens near the first choice and with the right title
     expect(mocks.pickLocation.mock.calls[1][0]).toMatchObject({ title: 'Choose destination', near: { lat: 9.9, lng: 8.9 } });
 
@@ -74,6 +79,34 @@ describe.skipIf(!jsdom)('ride planner form', () => {
       pickup: 'Bauchi Road, Jos', destination: 'Rayfield, Jos',
       pickup_lat: 9.9, pickup_lng: 8.9, destination_lat: 9.95, destination_lng: 8.95,
     });
+  });
+
+  it('shows the road distance and traffic-aware arrival time when the backend has a route', async () => {
+    await boot();
+    mocks.getRoadRoute.mockResolvedValue({ source: 'road', distanceKm: 12.4, minutes: 28, traffic: true, delayMinutes: 6 });
+    mocks.pickLocation.mockResolvedValueOnce(JOS).mockResolvedValueOnce(FAR);
+    await window.pickRideLocation('pickup');
+    await window.pickRideLocation('destination');
+    await flush();
+    expect(mocks.getRoadRoute).toHaveBeenLastCalledWith({ lat: 9.9, lng: 8.9 }, { lat: 9.95, lng: 8.95 });
+    expect($('rideRouteSummary').textContent).toBe('12 km by road \u2022 about 28 min (includes 6 min of traffic delay)');
+  });
+
+  it('a slow, outdated route answer never overwrites a newer one', async () => {
+    await boot();
+    let releaseSlow;
+    mocks.getRoadRoute
+      .mockImplementationOnce(() => new Promise((res) => { releaseSlow = () => res({ source: 'road', distanceKm: 99, minutes: 99, traffic: false, delayMinutes: 0 }); }))
+      .mockResolvedValueOnce({ source: 'road', distanceKm: 5, minutes: 11, traffic: false, delayMinutes: 0 });
+    mocks.pickLocation.mockResolvedValueOnce(JOS).mockResolvedValueOnce(FAR);
+    await window.pickRideLocation('pickup');
+    await window.pickRideLocation('destination'); // first (slow) lookup starts here
+    window.swapLocations();                       // second lookup starts and answers immediately
+    await flush();
+    releaseSlow();
+    await flush();
+    expect($('rideRouteSummary').textContent).toContain('5.0 km by road');
+    expect($('rideRouteSummary').textContent).not.toContain('99');
   });
 
   it('editing the text by hand drops the old map point and falls back to looking the address up', async () => {
