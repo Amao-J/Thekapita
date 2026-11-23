@@ -14,6 +14,7 @@ import {
   updatePreferences,
   updateSettings,
   getCurrentUser,
+  logout,
 } from '../state/session.js';
 
 if (!isAuthenticated()) {
@@ -146,6 +147,11 @@ function copyKapitaId() {
   if (!id) return;
   navigator.clipboard.writeText(id);
   notify(`theKapita ID (${id}) copied to clipboard!`);
+}
+
+function signOut() {
+  logout();
+  window.location.href = 'auth.html';
 }
 
 /* --------------------------------------------------------------------------
@@ -348,3 +354,4 @@ window.saveProfileChanges = saveProfileChanges;
 window.openQrModal = openQrModal;
 window.closeQrModal = closeQrModal;
 window.copyKapitaId = copyKapitaId;
+window.signOut = signOut;

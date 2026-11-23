@@ -163,6 +163,16 @@
   gap: 10px;
 }
 
+.sign-out-button {
+  color: #b42318;
+  border-color: #f0b6b1;
+}
+
+.sign-out-button:hover {
+  background: #fff5f4;
+  border-color: #d92d20;
+}
+
 /* BUTTON COMPONENTS */
 .btn-primary {
   background: var(--emerald, #00d084);
