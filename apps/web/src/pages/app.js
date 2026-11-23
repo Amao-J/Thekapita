@@ -133,6 +133,159 @@ function updateHomepageGreeting() {
   greetingText.textContent = `${timeGreeting}, ${firstName}.`;
 }
 
+function openApp(appName) {
+  // Prototype trigger for routing between internal services
+  console.log(`Navigating to theKapita ${appName}...`);
+}
+
+// Interactive search placeholder effect
+const searchInput = document.getElementById('globalSearch');
+const placeholders = [
+  "Search 'Ride to Airport'...",
+  "Search 'Order Jollof'...",
+  "Search 'Pay Electricity'...",
+  "Ask Kapita Brain AI..."
+];
+
+let index = 0;
+if (searchInput) {
+  setInterval(() => {
+    index = (index + 1) % placeholders.length;
+    searchInput.setAttribute('placeholder', placeholders[index]);
+  }, 3000);
+}
+
+/* ===================================================
+   INTER-CONTAINER DRAG & DROP SWAP LOGIC
+   =================================================== */
+
+let draggedItem = null;
+
+function extractIconMarkup(element) {
+  const attrIcon = element.getAttribute('data-icon');
+  if (attrIcon && attrIcon !== 'null') {
+    return attrIcon;
+  }
+  const svg = element.querySelector('svg');
+  if (svg) {
+    return svg.outerHTML;
+  }
+  const iconNode = element.querySelector('.icon-circle > *, .pill-emblem');
+  if (iconNode) {
+    return iconNode.outerHTML;
+  }
+  return '';
+}
+
+function extractBadgeStyle(element) {
+  const attrStyle = element.getAttribute('data-badge-style');
+  if (attrStyle && attrStyle !== 'null') {
+    return attrStyle;
+  }
+  const circle = element.querySelector('.icon-circle');
+  if (!circle) return '';
+  const inlineBg = circle.style.background;
+  return inlineBg ? `style="background: ${escapeHtml(inlineBg)};"` : '';
+}
+
+function getItemSnapshot(element) {
+  const titleEl = element.querySelector('.app-info h3, .app-card-info h3') || element.querySelector('span:last-child');
+  const descEl = element.querySelector('.app-info p, .app-card-info p');
+  return {
+    id: element.getAttribute('data-id') || '',
+    title: element.getAttribute('data-title') || (titleEl ? titleEl.textContent.trim() : ''),
+    desc: element.getAttribute('data-desc') || (descEl ? descEl.textContent.trim() : ''),
+    icon: extractIconMarkup(element),
+    badgeStyle: extractBadgeStyle(element),
+  };
+}
+
+function applyItemSnapshot(element, data, isPill) {
+  element.setAttribute('data-id', data.id);
+  element.setAttribute('data-title', data.title);
+  element.setAttribute('data-desc', data.desc);
+  if (data.icon) {
+    element.setAttribute('data-icon', data.icon);
+  }
+  if (data.badgeStyle) {
+    element.setAttribute('data-badge-style', data.badgeStyle);
+  }
+
+  const safeId = escapeHtml(data.id);
+  const safeTitle = escapeHtml(data.title);
+  const safeDesc = escapeHtml(data.desc);
+  const safeIcon = data.icon || '';
+
+  if (isPill) {
+    // eslint-disable-next-line no-restricted-properties -- Icon markup comes from existing SVG/emblem elements and text fields are escaped.
+    element.innerHTML = `${safeIcon}<span>${safeTitle}</span>`;
+  } else {
+    // eslint-disable-next-line no-restricted-properties -- Icon markup comes from existing SVG/emblem elements and text fields are escaped.
+    element.innerHTML = `
+      <div class="icon-circle app-emblem-box ${safeId === 'Pay' ? 'hero-icon' : ''}" aria-hidden="true" ${data.badgeStyle || ''}>${safeIcon}</div>
+      <div class="app-info">
+        <h3>${safeTitle}</h3>
+        <p>${safeDesc}</p>
+      </div>
+    `;
+  }
+}
+
+function attachDragEvents(element) {
+  element.addEventListener('dragstart', handleDragStart);
+  element.addEventListener('dragover', handleDragOver);
+  element.addEventListener('dragleave', handleDragLeave);
+  element.addEventListener('drop', handleDrop);
+  element.addEventListener('dragend', handleDragEnd);
+
+  element.addEventListener('click', () => {
+    const id = element.getAttribute('data-id');
+    if (id) openApp(id);
+  });
+}
+
+function handleDragStart(e) {
+  draggedItem = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.getAttribute('data-id') || '');
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (this !== draggedItem) {
+    this.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave() {
+  this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  this.classList.remove('drag-over');
+
+  if (!draggedItem || draggedItem === this) return;
+
+  const sourceData = getItemSnapshot(draggedItem);
+  const targetData = getItemSnapshot(this);
+
+  const sourceIsPill = draggedItem.classList.contains('pill');
+  const targetIsPill = this.classList.contains('pill');
+
+  applyItemSnapshot(draggedItem, targetData, sourceIsPill);
+  applyItemSnapshot(this, sourceData, targetIsPill);
+}
+
+function handleDragEnd() {
+  this.classList.remove('dragging');
+  document.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+  draggedItem = null;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('heroGreeting')) {
     subscribeSession(updateHomepageGreeting);
@@ -157,150 +310,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
     updateNotificationBadge(notifications);
   });
-});
 
-function openApp(appName) {
-  // Prototype trigger for routing between internal services
-  console.log(`Navigating to theKapita ${appName}...`);
-}
-
-// Interactive search placeholder effect
-const searchInput = document.getElementById('globalSearch');
-const placeholders = [
-  "Search 'Ride to Airport'...",
-  "Search 'Order Jollof'...",
-  "Search 'Pay Electricity'...",
-  "Ask Kapita Brain AI..."
-];
-
-let index = 0;
-// BUGFIX: #globalSearch only exists on index.html, so this threw a
-// TypeError every 3 seconds on Profile, Wallet and Marketplace (app.js
-// loads on all of them). Guard so the interval is a no-op elsewhere.
-if (searchInput) {
-  setInterval(() => {
-    index = (index + 1) % placeholders.length;
-    searchInput.setAttribute('placeholder', placeholders[index]);
-  }, 3000);
-}
-
-// BUGFIX: toggleAppMenu() was defined three times in this file, the last
-// definition silently winning and the earlier two (plus their own
-// document-level "click outside" listeners) becoming dead code that still
-// ran on every click. The single definition and its outside-click handler
-// now live further down this file, right after toggleNotifMenu(), where
-// they also close the notification menu — the earlier, incomplete versions
-// have been removed.
-
-/* ===================================================
-   INTER-CONTAINER DRAG & DROP SWAP LOGIC
-   =================================================== */
-
-let draggedItem = null;
-
-// Helper: Re-render element HTML depending on whether it sits in Top Pills or Main Grid
-function buildElementHTML(id, title, desc, icon, isPill) {
-  if (isPill) {
-    return `${icon} ${title}`;
-  } else {
-    return `
-      <div class="icon-circle ${id === 'Pay' ? 'hero-icon' : ''}">${icon}</div>
-      <div class="app-info">
-        <h4>${title}</h4>
-        <p>${desc}</p>
-      </div>
-    `;
-  }
-}
-
-// Helper: Attach Event Listeners to Draggable Items
-function attachDragEvents(element) {
-  element.addEventListener('dragstart', handleDragStart);
-  element.addEventListener('dragover', handleDragOver);
-  element.addEventListener('dragleave', handleDragLeave);
-  element.addEventListener('drop', handleDrop);
-  element.addEventListener('dragend', handleDragEnd);
-
-  // Click handler so dragging still allows normal clicks
-  element.addEventListener('click', (e) => {
-    const id = element.getAttribute('data-id');
-    if (id) openApp(id);
-  });
-}
-
-function handleDragStart(e) {
-  draggedItem = this;
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  if (this !== draggedItem) {
-    this.classList.add('drag-over');
-  }
-}
-
-function handleDragLeave(e) {
-  this.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  this.classList.remove('drag-over');
-
-  if (!draggedItem || draggedItem === this) return;
-
-  // Extract metadata for both target and dragged items
-  const sourceData = {
-    id: draggedItem.getAttribute('data-id'),
-    title: draggedItem.getAttribute('data-title'),
-    desc: draggedItem.getAttribute('data-desc'),
-    icon: draggedItem.getAttribute('data-icon')
-  };
-
-  const targetData = {
-    id: this.getAttribute('data-id'),
-    title: this.getAttribute('data-title'),
-    desc: this.getAttribute('data-desc'),
-    icon: this.getAttribute('data-icon')
-  };
-
-  // Determine container types
-  const sourceIsPill = draggedItem.classList.contains('pill');
-  const targetIsPill = this.classList.contains('pill');
-
-  // Swap attributes
-  draggedItem.setAttribute('data-id', targetData.id);
-  draggedItem.setAttribute('data-title', targetData.title);
-  draggedItem.setAttribute('data-desc', targetData.desc);
-  draggedItem.setAttribute('data-icon', targetData.icon);
-
-  this.setAttribute('data-id', sourceData.id);
-  this.setAttribute('data-title', sourceData.title);
-  this.setAttribute('data-desc', sourceData.desc);
-  this.setAttribute('data-icon', sourceData.icon);
-
-  // Re-render inner HTML based on their target containers
-  // eslint-disable-next-line no-restricted-properties -- see buildElementHTML comment above
-  draggedItem.innerHTML = buildElementHTML(targetData.id, targetData.title, targetData.desc, targetData.icon, sourceIsPill);
-  // eslint-disable-next-line no-restricted-properties -- see buildElementHTML comment above
-  this.innerHTML = buildElementHTML(sourceData.id, sourceData.title, sourceData.desc, sourceData.icon, targetIsPill);
-}
-
-function handleDragEnd(e) {
-  this.classList.remove('dragging');
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  draggedItem = null;
-}
-
-// Initialize all draggable elements on page load
-document.addEventListener('DOMContentLoaded', () => {
   const draggables = document.querySelectorAll('[draggable="true"]');
-  draggables.forEach(attachDragEvents);
+  draggables.forEach((el) => {
+    const snap = getItemSnapshot(el);
+    if (snap.icon && !el.getAttribute('data-icon')) {
+      el.setAttribute('data-icon', snap.icon);
+    }
+    if (snap.badgeStyle && !el.getAttribute('data-badge-style')) {
+      el.setAttribute('data-badge-style', snap.badgeStyle);
+    }
+    attachDragEvents(el);
+  });
 });
 
 // Toggle Notification Menu
@@ -308,10 +329,8 @@ function toggleNotifMenu(event) {
   event.stopPropagation();
   const notifMenu = document.getElementById('notifMenu');
   const launcherMenu = document.getElementById('launcherMenu');
-  
-  // Close launcher menu if open
+
   if (launcherMenu) launcherMenu.classList.remove('active');
-  
   if (notifMenu) notifMenu.classList.toggle('active');
 }
 
@@ -320,18 +339,16 @@ function toggleAppMenu(event) {
   event.stopPropagation();
   const launcherMenu = document.getElementById('launcherMenu');
   const notifMenu = document.getElementById('notifMenu');
-  
-  // Close notification menu if open
+
   if (notifMenu) notifMenu.classList.remove('active');
-  
   if (launcherMenu) launcherMenu.classList.toggle('active');
 }
 
 // Close all menus when clicking anywhere outside
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
   const notifMenu = document.getElementById('notifMenu');
   const launcherMenu = document.getElementById('launcherMenu');
-  
+
   if (notifMenu && !notifMenu.contains(event.target)) {
     notifMenu.classList.remove('active');
   }
