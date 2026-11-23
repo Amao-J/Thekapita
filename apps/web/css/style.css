@@ -6,7 +6,7 @@
   --surface-gray: #f8fafc;
   --border-color: #cbd5e1;
   --focus-ring: #005fb8;
-  
+
   --font-heading: 'Bricolage Grotesque', sans-serif;
   --font-body: 'Montserrat', sans-serif;
 }
@@ -85,18 +85,9 @@ input:focus-visible,
   gap: 10px;
 }
 
-.app-icon {
-  background-color: var(--black);
-  color: var(--white);
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 20px;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.logo-container a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Wordmark Styling */
@@ -128,27 +119,6 @@ input:focus-visible,
   gap: 16px;
 }
 
-.app-launcher-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.app-launcher-btn:hover {
-  background: var(--surface-gray);
-}
-
-.app-launcher-btn svg {
-  width: 22px;
-  height: 22px;
-  fill: var(--black);
-}
-
 /* Central Portal Content */
 .portal-container {
   width: 100%;
@@ -161,12 +131,12 @@ input:focus-visible,
 
 /* Search Hero Section */
 .search-hero {
-  margin-top: 56px;
+  margin-top: 40px;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 56px;
+  margin-bottom: 48px;
 }
 
 .hero-subtitle {
@@ -207,6 +177,7 @@ input:focus-visible,
   width: 22px;
   height: 22px;
   fill: #64748b;
+  flex-shrink: 0;
 }
 
 .sleek-search-bar input {
@@ -244,13 +215,23 @@ input:focus-visible,
 .pill {
   background: var(--surface-gray);
   border: 1px solid var(--border-color);
-  padding: 8px 16px;
+  padding: 7px 15px 7px 10px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
   color: var(--black);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.pill-emblem {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .pill:hover {
@@ -311,16 +292,23 @@ input:focus-visible,
 }
 
 .icon-circle {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   background: var(--white);
-  border-radius: 14px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 10px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.app-emblem-box svg {
+  width: 34px;
+  height: 34px;
+  display: block;
 }
 
 .dark-circle {
@@ -331,14 +319,16 @@ input:focus-visible,
   font-size: 14px;
 }
 
-.app-info h3 {
+.app-info h3,
+.app-card-info h3 {
   font-family: var(--font-heading);
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 2px;
 }
 
-.app-info p {
+.app-info p,
+.app-card-info p {
   font-size: 12px;
   color: #525252;
 }
@@ -370,108 +360,22 @@ input:focus-visible,
     transform: none;
   }
 
-  .app-info p {
+  .app-info p,
+  .app-card-info p {
     display: none;
   }
 
-  .app-info h3 {
+  .app-info h3,
+  .app-card-info h3 {
     font-size: 11px;
     margin-top: 4px;
   }
 
   .icon-circle {
-    width: 52px;
-    height: 52px;
+    width: 54px;
+    height: 54px;
     border-radius: 16px;
   }
-}
-
-/* Launcher Dropdown Container */
-.launcher-wrapper {
-  position: relative;
-}
-
-.app-launcher-menu {
-  position: absolute;
-  top: 50px;
-  right: 0;
-  width: 320px;
-  background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  z-index: 200;
-  display: none;
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.app-launcher-menu.active {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.menu-header {
-  font-family: var(--font-heading);
-  font-size: 13px;
-  font-weight: 700;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-  padding-left: 4px;
-}
-
-.launcher-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  max-height: 340px;
-  overflow-y: auto;
-}
-
-.launcher-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.launcher-item:hover {
-  background: var(--surface-gray);
-}
-
-.launcher-icon {
-  width: 44px;
-  height: 44px;
-  background: var(--surface-gray);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.launcher-icon.dark-bg {
-  background: var(--black);
-  color: var(--emerald);
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 12px;
-}
-
-.launcher-item span {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--black);
 }
 
 /* Drag and Drop Feedback */
@@ -609,18 +513,6 @@ input:focus-visible,
   background: rgba(0, 208, 132, 0.08);
 }
 
-.notif-icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--surface-gray);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
 .notif-content {
   display: flex;
   flex-direction: column;
@@ -669,14 +561,8 @@ input:focus-visible,
   fill: currentColor;
 }
 
-#liveTrackingMap {
-  width: 100%;
-  height: 400px; /* Or whatever fixed/responsive height fits your layout */
-  border-radius: 12px;
-}
-
 /* ==========================================
-   SPOTLIGHT IMAGE STRIP (PORTAL SAFE)
+   SPOTLIGHT IMAGE STRIP (REAL PHOTOGRAPHY)
    ========================================== */
 .spotlight-section {
   width: 100%;
@@ -719,11 +605,18 @@ input:focus-visible,
   padding: 14px 16px;
   text-decoration: none;
   color: #ffffff;
-  background-size: cover;
-  background-position: center;
   border: 1px solid var(--border-color);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   isolation: isolate;
+}
+
+.spotlight-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
 }
 
 .spotlight-card::before {

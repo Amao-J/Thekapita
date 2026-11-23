@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>theKapita | one app, one wallet, one identity.</title>
   <script src="src/pages/theme.js"></script>
-  <script>
+  <!-- <script>
     (function () {
       try {
         const session = JSON.parse(localStorage.getItem('kapita.session.v1') || 'null');
@@ -16,7 +16,7 @@
         window.location.replace('landingpage.html');
       }
     })();
-  </script>
+  </script> -->
 
   <!-- SVG Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='30' fill='%23121212'/><text x='32' y='68' font-family='sans-serif' font-weight='800' font-size='52' fill='%23ffffff'>K</text><circle cx='72' cy='64' r='7' fill='%2300d084'/></svg>">
@@ -25,27 +25,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/theme.css">
-  <style>
-    /* Inline styles for custom inline SVG alignment inside cards/pills */
-    .app-card .icon-circle svg, .launcher-icon svg, .pill svg {
-      width: 24px;
-      height: 24px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .pill svg {
-      width: 18px;
-      height: 18px;
-      margin-right: 6px;
-    }
-    .launcher-item .launcher-icon svg {
-      width: 22px;
-      height: 22px;
-    }
-  </style>
 </head>
 <body>
 
@@ -56,16 +38,16 @@
   <header class="desktop-header">
     <div class="logo-container">
       <h1 class="brand-title">
-       <a href="index.html"> <span class="prefix">the</span>Kapita<span class="dot">.</span> </a>
+        <a href="index.html"><span class="prefix">the</span>Kapita<span class="dot">.</span></a>
       </h1>
     </div>
 
-    <!-- Right Header: Location + Notification Hub + Profile -->
+    <!-- Right Header: Theme Toggle + Notification Hub + Profile -->
     <div class="header-right">
 
       <!-- Drop-in Dark/Light Icon Button -->
       <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark or light theme"></button>
-      
+
       <!-- Notification Bell Widget -->
       <div class="notif-wrapper">
         <button class="icon-btn notif-btn" id="notifBtn" title="Notifications" aria-label="Notifications" aria-haspopup="true" aria-expanded="false" onclick="toggleNotifMenu(event)">
@@ -76,7 +58,7 @@
         <!-- Dropdown Notification Panel -->
         <div class="notif-menu" id="notifMenu" role="dialog" aria-label="Notifications Panel">
           <div class="notif-header">
-            <span>Activity & Alerts</span>
+            <span>Activity &amp; Alerts</span>
             <button class="mark-read text-btn-link" type="button">Mark all as read</button>
           </div>
           <div class="notif-list">
@@ -100,13 +82,13 @@
 
   <!-- Hero Portal Container -->
   <main class="portal-container" id="main-content">
-    
+
     <!-- Hero Brand Statement & Search -->
     <section class="search-hero">
       <div class="hero-brand">
         <p class="hero-subtitle" id="heroGreeting" hidden><span id="heroGreetingText"></span> What do you need today?</p>
       </div>
-      
+
       <div class="sleek-search-bar">
         <label for="globalSearch" class="sr-only">Search ecosystem services</label>
         <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
@@ -116,22 +98,53 @@
 
       <!-- Quick Action Pills -->
       <div class="quick-pills" id="quickPillsContainer">
-        <button class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" onclick="window.location.href='wallet.html'" style="cursor: pointer;">
-          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="#00d084"/><path d="M2 10h20" stroke="#121212" stroke-width="1.5"/><rect x="5" y="14" width="4" height="2" rx="1" fill="#ffffff"/></svg> Kapita Pay
+        <button class="pill" draggable="true" data-id="Pay" data-title="Kapita Pay" data-desc="Fintech & Wallet" onclick="window.location.href='wallet.html'">
+          <svg class="pill-emblem" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="3" y="7" width="26" height="18" rx="4" fill="#121212"/>
+            <rect x="3" y="11" width="26" height="4" fill="#00d084"/>
+            <rect x="7" y="18" width="7" height="3" rx="1.5" fill="#ffffff"/>
+            <circle cx="23" cy="19.5" r="2" fill="#00d084"/>
+          </svg>
+          <span>Kapita Pay</span>
         </button>
-        <button class="pill" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Transportation & Delivery" onclick="window.location.href='ride.html'" style="cursor: pointer;">
-          <svg viewBox="0 0 24 24"><path d="M5 13l2-5h10l2 5v5H5v-5z" fill="#00d084"/><circle cx="7.5" cy="18" r="2" fill="#121212"/><circle cx="16.5" cy="18" r="2" fill="#121212"/><path d="M6 10h12" stroke="#ffffff" stroke-width="1.5"/></svg> Book Ride
+
+        <button class="pill" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Transportation & Delivery" onclick="window.location.href='ride.html'">
+          <svg class="pill-emblem" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M7 15l2.5-6h13L25 15v7H7v-7z" fill="#00d084"/>
+            <path d="M9.5 10h13l1.5 4H8l1.5-4z" fill="#121212"/>
+            <circle cx="10.5" cy="18.5" r="1.5" fill="#ffffff"/>
+            <circle cx="21.5" cy="18.5" r="1.5" fill="#ffffff"/>
+            <rect x="8" y="22" width="3.5" height="2.5" rx="1" fill="#121212"/>
+            <rect x="20.5" y="22" width="3.5" height="2.5" rx="1" fill="#121212"/>
+          </svg>
+          <span>Book Ride</span>
         </button>
-        <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" onclick="window.location.href='food.html'" style="cursor: pointer;">
-          <svg viewBox="0 0 24 24"><path d="M3 13h18c0-4.97-4.03-9-9-9s-9 4.03-9 9z" fill="#d97706"/><path d="M2 17h20v2H2z" fill="#b45309"/><path d="M10 2v2M14 2v2M6 2v2" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/></svg> Order Chow
+
+        <button class="pill" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" onclick="window.location.href='food.html'">
+          <svg class="pill-emblem" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M6 15c0-5 4.5-8.5 10-8.5s10 3.5 10 8.5H6z" fill="#f59e0b"/>
+            <rect x="5" y="16.5" width="22" height="3" rx="1.5" fill="#10b981"/>
+            <rect x="6" y="21" width="20" height="4" rx="2" fill="#d97706"/>
+            <circle cx="12" cy="11" r="1" fill="#fef3c7"/>
+            <circle cx="16" cy="10" r="1" fill="#fef3c7"/>
+            <circle cx="20" cy="11" r="1" fill="#fef3c7"/>
+          </svg>
+          <span>Order Chow</span>
         </button>
-        <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" onclick="window.location.href='marketplace.html'" style="cursor: pointer;">
-          <svg viewBox="0 0 24 24"><path d="M4 7h16l-2 13H6L4 7z" fill="#8b5cf6"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="#8b5cf6" stroke-width="2" fill="none"/></svg> Marketplace
+
+        <button class="pill" draggable="true" data-id="Market" data-title="Market" data-desc="E-commerce" onclick="window.location.href='marketplace.html'">
+          <svg class="pill-emblem" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M7 11h18l-1.5 15h-15L7 11z" fill="#7c3aed"/>
+            <path d="M12 11V8.5a4 4 0 0 1 8 0V11" stroke="#121212" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <circle cx="13" cy="15" r="1.2" fill="#ddd6fe"/>
+            <circle cx="19" cy="15" r="1.2" fill="#ddd6fe"/>
+          </svg>
+          <span>Marketplace</span>
         </button>
       </div>
     </section>
 
-    <!-- Slim Featured Spotlight Strip (Multiple Images) -->
+    <!-- Slim Featured Spotlight Strip (Real Photography) -->
     <section class="spotlight-section" aria-label="Featured services">
       <div class="spotlight-header">
         <h2>Spotlight</h2>
@@ -139,7 +152,8 @@
       </div>
 
       <div class="spotlight-grid">
-        <a href="haven.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=900&auto=format&fit=crop');">
+        <a href="haven.html" class="spotlight-card">
+          <img class="spotlight-img" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=900&auto=format&fit=crop" alt="Modern home with bright living space and garden exterior">
           <span class="spotlight-badge">Haven</span>
           <div class="spotlight-copy">
             <strong>Verified Homes</strong>
@@ -147,7 +161,8 @@
           </div>
         </a>
 
-        <a href="food.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1763048443535-1243379234e2?q=80&w=900&auto=format&fit=crop');">
+        <a href="food.html" class="spotlight-card">
+          <img class="spotlight-img" src="https://images.unsplash.com/photo-1763048443535-1243379234e2?q=80&w=900&auto=format&fit=crop" alt="Prepared meal plate ready for food delivery">
           <span class="spotlight-badge">Eats</span>
           <div class="spotlight-copy">
             <strong>Order Chow</strong>
@@ -155,7 +170,8 @@
           </div>
         </a>
 
-        <a href="ride.html" class="spotlight-card" style="background-image: url('https://images.unsplash.com/photo-1616805111699-0e52fa62f779?q=80&w=900&auto=format&fit=crop');">
+        <a href="ride.html" class="spotlight-card">
+          <img class="spotlight-img" src="https://images.unsplash.com/photo-1616805111699-0e52fa62f779?q=80&w=900&auto=format&fit=crop" alt="City ride and parcel transport on road">
           <span class="spotlight-badge">Logistics</span>
           <div class="spotlight-copy">
             <strong>Rides &amp; Parcels</strong>
@@ -168,27 +184,41 @@
     <!-- Ecosystem App Grid Container -->
     <section class="ecosystem-section">
       <div class="grid-title">
-        <h2>Services & Ecosystem</h2>
+        <h2>Services &amp; Ecosystem</h2>
         <span class="count-tag">20+ Apps</span>
       </div>
 
       <div class="desktop-app-grid" id="mainGridContainer">
 
-        <!-- Ride & Logistics Superapp Card -->
-        <div class="app-card" tabindex="0" role="button" aria-label="Ride & Courier service" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Taxis & Logistics" onclick="window.location.href='ride.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #e6fdf4; color: #00d084;">
-            <svg viewBox="0 0 24 24"><path d="M5 13l2-5h10l2 5v5H5v-5z" fill="#00d084"/><circle cx="7.5" cy="18" r="2" fill="#121212"/><circle cx="16.5" cy="18" r="2" fill="#121212"/><path d="M6 10h12" stroke="#ffffff" stroke-width="1.5"/></svg>
+        <!-- Rides: Detailed Front-View Taxi & Headlights Illustration -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Ride & Courier service" draggable="true" data-id="Ride" data-title="Ride & Courier" data-desc="Taxis & Logistics" onclick="window.location.href='ride.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #dcfce7, #bbf7d0);">
+            <svg viewBox="0 0 40 40">
+              <rect x="15" y="7" width="10" height="4" rx="2" fill="#121212"/>
+              <path d="M9 19l3-8h16l3 8v9H9v-9z" fill="#00b874"/>
+              <path d="M12.5 12.5h15l2 5.5h-19l2-5.5z" fill="#121212"/>
+              <circle cx="13.5" cy="23.5" r="2" fill="#fef08a"/>
+              <circle cx="26.5" cy="23.5" r="2" fill="#fef08a"/>
+              <rect x="16.5" y="22.5" width="7" height="2" rx="1" fill="#064e3b"/>
+              <rect x="10.5" y="28" width="4.5" height="3.5" rx="1.5" fill="#121212"/>
+              <rect x="25" y="28" width="4.5" height="3.5" rx="1.5" fill="#121212"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Rides</h3>
-            <p>Ride & Logistics</p>
+            <p>Ride &amp; Logistics</p>
           </div>
         </div>
 
-        <!-- Driver Partner Portal Card -->
-        <div class="app-card" tabindex="0" role="button" aria-label="Driver Partner Portal" draggable="true" data-id="Driver" data-title="Driver Portal" data-desc="Drive & Deliver" onclick="window.location.href='driver.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #e6fdf4; color: #00a66a;">
-            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3" fill="#00a66a"/><circle cx="7" cy="18" r="2" fill="#121212"/><circle cx="17" cy="18" r="2" fill="#121212"/></svg>
+        <!-- Drive: Detailed Steering Wheel + Dashboard Gauge Illustration -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Driver Partner Portal" draggable="true" data-id="Driver" data-title="Driver Portal" data-desc="Drive & Deliver" onclick="window.location.href='driver.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #1e293b, #0f172a);">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="12" fill="none" stroke="#00d084" stroke-width="3.2"/>
+              <circle cx="20" cy="20" r="4" fill="#f8fafc"/>
+              <path d="M9 19h7M24 19h7M20 24v7" stroke="#00d084" stroke-width="2.8" stroke-linecap="round"/>
+              <circle cx="20" cy="20" r="1.6" fill="#121212"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Drive</h3>
@@ -196,32 +226,49 @@
           </div>
         </div>
 
-        <!-- Bills & Pay Superapp Card -->
-        <div class="app-card" tabindex="0" role="button" aria-label="Bills & Pay service" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" onclick="window.location.href='bills.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #eff6ff; color: #3b82f6;">
-            <svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z" fill="#3b82f6"/><path d="M8 7h8M8 11h8M8 15h5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <!-- Bills & Pay: Detailed Receipt + Naira/Card Emblem -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Bills & Pay service" draggable="true" data-id="Bills" data-title="Bills & Pay" data-desc="Utilities & Subscriptions" onclick="window.location.href='bills.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #dbeafe, #bfdbfe);">
+            <svg viewBox="0 0 40 40">
+              <path d="M10 7h20v26l-3.3-2.2-3.3 2.2-3.4-2.2-3.3 2.2L13.3 30.8 10 33V7z" fill="#2563eb"/>
+              <rect x="14" y="12" width="12" height="2.5" rx="1.2" fill="#ffffff"/>
+              <rect x="14" y="17" width="8" height="2.5" rx="1.2" fill="#93c5fd"/>
+              <circle cx="25" cy="24" r="4.5" fill="#00d084"/>
+              <path d="M23.5 24l1.1 1.1 2.2-2.2" stroke="#121212" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            </svg>
           </div>
           <div class="app-info">
-            <h3>Bills & Pay</h3>
-            <p>Utilities & Subs</p>
+            <h3>Bills &amp; Pay</h3>
+            <p>Utilities &amp; Subs</p>
           </div>
         </div>
 
-        <!-- Linked Eats Card to food.html -->
-        <div class="app-card" tabindex="0" role="button" aria-label="Eats service" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" onclick="window.location.href='food.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #fef3c7; color: #d97706;">
-            <svg viewBox="0 0 24 24"><path d="M3 13h18c0-4.97-4.03-9-9-9s-9 4.03-9 9z" fill="#d97706"/><path d="M2 17h20v2H2z" fill="#b45309"/><path d="M10 2v2M14 2v2M6 2v2" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <!-- Eats: Detailed Cloche / Burger & Food Bowl Illustration -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Eats service" draggable="true" data-id="Eats" data-title="Eats" data-desc="Food & Bukka" onclick="window.location.href='food.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #fef3c7, #fde68a);">
+            <svg viewBox="0 0 40 40">
+              <path d="M8 19c0-6.2 5.4-10.5 12-10.5S32 12.8 32 19H8z" fill="#d97706"/>
+              <rect x="7" y="20.5" width="26" height="3.2" rx="1.6" fill="#10b981"/>
+              <rect x="8" y="25" width="24" height="4.5" rx="2.2" fill="#b45309"/>
+              <circle cx="15" cy="14" r="1.2" fill="#fef3c7"/>
+              <circle cx="20" cy="12.5" r="1.2" fill="#fef3c7"/>
+              <circle cx="25" cy="14" r="1.2" fill="#fef3c7"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Eats</h3>
-            <p>Food & Bukka</p>
+            <p>Food &amp; Bukka</p>
           </div>
         </div>
 
-        <!-- Added Directory Superapp Card Linked to directories.html -->
-        <div class="app-card" tabindex="0" role="button" aria-label="Directory Service" draggable="true" data-id="Directories" data-title="Directory" data-desc="Verified Public & Businesses" onclick="window.location.href='directories.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: rgba(0, 208, 132, 0.1); color: #008755;">
-            <svg viewBox="0 0 24 24"><path d="M3 6h6l2 2h10v10H3V6z" fill="#008755"/><path d="M3 8h18v11H3z" fill="#00d084" opacity="0.8"/></svg>
+        <!-- Directory: Verified Map Pin & Storefront Badge -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Directory Service" draggable="true" data-id="Directories" data-title="Directory" data-desc="Verified Public & Businesses" onclick="window.location.href='directories.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #d1fae5, #a7f3d0);">
+            <svg viewBox="0 0 40 40">
+              <path d="M20 6c-6.1 0-11 4.7-11 10.6 0 7.6 11 17.4 11 17.4s11-9.8 11-17.4C31 10.7 26.1 6 20 6z" fill="#059669"/>
+              <circle cx="20" cy="16.5" r="5.5" fill="#ffffff"/>
+              <path d="M17.6 16.5l1.7 1.7 3.3-3.3" stroke="#059669" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Directory</h3>
@@ -229,9 +276,16 @@
           </div>
         </div>
 
-        <div class="app-card" tabindex="0" role="button" aria-label="Haven Real Estate service" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" onclick="window.location.href='haven.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #e0f2fe; color: #0ea5e9;">
-            <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h14v-8h3L12 3z" fill="#0ea5e9"/><path d="M10 20v-6h4v6" fill="#ffffff"/></svg>
+        <!-- Haven: Architectural Modern House with Lit Windows -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Haven Real Estate service" draggable="true" data-id="Haven" data-title="Haven" data-desc="Real Estate" onclick="window.location.href='haven.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #e0f2fe, #bae6fd);">
+            <svg viewBox="0 0 40 40">
+              <path d="M20 7L6 18.5h4V32h20V18.5h4L20 7z" fill="#0284c7"/>
+              <path d="M20 7l14 11.5h-4L20 10.2 10 18.5H6L20 7z" fill="#0369a1"/>
+              <rect x="17" y="22" width="6" height="10" rx="1" fill="#f8fafc"/>
+              <rect x="12.5" y="18" width="4" height="4" rx="0.8" fill="#fef08a"/>
+              <rect x="23.5" y="18" width="4" height="4" rx="0.8" fill="#fef08a"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Haven</h3>
@@ -239,9 +293,15 @@
           </div>
         </div>
 
-        <div class="app-card" tabindex="0" role="button" aria-label="Care Healthcare service" draggable="true" data-id="Care" data-title="Care" data-desc="Healthcare" onclick="window.location.href='care.html'" style="cursor: pointer;">
-          <div class="icon-circle" aria-hidden="true" style="background: #fee2e2; color: #ef4444;">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444"/><path d="M12 7v10M7 12h10" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <!-- Care: Medical Kit & Heartbeat Pulse Illustration -->
+        <div class="app-card" tabindex="0" role="button" aria-label="Care Healthcare service" draggable="true" data-id="Care" data-title="Care" data-desc="Healthcare" onclick="window.location.href='care.html'">
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #fee2e2, #fecaca);">
+            <svg viewBox="0 0 40 40">
+              <rect x="7" y="12" width="26" height="20" rx="5" fill="#dc2626"/>
+              <path d="M15 12V9.5A2.5 2.5 0 0 1 17.5 7h5A2.5 2.5 0 0 1 25 9.5V12" stroke="#991b1b" stroke-width="2.4" fill="none"/>
+              <rect x="18.2" y="16" width="3.6" height="12" rx="1.2" fill="#ffffff"/>
+              <rect x="14" y="20.2" width="12" height="3.6" rx="1.2" fill="#ffffff"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Care</h3>
@@ -249,9 +309,16 @@
           </div>
         </div>
 
+        <!-- Counsel: Classic Balance Scales of Justice Illustration -->
         <div class="app-card" tabindex="0" role="button" aria-label="Counsel Legal Directory service" draggable="true" data-id="Counsel" data-title="Counsel" data-desc="Legal Directory" onclick="openApp('Counsel')">
-          <div class="icon-circle" aria-hidden="true" style="background: #fef3c7; color: #d97706;">
-            <svg viewBox="0 0 24 24"><path d="M12 2v20M4 6h16M7 10h10M5 18h14" stroke="#d97706" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #fef3c7, #fde68a);">
+            <svg viewBox="0 0 40 40">
+              <rect x="18.5" y="8" width="3" height="22" rx="1.5" fill="#92400e"/>
+              <rect x="12" y="30" width="16" height="3" rx="1.5" fill="#78350f"/>
+              <rect x="9" y="11" width="22" height="2.6" rx="1.3" fill="#b45309"/>
+              <path d="M11 13.5l-3.5 7h7l-3.5-7zM29 13.5l-3.5 7h7l-3.5-7z" fill="#d97706"/>
+              <path d="M7.5 20.5a3.5 3.5 0 0 0 7 0h-7zM25.5 20.5a3.5 3.5 0 0 0 7 0h-7z" fill="#78350f"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Counsel</h3>
@@ -259,19 +326,30 @@
           </div>
         </div>
 
+        <!-- Talent: Executive Briefcase with Gold Clasp -->
         <div class="app-card" tabindex="0" role="button" aria-label="Talent Jobs and Hiring service" draggable="true" data-id="Talent" data-title="Talent" data-desc="Jobs & Hiring" onclick="openApp('Talent')">
-          <div class="icon-circle" aria-hidden="true" style="background: #e0e7ff; color: #6366f1;">
-            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" fill="#6366f1"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="#6366f1" stroke-width="2" fill="none"/></svg>
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #e0e7ff, #c7d2fe);">
+            <svg viewBox="0 0 40 40">
+              <path d="M15 12V9.5A2.5 2.5 0 0 1 17.5 7h5A2.5 2.5 0 0 1 25 9.5V12" stroke="#3730a3" stroke-width="2.4" fill="none"/>
+              <rect x="7" y="12" width="26" height="20" rx="4.5" fill="#4f46e5"/>
+              <path d="M7 19h26v3H7z" fill="#3730a3"/>
+              <rect x="17.5" y="18" width="5" height="5" rx="1.2" fill="#fbbf24"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Talent</h3>
-            <p>Jobs & Hiring</p>
+            <p>Jobs &amp; Hiring</p>
           </div>
         </div>
 
+        <!-- Brain AI: Glowing Neural Core / Sparkle Emblem -->
         <div class="app-card" tabindex="0" role="button" aria-label="Brain AI Assistant service" draggable="true" data-id="Brain" data-title="Brain AI" data-desc="AI Assistant" onclick="openApp('Brain')">
-          <div class="icon-circle" aria-hidden="true" style="background: #d1fae5; color: #10b981;">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#10b981"/><path d="M9 10h.01M15 10h.01M9.5 15s1 1.5 2.5 1.5 2.5-1.5 2.5-1.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #121212, #1e293b);">
+            <svg viewBox="0 0 40 40">
+              <path d="M20 7l2.8 8.2L31 18l-8.2 2.8L20 29l-2.8-8.2L9 18l8.2-2.8L20 7z" fill="#00d084"/>
+              <path d="M29 25l1.2 3.3L33.5 29.5l-3.3 1.2L29 34l-1.2-3.3-3.3-1.2 3.3-1.2L29 25z" fill="#6ee7b7"/>
+              <circle cx="11" cy="10" r="1.8" fill="#34d399"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Brain AI</h3>
@@ -279,9 +357,17 @@
           </div>
         </div>
 
+        <!-- Stays: Hotel Suite & Keycard Illustration -->
         <div class="app-card" tabindex="0" role="button" aria-label="Stays Hospitality service" draggable="true" data-id="Stays" data-title="Stays" data-desc="Hospitality" onclick="openApp('Stays')">
-          <div class="icon-circle" aria-hidden="true" style="background: #ffe4e6; color: #f43f5e;">
-            <svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M4 9h16M8 3v6" stroke="#f43f5e" stroke-width="2" fill="none"/></svg>
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #ffe4e6, #fecdd3);">
+            <svg viewBox="0 0 40 40">
+              <rect x="7" y="20" width="26" height="9" rx="2.5" fill="#e11d48"/>
+              <path d="M9 13a3 3 0 0 1 3-3h16a3 3 0 0 1 3 3v7H9v-7z" fill="#fb7185"/>
+              <rect x="11.5" y="14.5" width="7" height="4.5" rx="1.5" fill="#ffffff"/>
+              <rect x="21.5" y="14.5" width="7" height="4.5" rx="1.5" fill="#ffffff"/>
+              <rect x="9" y="29" width="3" height="3.5" rx="1" fill="#881337"/>
+              <rect x="28" y="29" width="3" height="3.5" rx="1" fill="#881337"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Stays</h3>
@@ -289,9 +375,13 @@
           </div>
         </div>
 
+        <!-- Handy: Crossed Wrench & Screwdriver Illustration -->
         <div class="app-card" tabindex="0" role="button" aria-label="Handy Skilled Artisans service" draggable="true" data-id="Handy" data-title="Handy" data-desc="Skilled Artisans" onclick="openApp('Handy')">
-          <div class="icon-circle" aria-hidden="true" style="background: #fef9c3; color: #eab308;">
-            <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="#eab308"/></svg>
+          <div class="icon-circle app-emblem-box" aria-hidden="true" style="background: linear-gradient(145deg, #fef9c3, #fef08a);">
+            <svg viewBox="0 0 40 40">
+              <path d="M26.5 9.5a6.5 6.5 0 0 0-8.4 8.4l-8.6 8.6a2.5 2.5 0 0 0 3.5 3.5l8.6-8.6a6.5 6.5 0 0 0 8.4-8.4l-3.8 3.8-3.5-3.5 3.8-3.8z" fill="#ca8a04"/>
+              <circle cx="11.5" cy="28.5" r="1.2" fill="#fef9c3"/>
+            </svg>
           </div>
           <div class="app-info">
             <h3>Handy</h3>
