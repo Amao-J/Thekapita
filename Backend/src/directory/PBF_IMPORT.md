@@ -105,6 +105,21 @@ python manage.py import_listing_photos --folder photos/                         
 The importer checks every file by its real bytes, resizes it, removes hidden GPS data, stores it in the private bucket, and
 reports any file it could not use. Places that already have a photo are skipped unless you add `--replace`.
 
+To make a review pack of openly licensed Commons candidates for approved listings that still need photos, run this from
+`Backend/src`:
+
+```powershell
+python manage.py collect_commons_photos --city Abuja --category all --limit 100 --output-dir commons-review
+```
+
+The command searches Commons by listing name, downloads up to two candidates per listing into
+`commons-review/<listing-id>/`, and writes `commons-review/manifest.csv` with the Commons page, license, creator, and
+credit information. It accepts CC0, public-domain-mark, CC BY, and CC BY-SA licenses; it excludes non-commercial and
+no-derivatives licenses. Results are suggestions, not verified matches: inspect each image and its Commons page before
+use. This command does not attach images to listings. The current app has no listing-photo attribution field, so do not
+upload these candidates to production until the required attribution can be shown alongside the image. Keep the
+manifest with the review pack.
+
 To see whether OpenStreetMap volunteers already tagged any places with a picture or a Wikimedia Commons file (Commons
 files have clear licences; the plain `image` tag does not, so check the licence before using one), count the tags in your
 snapshot (`--export-json`). Notable buildings (hospitals, universities, ministries) are far more likely to have a Commons
