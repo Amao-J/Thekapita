@@ -1,7 +1,6 @@
-"""Download openly licensed Wikimedia Commons photo candidates for directory listings.
+"""Download openly licensed Wikimedia Commons candidates and prepare an import map.
 
-The results are a review pack, not an automatic listing-photo import. Check each match
-and retain its manifest attribution before using it in the application.
+Review the suggested matches and manifest attribution before importing any image.
 """
 import csv
 import html
@@ -40,6 +39,7 @@ MANIFEST_FIELDS = (
     "credit",
     "attribution_required",
 )
+IMPORT_MAP_FIELDS = ("listing_id", "file")
 
 
 class CommonsError(Exception):
@@ -164,7 +164,8 @@ class Command(BaseCommand):
             raise CommandError(f"{output} is not a folder.")
         output.mkdir(parents=True, exist_ok=True)
         manifest_path = output / "manifest.csv"
-        if manifest_path.exists() or any(output.iterdir()):
+        import_map_path = output / "import-map.csv"
+        if manifest_path.exists() or import_map_path.exists() or any(output.iterdir()):
             raise CommandError(f"{output} must be empty; refusing to overwrite existing files.")
 
         listings = Listing.objects.filter(status=Listing.Status.APPROVED, image_key="")
@@ -177,9 +178,12 @@ class Command(BaseCommand):
             listings = listings[:opts["limit"]]
 
         stats = {"downloaded": 0, "no_match": 0, "failed": 0}
-        with manifest_path.open("w", newline="", encoding="utf-8-sig") as manifest:
+        with manifest_path.open("w", newline="", encoding="utf-8-sig") as manifest, \
+                import_map_path.open("w", newline="", encoding="utf-8-sig") as import_map:
             writer = csv.DictWriter(manifest, fieldnames=MANIFEST_FIELDS)
+            map_writer = csv.DictWriter(import_map, fieldnames=IMPORT_MAP_FIELDS)
             writer.writeheader()
+            map_writer.writeheader()
             for listing in listings.iterator():
                 if stats["downloaded"] or stats["no_match"] or stats["failed"]:
                     time.sleep(opts["delay"])
@@ -235,6 +239,8 @@ class Command(BaseCommand):
                             **metadata,
                         }.items()
                     })
+                    if matched == 0:
+                        map_writer.writerow({"listing_id": listing.id, "file": candidate_file})
                     matched += 1
                     stats["downloaded"] += 1
                 if not eligible:
@@ -243,5 +249,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Downloaded {stats['downloaded']} licensed candidate(s); "
             f"{stats['no_match']} listing(s) had no eligible match; {stats['failed']} candidate(s) failed. "
-            f"Review images and attribution in {manifest_path}."
+            f"Review images and attribution in {manifest_path}; selected candidates are mapped in {import_map_path}."
         ))

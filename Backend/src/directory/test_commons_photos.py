@@ -82,10 +82,26 @@ class CollectCommonsPhotosTests(TestCase):
             self.assertTrue(image_path.is_file())
             with open(Path(temp_dir) / "manifest.csv", newline="", encoding="utf-8-sig") as file:
                 row = next(csv.DictReader(file))
+            with open(Path(temp_dir) / "import-map.csv", newline="", encoding="utf-8-sig") as file:
+                import_row = next(csv.DictReader(file))
             self.assertEqual(row["license"], "CC BY-SA 4.0")
             self.assertEqual(row["artist"], "Example Artist")
             self.assertEqual(row["source_url"], "https://commons.wikimedia.org/wiki/File:Hospital.jpg")
             self.assertEqual(row["attribution_required"], "true")
+            self.assertEqual(import_row, {
+                "listing_id": str(self.listing.id),
+                "file": f"{self.listing.id}/001.jpg",
+            })
+            with patch("directory.storage.put_object") as put_object:
+                call_command(
+                    "import_listing_photos",
+                    folder=temp_dir,
+                    map=Path(temp_dir) / "import-map.csv",
+                    stdout=io.StringIO(),
+                )
+            self.listing.refresh_from_db()
+            self.assertRegex(self.listing.image_key, rf"^directory/listings/{self.listing.id}/[0-9a-f]{{32}}\.jpg$")
+            put_object.assert_called_once()
 
     def test_rejects_non_commons_download_hosts(self):
         from .management.commands.collect_commons_photos import CommonsError, _file_url

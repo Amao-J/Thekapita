@@ -6,7 +6,8 @@
 
 Every photo is checked by its real bytes, shrunk to web size, re-encoded (which drops hidden GPS data) and stored in the
 private bucket. Places that already have a photo are skipped unless you pass --replace. Only load photos you have the right
-to use: ones your own team took, or that the restaurant gave you permission to use. Do not copy photos from other websites."""
+to use, such as ones your own team took, ones the owner supplied, or openly licensed images with their required
+attribution preserved. Do not copy unlicensed photos from other websites."""
 import csv
 import uuid
 from pathlib import Path
