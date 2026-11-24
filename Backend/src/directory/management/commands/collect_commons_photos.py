@@ -52,6 +52,9 @@ def _allowed_url(url, hosts):
 
 
 def _request(url, max_bytes):
+    initial_host = urllib.parse.urlparse(url).hostname
+    if initial_host not in {"commons.wikimedia.org", "upload.wikimedia.org"}:
+        raise CommonsError("Refusing to contact a host outside Wikimedia Commons.")
     req = urllib.request.Request(
         url,
         headers={"User-Agent": USER_AGENT, "Accept": "application/json, image/*"},
@@ -59,8 +62,7 @@ def _request(url, max_bytes):
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
             final_url = response.geturl()
-            hosts = {"commons.wikimedia.org", "upload.wikimedia.org"}
-            if not _allowed_url(final_url, hosts):
+            if not _allowed_url(final_url, {initial_host}):
                 raise CommonsError("Wikimedia redirected to an untrusted host.")
             data = response.read(max_bytes + 1)
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
@@ -71,18 +73,25 @@ def _request(url, max_bytes):
 
 
 def _license_metadata(metadata):
-    license_url = (metadata.get("LicenseUrl") or {}).get("value", "").strip()
+    if not isinstance(metadata, dict):
+        return None
+
+    def value(key):
+        entry = metadata.get(key)
+        return entry.get("value", "") if isinstance(entry, dict) else ""
+
+    license_url = value("LicenseUrl").strip()
     parsed = urllib.parse.urlparse(license_url)
     if parsed.scheme != "https" or parsed.hostname != "creativecommons.org":
         return None
     if not (LICENSE_PATH.fullmatch(parsed.path) or PD_PATH.fullmatch(parsed.path)):
         return None
     return {
-        "license": _plain((metadata.get("LicenseShortName") or {}).get("value", "")),
+        "license": _plain(value("LicenseShortName")),
         "license_url": license_url,
-        "artist": _plain((metadata.get("Artist") or {}).get("value", "")),
-        "credit": _plain((metadata.get("Credit") or {}).get("value", "")),
-        "attribution_required": _plain((metadata.get("AttributionRequired") or {}).get("value", "")),
+        "artist": _plain(value("Artist")),
+        "credit": _plain(value("Credit")),
+        "attribution_required": _plain(value("AttributionRequired")),
     }
 
 
@@ -111,10 +120,12 @@ def _candidate_pages(data):
         payload = json.loads(data.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise CommonsError("Commons returned invalid JSON.") from exc
-    pages = payload.get("query", {}).get("pages", [])
-    if not isinstance(pages, list):
+    if not isinstance(payload, dict) or not isinstance(payload.get("query"), dict):
         raise CommonsError("Commons returned an unexpected search response.")
-    return sorted(pages, key=lambda page: page.get("index", 0))
+    pages = payload["query"].get("pages", [])
+    if not isinstance(pages, list) or not all(isinstance(page, dict) for page in pages):
+        raise CommonsError("Commons returned an unexpected search response.")
+    return sorted(pages, key=lambda page: page.get("index", 0) if isinstance(page.get("index", 0), int) else 0)
 
 
 def _file_url(info):
@@ -122,6 +133,11 @@ def _file_url(info):
     if not _allowed_url(url, {"upload.wikimedia.org"}):
         raise CommonsError("Commons returned a file URL outside upload.wikimedia.org.")
     return url
+
+
+def _csv_safe(value):
+    text = str(value or "")
+    return f"'{text}" if text.startswith(("=", "+", "-", "@")) else text
 
 
 class Command(BaseCommand):
@@ -144,6 +160,8 @@ class Command(BaseCommand):
             raise CommandError("--delay cannot be negative.")
 
         output = Path(opts["output_dir"])
+        if output.exists() and not output.is_dir():
+            raise CommandError(f"{output} is not a folder.")
         output.mkdir(parents=True, exist_ok=True)
         manifest_path = output / "manifest.csv"
         if manifest_path.exists() or any(output.iterdir()):
@@ -174,18 +192,25 @@ class Command(BaseCommand):
                     continue
 
                 matched = 0
+                eligible = 0
                 for page in pages:
                     if matched >= opts["max_results"]:
                         break
-                    info = (page.get("imageinfo") or [{}])[0]
+                    imageinfo = page.get("imageinfo")
+                    if not isinstance(imageinfo, list) or not imageinfo or not isinstance(imageinfo[0], dict):
+                        continue
+                    info = imageinfo[0]
                     metadata = _license_metadata(info.get("extmetadata") or {})
                     if metadata is None:
                         continue
                     source_url = page.get("canonicalurl") or page.get("fullurl") or ""
                     if not _allowed_url(source_url, {"commons.wikimedia.org"}):
                         continue
+                    eligible += 1
                     try:
                         image_url = _file_url(info)
+                        if opts["delay"]:
+                            time.sleep(opts["delay"])
                         image_data = _request(image_url, MAX_IMAGE_BYTES)
                         prepared = photos.prepare_photo(image_data)
                     except (CommonsError, photos.PhotoError) as exc:
@@ -201,22 +226,22 @@ class Command(BaseCommand):
                         raise CommandError(f"Refusing to overwrite {destination}.")
                     destination.write_bytes(prepared)
                     writer.writerow({
-                        "listing_id": listing.id,
-                        "listing_name": _plain(listing.name),
-                        "candidate_file": candidate_file,
-                        "commons_title": _plain(page.get("title", "")),
-                        "source_url": source_url,
-                        **metadata,
+                        key: _csv_safe(value) for key, value in {
+                            "listing_id": listing.id,
+                            "listing_name": _plain(listing.name),
+                            "candidate_file": candidate_file,
+                            "commons_title": _plain(page.get("title", "")),
+                            "source_url": source_url,
+                            **metadata,
+                        }.items()
                     })
                     matched += 1
                     stats["downloaded"] += 1
-                    if opts["delay"] and matched < opts["max_results"]:
-                        time.sleep(opts["delay"])
-                if not matched:
+                if not eligible:
                     stats["no_match"] += 1
 
         self.stdout.write(self.style.SUCCESS(
             f"Downloaded {stats['downloaded']} licensed candidate(s); "
-            f"{stats['no_match']} listing(s) had no eligible match; {stats['failed']} request(s) failed. "
+            f"{stats['no_match']} listing(s) had no eligible match; {stats['failed']} candidate(s) failed. "
             f"Review images and attribution in {manifest_path}."
         ))

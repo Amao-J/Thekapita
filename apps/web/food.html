@@ -550,34 +550,37 @@
     </div>
   </div>
 
-  <!-- MODAL: Dish Selection & Ordering -->
-  <div class="wallet-modal-overlay" id="dishModal" role="dialog" aria-modal="true" aria-labelledby="modalDishTitle">
+  <button type="button" id="floatingCartBtn" onclick="openCartFromMenu()" aria-label="Open your food cart"
+    style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:900;display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:0;border-radius:999px;background:var(--emerald-dark);color:#fff;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;">
+    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;">shopping_basket</span>
+    <span id="floatingCartLabel">Cart</span>
+  </button>
+
+  <!-- MODAL: Cart & Checkout (several dishes from one restaurant, one escrow order) -->
+  <div class="wallet-modal-overlay" id="dishModal" role="dialog" aria-modal="true" aria-labelledby="modalVendorTitle">
     <div class="wallet-modal-card">
       <div class="wallet-modal-header">
         <div>
-          <h3 id="modalVendorTitle">Vendor Menu</h3>
+          <h3 id="modalVendorTitle">Your order</h3>
           <p class="modal-sub">Escrow Protected Checkout</p>
         </div>
-        <button type="button" class="modal-close-btn" onclick="closeModal('dishModal')" aria-label="Close dish checkout modal">
+        <button type="button" class="modal-close-btn" onclick="closeModal('dishModal')" aria-label="Close checkout">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <img src="" id="modalDishImg" alt="Dish Preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px;">
-      <h4 id="modalDishTitle" style="font-size: 17px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Dish Name</h4>
-      <div id="modalDishPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 12px;">₦0.00</div>
+      <div id="cartLines" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:40vh;overflow-y:auto;"></div>
+      <button type="button" id="cartAddMore" style="width:100%;margin-bottom:12px;padding:10px;border:1.5px solid var(--border-color);background:var(--surface-gray);color:var(--text-dark);border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;" onclick="addMoreFromCart()">+ Add more dishes</button>
+
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:4px;"><span>Items</span><span id="cartSubtotal">&#8358;0</span></div>
+      <div id="modalDishPrice" style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 12px;">&#8358;0 + delivery</div>
       <label for="dishAddress" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Delivery address</label>
       <input type="text" id="dishAddress" class="form-control" maxlength="255" placeholder="Where should we deliver?" autocomplete="street-address" style="margin-bottom: 16px;">
 
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: inline-flex; align-items: center; background: var(--surface-gray); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden;">
-          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" aria-label="Decrease quantity" onclick="adjustQty(-1)">-</button>
-          <span id="dishModalQty" style="width: 36px; text-align: center; font-weight: 800; font-size: 14px;" aria-live="polite">1</span>
-          <button type="button" class="add-dish-btn" style="background: transparent; color: var(--text-dark); border-radius: 0;" aria-label="Increase quantity" onclick="adjustQty(1)">+</button>
-        </div>
-
-        <button type="button" class="btn-primary" style="padding: 12px 20px; border-radius: 12px; margin-top: 0;" onclick="confirmOrderCheckout()">
-          Add to Escrow Order
+      <div style="display:flex;gap:8px;">
+        <button type="button" style="padding:12px 16px;border:1.5px solid var(--border-color);background:var(--surface-gray);color:var(--text-dark);border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;" onclick="clearFoodCart()">Clear</button>
+        <button type="button" class="btn-primary w-full" id="cartPlaceOrderBtn" style="flex:1;padding: 12px 20px; border-radius: 12px; margin-top: 0;" onclick="confirmOrderCheckout()">
+          Place Escrow Order
         </button>
       </div>
     </div>
@@ -597,6 +600,9 @@
       </div>
 
       <div class="full-menu-list" id="fullMenuList"></div>
+      <button type="button" class="btn-primary w-full" id="menuViewCartBtn" style="display:none;margin-top:12px;" onclick="openCartFromMenu()">
+        <span id="menuViewCartLabel">View cart</span>
+      </button>
     </div>
   </div>
 

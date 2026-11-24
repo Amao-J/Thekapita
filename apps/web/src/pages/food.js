@@ -3,11 +3,10 @@ import { ApiError, newIdempotencyKey, request } from '../api/client.js';
 import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { buildDirectoryQuery, DIRECTORY_PAGE_SIZE } from '@thekapita/shared/directoryQuery';
 import { currentPosition, locationAlreadyGranted } from '../ui/map.js';
+import * as foodCart from '../state/foodCart.js';
 
 /* Application State */
-let currentDish = null; // { id, slug, name, price, vendor, img } for the dish modal
-let currentModalQty = 1;
-let orderKey = null;    // Idempotency-Key for the order being placed (reused only for network retries)
+let orderKey = null;    // { fingerprint, key }: Idempotency-Key for the cart being placed (reused only for network retries)
 let restaurants = [];   // orderable vendors, from GET /food/restaurants?source=food
 let isOnline = navigator.onLine;
 
@@ -379,12 +378,31 @@ function toggleDropdown() {
   btn.setAttribute('aria-expanded', isExpanded);
 }
 
-/* Interactive Dish Order Modal */
+/* Cart: several dishes from one restaurant, placed as ONE escrow order (see state/foodCart.js). */
+
+/**
+ * Add a dish to the cart. If the cart holds another restaurant's dishes, ask before replacing it
+ * (escrow pays one restaurant per order). Returns true when the dish is now in the cart.
+ */
+function addToCart(restaurant, item, qty = 1) {
+  let result = foodCart.addItem(restaurant, item, qty);
+  if (result.conflict) {
+    const current = foodCart.getCart().vendor;
+    if (!window.confirm(`Your cart has dishes from ${current}. Start a new cart with ${restaurant.name}?`)) return false;
+    result = foodCart.replaceWith(restaurant, item, qty);
+  }
+  if (result.full) {
+    showNotification('Your cart is full. Remove a dish before adding another.', 'error');
+    return false;
+  }
+  return Boolean(result.ok);
+}
 
 /**
  * Two ways in: openDishModal({ id, slug, name, price, vendor, img }) from the live menu, and the
  * old openDishModal(title, price, vendorName, img) used by the static "top picks" cards, which we
  * resolve against the live menu by name so every order still goes through the backend.
+ * Either way the dish goes into the cart and the cart opens.
  */
 async function openDishModal(first, price, vendorName, img) {
   if (typeof first === 'object') return showDish(first);
@@ -401,16 +419,13 @@ async function openDishModal(first, price, vendorName, img) {
 }
 
 async function showDish(dish) {
-  currentDish = dish;
-  currentModalQty = 1;
-  orderKey = null;
+  if (!addToCart({ slug: dish.slug, name: dish.vendor }, dish)) return;
+  await openCart();
+}
 
-  document.getElementById('modalVendorTitle').textContent = dish.vendor;
-  document.getElementById('modalDishTitle').textContent = dish.name;
-  document.getElementById('modalDishImg').src = dish.img || CATEGORY_IMG.buka;
-  document.getElementById('dishModalQty').textContent = currentModalQty;
-  updateDishModalPrice();
-
+async function openCart() {
+  if (foodCart.isEmpty()) return showNotification('Your cart is empty. Add a dish from a menu first.', 'error');
+  renderCart();
   const address = document.getElementById('dishAddress');
   if (address && !address.value) {
     // Prefill from the profile when we can; the customer can still edit it per order.
@@ -420,20 +435,64 @@ async function showDish(dish) {
   openModal('dishModal');
 }
 
-function adjustQty(delta) {
-  currentModalQty = Math.min(50, Math.max(1, currentModalQty + delta));
-  document.getElementById('dishModalQty').textContent = currentModalQty;
-  updateDishModalPrice();
+function openCartFromMenu() {
+  closeModal('fullMenuModal');
+  openCart();
 }
 
-function updateDishModalPrice() {
-  const total = (currentDish?.price || 0) * currentModalQty;
-  document.getElementById('modalDishPrice').textContent = `${naira(total)} + delivery`;
+function addMoreFromCart() {
+  const { slug } = foodCart.getCart();
+  closeModal('dishModal');
+  if (slug) openFullVendorMenu(slug);
 }
+
+function clearFoodCart() {
+  foodCart.clearCart();
+  closeModal('dishModal');
+}
+
+/** Repaint every part of the page that shows the cart: the checkout lines, the totals and the "View cart" buttons. */
+function renderCart() {
+  const cart = foodCart.getCart();
+  const count = foodCart.itemCount();
+  const label = count ? `View cart \u2022 ${count} item${count === 1 ? '' : 's'} \u2022 ${naira(foodCart.subtotal())}` : '';
+
+  const floating = document.getElementById('floatingCartBtn');
+  if (floating) {
+    floating.style.display = count ? 'inline-flex' : 'none'; // not [hidden]: the inline display would override it
+    document.getElementById('floatingCartLabel').textContent = label;
+  }
+  const menuBtn = document.getElementById('menuViewCartBtn');
+  if (menuBtn) {
+    menuBtn.style.display = count ? '' : 'none';
+    document.getElementById('menuViewCartLabel').textContent = label;
+  }
+
+  const lines = document.getElementById('cartLines');
+  if (!lines) return;
+  document.getElementById('modalVendorTitle').textContent = cart.vendor || 'Your order';
+  lines.replaceChildren(...cart.lines.map((line) => el('div', { class: 'cart-line', style: 'display:flex;align-items:center;gap:10px;' },
+    el('div', { style: 'flex:1;min-width:0;' },
+      el('div', { style: 'font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, line.name),
+      el('div', { style: 'font-size:12px;color:var(--text-muted);' }, `${naira(line.price)} each`)),
+    el('div', { style: 'display:inline-flex;align-items:center;background:var(--surface-gray);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;' },
+      el('button', { type: 'button', class: 'add-dish-btn', style: 'background:transparent;color:var(--text-dark);border-radius:0;', 'aria-label': `Remove one ${line.name}`, onclick: () => foodCart.changeQty(line.id, -1) }, line.qty === 1 ? '\u00D7' : '-'),
+      el('span', { style: 'width:32px;text-align:center;font-weight:800;font-size:14px;', 'aria-live': 'polite' }, String(line.qty)),
+      el('button', { type: 'button', class: 'add-dish-btn', style: 'background:transparent;color:var(--text-dark);border-radius:0;', 'aria-label': `Add one more ${line.name}`, onclick: () => foodCart.changeQty(line.id, 1) }, '+')),
+    el('div', { style: 'width:78px;text-align:right;font-weight:800;font-size:13px;' }, naira(line.price * line.qty)),
+  )));
+  document.getElementById('cartSubtotal').textContent = naira(foodCart.subtotal());
+  document.getElementById('modalDishPrice').textContent = `${naira(foodCart.subtotal())} + delivery`;
+}
+
+foodCart.subscribe(() => {
+  renderCart();
+  if (foodCart.isEmpty()) document.getElementById('dishModal')?.classList.remove('active');
+});
 
 async function confirmOrderCheckout() {
-  if (!currentDish || !requireLogin()) return;
-  const btn = document.querySelector('#dishModal .btn-primary');
+  if (foodCart.isEmpty() || !requireLogin()) return;
+  const btn = document.getElementById('cartPlaceOrderBtn');
   const originalText = btn.textContent;
   const address = (document.getElementById('dishAddress')?.value || '').trim();
   if (!address) {
@@ -446,13 +505,17 @@ async function confirmOrderCheckout() {
   btn.disabled = true;
 
   try {
-    orderKey ||= newIdempotencyKey();
+    // The key is tied to the exact cart + address: any change makes it a different order and gets a new key.
+    const body = foodCart.orderPayload(address);
+    const fingerprint = JSON.stringify(body);
+    if (!orderKey || orderKey.fingerprint !== fingerprint) orderKey = { fingerprint, key: newIdempotencyKey() };
     const { order } = await authorizedRequest(ENDPOINTS.food.orders, {
       method: 'POST',
-      headers: { 'Idempotency-Key': orderKey },
-      body: { restaurant: currentDish.slug, items: [{ id: currentDish.id, qty: currentModalQty }], address },
+      headers: { 'Idempotency-Key': orderKey.key },
+      body,
     });
     orderKey = null;
+    foodCart.clearCart(); // also closes the checkout modal
     closeModal('dishModal');
     showNotification(`Order ${order.reference} placed! ${naira(order.total)} is held in escrow until you confirm delivery.`);
     loadActiveOrder();
@@ -740,8 +803,10 @@ async function openFullVendorMenu(slug) {
           type: 'button', class: 'add-dish-btn', 'aria-label': `Add ${item.name}`,
           onclick: () => {
             if (!r.is_open) return showNotification(`${r.name} isn't accepting orders right now.`, 'error');
-            closeModal('fullMenuModal');
-            setTimeout(() => openDishModal({ id: item.id, slug: r.slug, name: item.name, price: item.price, vendor: r.name, img }), 200);
+            // Stay in the menu so several dishes can be added before checkout.
+            if (addToCart({ slug: r.slug, name: r.name }, { id: item.id, name: item.name, price: item.price, img })) {
+              showNotification(`${item.name} added to your cart.`);
+            }
           },
         }, el('span', { class: 'material-symbols-outlined', style: 'font-size: 18px;', 'aria-hidden': 'true' }, 'add')),
       );
@@ -753,6 +818,7 @@ async function openFullVendorMenu(slug) {
 
 /* On Document Ready */
 document.addEventListener('DOMContentLoaded', () => {
+  foodCart.restoreCart();
   fetchRealVendorData();
   loadActiveOrder();
 });
@@ -762,7 +828,7 @@ window.addEventListener('offline', () => { isOnline = false; });
 
 /* The page calls these from inline onclick="..." attributes, so they must be on window now that this is a module. */
 Object.assign(window, {
-  openModal, closeModal, toggleDropdown, adjustQty, confirmOrderCheckout, handleReservationSubmit,
+  openModal, closeModal, toggleDropdown, confirmOrderCheckout, openCartFromMenu, addMoreFromCart, clearFoodCart, handleReservationSubmit,
   openReservationsListModal, handleFilterSearch, switchVendorCategory, filterByCuisine, toggleAiWidget,
   quickAiOrder, handleVendorRegistration, openDishModal, openFullVendorMenu, fetchRealVendorData,
 });
