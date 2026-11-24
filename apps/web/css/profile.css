@@ -1204,3 +1204,62 @@
   gap: 12px;
   justify-content: flex-end;
 }
+
+
+
+/* ==========================================
+   SUPPORT CONVERSATIONS & NEW TICKET
+   ========================================== */
+
+.support-conversations-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.support-conversations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.support-conversations-title {
+  font-family: var(--font-heading, 'Bricolage Grotesque', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--black, #121212);
+}
+
+.support-conversations-header .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.support-conversations-empty {
+  background: var(--surface-gray, #f8f9fa);
+  border: 1px dashed var(--border-color, #cbd5e1);
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted, #475569);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .support-conversations-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .support-conversations-header .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
