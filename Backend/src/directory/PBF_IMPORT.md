@@ -128,6 +128,11 @@ no-derivatives licenses. Results are suggestions, not verified matches: inspect 
 use, and keep the manifest with the review pack. The current app has no listing-photo attribution field, so do not
 upload these candidates to production until the required attribution can be shown alongside the image.
 
+The collector uses a descriptive User-Agent, asks Commons to defer when servers are busy, and retries temporary
+rate-limit/server errors. If a listing still fails, its error includes the HTTP status and a short response body. Wait
+before rerunning and increase `--delay` (for example, `--delay 3`). Each run needs a new, empty output folder; partial
+results are preserved and are not overwritten.
+
 To see whether OpenStreetMap volunteers already tagged any places with a picture or a Wikimedia Commons file (Commons
 files have clear licences; the plain `image` tag does not, so check the licence before using one), count the tags in your
 snapshot (`--export-json`). Notable buildings (hospitals, universities, ministries) are far more likely to have a Commons

@@ -5,8 +5,10 @@ Review the suggested matches and manifest attribution before importing any image
 import csv
 import html
 import json
+import math
 import re
 import time
+from email.utils import parsedate_to_datetime
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -18,9 +20,13 @@ from directory import photos
 from directory.models import Listing
 
 API_URL = "https://commons.wikimedia.org/w/api.php"
-USER_AGENT = "ThekapitaDirectoryPhotoCollector/1.0 (directory photo review)"
+USER_AGENT = "ThekapitaDirectoryPhotoCollector/1.1 (+https://thekapita.com/)"
 MAX_API_BYTES = 5 * 1024 * 1024
 MAX_IMAGE_BYTES = photos.MAX_INPUT_BYTES
+MAX_REQUEST_ATTEMPTS = 4
+MAX_RETRY_DELAY_SECONDS = 120
+RETRYABLE_HTTP_STATUSES = {429, 500, 502, 503, 504}
+RETRYABLE_API_ERRORS = {"maxlag", "ratelimited"}
 LICENSE_PATH = re.compile(
     r"^/licenses/(by|by-sa)/(1\.0|2\.0|2\.5|3\.0|4\.0)/?$", re.IGNORECASE
 )
@@ -45,10 +51,31 @@ IMPORT_MAP_FIELDS = ("listing_id", "file")
 class CommonsError(Exception):
     """A Commons response or image cannot be safely used."""
 
+    def __init__(self, message, retryable=False):
+        super().__init__(message)
+        self.retryable = retryable
+
 
 def _allowed_url(url, hosts):
     parsed = urllib.parse.urlparse(url or "")
     return parsed.scheme == "https" and parsed.hostname in hosts
+
+
+def _retry_delay(headers, attempt):
+    retry_after = headers.get("Retry-After") if headers else None
+    if retry_after:
+        try:
+            delay = float(retry_after)
+            if not math.isfinite(delay):
+                raise ValueError("Retry-After is not finite")
+            return min(max(delay, 0), MAX_RETRY_DELAY_SECONDS)
+        except ValueError:
+            try:
+                delay = parsedate_to_datetime(retry_after).timestamp() - time.time()
+                return min(max(delay, 0), MAX_RETRY_DELAY_SECONDS)
+            except (TypeError, ValueError, OverflowError):
+                pass
+    return min(2 ** attempt, MAX_RETRY_DELAY_SECONDS)
 
 
 def _request(url, max_bytes):
@@ -59,17 +86,35 @@ def _request(url, max_bytes):
         url,
         headers={"User-Agent": USER_AGENT, "Accept": "application/json, image/*"},
     )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            final_url = response.geturl()
-            if not _allowed_url(final_url, {initial_host}):
-                raise CommonsError("Wikimedia redirected to an untrusted host.")
-            data = response.read(max_bytes + 1)
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise CommonsError(f"Could not retrieve a Commons response ({exc.__class__.__name__}).") from exc
-    if len(data) > max_bytes:
-        raise CommonsError("The Commons response exceeds the permitted size.")
-    return data
+    for attempt in range(MAX_REQUEST_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                final_url = response.geturl()
+                if not _allowed_url(final_url, {initial_host}):
+                    raise CommonsError("Wikimedia redirected to an untrusted host.")
+                data = response.read(max_bytes + 1)
+            if len(data) > max_bytes:
+                raise CommonsError("The Commons response exceeds the permitted size.")
+            return data
+        except urllib.error.HTTPError as exc:
+            if exc.code in RETRYABLE_HTTP_STATUSES and attempt + 1 < MAX_REQUEST_ATTEMPTS:
+                time.sleep(_retry_delay(exc.headers, attempt))
+                continue
+            body = exc.read(400).decode("utf-8", errors="replace").strip()
+            detail = f": {body}" if body else ""
+            raise CommonsError(
+                f"Commons returned HTTP {exc.code} {exc.reason}{detail}"
+            ) from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if attempt + 1 < MAX_REQUEST_ATTEMPTS:
+                time.sleep(_retry_delay(None, attempt))
+                continue
+            reason = getattr(exc, "reason", exc)
+            raise CommonsError(
+                f"Could not retrieve a Commons response after {MAX_REQUEST_ATTEMPTS} attempts "
+                f"({reason})."
+            ) from exc
+    raise CommonsError("Could not retrieve a Commons response.")
 
 
 def _license_metadata(metadata):
@@ -104,6 +149,7 @@ def _search_url(name):
         "action": "query",
         "format": "json",
         "formatversion": "2",
+        "maxlag": "5",
         "generator": "search",
         "gsrnamespace": "6",
         "gsrsearch": f'filetype:bitmap "{name}"',
@@ -120,12 +166,32 @@ def _candidate_pages(data):
         payload = json.loads(data.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise CommonsError("Commons returned invalid JSON.") from exc
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if isinstance(error, dict):
+        code = _plain(error.get("code", "unknown"))
+        info = _plain(error.get("info", ""))
+        detail = f": {info}" if info else ""
+        raise CommonsError(
+            f"Commons API error {code}{detail}",
+            retryable=code in RETRYABLE_API_ERRORS,
+        )
     if not isinstance(payload, dict) or not isinstance(payload.get("query"), dict):
         raise CommonsError("Commons returned an unexpected search response.")
     pages = payload["query"].get("pages", [])
     if not isinstance(pages, list) or not all(isinstance(page, dict) for page in pages):
         raise CommonsError("Commons returned an unexpected search response.")
     return sorted(pages, key=lambda page: page.get("index", 0) if isinstance(page.get("index", 0), int) else 0)
+
+
+def _search_pages(name):
+    for attempt in range(MAX_REQUEST_ATTEMPTS):
+        try:
+            return _candidate_pages(_request(_search_url(name), MAX_API_BYTES))
+        except CommonsError as exc:
+            if not exc.retryable or attempt + 1 >= MAX_REQUEST_ATTEMPTS:
+                raise
+            time.sleep(_retry_delay(None, attempt))
+    raise CommonsError("Could not complete the Commons search.")
 
 
 def _file_url(info):
@@ -188,8 +254,7 @@ class Command(BaseCommand):
                 if stats["downloaded"] or stats["no_match"] or stats["failed"]:
                     time.sleep(opts["delay"])
                 try:
-                    search_data = _request(_search_url(listing.name), MAX_API_BYTES)
-                    pages = _candidate_pages(search_data)
+                    pages = _search_pages(listing.name)
                 except CommonsError as exc:
                     stats["failed"] += 1
                     self.stderr.write(f"Listing {listing.id} ({listing.name}): {exc}")

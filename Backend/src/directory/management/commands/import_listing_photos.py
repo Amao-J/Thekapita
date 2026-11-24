@@ -24,11 +24,14 @@ def _collect(folder: Path, map_path):
     if map_path:
         try:
             with open(map_path, newline="", encoding="utf-8-sig") as fh:
-                rows = list(csv.DictReader(fh))
+                reader = csv.DictReader(fh)
+                if not reader.fieldnames or not {"listing_id", "file"} <= set(reader.fieldnames):
+                    raise CommandError("The --map CSV needs a header row with the columns: listing_id,file")
+                rows = list(reader)
         except OSError as exc:
             raise CommandError(f"Could not read {map_path}: {exc}")
-        if not rows or not {"listing_id", "file"} <= set(rows[0]):
-            raise CommandError("The --map CSV needs a header row with the columns: listing_id,file")
+        if not rows:
+            raise CommandError("The --map CSV has no photo rows; there are no downloaded images to import.")
         for row in rows:
             raw_id = (row["listing_id"] or "").strip()
             name = (row["file"] or "").strip()

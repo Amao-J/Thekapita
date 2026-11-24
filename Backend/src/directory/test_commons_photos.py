@@ -2,10 +2,11 @@ import csv
 import io
 import json
 import tempfile
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.test import TestCase
 from PIL import Image
 
@@ -108,3 +109,45 @@ class CollectCommonsPhotosTests(TestCase):
 
         with self.assertRaises(CommonsError):
             _file_url({"thumburl": "https://example.com/image.jpg"})
+
+    def test_http_errors_report_status_and_response_body(self):
+        from .management.commands import collect_commons_photos as collector
+
+        error = urllib.error.HTTPError(
+            collector.API_URL, 403, "Forbidden", {}, io.BytesIO(b"request blocked")
+        )
+        with patch.object(collector.urllib.request, "urlopen", side_effect=error):
+            with self.assertRaisesRegex(collector.CommonsError, "HTTP 403 Forbidden.*request blocked"):
+                collector._request(collector.API_URL, 1024)
+
+    def test_rate_limit_response_retries_after_the_server_delay(self):
+        from .management.commands import collect_commons_photos as collector
+
+        class Response(io.BytesIO):
+            def geturl(self):
+                return collector.API_URL
+
+        limited = urllib.error.HTTPError(
+            collector.API_URL, 429, "Too Many Requests", {"Retry-After": "0"}, io.BytesIO()
+        )
+        with patch.object(collector.urllib.request, "urlopen", side_effect=[limited, Response(b"ok")]), \
+                patch.object(collector.time, "sleep") as sleep:
+            self.assertEqual(collector._request(collector.API_URL, 1024), b"ok")
+        sleep.assert_called_once_with(0.0)
+
+    def test_api_rate_limit_error_is_retryable_and_explained(self):
+        from .management.commands import collect_commons_photos as collector
+
+        with self.assertRaises(collector.CommonsError) as raised:
+            collector._candidate_pages(
+                b'{"error":{"code":"ratelimited","info":"Wait before retrying."}}'
+            )
+        self.assertTrue(raised.exception.retryable)
+        self.assertIn("Wait before retrying", str(raised.exception))
+
+    def test_header_only_import_map_reports_that_no_images_were_downloaded(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            map_path = Path(temp_dir) / "import-map.csv"
+            map_path.write_text("listing_id,file\n", encoding="utf-8")
+            with self.assertRaisesRegex(CommandError, "no photo rows"):
+                call_command("import_listing_photos", folder=temp_dir, map=map_path)
