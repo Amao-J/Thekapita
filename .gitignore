@@ -20,3 +20,5 @@ Thekapita-Weekly-Progress-Report.docx
 *.md
 !apps/mobile/MOBILE-TESTING-AND-STORE-RELEASE.md
 *.patch
+!Backend/src/directory/PBF_IMPORT.md
+Thekapita-updated.zip

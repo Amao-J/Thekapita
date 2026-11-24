@@ -148,3 +148,14 @@ def inspect_uploaded_image(s3_key):
         "content_type": result.get("ContentType", ""),
         "size": result.get("ContentLength", 0),
     }
+
+
+def put_object(s3_key, data: bytes, content_type: str):
+    """Store bytes prepared by the server; browser uploads use the signed-POST flow in uploads.py."""
+    try:
+        _configured_client().put_object(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_key, Body=data, ContentType=content_type,
+        )
+    except (BotoCoreError, ClientError) as exc:
+        logger.exception("Could not store an image.")
+        raise S3ImageStorageError("Could not store the image.") from exc
