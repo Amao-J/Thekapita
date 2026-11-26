@@ -21,6 +21,9 @@ from directory.models import Listing
 
 API_URL = "https://commons.wikimedia.org/w/api.php"
 USER_AGENT = "ThekapitaDirectoryPhotoCollector/1.1 (+https://thekapita.com/)"
+COMMONS_API_HOST = "commons.wikimedia.org"
+COMMONS_IMAGE_HOSTS = {"upload.wikimedia.org", "thumb.wikimedia.org"}
+COMMONS_HOSTS = COMMONS_IMAGE_HOSTS | {COMMONS_API_HOST}
 MAX_API_BYTES = 5 * 1024 * 1024
 MAX_IMAGE_BYTES = photos.MAX_INPUT_BYTES
 MAX_REQUEST_ATTEMPTS = 4
@@ -80,7 +83,7 @@ def _retry_delay(headers, attempt):
 
 def _request(url, max_bytes):
     initial_host = urllib.parse.urlparse(url).hostname
-    if initial_host not in {"commons.wikimedia.org", "upload.wikimedia.org"}:
+    if initial_host not in COMMONS_HOSTS:
         raise CommonsError("Refusing to contact a host outside Wikimedia Commons.")
     req = urllib.request.Request(
         url,
@@ -90,7 +93,10 @@ def _request(url, max_bytes):
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
                 final_url = response.geturl()
-                if not _allowed_url(final_url, {initial_host}):
+                allowed_redirect_hosts = (
+                    {COMMONS_API_HOST} if initial_host == COMMONS_API_HOST else COMMONS_IMAGE_HOSTS
+                )
+                if not _allowed_url(final_url, allowed_redirect_hosts):
                     raise CommonsError("Wikimedia redirected to an untrusted host.")
                 data = response.read(max_bytes + 1)
             if len(data) > max_bytes:
@@ -175,6 +181,8 @@ def _candidate_pages(data):
             f"Commons API error {code}{detail}",
             retryable=code in RETRYABLE_API_ERRORS,
         )
+    if isinstance(payload, dict) and "query" not in payload and payload.get("batchcomplete") is True:
+        return []
     if not isinstance(payload, dict) or not isinstance(payload.get("query"), dict):
         raise CommonsError("Commons returned an unexpected search response.")
     pages = payload["query"].get("pages", [])
@@ -196,8 +204,8 @@ def _search_pages(name):
 
 def _file_url(info):
     url = info.get("thumburl") or info.get("url") or ""
-    if not _allowed_url(url, {"upload.wikimedia.org"}):
-        raise CommonsError("Commons returned a file URL outside upload.wikimedia.org.")
+    if not _allowed_url(url, COMMONS_IMAGE_HOSTS):
+        raise CommonsError("Commons returned a file URL outside Wikimedia's image hosts.")
     return url
 
 

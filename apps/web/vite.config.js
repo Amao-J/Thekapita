@@ -31,6 +31,7 @@ export default defineConfig({
         driver: resolve(__dirname, 'driver.html'),
         driverSignup: resolve(__dirname, 'driver-signup.html'),
         directories: resolve(__dirname, 'directories.html'),
+        haven: resolve(__dirname, 'haven.html'),
       },
     },
   },

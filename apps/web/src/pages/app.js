@@ -134,8 +134,20 @@ function updateHomepageGreeting() {
 }
 
 function openApp(appName) {
-  // Prototype trigger for routing between internal services
-  console.log(`Navigating to theKapita ${appName}...`);
+  const routes = {
+    Ride: 'ride.html',
+    Driver: 'driver.html',
+    Bills: 'bills.html',
+    Eats: 'food.html',
+    Market: 'marketplace.html',
+    Directories: 'directories.html',
+    Haven: 'haven.html',
+    Care: 'care.html',
+  };
+  const destination = routes[appName];
+  if (destination) {
+    window.location.href = destination;
+  }
 }
 
 // Interactive search placeholder effect

@@ -110,6 +110,24 @@ class CollectCommonsPhotosTests(TestCase):
         with self.assertRaises(CommonsError):
             _file_url({"thumburl": "https://example.com/image.jpg"})
 
+    def test_accepts_wikimedia_thumbnail_urls(self):
+        from .management.commands import collect_commons_photos as collector
+
+        url = "https://thumb.wikimedia.org/wikipedia/commons/thumb/example.jpg"
+        self.assertEqual(collector._file_url({"thumburl": url}), url)
+
+        class Response(io.BytesIO):
+            def geturl(self):
+                return url
+
+        with patch.object(collector.urllib.request, "urlopen", return_value=Response(b"jpeg")):
+            self.assertEqual(collector._request(url, 1024), b"jpeg")
+
+    def test_empty_commons_search_response_means_no_results(self):
+        from .management.commands.collect_commons_photos import _candidate_pages
+
+        self.assertEqual(_candidate_pages(b'{"batchcomplete":true}'), [])
+
     def test_http_errors_report_status_and_response_body(self):
         from .management.commands import collect_commons_photos as collector
 

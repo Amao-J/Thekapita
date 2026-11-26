@@ -131,7 +131,8 @@ upload these candidates to production until the required attribution can be show
 The collector uses a descriptive User-Agent, asks Commons to defer when servers are busy, and retries temporary
 rate-limit/server errors. If a listing still fails, its error includes the HTTP status and a short response body. Wait
 before rerunning and increase `--delay` (for example, `--delay 3`). Each run needs a new, empty output folder; partial
-results are preserved and are not overwritten.
+results are preserved and are not overwritten. A Commons search with no matching files is counted as no match; thumbnails
+served from `thumb.wikimedia.org` are accepted as well as originals from `upload.wikimedia.org`.
 
 To see whether OpenStreetMap volunteers already tagged any places with a picture or a Wikimedia Commons file (Commons
 files have clear licences; the plain `image` tag does not, so check the licence before using one), count the tags in your
