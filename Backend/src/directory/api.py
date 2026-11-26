@@ -4,15 +4,16 @@ import re
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.db import IntegrityError
+from django.http import HttpResponseRedirect
 from django.db.models import Avg, Case, Count, ExpressionWrapper, F, FloatField, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
 from ninja import Field, Router, Schema
 from ninja.errors import HttpError
 
 from app.auth import JWTAuth
-from app.throttles import user_throttle
+from app.throttles import anon_throttle, user_throttle
 
-from . import storage, uploads
+from . import google_places, storage, uploads
 from .classify import classify_restaurant
 from .models import Bookmark, Listing, Report, Review
 
@@ -48,6 +49,7 @@ class ListingOut(Schema):
     description: str = ""
     address: str
     image_url: str | None = None
+    image_credit: str | None = None  # shown on the photo when it is Google's ("Photo © Google · by …"): required by Google
     can_upload_image: bool = False
     city: str = ""
     phone: str
@@ -135,6 +137,7 @@ def _listing(l, near=None, can_upload_image=False):
         "id": l.id, "name": l.name, "category": l.category, "category_label": l.get_category_display(),
         "description": l.description, "address": l.address,
         "image_url": l.image_url,
+        "image_credit": l.image_credit,
         "can_upload_image": can_upload_image,
         "city": l.city, "phone": l.phone,
         "hours": l.hours, "services": l.services or [], "tier": l.tier, "is_verified": l.is_verified,
@@ -291,6 +294,36 @@ def delete_listing_image(request, listing_id: int):
     listing.save(update_fields=["image_key", "updated_at"])
     storage.delete_object(previous)
     return {"id": listing.id, "image_key": "", "image_url": None}
+
+
+@router.get("/listings/{listing_id}/google-photo", auth=None, throttle=[anon_throttle("dir_google_photo", "120/m")])
+def listing_google_photo(request, listing_id: int):
+    """Send the browser to Google's own copy of the listing's photo. We never keep the picture (Google's terms), and the
+    API key stays on the server. Public, because an <img> tag cannot send a login token, so it is throttled per address."""
+    key = settings.GOOGLE_PLACES_API_KEY
+    listing = Listing.objects.filter(pk=listing_id, status=Listing.Status.APPROVED, image_key="").exclude(google_photo_name="").first()
+    if not key or listing is None:
+        raise HttpError(404, "No photo.")
+    try:
+        uri = google_places.photo_uri(key, listing.google_photo_name)
+    except google_places.GooglePlacesError as exc:
+        if exc.status not in (400, 404) or not listing.google_place_id:
+            raise HttpError(502, "The photo is unavailable right now.")
+        # Google's photo references expire: ask for a fresh one for the same place and try once more.
+        try:
+            name, author = google_places.refresh_photo(key, listing.google_place_id)
+            uri = google_places.photo_uri(key, name) if name else None
+        except google_places.GooglePlacesError:
+            raise HttpError(502, "The photo is unavailable right now.")
+        if not uri:
+            listing.google_photo_name = listing.google_photo_author = ""
+            listing.save(update_fields=["google_photo_name", "google_photo_author", "updated_at"])
+            raise HttpError(404, "No photo.")
+        listing.google_photo_name, listing.google_photo_author = name, author
+        listing.save(update_fields=["google_photo_name", "google_photo_author", "updated_at"])
+    response = HttpResponseRedirect(uri)
+    response["Cache-Control"] = "public, max-age=300"  # only the redirect is cached, briefly; the picture stays Google's
+    return response
 
 
 # ---- signed-in actions -------------------------------------------------------

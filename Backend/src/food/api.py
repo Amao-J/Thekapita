@@ -52,6 +52,7 @@ class RestaurantOut(Schema):
     tags: list[str]
     description: str = ""
     image_url: str | None = None
+    image_credit: str | None = None  # "Photo © Google · by …" when image_url is a Google photo
     address: str
     phone: str
     hours: str = ""
@@ -231,6 +232,7 @@ def _directory_restaurant(listing, near=None):
         "tags": listing.services or [],
         "description": listing.description,
         "image_url": listing.image_url,
+        "image_credit": listing.image_credit,
         "address": address,
         "phone": listing.phone,
         "hours": listing.hours,

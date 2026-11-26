@@ -113,4 +113,17 @@ describe.skipIf(!jsdom)('food page directory listings', () => {
     expect(genericCard.style.display).toBe('none');
     expect($('#directoryCountTag').textContent).toBe('1 Listings');
   });
+
+  it('labels a Google photo as Google\'s on the picture and in words, and only then', async () => {
+    await boot({
+      0: [
+        listing(1, { name: 'With Google', source: 'directory', is_orderable: false, image_credit: 'Photo \u00A9 Google \u00B7 by Jane' }),
+        listing(2, { name: 'Own photo', source: 'directory', is_orderable: false }),
+      ],
+    });
+    const [google, own] = document.querySelectorAll('#restaurantDirectoryList .directory-restaurant-card');
+    expect(google.querySelector('.photo-credit-tag').textContent).toBe('\u00A9 Google');
+    expect(google.textContent).toContain('Photo \u00A9 Google \u00B7 by Jane');
+    expect(own.querySelector('.photo-credit-tag')).toBeNull();
+  });
 });

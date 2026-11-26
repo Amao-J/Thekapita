@@ -49,6 +49,12 @@ class Listing(models.Model):
     subtype = models.CharField(max_length=10, blank=True, default="", db_index=True)
     source = models.CharField(max_length=8, choices=Source.choices, default=Source.USER, db_index=True)
     source_id = models.CharField(max_length=40, blank=True, default="")
+    # Google Places photo (see google_places.py). Google's terms allow keeping the place id, NOT the picture itself, so only
+    # references are stored here and the picture is fetched from Google each time it is shown.
+    google_place_id = models.CharField(max_length=255, blank=True, default="")
+    google_photo_name = models.CharField(max_length=512, blank=True, default="")
+    google_photo_author = models.CharField(max_length=255, blank=True, default="")
+    google_checked_at = models.DateTimeField(null=True, blank=True)  # last time we asked Google (so reruns skip it)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -69,7 +75,18 @@ class Listing(models.Model):
 
     @property
     def image_url(self) -> str | None:
-        return image_url_for(self.image_key)
+        if self.image_key:
+            return image_url_for(self.image_key)
+        if self.google_photo_name:  # a photo someone uploaded always wins over the Google one
+            return f"{settings.PUBLIC_API_URL}/directory/listings/{self.id}/google-photo"
+        return None
+
+    @property
+    def image_credit(self) -> str | None:
+        """The line that must be shown next to a Google photo; None for every other photo."""
+        if self.image_key or not self.google_photo_name:
+            return None
+        return f"Photo \u00A9 Google \u00B7 by {self.google_photo_author}" if self.google_photo_author else "Photo \u00A9 Google"
 
 
 class Review(models.Model):

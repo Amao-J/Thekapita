@@ -10,6 +10,7 @@ import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { $, closeModal, errorMessage, h, openModal, setText, toast } from '../ui/dom.js';
 import { currentPosition, geocode, hasCoords } from '../ui/map.js';
 import { uploadPhoto } from '../ui/image.js';
+import { photoCreditTag } from '../ui/photoCredit.js';
 import { describeRoute, getRoadRoute } from '../ui/route.js';
 
 const state = {
@@ -130,6 +131,10 @@ function card(l) {
         style: 'width:100%;height:100%;object-fit:cover;border-radius:inherit;',
       })
       : initials(l.name));
+  if (l.image_url && l.image_credit) {
+    logo.style.position = 'relative'; // the "© Google" tag sits on the picture
+    logo.append(photoCreditTag(l.image_credit));
+  }
   return h('article', { class: 'directory-card entity-card' + (l.tier === 'sponsored' ? ' sponsored' : '') },
     h('div', { class: 'entity-header' },
       logo,
@@ -234,8 +239,16 @@ async function openDetail(id) {
     else photo.removeAttribute('src'); // src="" would make some browsers re-request the page itself
     photo.alt = l.image_url ? `${l.name} photo` : '';
     photo.hidden = !l.image_url;
+    // Google photos must say so, in words, right under the picture.
+    let credit = $('modalImageCredit');
+    if (!credit) {
+      credit = h('p', { id: 'modalImageCredit', style: 'margin:6px 0 0;font-size:12px;font-weight:700;color:#475569;' });
+      photo.after(credit);
+    }
+    credit.textContent = l.image_url ? l.image_credit || '' : '';
+    credit.hidden = !(l.image_url && l.image_credit);
     $('modalImageUploadForm').hidden = !l.can_upload_image;
-    $('modalImageRemoveBtn').hidden = !(l.can_upload_image && l.image_url);
+    $('modalImageRemoveBtn').hidden = !(l.can_upload_image && l.image_url && !l.image_credit); // a Google photo is not ours to delete
     $('modalImageInput').value = '';
     $('modalVerifiedBanner').hidden = !l.is_verified; // only listings staff have verified may claim it
     setText('modalAddress', l.address);

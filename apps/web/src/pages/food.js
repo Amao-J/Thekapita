@@ -4,6 +4,7 @@ import { ENDPOINTS } from '@thekapita/shared/endpoints';
 import { buildDirectoryQuery, DIRECTORY_PAGE_SIZE } from '@thekapita/shared/directoryQuery';
 import { currentPosition, locationAlreadyGranted } from '../ui/map.js';
 import * as foodCart from '../state/foodCart.js';
+import { withPhotoCredit } from '../ui/photoCredit.js';
 
 /* Application State */
 let orderKey = null;    // { fingerprint, key }: Idempotency-Key for the cart being placed (reused only for network retries)
@@ -298,13 +299,16 @@ function renderDirectoryCards(listings, error = null) {
       place.hours ? `Hours: ${place.hours}` : '',
       place.phone ? `Phone: ${place.phone}` : '',
       place.services?.length ? place.services.join(' · ') : '',
+      place.image_credit || '',
     ].filter(Boolean);
     container.append(el('article', {
       class: 'restaurant-option-card directory-restaurant-card',
       dataset: { category: type, cuisine: terms, source: 'directory' },
     },
     el('div', { class: 'vendor-card-header' },
-      el('img', { src: place.image_url || NO_PHOTO, alt: place.image_url ? place.name : '', class: 'vendor-thumb-box', loading: 'lazy' }),
+      withPhotoCredit(
+        el('img', { src: place.image_url || NO_PHOTO, alt: place.image_url ? place.name : '', class: 'vendor-thumb-box', loading: 'lazy' }),
+        place.image_url ? place.image_credit : null),
       el('div', { class: 'vendor-info' },
         el('div', { class: 'vendor-title-row' },
           el('h4', {}, place.name),

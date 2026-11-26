@@ -180,6 +180,12 @@ TOMTOM_API_KEY = os.environ.get("TOMTOM_API_KEY", "")
 ROUTING_PROVIDER = os.environ.get("ROUTING_PROVIDER", "tomtom" if TOMTOM_API_KEY else "osrm")
 OSRM_BASE_URL = os.environ.get("OSRM_BASE_URL", "https://router.project-osrm.org")
 
+# Google Places photos for directory listings that have no photo of their own (manage.py fetch_google_photos).
+# Create a key in Google Cloud with ONLY "Places API (New)" enabled and restrict it to your server's IP.
+GOOGLE_PLACES_API_KEY = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+# Public address of this API (".../api"). The apps load Google photos through it, so it must be absolute.
+PUBLIC_API_URL = os.environ.get("PUBLIC_API_URL", f"https://{railway_public_domain}/api" if railway_public_domain else "").rstrip("/")
+
 # Optional: a PUBLIC base URL for stored listing/restaurant/dish photos (e.g. a Cloudflare/CDN domain in front of a
 # public-read bucket). When set, photo URLs are stable and cacheable instead of short-lived signed links. Leave unset to
 # keep the bucket fully private.

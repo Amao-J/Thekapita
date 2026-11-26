@@ -149,3 +149,19 @@ print(f"{len(els)} named places")
 for k in keys: print(f"  {k:20s} {count[k]}")
 PY
 ```
+
+## Google photos (`fetch_google_photos`)
+
+For places that still have no photo, `python manage.py fetch_google_photos --city Abuja --limit 50` asks Google's official
+Places API (New) for the place and its first photo. It does **not** scrape Google pages (not allowed).
+
+Set on the backend service: `GOOGLE_PLACES_API_KEY` (enable only "Places API (New)", restrict the key to your server) and
+`PUBLIC_API_URL` (e.g. `https://<backend>/api`; on Railway it is derived from `RAILWAY_PUBLIC_DOMAIN` if you leave it out).
+
+Google's rules, which the code follows:
+- The picture is **not copied or stored**. Only the place id and a photo reference are saved; the app loads the picture from
+  Google through `/api/directory/listings/{id}/google-photo` (a redirect) every time it is shown.
+- Every Google photo shows a **"© Google" tag** on the picture and "Photo © Google · by <photographer>" beside it
+  (`image_credit` in the API). A photo someone uploads always replaces the Google one, and then carries no Google tag.
+- A place is matched only if its name and map position agree with ours; otherwise it gets no photo rather than a wrong one.
+- Every lookup and every picture view is billed by Google. Use `--limit`, `--dry-run`, and a budget alert in Google Cloud.
