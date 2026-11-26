@@ -99,6 +99,7 @@ function errorMessage(err, fallback) {
 
 async function loadProperties() {
   const grid = document.getElementById("propertyGrid");
+  document.getElementById("propertyCountTag").textContent = "Loading listings...";
   setHtml(grid, `<div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: #64748b;">Loading properties…</div>`);
   try {
     const all = [];
@@ -110,6 +111,7 @@ async function loadProperties() {
     propertiesDataset = all.map(toView);
   } catch (err) {
     propertiesDataset = [];
+    document.getElementById("propertyCountTag").textContent = "Listings unavailable";
     setHtml(grid, `<div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: #64748b;">
       <p>${esc(errorMessage(err, "Could not load properties."))}</p>
       <button class="btn-card-primary" onclick="loadProperties()">Try again</button></div>`);
@@ -303,6 +305,7 @@ async function handleAddProperty(e) {
       function renderProperties(items) {
         const grid = document.getElementById("propertyGrid");
         setHtml(grid, "");
+        document.getElementById("propertyCountTag").textContent = `${items.length} Listings Found`;
 
         if (items.length === 0) {
           setHtml(grid, `
@@ -359,7 +362,6 @@ async function handleAddProperty(e) {
           grid.appendChild(card);
         });
 
-        document.getElementById("propertyCountTag").textContent = `${items.length} Listings Found`;
       }
 
       function filterProperties() {

@@ -272,8 +272,9 @@
         <input id="modalImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
         <button type="submit" class="btn-submit-primary">Upload photo</button>
       </form>
+      <button id="modalImageRemoveBtn" type="button" class="btn-submit-primary" onclick="removeSelectedListingImage()" hidden>Remove photo</button>
 
-      <div class="verified-record-banner">
+      <div id="modalVerifiedBanner" class="verified-record-banner" hidden>
         <span class="material-symbols-outlined">verified</span>
         <span>Verified Institutional Listing • Official Government Record</span>
       </div>
