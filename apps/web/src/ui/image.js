@@ -64,7 +64,7 @@ export async function uploadPhoto(file, { issue, confirm }) {
   try {
     response = await fetch(uploadUrl, { method: 'POST', body: form });
   } catch {
-    throw new ApiError(0, 'Could not reach photo storage. Check your connection and try again.');
+    throw new ApiError(0, 'Could not reach photo storage. Check that the bucket CORS allows this website origin and POST requests.');
   }
   if (!response.ok) throw new ApiError(response.status, 'The photo could not be uploaded. Please try again.');
   return confirm(key);
