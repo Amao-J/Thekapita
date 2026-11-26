@@ -76,4 +76,11 @@ export const ENDPOINTS = Object.freeze({
     mine: '/directory/mine',
     reports: '/directory/reports',
   },
+  haven: {
+    properties: '/haven/properties', // GET (public, live only; ?intent&category&q&city&min_price&max_price&bedrooms) / POST (signed in)
+    property: (id) => `/haven/properties/${id}`, // GET / PATCH / DELETE (owner)
+    mine: '/haven/mine',
+    bookmarks: '/haven/bookmarks',
+    bookmark: (id) => `/haven/properties/${id}/bookmark`, // POST / DELETE
+  },
 });

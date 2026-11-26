@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'marketplace',
     'food',
     'directory',
+    'haven',
  
     
 ]
@@ -188,6 +189,8 @@ LISTING_IMAGE_PUBLIC_BASE_URL = os.environ.get("LISTING_IMAGE_PUBLIC_BASE_URL", 
 # production staff approve them in the admin unless these are set to 1.
 FOOD_AUTO_APPROVE = os.environ.get("FOOD_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
 DIRECTORY_AUTO_APPROVE = os.environ.get("DIRECTORY_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
+# Haven property listings: in production staff approve each one in the admin unless HAVEN_AUTO_APPROVE=1.
+HAVEN_AUTO_APPROVE = os.environ.get("HAVEN_AUTO_APPROVE", "1" if DEBUG else "0") == "1"
 
 # Comma-separated OAuth client IDs accepted as the token audience (web now, iOS/Android later).
 GOOGLE_CLIENT_IDS = [
