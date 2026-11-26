@@ -35,7 +35,7 @@ Show `© OpenStreetMap contributors` wherever imported records are displayed. Op
 
 Directory photos are stored by S3 object key in `Listing.image_key`, not as files on the Django server. The authenticated API creates a short-lived presigned S3 POST policy, the browser uploads directly to the private bucket, and the API stores the issued key after checking the stored object's type and size. Photo URLs are short-lived presigned GET URLs.
 
-Configure the same private S3-compatible credentials used by the app's default storage. The bucket must allow browser POSTs from the deployed site and local Vite origin; a suitable CORS rule is:
+Configure the same private S3-compatible credentials used by the app's default storage. Credentials alone do not enable browser uploads: the bucket itself must allow browser POSTs from each exact web-app origin. This is separate from Django's `CORS_ALLOWED_ORIGINS`. Add the production domain, local Vite origin when needed, and the exact Railway-generated web origin if using one; a suitable bucket CORS rule is:
 
 ```json
 [

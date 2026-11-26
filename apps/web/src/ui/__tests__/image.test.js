@@ -74,7 +74,7 @@ describe('prepareImage / uploadPhoto', () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403 })));
     await expect(image.uploadPhoto(file('a.jpg', 'image/jpeg'), { issue, confirm })).rejects.toMatchObject({ status: 403 });
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
-    await expect(image.uploadPhoto(file('a.jpg', 'image/jpeg'), { issue, confirm })).rejects.toThrow(/Could not reach photo storage/);
+    await expect(image.uploadPhoto(file('a.jpg', 'image/jpeg'), { issue, confirm })).rejects.toThrow(/bucket CORS/);
     expect(confirm).not.toHaveBeenCalled();
   });
 });
