@@ -671,3 +671,126 @@ input:focus-visible,
     height: 112px;
   }
 }
+
+/* ==========================================
+   SLIM TOP PROMO / ADVERT STRIP
+   ========================================== */
+.top-promo-strip {
+  width: 100%;
+  max-width: 680px;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid rgba(0, 208, 132, 0.35);
+  border-radius: 20px;
+  padding: 8px 12px 8px 8px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.top-promo-strip[hidden] {
+  display: none;
+}
+
+.top-promo-strip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.top-promo-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.top-promo-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.top-promo-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-promo-tag {
+  align-self: flex-start;
+  background: rgba(0, 208, 132, 0.16);
+  color: var(--emerald);
+  font-family: var(--font-heading);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.top-promo-copy p {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-promo-copy strong {
+  color: var(--white);
+  font-weight: 700;
+}
+
+.top-promo-cta {
+  background: var(--emerald);
+  color: var(--black);
+  font-family: var(--font-heading);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-promo-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.top-promo-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--white);
+}
+
+@media (max-width: 480px) {
+  .search-hero {
+    margin-top: 16px;
+  }
+
+  .top-promo-cta {
+    display: none;
+  }
+}
