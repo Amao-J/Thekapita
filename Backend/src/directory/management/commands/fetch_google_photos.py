@@ -27,6 +27,7 @@ class Command(BaseCommand):
         parser.add_argument("--limit", type=int, default=50, help="look up at most this many places (default 50, 0 = all)")
         parser.add_argument("--recheck", action="store_true", help="also ask again about places already checked")
         parser.add_argument("--pause", type=float, default=0.2, help="seconds to wait between Google calls")
+        parser.add_argument("--verbose", action="store_true", help="print what Google answered for every place")
         parser.add_argument("--dry-run", action="store_true", help="look up and report, save nothing")
 
     def handle(self, *args, **opts):
@@ -54,6 +55,9 @@ class Command(BaseCommand):
                 if exc.status in (400, 401, 403, 429):  # key problem or quota: every other call would fail too
                     raise CommandError(f"Stopping: {exc}. Check the key, that Places API (New) is enabled, and your quota.")
                 continue
+            if opts["verbose"]:
+                self.stdout.write(f"  {listing.id} {listing.name!r} -> " + (
+                    f"{found['matched_name']!r}, {found['photo_count']} photo(s)" if found else "no confident match"))
             if found is None:
                 stats["no_match"] += 1
             else:

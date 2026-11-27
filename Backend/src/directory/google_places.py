@@ -76,16 +76,23 @@ def _first_photo(place):
 
 
 def find_place(key, name, address, lat, lng):
-    """-> {"place_id", "photo_name", "author"} for the matching place, or None. photo_name is "" if it has no photos."""
+    """-> {"place_id", "photo_name", "author", "matched_name", "photo_count"} for the matching place, or None. photo_name is "" if
+    none of the matching places has photos."""
     body = {"textQuery": f"{name} {address}".strip(), "maxResultCount": 3}
     if lat is not None and lng is not None:
         body["locationBias"] = {"circle": {"center": {"latitude": lat, "longitude": lng}, "radius": 500.0}}
     data = _call("POST", f"{API}/places:searchText", key, body, "places.id,places.displayName,places.location,places.photos")
+    best = None
     for candidate in data.get("places") or []:
-        if candidate.get("id") and _same_place(name, lat, lng, candidate):
-            photo_name, author = _first_photo(candidate)
-            return {"place_id": candidate["id"], "photo_name": photo_name, "author": author}
-    return None
+        if not (candidate.get("id") and _same_place(name, lat, lng, candidate)):
+            continue
+        photo_name, author = _first_photo(candidate)
+        found = {"place_id": candidate["id"], "photo_name": photo_name, "author": author,
+                 "matched_name": (candidate.get("displayName") or {}).get("text", ""), "photo_count": len(candidate.get("photos") or [])}
+        if photo_name:
+            return found  # the first matching place that actually has a photo
+        best = best or found
+    return best
 
 
 def refresh_photo(key, place_id):
