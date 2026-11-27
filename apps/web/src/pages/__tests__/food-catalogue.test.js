@@ -176,6 +176,16 @@ describe.skipIf(!jsdom)('food page catalogue', () => {
     expect(document.querySelector('.restaurant-option-card:not(.directory-restaurant-card) img').getAttribute('src')).toMatch(/unsplash/);
   });
 
+  it('renders uploaded restaurant and directory videos with playback controls', async () => {
+    await boot({
+      vendors: [vendor(1, { video_url: 'https://media.example/vendor.mp4' })],
+      pages: [[place(1, { video_url: 'https://media.example/place.webm' })]],
+    });
+    expect(document.querySelector('.restaurant-option-card:not(.directory-restaurant-card) video').getAttribute('src')).toBe('https://media.example/vendor.mp4');
+    expect(document.querySelector('.directory-restaurant-card video').getAttribute('src')).toBe('https://media.example/place.webm');
+    expect(document.querySelector('.restaurant-option-card:not(.directory-restaurant-card) video').hasAttribute('controls')).toBe(true);
+  });
+
   it('asks for location only when the browser already allows it, then sends it and shows distance', async () => {
     await boot();
     expect(mocks.currentPosition).not.toHaveBeenCalled();           // no surprise permission prompt

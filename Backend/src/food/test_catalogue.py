@@ -59,6 +59,16 @@ class CatalogueTests(TestCase):
         self.assertTrue(all(not r["is_orderable"] and r["slug"].startswith("directory-") and r["id"] < 0 for r in directory))
         self.assertEqual(self.client.get("/api/food/restaurants?source=nope").status_code, 422)
 
+    def test_video_urls_are_exposed_for_food_and_directory_restaurants(self):
+        Restaurant.objects.filter(pk=self.near_vendor.pk).update(video_file="food/restaurants/videos/store.mp4")
+        Listing.objects.filter(name="Mama Buka Spot").update(video_file="directory/listings/videos/shop.webm")
+        with patch("food.api.image_storage.stored_file_url", side_effect=lambda file, request: f"https://media/{file.name}" if file else None):
+            vendors = self.get("?source=food")
+            places = self.get("?source=directory&q=Mama%20Buka%20Spot")
+        by_slug = {row["slug"]: row["video_url"] for row in vendors}
+        self.assertEqual(by_slug["near-buka"], "https://media/food/restaurants/videos/store.mp4")
+        self.assertEqual(places[0]["video_url"], "https://media/directory/listings/videos/shop.webm")
+
     def test_all_lists_orderable_first_then_paginates_straight_on_into_the_directory(self):
         pages = [self.get(f"?limit=100&offset={o}") for o in (0, 100, 200, 300)]
         ids = [r["slug"] for page in pages for r in page]

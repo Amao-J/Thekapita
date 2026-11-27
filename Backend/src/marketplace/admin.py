@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
+from directory.admin_upload import (
+    MediaUploadForm, delete_replaced_video, saved_video_name, video_preview,
+)
+
 from . import services
 from .models import Category, Order, OrderItem, Product, ProductImage, Seller
 
@@ -19,20 +23,35 @@ class SellerAdmin(admin.ModelAdmin):
     autocomplete_fields = ()
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
-    prepopulated_fields = {}
-
-
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
+    form = MediaUploadForm
     extra = 1
-    readonly_fields = ("preview",)
+    readonly_fields = ("preview", "video_preview")
 
     @admin.display(description="Preview")
     def preview(self, obj):
         return _thumb(obj.image_key) if obj.pk else "-"
+
+    @admin.display(description="Current video")
+    def video_preview(self, obj):
+        return video_preview(obj)
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    prepopulated_fields = {}
+    form = MediaUploadForm
+    readonly_fields = ("video_preview",)
+
+    @admin.display(description="Current video")
+    def video_preview(self, obj):
+        return video_preview(obj)
+
+    def save_model(self, request, obj, form, change):
+        previous_video = saved_video_name(obj)
+        super().save_model(request, obj, form, change)
+        delete_replaced_video(obj, previous_video)
 
 
 @admin.register(Product)
@@ -41,13 +60,35 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ("category", "is_active", "in_stock", "featured", "seller")
     search_fields = ("name", "sku", "tags")
     list_editable = ("price", "stock", "is_active", "featured")
-    readonly_fields = ("slug", "sku", "thumb")
+    form = MediaUploadForm
+    readonly_fields = ("slug", "sku", "thumb", "video_preview")
     inlines = [ProductImageInline]
 
     @admin.display(description="Image")
     def thumb(self, obj):
         return _thumb(obj.image_key)
 
+    @admin.display(description="Current video")
+    def video_preview(self, obj):
+        return video_preview(obj)
+
+    def save_model(self, request, obj, form, change):
+        previous_video = saved_video_name(obj)
+        super().save_model(request, obj, form, change)
+        delete_replaced_video(obj, previous_video)
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is ProductImage:
+            previous_videos = {
+                item_form.instance.pk: saved_video_name(item_form.instance)
+                for item_form in formset.forms if item_form.instance.pk
+            }
+            super().save_formset(request, form, formset, change)
+            for item_form in formset.forms:
+                if item_form.instance.pk:
+                    delete_replaced_video(item_form.instance, previous_videos.get(item_form.instance.pk, ""))
+            return
+        super().save_formset(request, form, formset, change)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem

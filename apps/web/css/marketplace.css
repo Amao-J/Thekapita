@@ -453,6 +453,18 @@ html body .wallet-container {
   overflow: hidden;
 }
 
+.product-video-tag {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .product-img-wrapper img {
   width: 100%;
   height: 100%;

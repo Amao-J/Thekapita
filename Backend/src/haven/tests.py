@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase, override_settings
+from unittest.mock import patch
 
 from app.auth import issue_token_pair
 
@@ -102,3 +103,22 @@ class HavenApiTests(TestCase):
         self.client.get(f"/api/haven/properties/{p.id}", **self.o)
         p.refresh_from_db()
         self.assertEqual(p.views, 1)
+
+
+
+class PropertyMediaApiTests(TestCase):
+    def test_uploaded_media_urls_are_in_property_api_responses(self):
+        user = User.objects.create_user("media-owner", "media@example.com", "pw-12345")
+        property = Property.objects.create(
+            owner=user, title="Video flat", intent="rent", price=1000000, address="1 Rd",
+            city="Yaba", status=Property.Status.APPROVED,
+        )
+        Property.objects.filter(pk=property.pk).update(
+            image_file="haven/properties/images/home.jpg",
+            video_file="haven/properties/videos/tour.mp4",
+        )
+        with patch("haven.api.stored_file_url", side_effect=lambda file, request: f"https://media/{file.name}" if file else None):
+            response = self.client.get(f"/api/haven/properties/{property.id}")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["image_url"], "https://media/haven/properties/images/home.jpg")
+        self.assertEqual(response.json()["video_url"], "https://media/haven/properties/videos/tour.mp4")

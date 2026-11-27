@@ -11,6 +11,7 @@ from .models import Listing
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 32
 Form = modelform_factory(Listing, form=PhotoUploadForm, fields=["name"])
+VideoForm = modelform_factory(Listing, form=PhotoUploadForm, fields=["name", "video_file"])
 
 
 def request():
@@ -22,6 +23,10 @@ def request():
 
 def bound(photo=None, **data):
     return Form(data={"name": "x", **data}, files={"photo": photo} if photo else {})
+
+
+def bound_video(video):
+    return VideoForm(data={"name": "x"}, files={"video_file": video})
 
 
 class AdminPhotoUpload(TestCase):
@@ -83,3 +88,19 @@ class AdminPhotoUpload(TestCase):
         with patch.object(storage, "put_object") as put:
             save_uploaded_photo(request(), self.listing, form, "directory/listings/1")
         put.assert_not_called()
+
+    def test_video_upload_checks_content_and_renames_to_a_supported_extension(self):
+        mp4 = b"\x00\x00\x00\x18ftypisom" + b"\x00" * 24
+        form = bound_video(SimpleUploadedFile("clip.txt", mp4, "text/plain"))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["video_file"].detected_type, "video/mp4")
+        self.assertRegex(form.cleaned_data["video_file"].name, r"^[0-9a-f]{32}\.mp4$")
+
+    def test_video_upload_rejects_non_video_bytes_and_files_over_limit(self):
+        invalid = bound_video(SimpleUploadedFile("clip.mp4", b"not a video", "video/mp4"))
+        self.assertFalse(invalid.is_valid())
+        self.assertIn("video_file", invalid.errors)
+        with patch("directory.admin_upload.MAX_VIDEO_BYTES", 10):
+            oversized = bound_video(SimpleUploadedFile("clip.mp4", b"\x00\x00\x00\x18ftypisom", "video/mp4"))
+            self.assertFalse(oversized.is_valid())
+            self.assertIn("video_file", oversized.errors)

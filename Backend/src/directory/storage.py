@@ -132,6 +132,15 @@ def image_url_for(s3_key):
         return None
 
 
+def stored_file_url(field_file, request=None):
+    if not field_file:
+        return None
+    url = field_file.url
+    if request is not None and not url.startswith(("http://", "https://")):
+        return request.build_absolute_uri(url)
+    return url
+
+
 def inspect_uploaded_image(s3_key):
     try:
         result = _configured_client().head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=s3_key)

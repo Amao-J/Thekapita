@@ -239,6 +239,19 @@ async function openDetail(id) {
     else photo.removeAttribute('src'); // src="" would make some browsers re-request the page itself
     photo.alt = l.image_url ? `${l.name} photo` : '';
     photo.hidden = !l.image_url;
+    let video = $('modalVideo');
+    if (!video) {
+      video = h('video', { id: 'modalVideo', controls: '', playsinline: '', preload: 'metadata', class: 'detail-modal-image' });
+      photo.after(video);
+    }
+    if (l.video_url) {
+      video.src = l.video_url;
+      video.hidden = false;
+    } else {
+      video.pause();
+      video.removeAttribute('src');
+      video.hidden = true;
+    }
     // Google photos must say so, in words, right under the picture.
     let credit = $('modalImageCredit');
     if (!credit) {

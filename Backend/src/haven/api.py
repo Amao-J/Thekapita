@@ -15,6 +15,7 @@ from ninja.errors import HttpError
 from ninja.throttling import UserRateThrottle
 
 from app.auth import JWTAuth
+from directory.storage import stored_file_url
 
 from .models import Property, PropertyBookmark
 
@@ -39,6 +40,7 @@ class PropertyOut(Schema):
     parking: int
     area_sqm: int | None = None
     image_url: str
+    video_url: str | None = None
     title_doc: str
     title_doc_label: str
     title_verified: bool
@@ -99,7 +101,7 @@ def _user(request):
     return JWTAuth().authenticate(request, header[7:])
 
 
-def _out(p: Property, user=None, bookmarked_ids=frozenset()):
+def _out(p: Property, user=None, bookmarked_ids=frozenset(), request=None):
     return {
         "id": p.id, "title": p.title, "description": p.description,
         "category": p.category, "category_label": p.get_category_display(),
@@ -107,7 +109,8 @@ def _out(p: Property, user=None, bookmarked_ids=frozenset()):
         "price": float(p.price), "price_period": p.price_period, "negotiable": p.negotiable,
         "address": p.address, "city": p.city,
         "bedrooms": p.bedrooms, "bathrooms": p.bathrooms, "parking": p.parking, "area_sqm": p.area_sqm,
-        "image_url": p.image_url,
+        "image_url": stored_file_url(p.image_file, request) or p.image_url,
+        "video_url": stored_file_url(p.video_file, request),
         "title_doc": p.title_doc, "title_doc_label": p.get_title_doc_display(),
         "title_verified": p.title_verified, "agent_verified": p.agent_verified,
         "featured": p.featured, "status": p.status, "status_label": p.get_status_display(),
@@ -160,7 +163,7 @@ def list_properties(request, intent: str | None = None, category: str | None = N
     limit, offset = max(1, min(limit, 100)), max(offset, 0)
     user = _user(request)
     marked = _bookmarked_ids(user)
-    return [_out(p, user, marked) for p in qs[offset: offset + limit]]
+    return [_out(p, user, marked, request) for p in qs[offset: offset + limit]]
 
 
 @router.get("/properties/{property_id}", response=PropertyOut)
@@ -174,7 +177,7 @@ def get_property(request, property_id: int):
         raise HttpError(404, "Property not found.")
     if p.status == Property.Status.APPROVED and not (user and p.owner_id == user.id):
         Property.objects.filter(pk=p.pk).update(views=F("views") + 1)
-    return _out(p, user, _bookmarked_ids(user))
+    return _out(p, user, _bookmarked_ids(user), request)
 
 
 # ---- owner / agent -----------------------------------------------------------
@@ -184,7 +187,7 @@ def my_properties(request):
     """Every property the caller listed, including pending and rejected ones."""
     marked = _bookmarked_ids(request.auth)
     qs = Property.objects.filter(owner=request.auth).exclude(status=Property.Status.ARCHIVED)
-    return [_out(p, request.auth, marked) for p in qs.order_by("-created_at")]
+    return [_out(p, request.auth, marked, request) for p in qs.order_by("-created_at")]
 
 
 @router.post("/properties", response={201: PropertyOut}, auth=JWTAuth(), throttle=[UserRateThrottle("30/h")])
@@ -193,7 +196,7 @@ def create_property(request, payload: PropertyIn):
     data = payload.dict()
     _check_choices(data)
     p = Property.objects.create(owner=request.auth, status=_initial_status(), **data)
-    return 201, _out(p, request.auth)
+    return 201, _out(p, request.auth, request=request)
 
 
 @router.patch("/properties/{property_id}", response=PropertyOut, auth=JWTAuth())
@@ -208,7 +211,7 @@ def update_property(request, property_id: int, payload: PropertyPatch):
     if "title_doc" in changes:
         p.title_verified = False  # a different document needs a fresh audit
     p.save()
-    return _out(p, request.auth, _bookmarked_ids(request.auth))
+    return _out(p, request.auth, _bookmarked_ids(request.auth), request)
 
 
 @router.delete("/properties/{property_id}", response={204: None}, auth=JWTAuth())
@@ -226,7 +229,7 @@ def archive_property(request, property_id: int):
 def my_bookmarks(request):
     qs = Property.objects.filter(bookmarks__user=request.auth, status=Property.Status.APPROVED)
     marked = _bookmarked_ids(request.auth)
-    return [_out(p, request.auth, marked) for p in qs.order_by("-bookmarks__created_at")]
+    return [_out(p, request.auth, marked, request) for p in qs.order_by("-bookmarks__created_at")]
 
 
 @router.post("/properties/{property_id}/bookmark", auth=JWTAuth())

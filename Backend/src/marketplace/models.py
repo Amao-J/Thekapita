@@ -44,6 +44,7 @@ class Category(TimeStampedModel):
         upload_to="marketplace/categories/", blank=True, null=True,
         validators=[FileExtensionValidator(["svg", "png", "jpg", "jpeg", "webp"])],
     )
+    video_file = models.FileField(upload_to="marketplace/categories/videos/", blank=True)
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -76,6 +77,7 @@ class Product(TimeStampedModel):
     compare_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Pre-discount price (strikethrough).")
     stock = models.PositiveIntegerField(default=0, help_text="Decremented at checkout, restored on cancellation.")
     image_key = models.ImageField(upload_to="marketplace/products/%Y/%m/", blank=True, null=True)
+    video_file = models.FileField(upload_to="marketplace/products/videos/", blank=True)
     tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated.")
     in_stock = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True, help_text="Unpublish without deleting.")
@@ -106,6 +108,7 @@ class Product(TimeStampedModel):
 class ProductImage(TimeStampedModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="gallery_images")
     image_key = models.ImageField(upload_to="marketplace/products/gallery/%Y/%m/")
+    video_file = models.FileField(upload_to="marketplace/products/gallery/videos/", blank=True)
     alt_text = models.CharField(max_length=255, blank=True)
     order = models.PositiveSmallIntegerField(default=0)
 

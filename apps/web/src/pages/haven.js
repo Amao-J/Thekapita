@@ -14,6 +14,7 @@ function closeModal(id) {
   document.getElementById(id).classList.remove("active");
   if (id === 'detailModal') {
     stopAutoRotate();
+    document.getElementById("modalPropVideo")?.pause();
   }
 }
 
@@ -82,6 +83,7 @@ function toView(p) {
     agentVerified: p.agent_verified,
     featured: p.featured,
     img: p.image_url || FALLBACK_IMG,
+    videoUrl: p.video_url,
     bookmarked: p.bookmarked,
     vendorOwned: p.is_mine,
     status: p.status,
@@ -327,7 +329,9 @@ async function handleAddProperty(e) {
               <span class="material-symbols-outlined" style="font-size: 18px;">bookmark</span>
             </button>
             <div class="property-img-wrapper" onclick="openDetailModal(${item.id})">
-              <img src="${esc(item.img)}" class="property-img" alt="${esc(item.title)}">
+              ${item.videoUrl
+                ? `<video src="${esc(item.videoUrl)}" class="property-img" controls playsinline preload="metadata" onclick="event.stopPropagation()" aria-label="${esc(item.title)} video"></video>`
+                : `<img src="${esc(item.img)}" class="property-img" alt="${esc(item.title)}">`}
               <div class="virtual-tour-pill">
                 <span class="material-symbols-outlined" style="font-size: 14px;">360</span>
                 <span>360° Tour</span>
@@ -475,6 +479,15 @@ async function handleAddProperty(e) {
         document.getElementById("modalPropLocation").textContent = item.location;
         document.getElementById("modalPropPrice").textContent = item.price;
         document.getElementById("modalPropImg").src = item.img;
+        const video = document.getElementById("modalPropVideo");
+        video.pause();
+        if (item.videoUrl) {
+          video.src = item.videoUrl;
+          video.hidden = false;
+        } else {
+          video.removeAttribute("src");
+          video.hidden = true;
+        }
         document.getElementById("modalPropDescription").textContent = item.desc;
         document.getElementById("modalPropTitleBadge").textContent = item.titleDoc;
 

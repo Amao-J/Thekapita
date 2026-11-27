@@ -137,6 +137,7 @@ function renderProductCards(products) {
     <article class="product-card" data-category="${esc(p.category)}" data-price="${p.price}" data-verified="${p.is_verified ? 'true' : 'false'}" data-in-stock="${p.stock > 0 ? 'true' : 'false'}">
       <div class="product-img-wrapper">
         ${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy">` : ''}
+        ${p.video_url ? '<span class="product-video-tag">Video</span>' : ''}
         <button class="product-fav-btn ${wishlist.has(String(p.id)) ? 'active' : ''}" data-wishlist-id="${esc(p.id)}" onclick="toggleWishlist(this)" aria-label="Toggle ${esc(p.title)} in wishlist"><span class="material-symbols-outlined">favorite</span></button>
         ${p.is_verified ? `<div class="seller-badge-tag"><span class="material-symbols-outlined" style="font-size: 11px;">verified</span> ${esc(p.seller_name)}</div>` : ''}
       </div>
@@ -559,6 +560,8 @@ function renderProductDetail() {
       <div class="pdp-gallery-card">
         <div class="pdp-main-img-wrapper">
           ${product.image_url ? `<img id="pdpMainImage" src="${esc(product.image_url)}" alt="${esc(product.title)}">` : '<div class="pdp-main-img-placeholder"></div>'}
+          ${product.video_url ? `<video src="${esc(product.video_url)}" controls playsinline preload="metadata" aria-label="${esc(product.title)} video" style="width:100%;max-height:420px;object-fit:contain;background:#111;"></video>` : ''}
+          ${(product.gallery_videos || []).map((url, index) => `<video src="${esc(url)}" controls playsinline preload="metadata" aria-label="${esc(product.title)} video ${index + 1}" style="width:100%;max-height:420px;object-fit:contain;background:#111;"></video>`).join('')}
           <button type="button" class="pdp-fav-btn ${wishlist.has(String(product.id)) ? 'active' : ''}" data-wishlist-id="${esc(product.id)}" onclick="toggleWishlist(this)" aria-label="Toggle wishlist">
             <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
           </button>

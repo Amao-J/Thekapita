@@ -18,6 +18,7 @@ class Restaurant(models.Model):
     description = models.CharField(max_length=300, blank=True)
     image_url = models.URLField(max_length=500, blank=True)   # legacy: a link to a picture hosted elsewhere
     image_key = models.CharField(max_length=512, blank=True, default="")  # preferred: a photo uploaded to our storage
+    video_file = models.FileField(upload_to="food/restaurants/videos/", blank=True)
     # Where the store is. Lets customers see distance, lets us estimate delivery time by road, and rank by nearest.
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -46,6 +47,7 @@ class MenuItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(1)])
     image_url = models.URLField(max_length=500, blank=True)
     image_key = models.CharField(max_length=512, blank=True, default="")
+    video_file = models.FileField(upload_to="food/menu/videos/", blank=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -6,6 +6,7 @@ from ninja.throttling import AnonRateThrottle
 
 from app.auth import JWTAuth
 from app.idempotency import IdempotencyConflict, get_or_create_idempotent_response
+from directory.storage import stored_file_url
 
 from . import services
 from .media import PUBLIC_PREFIXES, generate_presigned_url, signed_url
@@ -26,7 +27,9 @@ class ProductOut(Schema):
     category: str            # category slug, what the page filters on
     category_label: str
     image_url: str | None = None
+    video_url: str | None = None
     gallery: list[str] = []
+    gallery_videos: list[str] = []
     seller_name: str
     is_verified: bool
     in_stock: bool
@@ -40,6 +43,7 @@ class CategoryOut(Schema):
     slug: str
     name: str
     image_url: str | None = None
+    video_url: str | None = None
 
 
 class OrderItemIn(Schema):
@@ -83,7 +87,12 @@ def _product(p, request, with_gallery=False):
         "price": float(p.price), "compare_price": float(p.compare_price) if p.compare_price else None,
         "category": p.category.slug, "category_label": p.category.name,
         "image_url": signed_url(p.image_key, request),
+        "video_url": stored_file_url(p.video_file, request),
         "gallery": [signed_url(g.image_key, request) for g in p.gallery_images.all()] if with_gallery else [],
+        "gallery_videos": [
+            url for g in p.gallery_images.all()
+            if (url := stored_file_url(g.video_file, request))
+        ] if with_gallery else [],
         "seller_name": p.seller.store_name, "is_verified": p.seller.is_verified,
         "in_stock": p.stock > 0, "stock": p.stock, "badge": p.badge,
     }
@@ -129,7 +138,10 @@ def get_product(request, product_id: int):
 
 @router.get("/categories", response=list[CategoryOut])
 def list_categories(request):
-    return [{"slug": c.slug, "name": c.name, "image_url": c.image_url} for c in Category.objects.all()]
+    return [{
+        "slug": c.slug, "name": c.name, "image_url": c.image_url,
+        "video_url": stored_file_url(c.video_file, request),
+    } for c in Category.objects.all()]
 
 
 @router.get("/presign", throttle=[AnonRateThrottle("60/m")])

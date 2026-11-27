@@ -31,6 +31,7 @@ class Listing(models.Model):
     description = models.CharField(max_length=400, blank=True)
     address = models.CharField(max_length=255)
     image_key = models.CharField(max_length=512, blank=True, default="")
+    video_file = models.FileField(upload_to="directory/listings/videos/", blank=True)
     city = models.CharField(max_length=80, blank=True)
     phone = models.CharField(max_length=30)
     hours = models.CharField(max_length=120, blank=True)

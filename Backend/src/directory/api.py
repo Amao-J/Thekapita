@@ -49,6 +49,7 @@ class ListingOut(Schema):
     description: str = ""
     address: str
     image_url: str | None = None
+    video_url: str | None = None
     image_credit: str | None = None  # shown on the photo when it is Google's ("Photo © Google · by …"): required by Google
     can_upload_image: bool = False
     city: str = ""
@@ -128,7 +129,7 @@ def _haversine_km(lat1, lng1, lat2, lng2):
     return 6371.0 * 2 * math.asin(math.sqrt(a))
 
 
-def _listing(l, near=None, can_upload_image=False):
+def _listing(l, near=None, can_upload_image=False, request=None):
     dist = None
     if near and l.latitude is not None and l.longitude is not None:
         dist = round(_haversine_km(near[0], near[1], l.latitude, l.longitude), 2)
@@ -137,6 +138,7 @@ def _listing(l, near=None, can_upload_image=False):
         "id": l.id, "name": l.name, "category": l.category, "category_label": l.get_category_display(),
         "description": l.description, "address": l.address,
         "image_url": l.image_url,
+        "video_url": storage.stored_file_url(l.video_file, request),
         "image_credit": l.image_credit,
         "can_upload_image": can_upload_image,
         "city": l.city, "phone": l.phone,
@@ -208,7 +210,7 @@ def list_listings(request, category: str | None = None, q: str | None = None,
         qs = qs.filter(Q(name__icontains=n) | Q(description__icontains=n) | Q(address__icontains=n))
     limit, offset = max(1, min(limit, 100)), max(offset, 0)
     near = _near(lat, lng)
-    return [_listing(l, near) for l in _ranked(qs, near, limit, offset)]
+    return [_listing(l, near, request=request) for l in _ranked(qs, near, limit, offset)]
 
 
 @router.get("/search", response=SearchOut)
@@ -223,7 +225,7 @@ def search(request, q: str, lat: float | None = None, lng: float | None = None):
             cond |= Q(name__icontains=w) | Q(description__icontains=w) | Q(address__icontains=w)
         qs = qs.filter(cond)
     near = _near(lat, lng)
-    return {"intent": intent, "results": [_listing(l, near) for l in _ranked(qs, near, 60, 0)]}
+    return {"intent": intent, "results": [_listing(l, near, request=request) for l in _ranked(qs, near, 60, 0)]}
 
 
 @router.get("/listings/{listing_id}", response=ListingDetailOut, auth=OptionalJWTAuth())
@@ -240,7 +242,7 @@ def get_listing(request, listing_id: int):
     can_upload_image = bool(
         user and user.is_authenticated and (user.is_staff or l.owner_id == user.id)
     )
-    return {**_listing(l, can_upload_image=can_upload_image), "reviews": reviews}
+    return {**_listing(l, can_upload_image=can_upload_image, request=request), "reviews": reviews}
 
 
 class ListingImageUploadIn(Schema):
@@ -344,7 +346,7 @@ def create_listing(request, payload: ListingIn):
         latitude=payload.latitude, longitude=payload.longitude,
         status=Listing.Status.APPROVED if settings.DIRECTORY_AUTO_APPROVE else Listing.Status.PENDING,
     )
-    return 201, {**_listing(l), "status": l.status, "status_label": l.get_status_display(), "bookmark_count": 0}
+    return 201, {**_listing(l, request=request), "status": l.status, "status_label": l.get_status_display(), "bookmark_count": 0}
 
 
 @router.get("/mine", response=list[MyListingOut], auth=JWTAuth())
@@ -353,7 +355,7 @@ def my_listings(request):
           .annotate(avg_rating=Avg("reviews__rating"), n_reviews=Count("reviews", distinct=True),
                     n_bookmarks=Count("bookmarks", distinct=True)))
     return [
-        {**_listing(l), "status": l.status, "status_label": l.get_status_display(), "bookmark_count": l.n_bookmarks}
+        {**_listing(l, request=request), "status": l.status, "status_label": l.get_status_display(), "bookmark_count": l.n_bookmarks}
         for l in qs
     ]
 
@@ -376,7 +378,7 @@ def post_review(request, listing_id: int, payload: ReviewIn):
 @router.get("/bookmarks", response=list[ListingOut], auth=JWTAuth())
 def my_bookmarks(request):
     ids = Bookmark.objects.filter(user=request.auth).values_list("listing_id", flat=True)
-    return [_listing(l) for l in _approved().filter(pk__in=list(ids))]
+    return [_listing(l, request=request) for l in _approved().filter(pk__in=list(ids))]
 
 
 @router.post("/listings/{listing_id}/bookmark", auth=JWTAuth())

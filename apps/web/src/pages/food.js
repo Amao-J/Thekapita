@@ -232,7 +232,9 @@ function renderVendorCards(vendors, error = null) {
       dataset: { category: v.category, cuisine: [v.category, ...(v.tags || [])].join(' '), slug: v.slug, source: 'food' },
     },
       el('div', { class: 'vendor-card-header' },
-        el('img', { src: v.image_url || CATEGORY_IMG[v.category] || CATEGORY_IMG.buka, alt: `${v.name}`, class: 'vendor-thumb-box' }),
+        v.video_url
+          ? el('video', { src: v.video_url, controls: '', playsinline: '', preload: 'metadata', class: 'vendor-thumb-box', 'aria-label': `${v.name} video` })
+          : el('img', { src: v.image_url || CATEGORY_IMG[v.category] || CATEGORY_IMG.buka, alt: `${v.name}`, class: 'vendor-thumb-box' }),
         el('div', { class: 'vendor-info' },
           el('div', { class: 'vendor-title-row' },
             el('h4', {}, v.name),
@@ -307,7 +309,9 @@ function renderDirectoryCards(listings, error = null) {
     },
     el('div', { class: 'vendor-card-header' },
       withPhotoCredit(
-        el('img', { src: place.image_url || NO_PHOTO, alt: place.image_url ? place.name : '', class: 'vendor-thumb-box', loading: 'lazy' }),
+      place.video_url
+        ? el('video', { src: place.video_url, controls: '', playsinline: '', preload: 'metadata', class: 'vendor-thumb-box', 'aria-label': `${place.name} video` })
+        : el('img', { src: place.image_url || NO_PHOTO, alt: place.image_url ? place.name : '', class: 'vendor-thumb-box', loading: 'lazy' }),
         place.image_url ? place.image_credit : null),
       el('div', { class: 'vendor-info' },
         el('div', { class: 'vendor-title-row' },
@@ -801,7 +805,9 @@ async function openFullVendorMenu(slug) {
     menuList.replaceChildren(...r.menu.map((item) => {
       const img = item.image_url || CATEGORY_IMG[r.category] || CATEGORY_IMG.buka;
       return el('div', { class: 'menu-list-item' },
-        el('img', { src: img, alt: item.name, class: 'menu-item-thumb' }),
+        item.video_url
+          ? el('video', { src: item.video_url, controls: '', playsinline: '', preload: 'metadata', class: 'menu-item-thumb', 'aria-label': `${item.name} video` })
+          : el('img', { src: img, alt: item.name, class: 'menu-item-thumb' }),
         el('div', { class: 'menu-item-info' }, el('h4', {}, item.name), el('span', { class: 'price' }, naira(item.price))),
         el('button', {
           type: 'button', class: 'add-dish-btn', 'aria-label': `Add ${item.name}`,

@@ -40,6 +40,7 @@ class MenuItemOut(Schema):
     category: str = ""
     price: float
     image_url: str | None = None
+    video_url: str | None = None
     is_available: bool
 
 
@@ -52,6 +53,7 @@ class RestaurantOut(Schema):
     tags: list[str]
     description: str = ""
     image_url: str | None = None
+    video_url: str | None = None
     image_credit: str | None = None  # "Photo © Google · by …" when image_url is a Google photo
     address: str
     phone: str
@@ -204,11 +206,12 @@ def _distance(near, lat, lng):
     return None
 
 
-def _restaurant(r, near=None):
+def _restaurant(r, near=None, request=None):
     return {
         "id": r.id, "slug": r.slug, "name": r.name, "category": r.category,
         "category_label": r.get_category_display(), "tags": r.tags or [],
         "description": r.description, "image_url": image_storage.image_url_for(r.image_key) or r.image_url or None,
+        "video_url": image_storage.stored_file_url(r.video_file, request),
         "address": r.address, "phone": r.phone, "hours": r.hours,
         "delivery_fee": float(r.delivery_fee), "eta_min": r.eta_min, "eta_max": r.eta_max,
         "is_open": r.is_open, "rating": None, "source": "food", "is_orderable": True,
@@ -217,7 +220,7 @@ def _restaurant(r, near=None):
     }
 
 
-def _directory_restaurant(listing, near=None):
+def _directory_restaurant(listing, near=None, request=None):
     """A restaurant that is only in the directory (no vendor account yet): browsable, not orderable."""
     city = listing.city.strip()
     address = listing.address
@@ -232,6 +235,7 @@ def _directory_restaurant(listing, near=None):
         "tags": listing.services or [],
         "description": listing.description,
         "image_url": listing.image_url,
+        "video_url": image_storage.stored_file_url(listing.video_file, request),
         "image_credit": listing.image_credit,
         "address": address,
         "phone": listing.phone,
@@ -251,10 +255,11 @@ def _directory_restaurant(listing, near=None):
     }
 
 
-def _menu_item(m):
+def _menu_item(m, request=None):
     return {
         "id": m.id, "name": m.name, "description": m.description, "category": m.category,
         "price": float(m.price), "image_url": image_storage.image_url_for(m.image_key) or m.image_url or None,
+        "video_url": image_storage.stored_file_url(m.video_file, request),
         "is_available": m.is_available,
     }
 
@@ -345,13 +350,13 @@ def list_restaurants(request, category: str | None = None, tag: str | None = Non
             )
         if wanted_tag:
             dq = dq.filter(services_text__icontains=f'"{wanted_tag}"')
-        return [_directory_restaurant(l, near) for l in _ranked(dq, near, page_limit, page_offset)]
+        return [_directory_restaurant(l, near, request) for l in _ranked(dq, near, page_limit, page_offset)]
 
     if source == "food":
-        return [_restaurant(r, near) for r in vendors[offset: offset + limit]]
+        return [_restaurant(r, near, request) for r in vendors[offset: offset + limit]]
     if source == "directory":
         return directory_page(limit, offset)
-    page = [_restaurant(r, near) for r in vendors[offset: offset + limit]]
+    page = [_restaurant(r, near, request) for r in vendors[offset: offset + limit]]
     if len(page) < limit:  # vendors are exhausted: continue with directory rows
         page += directory_page(limit - len(page), max(0, offset - len(vendors)))
     return page
@@ -363,7 +368,7 @@ def get_restaurant(request, slug: str):
         r = _listed().prefetch_related("items").get(slug=slug)
     except Restaurant.DoesNotExist:
         raise HttpError(404, "Restaurant not found.")
-    return {**_restaurant(r), "menu": [_menu_item(m) for m in r.items.all() if m.is_available]}
+    return {**_restaurant(r, request=request), "menu": [_menu_item(m, request) for m in r.items.all() if m.is_available]}
 
 
 # ---- customer orders --------------------------------------------------------
@@ -491,7 +496,7 @@ def _unique_slug(name):
 @router.get("/vendor/me", response=VendorOut, auth=JWTAuth())
 def vendor_me(request):
     store = _store(request)
-    return {**_restaurant(store), "is_active": store.is_active}
+    return {**_restaurant(store, request=request), "is_active": store.is_active}
 
 
 @router.get("/vendor/summary", response=VendorSummaryOut, auth=JWTAuth())
@@ -525,7 +530,7 @@ def vendor_register(request, payload: VendorRegisterIn):
         category=payload.category, address=payload.address.strip(), phone=payload.phone.strip(),
         is_active=settings.FOOD_AUTO_APPROVE,
     )
-    return 201, {**_restaurant(store), "is_active": store.is_active}
+    return 201, {**_restaurant(store, request=request), "is_active": store.is_active}
 
 
 @router.patch("/vendor/store", response=VendorOut, auth=JWTAuth())
@@ -541,12 +546,12 @@ def vendor_update_store(request, payload: StoreUpdateIn):
             continue
         setattr(store, field, value.strip() if isinstance(value, str) else value)
     store.save()
-    return {**_restaurant(store), "is_active": store.is_active}
+    return {**_restaurant(store, request=request), "is_active": store.is_active}
 
 
 @router.get("/vendor/menu", response=list[MenuItemOut], auth=JWTAuth())
 def vendor_menu(request):
-    return [_menu_item(m) for m in _store(request).items.all()]
+    return [_menu_item(m, request) for m in _store(request).items.all()]
 
 
 @router.post("/vendor/menu", response={201: MenuItemOut}, auth=JWTAuth())
@@ -555,7 +560,7 @@ def vendor_add_dish(request, payload: MenuItemIn):
     item = MenuItem.objects.create(restaurant=store, **{
         **payload.dict(), "name": payload.name.strip(), "category": payload.category.strip(),
     })
-    return 201, _menu_item(item)
+    return 201, _menu_item(item, request)
 
 
 @router.patch("/vendor/menu/{item_id}", response=MenuItemOut, auth=JWTAuth())
@@ -569,7 +574,7 @@ def vendor_update_dish(request, item_id: int, payload: MenuItemUpdateIn):
         if value is not None:
             setattr(item, field, value.strip() if isinstance(value, str) else value)
     item.save()
-    return _menu_item(item)
+    return _menu_item(item, request)
 
 
 @router.get("/vendor/orders", response=list[OrderOut], auth=JWTAuth())

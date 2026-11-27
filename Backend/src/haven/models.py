@@ -44,6 +44,8 @@ class Property(models.Model):
     parking = models.PositiveSmallIntegerField(default=0)
     area_sqm = models.PositiveIntegerField(null=True, blank=True)
     image_url = models.URLField(max_length=500, blank=True)
+    image_file = models.ImageField(upload_to="haven/properties/images/", blank=True)
+    video_file = models.FileField(upload_to="haven/properties/videos/", blank=True)
     title_doc = models.CharField(max_length=10, choices=TitleDoc.choices, default=TitleDoc.COFO)
     title_verified = models.BooleanField(default=False, help_text="Staff only: tick once the title document is audited.")
     agent_verified = models.BooleanField(default=False, help_text="Staff only: shows the Verified Agent badge.")
