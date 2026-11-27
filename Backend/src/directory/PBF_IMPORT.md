@@ -35,23 +35,7 @@ Show `© OpenStreetMap contributors` wherever imported records are displayed. Op
 
 Directory photos are stored by S3 object key in `Listing.image_key`, not as files on the Django server. The authenticated API creates a short-lived presigned S3 POST policy, the browser uploads directly to the private bucket, and the API stores the issued key after checking the stored object's type and size. Photo URLs are short-lived presigned GET URLs.
 
-Configure the same private S3-compatible credentials used by the app's default storage. Credentials alone do not enable browser uploads: the bucket itself must allow browser POSTs from each exact web-app origin. This is separate from Django's `CORS_ALLOWED_ORIGINS`. Add the production domain, local Vite origin when needed, and the exact Railway-generated web origin if using one; a suitable bucket CORS rule is:
-
-```json
-[
-  {
-    "AllowedOrigins": [
-      "https://thekapita.com",
-      "https://www.thekapita.com",
-      "http://localhost:5173"
-    ],
-    "AllowedMethods": ["POST"],
-    "AllowedHeaders": ["*"],
-    "ExposeHeaders": ["ETag"],
-    "MaxAgeSeconds": 3000
-  }
-]
-```
+Configure the same private S3-compatible credentials used by the app's default storage. Credentials alone do not enable browser uploads: the bucket itself must allow browser POSTs from each exact web-app origin. This is separate from Django's `CORS_ALLOWED_ORIGINS`. The bucket CORS rule for production is in the repository-root [cors.json](../../../cors.json); apply it to the bucket named by `AWS_S3_BUCKET_NAME`. Add a separate local-development origin only if needed.
 
 Keep the bucket private. Owners can upload photos to their own listings; staff can add photos to unclaimed map listings. A map `image` tag is not copied automatically because its reuse rights may differ from the OSM data license.
 
