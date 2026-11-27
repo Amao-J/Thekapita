@@ -1,13 +1,11 @@
-[
-  {
-    "AllowedOrigins": [
-      "https://thekapita.com",
-      "https://www.thekapita.com",
-      "https://cdlcv7xk.up.railway.app"
-    ],
-    "AllowedMethods": ["POST"],
-    "AllowedHeaders": ["*"],
-    "ExposeHeaders": ["ETag"],
-    "MaxAgeSeconds": 3000
-  }
-]
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["https://www.thekapita.com", "https://thekapita.com"],
+      "AllowedMethods": ["POST"],
+      "AllowedHeaders": ["*"],
+      "ExposeHeaders": ["ETag"],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
